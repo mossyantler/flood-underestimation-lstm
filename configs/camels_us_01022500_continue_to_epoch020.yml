@@ -1,0 +1,5 @@
+epochs: 17
+learning_rate:
+  0: 1e-3
+  10: 5e-4
+  16: 1e-4
