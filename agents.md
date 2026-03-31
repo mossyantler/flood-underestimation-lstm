@@ -80,10 +80,12 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 ```
 
 - **대상 유역**: Delaware River Basin Commission 기준 Delaware River Basin. 공식 기준 레이어는 `basins/drbc_boundary/drb_bnd_polygon.shp`.
-- 이전 테스트용 01022500 config와 forcing/streamflow 데이터는 삭제됨.
 - CAMELSH shapefile과 attributes 추출본은 `basins/CAMELSH_data/` 아래에 둔다.
 - Static attributes (`camels_attributes_v2.0/`)는 legacy 참고 자료이므로 유지한다.
-- 향후 DRBC Delaware basin에 맞는 CAMELSH forcing/streamflow subset과 config를 작성해야 한다.
+- 현재 `output/basin/drbc_camelsh/` 아래에 DRBC 기준 CAMELSH subset 산출물을 둔다.
+- 현재 선택 규칙은 `outlet_in_drbc == True`와 `overlap_ratio_of_basin >= 0.9`이고, 이에 해당하는 basin은 `154개`다. outlet만 기준으로 보면 `192개`다.
+- 현재 `scripts/build_drbc_basin_analysis_table.py`로 static basin analysis table을 생성하며, 결과는 `output/basin/drbc_camelsh/analysis/` 아래에 둔다.
+- 다음 단계는 이 selected basin들에 forcing/streamflow 품질 정보와 event-level 지표를 붙여 flood-prone screening으로 넘어가는 것이다.
 
 ## 개발 환경 규칙
 
@@ -95,4 +97,4 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 
 1. Model 1 (deterministic) → Model 2 (probabilistic) 순서로 먼저 재현 가능하게 구현
 2. Model 3 (physics-guided hybrid)은 그 다음에 넣어 incremental gain 확인
-3. 모델 학습 전에 **basin 조사 단계** 선행: DRBC boundary 기준 CAMELSH subset 확정 → forcing/streamflow/static attributes 결합 → flood-prone subbasin screening table 생성
+3. 모델 학습 전에 **basin 조사 단계** 선행: DRBC boundary 기준 CAMELSH subset 확정 → selected basin static/profile 분석 → forcing/streamflow 결합 → flood-prone basin screening table 생성

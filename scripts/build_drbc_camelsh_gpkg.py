@@ -63,7 +63,21 @@ def load_drbc_boundary(path: Path) -> gpd.GeoDataFrame:
 
 
 def load_csv(path: Path) -> pd.DataFrame:
-    return pd.read_csv(path, dtype={"gauge_id": str})
+    table = pd.read_csv(path, dtype={"gauge_id": str})
+    return add_gauge_label_fields(table)
+
+
+def add_gauge_label_fields(table: pd.DataFrame) -> pd.DataFrame:
+    table = table.copy()
+    table["gauge_id_len"] = table["gauge_id"].str.len()
+    table["gauge_id_format"] = table["gauge_id_len"].map(
+        lambda n: f"{int(n)}-digit USGS site number"
+    )
+    table["gauge_id_note"] = (
+        "USGS site numbers can be longer than 8 digits in high station-density areas."
+    )
+    table["gauge_label"] = table["gauge_id"] + " " + table["gauge_name"]
+    return table
 
 
 def load_camelsh_subset(
