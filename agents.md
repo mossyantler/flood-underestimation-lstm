@@ -35,8 +35,8 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 
 ## 프로젝트 범위
 
-- **데이터셋**: CAMELS-US daily (1차). 후속 검증에서 CAMELS-GB나 Caravan subset 추가 가능.
-- **시간 해상도**: 일 단위. Flash flood (sub-daily)는 첫 논문 범위 밖.
+- **데이터셋**: CAMELSH hourly를 기본 데이터셋으로 사용한다. CAMELS-US daily는 legacy 비교 또는 참고 자료로만 둔다.
+- **시간 해상도**: 기본은 시간 단위(hourly)다. 필요 시 후속 단계에서 daily aggregation ablation을 별도로 둘 수 있다.
 - **Backbone**: 첫 논문에서는 LSTM 고정. Transformer 등은 후속으로 분리.
 
 ## 입력 구성
@@ -64,30 +64,35 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 ```text
 .
 ├── basins/
-│   └── huc8_delware/   # Delaware basin HUC8 shapefile (.shp, .dbf, .prj 등)
+│   ├── drbc_boundary/  # DRBC Delaware River Basin 공식 경계
+│   ├── huc8_delware/   # 초기 HUC8 exploratory shapefile
+│   └── CAMELSH_data/   # CAMELSH shapefiles / attributes 추출본
 ├── configs/             # NeuralHydrology 실험 설정 (현재 비어 있음)
 ├── data/CAMELS_US/
-│   └── camels_attributes_v2.0/  # 전체 유역 속성 데이터
+│   └── camels_attributes_v2.0/  # legacy CAMELS-US 속성 데이터
 ├── docs/
 │   ├── context/         # 프로젝트 맥락 문서
 │   └── research/        # architecture, design, literature-review
+├── output/
+│   └── basin/           # basin 관련 산출물
 ├── scripts/             # download, run 스크립트
 └── runs/                # (gitignored) 학습 출력
 ```
 
-- **대상 유역**: Delaware basin (HUC8). `basins/huc8_delware/`에 shapefile 형태로 보관.
+- **대상 유역**: Delaware River Basin Commission 기준 Delaware River Basin. 공식 기준 레이어는 `basins/drbc_boundary/drb_bnd_polygon.shp`.
 - 이전 테스트용 01022500 config와 forcing/streamflow 데이터는 삭제됨.
-- Static attributes (`camels_attributes_v2.0/`)는 전체 CAMELS 유역 속성이므로 유지.
-- 향후 Delaware basin에 맞는 forcing/streamflow 데이터 확보 및 config 작성 필요.
+- CAMELSH shapefile과 attributes 추출본은 `basins/CAMELSH_data/` 아래에 둔다.
+- Static attributes (`camels_attributes_v2.0/`)는 legacy 참고 자료이므로 유지한다.
+- 향후 DRBC Delaware basin에 맞는 CAMELSH forcing/streamflow subset과 config를 작성해야 한다.
 
 ## 개발 환경 규칙
 
 - **패키지 관리**: `uv` 표준. 새 코드는 `uv run`으로 실행 가능해야 한다.
-- **전처리/분석**: Python 스크립트 또는 notebook. HUC8 basin 탐색, 속성 병합, 홍수 취약 후보 추출 등.
+- **전처리/분석**: Python 스크립트 또는 notebook. DRBC basin 기준 subset 정의, 속성 병합, 홍수 취약 후보 추출 등을 수행한다.
 - **반복 가능성**: one-off 분석이 아닌 반복 가능한 스크립트 형태로 유지.
 
 ## 구현 순서 원칙
 
 1. Model 1 (deterministic) → Model 2 (probabilistic) 순서로 먼저 재현 가능하게 구현
 2. Model 3 (physics-guided hybrid)은 그 다음에 넣어 incremental gain 확인
-3. 모델 학습 전에 **basin 조사 단계** 선행: CAMELS 속성/forcing/streamflow 결합 → flood-prone subbasin screening table 생성
+3. 모델 학습 전에 **basin 조사 단계** 선행: DRBC boundary 기준 CAMELSH subset 확정 → forcing/streamflow/static attributes 결합 → flood-prone subbasin screening table 생성

@@ -18,7 +18,7 @@
 - static attributes: 면적, 평균 경사, aridity, snow fraction, soil depth, permeability, baseflow index 등
 - 선택적 lagged obs: 후속 실험에서 `lagged Q`를 넣을 수 있음
 
-현재 설계의 기본 단위는 `multi-basin daily streamflow prediction`입니다.
+현재 설계의 기본 단위는 `DRBC Delaware River Basin subset 위의 multi-basin hourly streamflow prediction`입니다.
 
 ## 1. Deterministic LSTM
 
@@ -101,4 +101,4 @@ inputs
 1. backbone은 첫 논문에서 `multi-basin LSTM`으로 고정한다.  
 2. probabilistic head를 먼저 넣어 tail modeling 효과를 분리한다.  
 3. physics-guided core는 후속 비교축으로 넣되, `dynamic-parameter shell`이 아니라 `state/flux-constrained` 구조로 설계한다.  
-4. flash flood처럼 더 짧은 시간 해상도 문제는 후속 연구 주제로 분리하고, 첫 논문은 daily extreme flood underestimation에 집중한다.
+4. 첫 논문은 CAMELSH hourly 기반 extreme flood response에 집중하고, sub-hourly flash flood는 후속 연구 주제로 분리한다.

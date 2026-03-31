@@ -7,3 +7,8 @@ __pycache__/
 runs/
 output/
 tmp/
+basins/CAMELSH/
+basins/CAMELSH_data/
+basins/CAMELSH_download/
+basins/drbc_boundary/*.zip
+basins/huc8_delware/*.qgz

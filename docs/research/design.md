@@ -31,19 +31,22 @@ LSTM encoder 뒤에 `flux / bounded-coefficient head`를 두고, conceptual stor
 
 ## 데이터셋
 
-첫 번째 논문은 `CAMELS-US multi-basin daily dataset`을 기본 데이터셋으로 사용합니다.  
-후속 확장이나 robustness check에서는 `CAMELS-GB` 또는 `Caravan subset`을 부록 수준으로 고려할 수 있습니다.
+현재 프로젝트의 기본 데이터셋은 `CAMELSH hourly dataset`입니다.  
+공간 범위는 DRBC 기준 `Delaware River Basin`으로 고정하고, basin subset은 DRBC 공식 경계와 CAMELSH basin polygon / outlet을 기준으로 확정합니다.
+
+`CAMELS-US`, `CAMELS-GB`, `Caravan subset`은 후속 robustness check나 related work 비교축으로만 둡니다.
 
 ## 입력 변수
 
 기본 입력은 다음과 같습니다.
 
-- `prcp(mm/day)`
-- `tmax(C)`
-- `tmin(C)`
-- `srad(W/m2)`
-- `vp(Pa)`
+- `prcp`
+- `tair` 또는 `tmax/tmin`
+- `srad`
+- `vp`
 - 필요 시 `PET`
+
+세부 변수명과 단위는 CAMELSH forcing source에 맞춰 최종 확정합니다.
 
 static attributes는 flood response에 직접 관련된 변수 위주로 고릅니다.
 
