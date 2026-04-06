@@ -4,6 +4,7 @@ __pycache__/
 .pytest_cache/
 .codex_tasks/
 .playwright-cli/
+docs/**/CLAUDE.md
 runs/
 output/
 tmp/
@@ -12,3 +13,6 @@ basins/CAMELSH_data/
 basins/CAMELSH_download/
 basins/drbc_boundary/*.zip
 basins/huc8_delware/*.qgz
+data/CAMELSH_generic/
+data/CAMELS_US/basin_mean_forcing/
+data/CAMELS_US/usgs_streamflow/

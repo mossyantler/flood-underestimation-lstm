@@ -48,7 +48,7 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 ## 실험 Split
 
 1. **Temporal split**: 같은 유역, 다른 시기
-2. **Basin holdout (PUB/PUR)**: 처음 보는 유역 일반화
+2. **Regional basin holdout (PUB/PUR)**: DRBC Delaware basin 전체를 holdout region으로 두고, 나머지 basin으로 `global multi-basin model`을 학습한 뒤 DRBC에서 일반화를 평가
 3. **Extreme-event holdout**: basin별 상위 홍수 이벤트 일부를 학습에서 배제
 
 ## 평가 지표
@@ -80,21 +80,24 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 ```
 
 - **대상 유역**: Delaware River Basin Commission 기준 Delaware River Basin. 공식 기준 레이어는 `basins/drbc_boundary/drb_bnd_polygon.shp`.
+- **학습 전략**: DRBC는 regional holdout / evaluation region으로 둔다. 모델 학습은 outlet가 DRBC 밖에 있고 polygon overlap이 `0.1` 이하인 tolerant non-DRBC CAMELSH basin에서 수행한다. 즉 현재 backbone은 Delaware regional model이 아니라, non-DRBC basin으로 학습한 global multi-basin model이다.
 - CAMELSH shapefile과 attributes 추출본은 `basins/CAMELSH_data/` 아래에 둔다.
 - Static attributes (`camels_attributes_v2.0/`)는 legacy 참고 자료이므로 유지한다.
 - 현재 `output/basin/drbc_camelsh/` 아래에 DRBC 기준 CAMELSH subset 산출물을 둔다.
+- 현재 `output/basin/camelsh_training_non_drbc/` 아래에 global training pool 산출물을 둔다.
 - 현재 선택 규칙은 `outlet_in_drbc == True`와 `overlap_ratio_of_basin >= 0.9`이고, 이에 해당하는 basin은 `154개`다. outlet만 기준으로 보면 `192개`다.
+- 현재 training pool 규칙은 `outlet_in_drbc == False` 이고 `overlap_ratio_of_basin <= 0.1`까지는 source mismatch에 따른 small overlap으로 허용하는 것이다. 그다음 usable year / estimated-flow fraction / boundary confidence quality gate를 적용한다. 현재 quality-pass training basin은 `1923개`다.
 - 현재 `scripts/build_drbc_basin_analysis_table.py`로 static basin analysis table을 생성하며, 결과는 `output/basin/drbc_camelsh/analysis/` 아래에 둔다.
-- 다음 단계는 이 selected basin들에 forcing/streamflow 품질 정보와 event-level 지표를 붙여 flood-prone screening으로 넘어가는 것이다.
+- 다음 단계는 DRBC holdout basin들에 forcing/streamflow 품질 정보와 event-level 지표를 붙여 flood-prone screening으로 넘어가는 것이다.
 
 ## 개발 환경 규칙
 
 - **패키지 관리**: `uv` 표준. 새 코드는 `uv run`으로 실행 가능해야 한다.
-- **전처리/분석**: Python 스크립트 또는 notebook. DRBC basin 기준 subset 정의, 속성 병합, 홍수 취약 후보 추출 등을 수행한다.
+- **전처리/분석**: Python 스크립트 또는 notebook. DRBC holdout subset 정의, non-DRBC training pool 정의, 속성 병합, 홍수 취약 후보 추출 등을 수행한다.
 - **반복 가능성**: one-off 분석이 아닌 반복 가능한 스크립트 형태로 유지.
 
 ## 구현 순서 원칙
 
 1. Model 1 (deterministic) → Model 2 (probabilistic) 순서로 먼저 재현 가능하게 구현
 2. Model 3 (physics-guided hybrid)은 그 다음에 넣어 incremental gain 확인
-3. 모델 학습 전에 **basin 조사 단계** 선행: DRBC boundary 기준 CAMELSH subset 확정 → selected basin static/profile 분석 → forcing/streamflow 결합 → flood-prone basin screening table 생성
+3. 모델 학습 전에 **basin 조사 단계** 선행: DRBC boundary 기준 holdout subset 확정 → non-DRBC training pool 확정 → DRBC selected basin static/profile 분석 → forcing/streamflow 결합 → flood-prone basin screening table 생성

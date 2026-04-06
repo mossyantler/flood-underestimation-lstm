@@ -1,8 +1,24 @@
 # Basin Source CSV Guide
 
-이 문서는 DRBC + CAMELSH workflow에서 basin 분석 테이블을 구성할 때 사용하는 source CSV 각각의 의미와 주요 컬럼 해석 방법을 정리한 가이드다.
+## 서술 목적
 
-현재 기준 분석 테이블은 [`drbc_selected_basin_analysis_table.csv`](/Users/jang-minyeop/Project/CAMELS/output/basin/drbc_camelsh/analysis/drbc_selected_basin_analysis_table.csv)이며, 아래 8개 source CSV를 병합해서 만든다.
+이 문서는 DRBC + CAMELSH workflow에서 basin 분석 테이블을 구성하는 source CSV와 주요 컬럼의 뜻을 정리한다. 핵심은 분석 테이블의 각 열이 어떤 원본 파일에서 왔고, 어떤 수문학적 의미를 가지는지 빠르게 확인할 수 있게 만드는 것이다.
+
+## 다루는 범위
+
+- basin analysis table을 구성하는 source CSV 목록
+- 각 CSV의 대표 컬럼과 해석 방법
+- 정적 분석 테이블을 읽는 기본 순서와 주의사항
+
+## 다루지 않는 범위
+
+- basin subset 선택 규칙 자체
+- 현재 screening workflow의 진행 상태
+- 논문 본문용 공식 screening 수식
+
+## 상세 서술
+
+현재 기준 분석 테이블은 [`drbc_selected_basin_analysis_table.csv`](/Users/jang-minyeop/Project/CAMELS/output/basin/drbc_camelsh/analysis/drbc_selected_basin_analysis_table.csv)이며, 아래 8개 source CSV를 병합해 만든다.
 
 | # | Source CSV | 역할 |
 |---|---|---|
@@ -19,7 +35,7 @@
 
 ## 분석의 세 층 구조
 
-분석 변수 전체는 세 층으로 읽는다.
+분석 변수는 세 층으로 읽는다.
 
 | 층 | 담당 CSV | 핵심 질문 |
 |---|---|---|
@@ -33,7 +49,7 @@
 
 ## 1. Selection / Mapping CSV
 
-[`camelsh_drbc_selected.csv`](/Users/jang-minyeop/Project/CAMELS/output/basin/drbc_camelsh/camelsh_drbc_selected.csv)는 attribute 파일이 아니라, 분석 테이블의 **행(row)을 결정하는 entry table**이다. 어떤 basin이 연구 범위에 포함되는지를 정의한다.
+[`camelsh_drbc_selected.csv`](/Users/jang-minyeop/Project/CAMELS/output/basin/drbc_camelsh/camelsh_drbc_selected.csv)는 attribute 파일이 아니라 분석 테이블의 **행(row)을 결정하는 entry table**이다.
 
 | 컬럼 | 의미 | 해석 방법 |
 |---|---|---|
@@ -50,7 +66,7 @@
 
 ## 2. BasinID CSV
 
-[`attributes_gageii_BasinID.csv`](/Users/jang-minyeop/Project/CAMELS/basins/CAMELSH_data/attributes/attributes_gageii_BasinID.csv)는 basin의 식별 정보와 outlet 메타데이터를 담는다. 설명 변수라기보다 **병합 기준 정보**로 쓴다.
+[`attributes_gageii_BasinID.csv`](/Users/jang-minyeop/Project/CAMELS/basins/CAMELSH_data/attributes/attributes_gageii_BasinID.csv)는 basin의 식별 정보와 outlet 메타데이터를 담는다. 설명 변수라기보다 **병합 기준 정보**에 가깝다.
 
 | 컬럼 | 의미 | 해석 방법 |
 |---|---|---|
@@ -227,3 +243,15 @@ land cover나 slope가 빠른 응답을 시사하더라도, `BFI_AVE`나 streamf
 
 **현재 테이블은 static 중심이다.**
 최종 flood screening은 이 정적 분석 위에 hourly observation availability, record length, missingness, peak/event 지표를 추가로 결합해야 완성된다.
+
+## 문서 정리
+
+이 문서는 basin analysis table의 source와 컬럼 의미를 설명하는 사전이다. basin 자체를 어떻게 고를지보다, 이미 고른 basin을 어떤 변수 조합으로 읽을지 정리하는 역할에 집중한다.
+
+정적 변수는 basin의 구조적 배경과 해석 단서를 제공한다. 최종 flood-prone basin 선정은 이 정적 정보 위에 품질 게이트와 observed-flow 지표를 더해 진행해야 한다.
+
+## 관련 문서
+
+- basin subset과 공간 기준은 [`basin.md`](basin.md)에서 고정한다.
+- 현재 analysis table과 screening 산출물 상태는 [`basin_analysis.md`](basin_analysis.md)에서 다룬다.
+- 논문 본문용 screening 규범은 [`basin_screening_method.md`](basin_screening_method.md)에서 다룬다.

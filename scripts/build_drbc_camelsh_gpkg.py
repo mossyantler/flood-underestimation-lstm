@@ -115,6 +115,19 @@ def build_outlets(table: pd.DataFrame) -> gpd.GeoDataFrame:
     return outlets.sort_values("gauge_id").reset_index(drop=True)
 
 
+def build_display_clip(
+    basins: gpd.GeoDataFrame,
+    boundary: gpd.GeoDataFrame,
+) -> gpd.GeoDataFrame:
+    clipped = gpd.clip(basins, boundary)
+    clipped = clipped.copy()
+    clipped["display_geometry_note"] = (
+        "Display-only geometry clipped to DRBC boundary; keep original CAMELSH "
+        "polygons for hydrologic analysis."
+    )
+    return clipped.sort_values("gauge_id").reset_index(drop=True)
+
+
 def main() -> None:
     args = parse_args()
     args.output_gpkg.parent.mkdir(parents=True, exist_ok=True)
@@ -130,6 +143,7 @@ def main() -> None:
         set(selected["gauge_id"]),
         selected,
     )
+    selected_basins_display = build_display_clip(selected_basins, boundary)
     selected_outlets = build_outlets(selected)
 
     intersect_only_basins = load_camelsh_subset(
@@ -137,14 +151,25 @@ def main() -> None:
         set(intersect_only["gauge_id"]),
         intersect_only,
     )
+    intersect_only_basins_display = build_display_clip(intersect_only_basins, boundary)
     intersect_only_outlets = build_outlets(intersect_only)
 
     boundary.to_file(args.output_gpkg, layer="drbc_boundary", driver="GPKG")
     selected_basins.to_file(args.output_gpkg, layer="camelsh_selected_basins", driver="GPKG")
+    selected_basins_display.to_file(
+        args.output_gpkg,
+        layer="camelsh_selected_basins_display_clipped",
+        driver="GPKG",
+    )
     selected_outlets.to_file(args.output_gpkg, layer="camelsh_selected_outlets", driver="GPKG")
     intersect_only_basins.to_file(
         args.output_gpkg,
         layer="camelsh_intersect_only_basins",
+        driver="GPKG",
+    )
+    intersect_only_basins_display.to_file(
+        args.output_gpkg,
+        layer="camelsh_intersect_only_basins_display_clipped",
         driver="GPKG",
     )
     intersect_only_outlets.to_file(
@@ -155,8 +180,11 @@ def main() -> None:
 
     print(f"Wrote GeoPackage: {args.output_gpkg}")
     print(
-        "Layers: drbc_boundary, camelsh_selected_basins, camelsh_selected_outlets, "
-        "camelsh_intersect_only_basins, camelsh_intersect_only_outlets"
+        "Layers: drbc_boundary, camelsh_selected_basins, "
+        "camelsh_selected_basins_display_clipped, camelsh_selected_outlets, "
+        "camelsh_intersect_only_basins, "
+        "camelsh_intersect_only_basins_display_clipped, "
+        "camelsh_intersect_only_outlets"
     )
 
 
