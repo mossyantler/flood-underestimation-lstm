@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import random
 from pathlib import Path
 
@@ -9,29 +10,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_SPLITS = ROOT / "data" / "CAMELSH_generic" / "drbc_holdout_broad" / "splits"
 OUTPUT_SPLITS = ROOT / "data" / "CAMELSH_generic" / "drbc_holdout_broad" / "splits_m3_safe"
+SUMMARY_PATH = OUTPUT_SPLITS / "summary.json"
 
 SEED = 111
 TRAIN_COUNT = 256
 VALIDATION_COUNT = 64
-
-# These basins were reported by NeuralHydrology as having no valid target values in the train period.
-INVALID_TRAIN_BASINS = {
-    "01191000",
-    "02407000",
-    "03017500",
-    "03126000",
-    "03127000",
-    "03141500",
-    "03190000",
-    "03198000",
-    "03466500",
-    "06824500",
-    "06847000",
-    "06864000",
-    "07029270",
-    "07229300",
-    "08183900",
-}
 
 
 def read_split(path: Path) -> list[str]:
@@ -57,9 +40,8 @@ def main() -> None:
     validation = read_split(SOURCE_SPLITS / "validation.txt")
     test = read_split(SOURCE_SPLITS / "test.txt")
 
-    filtered_train = [basin for basin in train if basin not in INVALID_TRAIN_BASINS]
-
-    safe_train = sample_split(filtered_train, TRAIN_COUNT, rng)
+    # SOURCE_SPLITS already reflects the official broad prepared split after the usability gate.
+    safe_train = sample_split(train, TRAIN_COUNT, rng)
     safe_validation = sample_split(validation, VALIDATION_COUNT, rng)
     safe_test = test
 
@@ -67,9 +49,27 @@ def main() -> None:
     write_split(OUTPUT_SPLITS / "validation.txt", safe_validation)
     write_split(OUTPUT_SPLITS / "test.txt", safe_test)
 
+    summary = {
+        "source_profile": "broad_prepared_split",
+        "random_seed": SEED,
+        "source_prepared_counts": {
+            "train": len(train),
+            "validation": len(validation),
+            "test": len(test),
+        },
+        "sampled_counts": {
+            "train": len(safe_train),
+            "validation": len(safe_validation),
+            "test": len(safe_test),
+        },
+    }
+    SUMMARY_PATH.parent.mkdir(parents=True, exist_ok=True)
+    SUMMARY_PATH.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+
     print(f"safe_train={len(safe_train)}")
     print(f"safe_validation={len(safe_validation)}")
     print(f"safe_test={len(safe_test)}")
+    print(f"summary={SUMMARY_PATH}")
 
 
 if __name__ == "__main__":

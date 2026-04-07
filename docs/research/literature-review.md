@@ -27,6 +27,7 @@
 | 데이터셋 기반 | `Large-sample watershed-scale hydrometeorological data set` (2015), `CAMELS` (2017), `CAMELSH` (2025) | large-sample hydrology와 현재 DRBC + CAMELSH subset의 정당화 | Introduction 후반, Data section |
 | LSTM baseline | `Rainfall-runoff modelling using LSTM networks` (2018) | deterministic LSTM baseline의 직접 출발점 | Related work, Baseline rationale |
 | multi-basin regionalization | `Towards learning universal, regional, and local hydrological behaviors` (2019), `Never train a Long Short-Term Memory network on a single basin` (2024) | multi-basin 학습과 static attributes 사용의 정당화 | Method 배경, split 설계 소개 앞 |
+| training budget / optimization | Kratzert et al. (2018), Frame et al. (2022), Kratzert et al. (2024), Feng et al. (2024) | epoch 수는 절대값보다 update 규모와 sampling unit과 함께 읽어야 한다는 점 정리 | Method의 hyperparameter rationale, Discussion |
 | PUB/PUR 일반화 | GB benchmark (2021), ungauged basin regionalization (2023) | temporal split만으로 부족하고 basin holdout이 필요하다는 근거 | Evaluation setting |
 | physics-guided modeling | `MC-LSTM` (2021), interpretable LSTM hydrology (2024), differentiable hydrologic models (2023) | physics-guided core를 state/flux-constrained 방향으로 설계할 근거 | Related work의 physics-guided 문단 |
 | hybrid critique | `To bucket or not to bucket?` (2024), `When physics gets in the way` (2026) | naive dynamic-parameter hybrid의 한계와 `AI가 physics를 덮어쓸 수 있음`을 보여줌 | Model 3 설계 철학, Discussion |
@@ -43,6 +44,24 @@
 ### 2. deterministic LSTM과 multi-basin 학습
 
 `LSTM rainfall-runoff` (2018)은 baseline의 출발점이고, `universal/regional/local behaviors` (2019)는 multi-basin 학습과 static attributes 결합의 대표 근거다. `Never train ... on a single basin` (2024)은 single-basin demo를 최종 실험으로 삼으면 안 된다는 점을 더 직접적으로 보여준다.
+
+### 2.1 training budget과 epoch 해석
+
+epoch 수만 보고 모델이 `많이 학습됐다` 또는 `적게 학습됐다`고 판단하면 오해가 생기기 쉽다. 수문 딥러닝 문헌에서는 같은 30 epoch라도 학습 basin 수, sequence 길이, minibatch 구성, sequence-to-one인지 sequence-to-sequence인지에 따라 실제 weight update 수와 학습 난도가 크게 달라진다. 따라서 선행연구의 epoch는 `절대값`이라기보다 `어떤 데이터 규모와 sampling 규칙에서 쓰였는가`와 함께 읽어야 한다.
+
+| 문헌 | 설정 | 보고된 training budget | 현재 프로젝트에 주는 함의 |
+|---|---|---|---|
+| Kratzert et al. (2018) | single-basin LSTM, 241개 basin 각각 별도 학습 | 예비 실험에서 basin별로 200 epoch까지 돌려 validation NSE를 확인했고, 최종 single-basin 모델은 50 epoch를 사용했다 | single-basin은 basin당 데이터가 적어서 epoch 수가 더 크게 잡힐 수 있다 |
+| Kratzert et al. (2018) | HUC별 regional LSTM | regional model은 20 epoch를 사용했다. 다만 저자들은 single-basin보다 epoch 수는 작아도 weight update는 훨씬 많다고 직접 설명한다 | regional 또는 multi-basin에서는 epoch 수가 작아 보여도 실제 학습량은 더 클 수 있다 |
+| Kratzert et al. (2018) | regional pretraining 후 basin별 fine-tuning | fine-tuning epoch는 basin별로 다르게 선택했고 범위는 0에서 20, 중앙값은 10이었다 | pretraining이 있을 때는 추가 epoch 수가 작아도 충분할 수 있다 |
+| Frame et al. (2022) | CAMELS 531 basin, extreme-event 비교, standard LSTM vs MC-LSTM | 두 모델 모두 30 epoch를 사용했다. minibatch size는 256, standard LSTM hidden size는 128, sequence length는 365일이었다 | flood-focused multi-basin baseline에서 30 epoch는 충분히 관행적인 선택이다 |
+| Kratzert et al. (2024) | CAMELS 531 basin regional LSTM baseline | regional LSTM은 30 epoch, hidden size 256, output dropout 0.4, validation-best epoch selection으로 보고됐다 | 최근 large-sample LSTM baseline에서도 30 epoch 안팎이 자주 쓰인다 |
+| Kratzert et al. (2024) | single-basin tuned LSTM | per-basin hyperparameter 탐색에서는 각 설정을 100 epoch까지 돌려 validation epoch를 고르는 방식이었다 | single-basin 실험은 공정 비교를 위해서도 계산 예산이 더 커질 수 있다 |
+| Feng et al. (2024) | global daily LSTM, global differentiable HBV hybrid | global LSTM은 300 epoch까지 학습해 수렴시켰고, differentiable 모델도 같은 mini-batch 체계에서 학습했다 | global-scale이나 daily large-sample 실험에서는 30보다 훨씬 큰 epoch budget도 흔하다 |
+
+정리하면 선행연구는 `항상 30 epoch` 같은 규칙을 보여주지 않는다. 대신 single-basin은 50 또는 100 epoch 이상도 흔하고, regional multi-basin baseline은 20에서 30 epoch가 자주 보이며, global-scale 실험은 300 epoch처럼 더 길게 가기도 한다. 따라서 현재 프로젝트의 `30 epoch`은 이상한 값이 아니라 `multi-basin LSTM baseline으로는 충분히 흔한 초기 budget`으로 볼 수 있다. 다만 최종적으로 충분한지는 validation convergence로 다시 확인해야 한다.
+
+현재 프로젝트 문맥에서 더 중요한 점은, 우리는 Model 1과 Model 2의 비교에서 `output design` 효과를 분리하고 싶다는 것이다. 그래서 첫 공식 비교에서는 선행연구와 크게 어긋나지 않는 fixed budget인 30 epoch를 공통으로 두고, 이후 필요하면 `30 vs 50 epoch` 또는 early stopping 민감도 분석으로 충분성만 별도로 점검하는 설계가 가장 타당하다.
 
 ### 3. ungauged basin 일반화
 

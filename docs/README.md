@@ -33,6 +33,7 @@
 ## Workflow
 
 - [`workflow/basin.md`](workflow/basin.md): 현재 공식 basin 정의, global training / DRBC holdout evaluation 기준, 다음 basin analysis 단계 정리
+- [`../output/basin/checklists/camelsh_basin_master_checklist_broad.csv`](../output/basin/checklists/camelsh_basin_master_checklist_broad.csv): CAMELSH 전체 basin에 대한 minimum quality gate와 broad profile `usability_status`를 기록한 공식 checklist
 - [`workflow/basin_explain.md`](workflow/basin_explain.md): basin analysis table에 쓰는 source CSV와 변수 해석 가이드
 - [`workflow/basin_analysis.md`](workflow/basin_analysis.md): 현재 완료된 static analysis, quality gate, provisional screening과 앞으로 만들 observed-flow screening의 관계 정리
 - [`workflow/basin_screening_method.md`](workflow/basin_screening_method.md): basin 선택 이후 공식 screening method와 observed-flow 중심 final screening 설계
@@ -52,5 +53,8 @@
 
 - [`references/README.md`](references/README.md): `references/` 폴더의 역할과 현재 참고 자료 목록
 - [`references/youtube-river-basin-analysis-study-guide.md`](references/youtube-river-basin-analysis-study-guide.md): 유역 형상과 하천망 개념을 CAMELS 연구 맥락으로 번역한 학습 가이드
+- [`references/research-plan-extreme-flood-underestimation.md`](references/research-plan-extreme-flood-underestimation.md): 비전공 검토자 기준으로 다시 풀어 쓴 상세 연구계획서 초안과 Markdown 구조도 작성 팁
+- [`references/research-proposal-submission-draft.md`](references/research-proposal-submission-draft.md): 표지, 목차, 본문 구성을 갖춘 제출용 연구계획서 초안
+- [`references/model-hyperparameter-glossary.md`](references/model-hyperparameter-glossary.md): 하이퍼파라미터와 주요 config 파라미터를 한 번에 보는 정리집
 
 에이전트 작업 맥락은 루트의 [`agents.md`](../agents.md)를 참조한다.
