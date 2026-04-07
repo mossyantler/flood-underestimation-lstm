@@ -4,7 +4,7 @@
 
 이 문서는 CAMELS 프로젝트의 연구계획서를 `비전공 검토자도 읽을 수 있는 수준`으로 정리한 참고 노트다. 공식 실험 규칙과 구현 source of truth는 [`../research/design.md`](../research/design.md), [`../research/architecture.md`](../research/architecture.md), [`../research/experiment_protocol.md`](../research/experiment_protocol.md)에 두고, 이 문서는 그 내용을 계획서 문체와 설명 중심 구조로 다시 풀어 적는다.
 
-이 문서의 핵심 질문은 하나다. `왜 기존 deterministic multi-basin LSTM은 극한 홍수에서 첨두 유량을 낮게 예측하는가, 그리고 그 문제를 probabilistic head와 physics-guided 구조가 얼마나 줄일 수 있는가`이다.
+이 문서의 핵심 질문은 하나다. `왜 기존 deterministic multi-basin LSTM은 극한 홍수에서 첨두 유량을 낮게 예측하는가, 그리고 그 문제를 probabilistic head가 얼마나 줄일 수 있는가`이다. physics-guided conceptual core는 현재 논문 범위 밖의 future work로 둔다.
 
 ---
 
@@ -22,9 +22,9 @@ Physics-guided 또는 hybrid hydrology 연구도 중요한 흐름이다. MC-LSTM
 
 첫째, `같은 LSTM backbone 위에서 output head만 probabilistic하게 바꿔도 peak underestimation이 줄어드는가`.
 
-둘째, `그다음에 physics-guided conceptual core를 추가했을 때의 추가 이득은 무엇인가`.
+둘째, `이 개선이 같은 basin의 다른 시기뿐 아니라, 처음 보는 basin과 훈련에서 거의 보지 못한 extreme event에서도 유지되는가`.
 
-셋째, `이 이득이 같은 basin의 다른 시기뿐 아니라, 처음 보는 basin과 훈련에서 거의 보지 못한 extreme event에서도 유지되는가`.
+셋째, `probabilistic head만으로 남는 한계는 무엇이며, future work에서 어떤 conceptual core가 필요한가`.
 
 이 연구는 바로 이 세 질문에 답하려는 계획이다.
 
@@ -32,13 +32,13 @@ Physics-guided 또는 hybrid hydrology 연구도 중요한 흐름이다. MC-LSTM
 
 ## 2. 연구 목표와 핵심 가설
 
-이 연구의 직접적인 목표는 극한 홍수 첨두 과소추정을 줄이는 것이다. 더 구체적으로는 `deterministic -> probabilistic -> physics-guided hybrid`의 세 모델을 같은 backbone과 같은 split 위에서 비교하여, 개선의 원인을 단계적으로 분리해 설명하는 것이 목적이다.
+이 연구의 직접적인 목표는 극한 홍수 첨두 과소추정을 줄이는 것이다. 더 구체적으로는 `deterministic -> probabilistic`의 두 모델을 같은 backbone과 같은 split 위에서 비교하여, `tail-aware output`의 효과를 분리해 설명하는 것이 목적이다.
 
 핵심 가설은 세 가지다.
 
 1. Deterministic LSTM의 peak underestimation 상당 부분은 backbone 자체보다 `output design`의 문제일 수 있다. 즉 point prediction 하나만 내는 구조가 upper tail을 충분히 열지 못할 수 있다.
 2. 같은 backbone에 probabilistic quantile head를 추가하면, 평균 회귀만 하던 모델보다 큰 첨두 유량을 더 직접적으로 학습할 수 있어 peak magnitude bias가 완화될 수 있다.
-3. Physics-guided conceptual core를 추가하면 단지 peak 크기뿐 아니라, peak timing과 basin generalization까지 더 안정적으로 개선될 수 있다. 다만 이때 구조는 naive dynamic-parameter shell이 아니라 `state/flux-constrained` 형태여야 한다.
+3. physics-guided conceptual core는 후속 연구에서 peak timing과 basin generalization을 보완할 가능성이 있다. 다만 이때 구조는 naive dynamic-parameter shell이 아니라 `state/flux-constrained` 형태여야 한다.
 
 ---
 
@@ -47,8 +47,8 @@ Physics-guided 또는 hybrid hydrology 연구도 중요한 흐름이다. MC-LSTM
 이 연구는 아래 세 질문을 중심으로 설계된다.
 
 1. `Deterministic multi-basin LSTM`이 보이는 extreme flood peak underestimation이 `probabilistic head`만으로 얼마나 줄어드는가?
-2. `Probabilistic multi-basin LSTM` 위에 `physics-guided conceptual core`를 추가하면 peak magnitude, peak timing, low-flow bias, regional generalization이 더 좋아지는가?
-3. 이 개선은 `temporal split`, `regional basin holdout`, `extreme-event holdout`에서 모두 유지되는가?
+2. 이 개선은 `temporal split`, `regional basin holdout`, `extreme-event holdout`에서 모두 유지되는가?
+3. probabilistic head 이후에도 남는 timing과 routing 한계는 무엇인가?
 
 ---
 
@@ -63,16 +63,14 @@ flowchart LR
   B --> D["Evaluation region: DRBC holdout basins"]
   C --> E["Model 1: Deterministic LSTM"]
   C --> F["Model 2: Probabilistic LSTM"]
-  C --> G["Model 3: Physics-guided probabilistic hybrid"]
   D --> H["Temporal / regional / extreme-event evaluation"]
   E --> H
   F --> H
-  G --> H
 ```
 
 위 구조도는 Markdown에서 `Mermaid`로 그린 것이다. Mermaid를 지원하는 뷰어에서는 바로 그림처럼 보이고, 지원하지 않는 뷰어에서는 코드 블록으로 보일 수 있다. 그래서 실제 문서에서는 구조도 바로 아래에 텍스트 설명도 함께 적는 것이 안전하다.
 
-이 구조를 텍스트로 풀면 이렇다. 먼저 CAMELSH hourly와 basin attributes를 준비하고, DRBC와 non-DRBC를 공간적으로 분리한 뒤 품질 게이트를 적용한다. 그다음 non-DRBC basin으로 global multi-basin model을 학습하고, DRBC basin을 holdout evaluation region으로 사용한다. 마지막으로 세 모델을 같은 평가 환경에서 비교한다.
+이 구조를 텍스트로 풀면 이렇다. 먼저 CAMELSH hourly와 basin attributes를 준비하고, DRBC와 non-DRBC를 공간적으로 분리한 뒤 품질 게이트를 적용한다. 그다음 non-DRBC basin으로 global multi-basin model을 학습하고, DRBC basin을 holdout evaluation region으로 사용한다. 마지막으로 두 모델을 같은 평가 환경에서 비교한다.
 
 ---
 
@@ -159,7 +157,7 @@ Static attribute를 왜 넣는지는 선행연구가 잘 보여준다. Kratzert 
 
 ### 8.1 공통 backbone
 
-세 모델은 모두 `multi-basin LSTM backbone`을 공유한다. 현재 구현 기준 backbone은 `cudalstm`이며, single-layer LSTM hidden state를 기반으로 각기 다른 head가 붙는다.
+현재 논문의 공식 비교축은 `multi-basin LSTM backbone`을 공유하는 두 모델이다. 현재 구현 기준 backbone은 `cudalstm`이며, single-layer LSTM hidden state를 기반으로 서로 다른 head가 붙는다.
 
 현재 기본 입력-출력 시간 구조는 다음과 같다.
 
@@ -263,27 +261,11 @@ $$
 
 즉 Model 2는 `과거 시계열에서 통계량을 직접 뽑아오는 모델`이 아니라, `입력 조건 X가 주어졌을 때 미래 각 시점 유량의 조건부 quantile function을 학습하는 모델`이라고 이해하는 것이 가장 정확하다.
 
-### 8.4 Model 3: Physics-guided probabilistic hybrid
+### 8.4 Future work 메모: Physics-guided conceptual core
 
-Model 3는 아직 설계 완성 단계는 아니지만, 목표 구조는 명확하다.
+Physics-guided conceptual core는 현재 논문의 공식 비교축이 아니다. 다만 Model 2 이후에도 timing, routing, basin generalization 한계가 남는다면, 후속 연구에서는 `bounded flux/coefficient head + conceptual core + residual quantile head` 방향을 검토할 수 있다.
 
-```mermaid
-flowchart TD
-  A["Dynamic forcing + static attributes"] --> B["Shared LSTM encoder"]
-  B --> C["Flux / bounded-coefficient head"]
-  C --> D["Conceptual core"]
-  D --> E["Snow storage"]
-  D --> F["Soil storage"]
-  D --> G["Fast runoff storage"]
-  D --> H["Slow/baseflow storage"]
-  D --> I["Routing"]
-  I --> J["Probabilistic head"]
-  J --> K["Tail-aware streamflow quantiles"]
-```
-
-핵심은 LSTM이 conceptual model의 모든 파라미터를 시점별로 마음대로 바꾸는 것이 아니라, `melt`, `infiltration`, `percolation`, `routing coefficient` 같은 제한된 flux 또는 bounded coefficient만 제안하게 하는 것이다. 이 설계는 naive hybrid에 대한 최근 비판을 피하기 위한 방향이다.
-
-즉 Model 3의 목적은 “AI가 physics를 대체한다”가 아니라, `physics가 state update와 routing의 뼈대를 맡고, LSTM은 그 안에서 필요한 조정 신호를 제안한다`는 구조를 만드는 데 있다.
+핵심은 LSTM이 conceptual model의 모든 파라미터를 시점별로 마음대로 바꾸는 것이 아니라, `melt`, `infiltration`, `percolation`, `routing coefficient` 같은 제한된 flux 또는 bounded coefficient만 제안하게 하는 것이다. 이 설계는 naive hybrid에 대한 최근 비판을 피하기 위한 future-work 방향이다.
 
 ---
 
@@ -345,19 +327,15 @@ Pinball loss의 직관은 간단하다. `q90`은 실제값의 약 90%가 그 아
 
 동일 가중치를 쓰는 이유는 첫 비교 실험에서 `head 구조의 순수 효과`를 보고 싶기 때문이다. tail quantile에만 더 큰 가중치를 주면, 그 효과가 head 변화 때문인지 loss weighting 때문인지 분리하기 어려워진다.
 
-### 10.3 Model 3
+### 10.3 Future work 메모
 
-Model 3는 Model 2의 probabilistic loss에 physics regularization을 더하는 구조를 목표로 한다.
+Physics-guided conceptual core를 후속 연구로 확장할 경우에는 Model 2의 probabilistic loss 위에 physics regularization을 추가하는 방향을 생각할 수 있다.
 
 $$
 L_{\mathrm{total}}=L_{\mathrm{prob}}+ \lambda_{\mathrm{mass}} L_{\mathrm{mass\_balance}}+ \lambda_{\mathrm{nonneg}} L_{\mathrm{nonnegativity}}+ \lambda_{\mathrm{bound}} L_{\mathrm{storage\_bounds}}
 $$
 
-현재 단계에서는 `λ_mass`, `λ_nonneg`, `λ_bound`의 exact 값보다, 어떤 물리 제약을 어떤 목적으로 넣는지가 더 중요하다.
-
-- `L_mass_balance`: 물수지 일관성 유지
-- `L_nonnegativity`: 음의 storage, 음의 flux 방지
-- `L_storage_bounds`: state variable이 비현실적으로 발산하지 않도록 제약
+현재 단계에서는 exact 값보다, 어떤 물리 제약을 어떤 목적으로 넣을지가 더 중요하다.
 
 ---
 
@@ -469,9 +447,9 @@ Event table은 [`../workflow/event_response_spec.md`](../workflow/event_response
 
 만약 Model 1 대비 Model 2에서 `FHV`, `Peak Relative Error`, `top 1% flow recall`이 개선된다면, 그 결과는 `output design만 바꿔도 tail suppression을 줄일 수 있다`는 해석으로 이어질 수 있다. 즉 peak underestimation의 중요한 원인이 평균 회귀와 point prediction 구조였다는 뜻이다.
 
-그다음 Model 2 대비 Model 3에서 `Peak Timing Error`, `regional holdout`, `snow-influenced basin subgroup`이 더 좋아진다면, 그 결과는 `state/routing을 명시한 physics-guided 구조가 tail-aware output만으로 부족한 부분을 보완했다`는 해석으로 이어질 수 있다.
+현재 논문에서는 Model 1 대비 Model 2에서 `FHV`, `Peak Relative Error`, `top 1% flow recall`, `coverage`, `calibration`이 어떻게 바뀌는지를 가장 중요하게 해석한다. 만약 이 비교 뒤에도 timing이나 basin holdout에서 구조적 한계가 남는다면, 그때 physics-guided conceptual core를 future work로 제안하는 것이 자연스럽다.
 
-이 두 단계 해석이 중요한 이유는, 많은 hybrid 연구가 여러 요소를 한꺼번에 바꿔서 무엇이 개선의 원인인지 명확하게 말하기 어려웠기 때문이다. 본 연구는 이 원인을 분리해 설명하는 데 초점을 둔다.
+이 해석이 중요한 이유는, 많은 hybrid 연구가 여러 요소를 한꺼번에 바꿔서 무엇이 개선의 원인인지 명확하게 말하기 어려웠기 때문이다. 본 연구는 우선 그 원인을 `output design` 관점에서 분리해 설명하는 데 초점을 둔다.
 
 ---
 
@@ -498,13 +476,7 @@ Event table은 [`../workflow/event_response_spec.md`](../workflow/event_response
 - pinball loss, coverage, calibration 계산
 - Model 1과 직접 비교
 
-### 단계 4. Model 3 설계 및 구현
-
-- conceptual core state schema 확정
-- flux / bounded-coefficient head 정의
-- physics regularization 구현 및 안정화
-
-### 단계 5. 종합 비교와 문서화
+### 단계 4. 종합 비교와 문서화
 
 - temporal, regional, extreme-event 결과 통합
 - basin subgroup 해석
@@ -520,7 +492,7 @@ Event table은 [`../workflow/event_response_spec.md`](../workflow/event_response
 | --- | --- | --- |
 | 데이터 전처리 / event table 생성 | 8코어 CPU, RAM 32GB, SSD 1TB | 16코어 CPU, RAM 64GB, NVMe 2TB |
 | Model 1 / Model 2 단일 학습 | NVIDIA CUDA GPU 16GB, RAM 64GB | RTX 4090 24GB 또는 동급, RAM 128GB |
-| multi-seed, sensitivity, Model 3 | CUDA GPU 24GB 이상 | 2x24GB GPU 또는 A100 40GB 이상, RAM 128GB 이상 |
+| multi-seed, sensitivity, post-processing | CUDA GPU 24GB 이상 | 2x24GB GPU 또는 A100 40GB 이상, RAM 128GB 이상 |
 
 권장 환경은 `GPU 24GB 1장 + RAM 128GB + NVMe 2TB`다. 이유는 hourly sequence 길이와 basin 수가 커서 메모리 요구량이 높고, post-processing과 event-level metric 계산도 함께 수행해야 하기 때문이다.
 
@@ -536,8 +508,8 @@ Event table은 [`../workflow/event_response_spec.md`](../workflow/event_response
 | Kratzert et al. (2019), *Towards learning universal, regional, and local hydrological behaviors* | static attributes와 multi-basin 학습의 정당화 | basin identity를 요약하는 정적 입력 선택 근거 |
 | Klotz et al. (2022), *Uncertainty estimation with deep learning for rainfall-runoff modeling* | uncertainty와 calibration을 체계적으로 benchmark | Model 2에서 probabilistic metric을 꼭 같이 봐야 하는 근거 |
 | Frame et al. (2022), *Deep learning rainfall-runoff predictions of extreme events* | extreme-event 중심 평가의 필요성 제시 | extreme-event holdout 설계의 직접 배경 |
-| Hoedt et al. (2021), *MC-LSTM* | mass-conserving sequence model 가능성 제시 | Model 3의 physics-guided 방향에 영감 제공 |
-| Liu et al. (2024), *A national-scale hybrid model for enhanced streamflow estimation* | hybrid model의 장점과 한계를 대규모로 비교 | Model 2와 Model 3 비교 필요성 정당화 |
+| Hoedt et al. (2021), *MC-LSTM* | mass-conserving sequence model 가능성 제시 | future-work conceptual core 설계 방향에 영감 제공 |
+| Liu et al. (2024), *A national-scale hybrid model for enhanced streamflow estimation* | hybrid model의 장점과 한계를 대규모로 비교 | probabilistic output 이후에도 남는 한계를 future work로 논의할 근거가 된다 |
 | Kratzert et al. (2024), *Never train an LSTM on a single basin* | multi-basin large-sample 학습의 중요성 강조 | single-basin이 아니라 global multi-basin strategy를 택해야 하는 근거 |
 
 ---
@@ -570,7 +542,6 @@ CAMELSH hourly + attributes
   -> LSTM backbone
   -> Model 1: regression head
   -> Model 2: quantile head
-  -> Model 3: conceptual core + probabilistic head
   -> temporal / regional / extreme-event evaluation
 ```
 

@@ -98,7 +98,7 @@
 
 영상에서 가장 연구적으로 중요한 메시지는 `같은 면적, 같은 강우라도 유역 형상에 따라 출구 hydrograph가 달라진다`는 점입니다. 좁고 긴 유역은 물이 출구까지 도달하는 시간이 길어서 peak가 낮고 늦게 나타납니다. 반대로 부채형이나 원형에 가까운 유역은 서로 다른 위치의 물이 짧은 시간 안에 동시에 모이기 쉬워서 peak가 크고 빠르게 나타납니다.
 
-이건 우리 주제와 정확히 맞닿아 있습니다. 만약 모델이 유역 형상 차이를 충분히 학습하지 못하면, 원형 또는 부채형에 가까운 flood-prone basin에서 peak underestimation이 더 심해질 수 있어요. 반대로 probabilistic head가 tail 쪽을 더 잘 잡더라도, timing과 concentration 과정은 여전히 basin geometry의 영향을 크게 받습니다. 그래서 Model 2와 Model 3를 비교할 때도 `shape-sensitive basins에서 추가 이득이 있는지`를 보는 게 의미가 있습니다.
+이건 우리 주제와 정확히 맞닿아 있습니다. 만약 모델이 유역 형상 차이를 충분히 학습하지 못하면, 원형 또는 부채형에 가까운 flood-prone basin에서 peak underestimation이 더 심해질 수 있어요. 반대로 probabilistic head가 tail 쪽을 더 잘 잡더라도, timing과 concentration 과정은 여전히 basin geometry의 영향을 크게 받습니다. 그래서 현재 논문에서는 `shape-sensitive basins에서 Model 2가 얼마나 개선되는지`를 보는 것이 의미가 있고, 그 뒤에도 한계가 남으면 conceptual core 같은 future work를 검토할 수 있습니다.
 
 영상은 평창과 정선 유역 예시를 통해 이 차이를 직관적으로 보여줍니다. 하나는 비교적 길고 좁아 반응이 늦고 완만하고, 다른 하나는 넓게 퍼져 있어 반응이 빠르고 큽니다. 이 예시는 결국 `동일한 면적보다 중요한 것은 물이 모이는 시간 구조`라는 점을 시각적으로 보여주는 사례라고 이해하면 좋습니다.
 
@@ -191,7 +191,7 @@
 
 그래서 함께 소개되는 것이 `유황계수`입니다. 영상의 설명 취지는 `홍수 대표 유량(Q10)`과 `갈수 대표 유량(Q355)`의 비를 통해 연중 유량 체계를 더 안정적으로 요약하자는 것입니다. 즉 `Q10 / Q355`에 가까운 해석으로 이해하면 됩니다. 값이 클수록 고유량과 저유량의 대비가 크고, 더 flashy하거나 변동성이 큰 유량 체계를 시사합니다.
 
-이 지표들은 우리 프로젝트의 평가 지표와는 직접 같지 않지만, `basin별 hydrograph regime 차이`를 설명하는 보조 feature로는 충분히 가치가 있습니다. 특히 low-flow와 flood-flow를 동시에 보려는 Model 3 해석에서는 이런 유황 개념이 도움이 됩니다.
+이 지표들은 우리 프로젝트의 평가 지표와는 직접 같지 않지만, `basin별 hydrograph regime 차이`를 설명하는 보조 feature로는 충분히 가치가 있습니다. 특히 probabilistic Model 2의 개선이 어떤 유황 체계에서 더 크게 나타나는지 해석할 때 도움이 됩니다.
 
 ## CAMELS 연구로 번역하면 무엇을 해야 하나
 
@@ -212,7 +212,7 @@
 | 저장/완충 | `soil depth`, `permeability`, `baseflow index`, `forest fraction` | infiltration과 delayed response가 얼마나 큰가 |
 | 기후 | `aridity`, `snow fraction`, `seasonality` | 반응을 유발하는 forcing regime이 무엇인가 |
 
-넷째, 모델 오류 해석도 이 축으로 하는 것이 좋습니다. 예를 들어 `Model 1이 compact하고 slope가 큰 basin에서 peak underestimation이 더 심한가`, `Model 2는 그런 basin에서 개선되지만 timing은 여전히 늦는가`, `Model 3는 high-slope 또는 snow-influenced basin에서 추가 이득이 있는가` 같은 질문으로 바꿔야 합니다.
+넷째, 모델 오류 해석도 이 축으로 하는 것이 좋습니다. 예를 들어 `Model 1이 compact하고 slope가 큰 basin에서 peak underestimation이 더 심한가`, `Model 2는 그런 basin에서 얼마나 개선되는가`, `그래도 timing 한계가 남는 basin type은 무엇인가` 같은 질문으로 바꿔야 합니다.
 
 ## Delaware basin에 바로 적용하는 실무 메모
 

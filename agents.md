@@ -7,29 +7,28 @@
 
 ## 연구 목표 (한 줄)
 
-Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정**을 줄이기 위해, deterministic → probabilistic → physics-guided hybrid 세 모델을 단계 비교한다.
+Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정**을 줄이기 위해, deterministic baseline과 probabilistic quantile extension을 비교한다. physics-guided hybrid는 후속 확장으로 둔다.
 
 ## 작업 제목
 
-**Reducing Extreme Flood Underestimation with Probabilistic and Physics-Guided Extensions of Multi-Basin LSTM Models**
+**Reducing Extreme Flood Underestimation with Probabilistic Extensions of Multi-Basin LSTM Models**
 
 ## 핵심 가설
 
 1. Deterministic LSTM의 peak underestimation 상당 부분은 **output design** 문제이다. Probabilistic head만 추가해도 extreme flood 지표가 의미 있게 좋아질 수 있다.
-2. Physics-guided core를 얹으면 **timing과 basin generalization**에서 추가 이득이 있을 수 있다.
-3. 이 추가 이득은 snow 영향 또는 groundwater 영향이 큰 유역에서 더 크게 나타날 수 있다.
+2. physics-guided core는 후속 연구에서 **timing과 basin generalization**에 추가 이득을 줄 가능성이 있다.
+3. 이 후속 이득은 snow 영향 또는 groundwater 영향이 큰 유역에서 더 크게 나타날 수 있다.
 
 ---
 
-## 세 모델 비교 구조
+## 공식 비교 구조
 
 | 모델 | 구조 | 역할 |
 |------|------|------|
 | Model 1 | Deterministic multi-basin LSTM | Baseline. 모든 개선은 이것 대비 비교 |
 | Model 2 | Probabilistic multi-basin LSTM (backbone 동일, head만 quantile) | Output design만으로 peak bias가 줄어드는지 검증 |
-| Model 3 | Physics-guided probabilistic hybrid (flux/bounded-coefficient head + conceptual core) | Probabilistic만으로 부족한 부분이 있는지 확인 |
 
-자세한 아키텍처는 [`docs/research/architecture.md`](docs/research/architecture.md) 참조.
+`Model 3` 관련 conceptual core 설계 메모는 남겨 두되, 현재 논문의 공식 비교축에는 포함하지 않는다. 자세한 아키텍처는 [`docs/research/architecture.md`](docs/research/architecture.md) 참조.
 
 ---
 
@@ -112,5 +111,5 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 ## 구현 순서 원칙
 
 1. Model 1 (deterministic) → Model 2 (probabilistic) 순서로 먼저 재현 가능하게 구현
-2. Model 3 (physics-guided hybrid)은 그 다음에 넣어 incremental gain 확인
+2. Model 3 (physics-guided hybrid)은 현재 논문 범위 밖의 exploratory / future work로 둔다
 3. 모델 학습 전에 **basin 조사 단계** 선행: DRBC boundary 기준 holdout subset 확정 → non-DRBC training pool 확정 → DRBC selected basin static/profile 분석 → forcing/streamflow 결합 → flood-prone basin screening table 생성

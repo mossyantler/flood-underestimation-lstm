@@ -18,7 +18,7 @@
 
 셋째, 물리 법칙을 구조 안에 넣으면 나아지는가를 본다. 물은 갑자기 사라지거나 생기지 않는다는 물수지 개념, 눈이 쌓였다가 녹는 과정, 토양에 저장되었다가 늦게 흘러나오는 과정 같은 것을 모델 안에 더 직접 반영하는 것이다.
 
-이 세 가지를 CAMELS 프로젝트 식으로 다시 말하면 `Deterministic LSTM -> Probabilistic LSTM -> Physics-guided hybrid` 순서로 비교하는 셈이다.
+이 세 가지를 CAMELS 프로젝트 식으로 다시 말하면 `Deterministic LSTM -> Probabilistic LSTM`을 먼저 비교하고, physics-guided hybrid는 후속 연구로 두는 셈이다.
 
 ## 이 분야에서 자주 나오는 가장 기본 단어들
 

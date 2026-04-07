@@ -2,7 +2,7 @@
 
 Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정**을 줄이기 위한 연구 프로젝트.
 
-Deterministic → Probabilistic → Physics-guided hybrid 세 모델을 단계적으로 비교한다.
+현재 논문의 공식 비교축은 `Deterministic LSTM -> Probabilistic quantile LSTM` 두 모델이다. `physics-guided hybrid`는 후속 확장 또는 exploratory branch로 둔다.
 
 ## 디렉토리 구조
 

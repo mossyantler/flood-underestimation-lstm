@@ -23,7 +23,7 @@
 | `workflow/event_response_spec.md` | hourly event table을 어떤 규칙과 스키마로 생성할 것인가 | event type 해석 규칙, basin cohort ranking |
 | `workflow/flood_generation_typing.md` | event와 basin을 어떤 flood generation type으로 해석할 것인가 | event extraction spec의 기준값, screening entry rule |
 | `workflow/prob_head.md` | probabilistic head를 학부 수준에서 어떻게 직관적으로 설명할 것인가 | 공식 config key, built-in metric 매핑 |
-| `research/architecture.md` | 세 모델의 구조와 head/core 역할을 어떻게 구분할 것인가 | exact split 규칙, config key, run artifact 규칙 |
+| `research/architecture.md` | 현재 논문 범위의 두 모델 구조와 future-work core 메모를 어떻게 구분할 것인가 | exact split 규칙, config key, run artifact 규칙 |
 | `research/design.md` | 이 연구가 무엇을 묻고 어떤 비교를 왜 하는가 | 구현 세부 키 이름, built-in/custom metric 경계 |
 | `research/experiment_protocol.md` | 실험을 실제로 어떤 split, loss, metric, config key로 실행할 것인가 | 개념적 배경의 긴 설명, 학부 수준 직관 가이드 |
 | `research/literature-review.md` | 어떤 문헌을 어디에 왜 인용할 것인가 | 공식 실험 규칙, 현재 코드 상태 |
@@ -43,7 +43,7 @@
 
 ## Research
 
-- [`research/architecture.md`](research/architecture.md): deterministic, probabilistic, physics-guided 세 모델의 구조와 head 역할 구분
+- [`research/architecture.md`](research/architecture.md): 현재 논문 범위의 deterministic / probabilistic 두 모델 구조와 future-work conceptual core 메모
 - [`research/design.md`](research/design.md): 연구 질문, split, loss, 평가 지표를 포함한 실험 설계
 - [`research/experiment_protocol.md`](research/experiment_protocol.md): split 생성 규칙, config key 대응, built-in/custom metric 경계, run 산출물 규칙을 한 번에 묶은 실행 프로토콜
 - [`research/literature-review.md`](research/literature-review.md): related work 서술 방향과 보강이 필요한 선행연구 축 정리

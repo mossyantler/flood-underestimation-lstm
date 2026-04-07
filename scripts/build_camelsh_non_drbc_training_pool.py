@@ -175,7 +175,7 @@ def main() -> None:
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     mapping = pd.read_csv(args.mapping_csv, dtype={"gauge_id": str})
-    # Holdout-safe training pool:
+    # Holdout-compatible training pool:
     # 1) basin outlet must be outside DRBC
     # 2) allow zero overlap or very small overlap caused by boundary source mismatch
     overlap_tol = args.max_overlap_ratio_tolerance

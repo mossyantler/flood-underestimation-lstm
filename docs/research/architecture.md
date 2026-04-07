@@ -2,13 +2,13 @@
 
 ## 서술 목적
 
-이 문서는 세 모델의 `구성 요소와 연결 방식`을 정리한다. 즉 `head가 무엇을 내는지`, `physics-guided core를 어디에 두는지`, `모델 간 구조 차이`를 설명한다.
+이 문서는 현재 논문 범위의 모델 `구성 요소와 연결 방식`을 정리한다. 즉 `head가 무엇을 내는지`, `Model 1과 Model 2가 어떻게 다른지`, `Model 3 메모를 어디까지 future work로 둘지`를 설명한다.
 
 ## 다루는 범위
 
-- deterministic, probabilistic, physics-guided 세 모델의 구조 비교
-- head와 conceptual core의 역할 구분
-- 현재 프로젝트의 backbone 고정 원칙
+- deterministic baseline과 probabilistic baseline의 구조 비교
+- head의 역할 구분과 backbone 고정 원칙
+- physics-guided conceptual core를 future work로 다루는 경계
 
 ## 다루지 않는 범위
 
@@ -20,17 +20,16 @@
 
 ## 전체 연구 구조
 
-현재 프로젝트는 하나의 모델을 바로 제안하기보다, 세 단계 아키텍처를 비교하는 구조다.
+현재 논문의 공식 비교축은 두 단계다.
 
 1. `Deterministic multi-basin LSTM`
 2. `Probabilistic multi-basin LSTM`
-3. `Physics-guided probabilistic hybrid`
 
-이 구조를 택한 이유는 성능 개선이 `출력 head` 때문인지 `physics-guided core` 때문인지 분리해서 보기 위해서다.
+이 구조를 택한 이유는 성능 개선이 `출력 head` 때문인지 먼저 분리해서 보기 위해서다. `physics-guided conceptual core`는 현재 논문 범위 밖의 후속 확장으로 둔다.
 
 ## 공통 입력
 
-세 모델의 공통 입력은 아래를 기본으로 씁니다.
+현재 논문 범위의 두 모델 공통 입력은 아래를 기본으로 쓴다.
 
 - dynamic forcing: `prcp`, `tmax`, `tmin`, `srad`, `vp`, 필요 시 `PET`
 - static attributes: 면적, 평균 경사, aridity, snow fraction, soil depth, permeability, baseflow index 등
@@ -66,42 +65,16 @@ inputs
 
 이 단계에서의 핵심 질문은 이것이다. `physics guidance 없이 probabilistic output만으로도 extreme flood peak bias를 얼마나 줄일 수 있는가?`
 
-## 3. Physics-guided probabilistic hybrid
+## 3. Physics-guided conceptual core 메모
 
-세 번째 모델은 probabilistic LSTM 위에 conceptual core를 추가한다. 다만 `To bucket or not to bucket?`에서 비판받은 naïve dynamic-parameter hybrid를 그대로 쓰지 않는다.
+`Model 3`는 현재 논문의 공식 비교축이 아니다. 다만 후속 연구를 위해 `bounded flux/coefficient head + conceptual core + residual quantile head` 방향의 설계 메모를 유지한다.
 
-우리가 지향하는 구조는 다음과 같다.
+현재 단계에서 이 메모를 남겨 두는 이유는 두 가지다.
 
-```text
-inputs
-  -> LSTM encoder
-  -> hydromet memory h_t
-  -> flux / bounded-coefficient head
-  -> conceptual core (storage + routing)
-  -> base hydrograph
-  -> probabilistic head
-  -> final quantiles / Q_hat
-```
+- probabilistic head만으로도 해결되지 않는 timing / routing 문제를 나중에 어디서 보완할지 정리하기 위해서
+- future work 문단에서 `naive dynamic-parameter hybrid`가 아니라 `state/flux-constrained core`를 지향한다고 분명히 말하기 위해서
 
-여기서 중요한 점은 LSTM이 conceptual model의 파라미터 전체 `θ_t`를 시점별로 마음대로 바꾸는 것이 아니라, `melt`, `ET`, `infiltration`, `percolation`, `routing coefficient` 같은 제한된 flux 또는 bounded coefficient만 제안하도록 하는 것이다.
-
-이 구조의 장점은 세 가지다.
-
-- physics의 역할이 단순 장식이 아니라 실제 `state update`와 `routing`에 들어감
-- AI가 physics를 덮어쓰는 정도를 줄일 수 있음
-- probabilistic head와 결합해 peak magnitude와 tail risk를 동시에 다룰 수 있음
-
-## conceptual core의 기본 상태 변수
-
-첫 논문 수준에서는 복잡도를 과도하게 높이지 않고, 다음과 같은 상태 변수로 시작하는 것이 적절하다.
-
-- `snow storage`
-- `soil storage`
-- `fast runoff storage`
-- `slow/baseflow storage`
-- 필요 시 `channel/routing storage`
-
-이 상태들은 물수지와 runoff generation을 표현하는 최소 골격이다.
+세부 설계는 [`conceptual_core_design.md`](conceptual_core_design.md)에 두고, 본문 비교와 구현 규범에서는 제외한다.
 
 ## head의 역할 구분
 
@@ -109,20 +82,21 @@ inputs
 
 - `regression head`: `h_t -> Q_hat`
 - `probabilistic head`: `h_t -> q50, q90, q95, q99`
-- `flux head`: `h_t -> melt, ET, infiltration, percolation ...`
-- `bounded coefficient head`: `h_t -> routing coefficient, partition factor ...`
+- `flux head`와 `bounded coefficient head`: future work의 conceptual core 메모에서만 다룸
 
 즉 LSTM의 본래 출력은 hidden state `h_t`이고, 우리가 보는 값은 각 head가 `h_t`를 해석한 결과다.
 
 ## 문서 정리
 
 1. backbone은 첫 논문에서 `multi-basin LSTM`으로 고정한다.  
-2. probabilistic head를 먼저 넣어 tail modeling 효과를 분리한다.  
-3. physics-guided core는 후속 비교축으로 넣되, `dynamic-parameter shell`이 아니라 `state/flux-constrained` 구조로 설계한다.  
-4. 첫 논문은 CAMELSH hourly 기반 extreme flood response에 집중하고, sub-hourly flash flood는 후속 연구 주제로 분리한다.
+2. 공식 비교축은 `Model 1 vs Model 2`다.  
+3. probabilistic head를 먼저 넣어 tail modeling 효과를 분리한다.  
+4. physics-guided core는 future work 메모로만 유지하고, 현재 논문의 메인 claim에서는 제외한다.  
+5. 첫 논문은 CAMELSH hourly 기반 extreme flood response에 집중하고, sub-hourly flash flood는 후속 연구 주제로 분리한다.
 
 ## 관련 문서
 
 - [`design.md`](design.md): 연구 질문과 비교 가설
 - [`experiment_protocol.md`](experiment_protocol.md): split, loss, metric, config key
 - [`../workflow/prob_head.md`](../workflow/prob_head.md): quantile head의 직관 설명
+- [`conceptual_core_design.md`](conceptual_core_design.md): future-work conceptual core 메모
