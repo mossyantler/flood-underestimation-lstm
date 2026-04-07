@@ -64,27 +64,40 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 ```text
 .
 ├── basins/
-│   ├── drbc_boundary/  # DRBC Delaware River Basin 공식 경계
-│   ├── huc8_delware/   # 초기 HUC8 exploratory shapefile
-│   └── CAMELSH_data/   # CAMELSH shapefiles / attributes 추출본
-├── configs/             # NeuralHydrology 실험 설정 (현재 비어 있음)
-├── data/CAMELS_US/
-│   └── camels_attributes_v2.0/  # legacy CAMELS-US 속성 데이터
+│   ├── CAMELSH/         # CAMELSH upstream 로컬 체크아웃 (gitignored)
+│   ├── CAMELSH_data/    # CAMELSH shapefiles / attributes / hourly observed 추출본 (gitignored)
+│   ├── CAMELSH_download/ # CAMELSH 원본 다운로드 보관 디렉터리 (gitignored)
+│   ├── drbc_boundary/   # DRBC Delaware River Basin 공식 경계
+│   └── huc8_delware/    # 초기 HUC8 exploratory shapefile / QGIS 자산
+├── configs/
+│   └── basin_splits/    # holdout / training pool basin split 산출물
+├── data/
+│   ├── CAMELSH_generic/
+│   │   └── drbc_holdout_broad/  # NH-style CAMELSH generic 데이터셋 (gitignored)
+│   └── CAMELS_US/
+│       ├── basin_mean_forcing/  # legacy forcing 원본 (gitignored)
+│       ├── camels_attributes_v2.0/  # legacy CAMELS-US 속성 데이터
+│       └── usgs_streamflow/     # legacy streamflow 원본 (gitignored)
 ├── docs/
-│   ├── context/         # 프로젝트 맥락 문서
-│   └── research/        # architecture, design, literature-review
-├── output/
-│   └── basin/           # basin 관련 산출물
-├── scripts/             # download, run 스크립트
-└── runs/                # (gitignored) 학습 출력
+│   ├── learn/           # 참고 학습 메모
+│   ├── references/      # glossary, proposal, planning 문서
+│   ├── research/        # architecture, design, literature-review
+│   └── workflow/        # basin selection / screening 워크플로
+├── scripts/             # 다운로드, 전처리, 분석, 실행 스크립트
+├── vendor/
+│   └── neuralhydrology/ # upstream 코드 참조용 vendor copy
+├── output/              # (gitignored) basin 분석 산출물, 필요 시 생성
+├── runs/                # (gitignored) 학습 출력, 필요 시 생성
+└── tmp/                 # (gitignored) scratch / download staging, 필요 시 생성
 ```
 
 - **대상 유역**: Delaware River Basin Commission 기준 Delaware River Basin. 공식 기준 레이어는 `basins/drbc_boundary/drb_bnd_polygon.shp`.
 - **학습 전략**: DRBC는 regional holdout / evaluation region으로 둔다. 모델 학습은 outlet가 DRBC 밖에 있고 polygon overlap이 `0.1` 이하인 tolerant non-DRBC CAMELSH basin에서 수행한다. 즉 현재 backbone은 Delaware regional model이 아니라, non-DRBC basin으로 학습한 global multi-basin model이다.
 - CAMELSH shapefile과 attributes 추출본은 `basins/CAMELSH_data/` 아래에 둔다.
 - Static attributes (`camels_attributes_v2.0/`)는 legacy 참고 자료이므로 유지한다.
-- 현재 `output/basin/drbc_camelsh/` 아래에 DRBC 기준 CAMELSH subset 산출물을 둔다.
-- 현재 `output/basin/camelsh_training_non_drbc/` 아래에 global training pool 산출물을 둔다.
+- 생성 산출물은 기본적으로 gitignored 디렉터리인 `output/`, `runs/`, `tmp/` 아래에 둔다.
+- DRBC 기준 CAMELSH subset 산출물은 `output/basin/drbc_camelsh/` 아래에 둔다.
+- global training pool 관련 산출물은 `output/basin/camelsh_training_non_drbc/` 아래에 둔다.
 - 현재 선택 규칙은 `outlet_in_drbc == True`와 `overlap_ratio_of_basin >= 0.9`이고, 이에 해당하는 basin은 `154개`다. outlet만 기준으로 보면 `192개`다.
 - 현재 training pool 규칙은 `outlet_in_drbc == False` 이고 `overlap_ratio_of_basin <= 0.1`까지는 source mismatch에 따른 small overlap으로 허용하는 것이다. 그다음 usable year / estimated-flow fraction / boundary confidence quality gate를 적용한다. 현재 quality-pass training basin은 `1923개`다.
 - 현재 `scripts/build_drbc_basin_analysis_table.py`로 static basin analysis table을 생성하며, 결과는 `output/basin/drbc_camelsh/analysis/` 아래에 둔다.
