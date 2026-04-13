@@ -16,6 +16,7 @@
 
 | 문서 | 주 질문 | 다루지 않는 것 |
 | --- | --- | --- |
+| `workflow/project_overview.md` | 이 저장소를 처음 읽는 사람이 프로젝트 목표, workflow, 문서 읽기 순서를 어떻게 빠르게 이해할 것인가 | basin selection 수식, event spec 상세 규칙, experiment config 전체 |
 | `workflow/basin.md` | 현재 프로젝트의 global training basin과 DRBC holdout evaluation basin 기준은 무엇인가 | screening score, 품질 게이트 수식, source CSV 컬럼 사전 |
 | `workflow/basin_explain.md` | basin analysis table을 구성하는 source CSV와 컬럼은 무엇을 뜻하는가 | 공식 cohort 선정 규칙, 현재 진행 상태 |
 | `workflow/basin_analysis.md` | 지금까지 어떤 basin 산출물이 만들어졌고, 다음 단계는 무엇인가 | 논문용 공식 screening 수식과 최종 규범 |
@@ -32,6 +33,7 @@
 
 ## Workflow
 
+- [`workflow/project_overview.md`](workflow/project_overview.md): 처음 읽는 사람을 위한 프로젝트 지도, 현재 상태, 권장 읽기 순서
 - [`workflow/basin.md`](workflow/basin.md): 현재 공식 basin 정의, global training / DRBC holdout evaluation 기준, 다음 basin analysis 단계 정리
 - [`workflow/basin_explain.md`](workflow/basin_explain.md): basin analysis table에 쓰는 source CSV와 변수 해석 가이드
 - [`workflow/basin_analysis.md`](workflow/basin_analysis.md): 현재 완료된 static analysis, quality gate, provisional screening과 앞으로 만들 observed-flow screening의 관계 정리
