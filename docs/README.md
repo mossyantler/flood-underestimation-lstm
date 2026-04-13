@@ -24,7 +24,7 @@
 | `workflow/event_response_spec.md` | hourly event table을 어떤 규칙과 스키마로 생성할 것인가 | event type 해석 규칙, basin cohort ranking |
 | `workflow/flood_generation_typing.md` | event와 basin을 어떤 flood generation type으로 해석할 것인가 | event extraction spec의 기준값, screening entry rule |
 | `workflow/prob_head.md` | probabilistic head를 학부 수준에서 어떻게 직관적으로 설명할 것인가 | 공식 config key, built-in metric 매핑 |
-| `research/architecture.md` | 세 모델의 구조와 head/core 역할을 어떻게 구분할 것인가 | exact split 규칙, config key, run artifact 규칙 |
+| `research/architecture.md` | 현재 논문 범위의 두 모델 구조와 future-work core 메모를 어떻게 구분할 것인가 | exact split 규칙, config key, run artifact 규칙 |
 | `research/design.md` | 이 연구가 무엇을 묻고 어떤 비교를 왜 하는가 | 구현 세부 키 이름, built-in/custom metric 경계 |
 | `research/experiment_protocol.md` | 실험을 실제로 어떤 split, loss, metric, config key로 실행할 것인가 | 개념적 배경의 긴 설명, 학부 수준 직관 가이드 |
 | `research/literature-review.md` | 어떤 문헌을 어디에 왜 인용할 것인가 | 공식 실험 규칙, 현재 코드 상태 |
@@ -35,6 +35,7 @@
 
 - [`workflow/project_overview.md`](workflow/project_overview.md): 처음 읽는 사람을 위한 프로젝트 지도, 현재 상태, 권장 읽기 순서
 - [`workflow/basin.md`](workflow/basin.md): 현재 공식 basin 정의, global training / DRBC holdout evaluation 기준, 다음 basin analysis 단계 정리
+- [`../output/basin/checklists/camelsh_basin_master_checklist_broad.csv`](../output/basin/checklists/camelsh_basin_master_checklist_broad.csv): CAMELSH 전체 basin에 대한 minimum quality gate와 broad profile `usability_status`를 기록한 공식 checklist
 - [`workflow/basin_explain.md`](workflow/basin_explain.md): basin analysis table에 쓰는 source CSV와 변수 해석 가이드
 - [`workflow/basin_analysis.md`](workflow/basin_analysis.md): 현재 완료된 static analysis, quality gate, provisional screening과 앞으로 만들 observed-flow screening의 관계 정리
 - [`workflow/basin_screening_method.md`](workflow/basin_screening_method.md): basin 선택 이후 공식 screening method와 observed-flow 중심 final screening 설계
@@ -44,7 +45,7 @@
 
 ## Research
 
-- [`research/architecture.md`](research/architecture.md): deterministic, probabilistic, physics-guided 세 모델의 구조와 head 역할 구분
+- [`research/architecture.md`](research/architecture.md): 현재 논문 범위의 deterministic / probabilistic 두 모델 구조와 future-work conceptual core 메모
 - [`research/design.md`](research/design.md): 연구 질문, split, loss, 평가 지표를 포함한 실험 설계
 - [`research/experiment_protocol.md`](research/experiment_protocol.md): split 생성 규칙, config key 대응, built-in/custom metric 경계, run 산출물 규칙을 한 번에 묶은 실행 프로토콜
 - [`research/literature-review.md`](research/literature-review.md): related work 서술 방향과 보강이 필요한 선행연구 축 정리
@@ -54,5 +55,8 @@
 
 - [`references/README.md`](references/README.md): `references/` 폴더의 역할과 현재 참고 자료 목록
 - [`references/youtube-river-basin-analysis-study-guide.md`](references/youtube-river-basin-analysis-study-guide.md): 유역 형상과 하천망 개념을 CAMELS 연구 맥락으로 번역한 학습 가이드
+- [`references/research-plan-extreme-flood-underestimation.md`](references/research-plan-extreme-flood-underestimation.md): 비전공 검토자 기준으로 다시 풀어 쓴 상세 연구계획서 초안과 Markdown 구조도 작성 팁
+- [`references/research-proposal-submission-draft.md`](references/research-proposal-submission-draft.md): 표지, 목차, 본문 구성을 갖춘 제출용 연구계획서 초안
+- [`references/model-hyperparameter-glossary.md`](references/model-hyperparameter-glossary.md): 하이퍼파라미터와 주요 config 파라미터를 한 번에 보는 정리집
 
 에이전트 작업 맥락은 루트의 [`agents.md`](../agents.md)를 참조한다.

@@ -17,6 +17,9 @@
 현재 `references/`의 자료는 아래와 같다.
 
 - [`youtube-river-basin-analysis-study-guide.md`](youtube-river-basin-analysis-study-guide.md): 유역 형상, 하천망, 형상계수, 경사, 차수 같은 전통 수문학 개념을 CAMELS basin analysis와 모델 오류 해석 관점으로 연결한 학습 가이드
+- [`research-plan-extreme-flood-underestimation.md`](research-plan-extreme-flood-underestimation.md): 극한 홍수 첨두 과소추정 문제를 중심으로, 변수 정의와 모델 구조까지 풀어서 쓴 상세 연구계획서 초안
+- [`research-proposal-submission-draft.md`](research-proposal-submission-draft.md): 표지와 목차를 포함한 제출용 연구계획서 문체의 초안
+- [`model-hyperparameter-glossary.md`](model-hyperparameter-glossary.md): CAMELS 실험에서 자주 쓰는 하이퍼파라미터와 주요 config 파라미터를 의미, 영향, 현재 값 기준으로 정리한 사전
 
 문서는 보통 아래 순서로 읽는다.
 

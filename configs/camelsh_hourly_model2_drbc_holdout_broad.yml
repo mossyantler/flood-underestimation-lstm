@@ -13,7 +13,7 @@ test_start_date: "01/01/2014"
 test_end_date: "31/12/2016"
 
 seed: 111
-device: mps
+device: cuda:0
 
 validate_every: 1
 validate_n_random_basins: 200
@@ -61,7 +61,7 @@ log_tensorboard: True
 log_n_figures: 0
 save_all_output: True
 save_weights_every: 1
-save_validation_results: False
+save_validation_results: True
 
 dataset: generic
 data_dir: ./data/CAMELSH_generic/drbc_holdout_broad

@@ -62,6 +62,48 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Re-extract basin NetCDF files even if they already exist in the output directory.",
     )
+    parser.add_argument(
+        "--target-variable",
+        type=str,
+        default="Streamflow",
+        help="Target variable that must have valid values inside each split period.",
+    )
+    parser.add_argument(
+        "--train-min-valid-target-count",
+        type=int,
+        default=720,
+        help="Minimum number of non-NaN target values required inside the train period.",
+    )
+    parser.add_argument(
+        "--validation-min-valid-target-count",
+        type=int,
+        default=168,
+        help="Minimum number of non-NaN target values required inside the validation period.",
+    )
+    parser.add_argument(
+        "--test-min-valid-target-count",
+        type=int,
+        default=168,
+        help="Minimum number of non-NaN target values required inside the test period.",
+    )
+    parser.add_argument(
+        "--info-csv",
+        type=Path,
+        default=Path("basins/CAMELSH_data/hourly_observed/info.csv"),
+        help="Hourly observation availability table used to derive usable-year spans.",
+    )
+    parser.add_argument(
+        "--min-annual-coverage",
+        type=float,
+        default=0.8,
+        help="Annual observation coverage threshold used to define a usable year.",
+    )
+    parser.add_argument("--train-start-date", type=str, default="01/01/2000")
+    parser.add_argument("--train-end-date", type=str, default="31/12/2010")
+    parser.add_argument("--validation-start-date", type=str, default="01/01/2011")
+    parser.add_argument("--validation-end-date", type=str, default="31/12/2013")
+    parser.add_argument("--test-start-date", type=str, default="01/01/2014")
+    parser.add_argument("--test-end-date", type=str, default="31/12/2016")
     return parser.parse_args()
 
 
@@ -271,16 +313,229 @@ def select_available_members(archive_names: list[str], basin_ids: set[str]) -> t
     return selected_names, found_ids, not_found
 
 
-def write_filtered_splits(output_dir: Path, split_basins: dict[str, list[str]], available_ids: set[str]) -> dict[str, Path]:
+def parse_split_periods(args: argparse.Namespace) -> dict[str, tuple[pd.Timestamp, pd.Timestamp]]:
+    return {
+        "train": (
+            pd.to_datetime(args.train_start_date, dayfirst=True),
+            pd.to_datetime(args.train_end_date, dayfirst=True),
+        ),
+        "validation": (
+            pd.to_datetime(args.validation_start_date, dayfirst=True),
+            pd.to_datetime(args.validation_end_date, dayfirst=True),
+        ),
+        "test": (
+            pd.to_datetime(args.test_start_date, dayfirst=True),
+            pd.to_datetime(args.test_end_date, dayfirst=True),
+        ),
+    }
+
+
+def get_timeseries_path(time_series_dir: Path, basin_id: str) -> Path | None:
+    for suffix in (".nc", ".nc4"):
+        path = time_series_dir / f"{basin_id}{suffix}"
+        if path.exists():
+            return path
+    return None
+
+
+def parse_split_min_valid_counts(args: argparse.Namespace) -> dict[str, int]:
+    return {
+        "train": args.train_min_valid_target_count,
+        "validation": args.validation_min_valid_target_count,
+        "test": args.test_min_valid_target_count,
+    }
+
+
+def build_usable_year_lookup(info_csv: Path, min_annual_coverage: float) -> dict[str, dict[str, Any]]:
+    info = pd.read_csv(info_csv, dtype={"STAID": str}).rename(columns={"STAID": "gauge_id"}).copy()
+    year_cols = [c for c in info.columns if c.isdigit()]
+    expected_hours = {col: (366 if pd.Timestamp(int(col), 1, 1).is_leap_year else 365) * 24 for col in year_cols}
+
+    for col in year_cols:
+        info[col] = pd.to_numeric(info[col], errors="coerce").fillna(0)
+
+    annual_coverage = pd.DataFrame({col: info[col] / expected_hours[col] for col in year_cols}, index=info.index)
+    has_usable_obs = annual_coverage >= min_annual_coverage
+
+    info["obs_years_usable"] = has_usable_obs.sum(axis=1)
+    no_usable_obs_mask = info["obs_years_usable"] == 0
+
+    info["first_obs_year_usable"] = has_usable_obs.idxmax(axis=1)
+    info.loc[no_usable_obs_mask, "first_obs_year_usable"] = pd.NA
+
+    reversed_cols = list(reversed(year_cols))
+    info["last_obs_year_usable"] = has_usable_obs[reversed_cols].idxmax(axis=1)
+    info.loc[no_usable_obs_mask, "last_obs_year_usable"] = pd.NA
+
+    lookup: dict[str, dict[str, Any]] = {}
+    for row in info[["gauge_id", "obs_years_usable", "first_obs_year_usable", "last_obs_year_usable"]].to_dict("records"):
+        lookup[row["gauge_id"]] = row
+    return lookup
+
+
+def count_valid_target_values(
+    timeseries_path: Path,
+    target_variable: str,
+    start_date: pd.Timestamp,
+    end_date: pd.Timestamp,
+) -> int:
+    ds = xr.open_dataset(timeseries_path)
+    try:
+        if target_variable not in ds:
+            return 0
+        target = ds[target_variable].sel(date=slice(start_date, end_date))
+        return int(target.notnull().sum().item())
+    finally:
+        ds.close()
+
+
+def write_filtered_splits(
+    output_dir: Path,
+    split_basins: dict[str, list[str]],
+    available_ids: set[str],
+    time_series_dir: Path,
+    split_periods: dict[str, tuple[pd.Timestamp, pd.Timestamp]],
+    target_variable: str,
+    split_min_valid_counts: dict[str, int],
+    usable_year_lookup: dict[str, dict[str, Any]],
+    min_annual_coverage: float,
+) -> tuple[dict[str, Path], dict[str, dict[str, Any]], Path]:
     splits_dir = output_dir / "splits"
     splits_dir.mkdir(parents=True, exist_ok=True)
     output_paths: dict[str, Path] = {}
+    split_summary: dict[str, dict[str, Any]] = {}
+    manifest_rows: list[dict[str, Any]] = []
     for split, basins in split_basins.items():
-        filtered = [basin for basin in basins if basin in available_ids]
+        start_date, end_date = split_periods[split]
+        min_valid_target_count = split_min_valid_counts[split]
+        filtered: list[str] = []
+        missing_in_archive: list[str] = []
+        missing_timeseries_file: list[str] = []
+        invalid_target_basins: list[str] = []
+
+        for basin in basins:
+            usable_meta = usable_year_lookup.get(
+                basin,
+                {
+                    "obs_years_usable": pd.NA,
+                    "first_obs_year_usable": pd.NA,
+                    "last_obs_year_usable": pd.NA,
+                },
+            )
+            if basin not in available_ids:
+                missing_in_archive.append(basin)
+                manifest_rows.append(
+                    {
+                        "gauge_id": basin,
+                        "original_split": split,
+                        "prepared_split_status": "except",
+                        "target_variable": target_variable,
+                        "split_start_date": start_date.strftime("%Y-%m-%d"),
+                        "split_end_date": end_date.strftime("%Y-%m-%d"),
+                        "min_valid_target_count": min_valid_target_count,
+                        "actual_valid_target_count": pd.NA,
+                        "obs_years_usable": usable_meta["obs_years_usable"],
+                        "first_obs_year_usable": usable_meta["first_obs_year_usable"],
+                        "last_obs_year_usable": usable_meta["last_obs_year_usable"],
+                        "min_annual_coverage_threshold": min_annual_coverage,
+                        "excluded_by_usability_gate": True,
+                        "exclusion_reason": "missing_in_archive",
+                    }
+                )
+                continue
+
+            timeseries_path = get_timeseries_path(time_series_dir, basin)
+            if timeseries_path is None:
+                missing_timeseries_file.append(basin)
+                manifest_rows.append(
+                    {
+                        "gauge_id": basin,
+                        "original_split": split,
+                        "prepared_split_status": "except",
+                        "target_variable": target_variable,
+                        "split_start_date": start_date.strftime("%Y-%m-%d"),
+                        "split_end_date": end_date.strftime("%Y-%m-%d"),
+                        "min_valid_target_count": min_valid_target_count,
+                        "actual_valid_target_count": pd.NA,
+                        "obs_years_usable": usable_meta["obs_years_usable"],
+                        "first_obs_year_usable": usable_meta["first_obs_year_usable"],
+                        "last_obs_year_usable": usable_meta["last_obs_year_usable"],
+                        "min_annual_coverage_threshold": min_annual_coverage,
+                        "excluded_by_usability_gate": True,
+                        "exclusion_reason": "missing_timeseries_file",
+                    }
+                )
+                continue
+
+            valid_count = count_valid_target_values(
+                timeseries_path=timeseries_path,
+                target_variable=target_variable,
+                start_date=start_date,
+                end_date=end_date,
+            )
+            if valid_count < min_valid_target_count:
+                invalid_target_basins.append(basin)
+                manifest_rows.append(
+                    {
+                        "gauge_id": basin,
+                        "original_split": split,
+                        "prepared_split_status": "except",
+                        "target_variable": target_variable,
+                        "split_start_date": start_date.strftime("%Y-%m-%d"),
+                        "split_end_date": end_date.strftime("%Y-%m-%d"),
+                        "min_valid_target_count": min_valid_target_count,
+                        "actual_valid_target_count": valid_count,
+                        "obs_years_usable": usable_meta["obs_years_usable"],
+                        "first_obs_year_usable": usable_meta["first_obs_year_usable"],
+                        "last_obs_year_usable": usable_meta["last_obs_year_usable"],
+                        "min_annual_coverage_threshold": min_annual_coverage,
+                        "excluded_by_usability_gate": True,
+                        "exclusion_reason": "invalid_target_count_below_threshold",
+                    }
+                )
+                continue
+
+            filtered.append(basin)
+            manifest_rows.append(
+                {
+                    "gauge_id": basin,
+                    "original_split": split,
+                    "prepared_split_status": split,
+                    "target_variable": target_variable,
+                    "split_start_date": start_date.strftime("%Y-%m-%d"),
+                    "split_end_date": end_date.strftime("%Y-%m-%d"),
+                    "min_valid_target_count": min_valid_target_count,
+                    "actual_valid_target_count": valid_count,
+                    "obs_years_usable": usable_meta["obs_years_usable"],
+                    "first_obs_year_usable": usable_meta["first_obs_year_usable"],
+                    "last_obs_year_usable": usable_meta["last_obs_year_usable"],
+                    "min_annual_coverage_threshold": min_annual_coverage,
+                    "excluded_by_usability_gate": False,
+                    "exclusion_reason": "pass",
+                }
+            )
+
         path = splits_dir / f"{split}.txt"
         path.write_text("\n".join(filtered) + ("\n" if filtered else ""), encoding="utf-8")
         output_paths[split] = path
-    return output_paths
+        split_summary[split] = {
+            "requested_count": len(basins),
+            "prepared_count": len(filtered),
+            "missing_in_archive_count": len(missing_in_archive),
+            "missing_timeseries_file_count": len(missing_timeseries_file),
+            "invalid_target_count": len(invalid_target_basins),
+            "missing_in_archive_basins": missing_in_archive,
+            "missing_timeseries_file_basins": missing_timeseries_file,
+            "invalid_target_basins": invalid_target_basins,
+            "start_date": start_date.strftime("%Y-%m-%d"),
+            "end_date": end_date.strftime("%Y-%m-%d"),
+            "target_variable": target_variable,
+            "min_valid_target_count": min_valid_target_count,
+        }
+    manifest_path = splits_dir / "split_manifest.csv"
+    manifest_df = pd.DataFrame(manifest_rows).sort_values(["original_split", "gauge_id"]).reset_index(drop=True)
+    manifest_df.to_csv(manifest_path, index=False)
+    return output_paths, split_summary, manifest_path
 
 
 def extract_selected_timeseries(
@@ -367,6 +622,9 @@ def main() -> None:
     args = parse_args()
     split_paths = basin_split_paths(args.profile)
     split_basins = load_split_basins(split_paths)
+    split_periods = parse_split_periods(args)
+    split_min_valid_counts = parse_split_min_valid_counts(args)
+    usable_year_lookup = build_usable_year_lookup(args.info_csv, min_annual_coverage=args.min_annual_coverage)
     basin_ids = flatten_split_basins(split_basins)
 
     profile_dir = args.output_dir / f"drbc_holdout_{args.profile}"
@@ -382,7 +640,17 @@ def main() -> None:
         force_reextract=args.force_reextract,
     )
 
-    filtered_split_paths = write_filtered_splits(profile_dir, split_basins, available_ids)
+    filtered_split_paths, prepared_split_summary, split_manifest_path = write_filtered_splits(
+        output_dir=profile_dir,
+        split_basins=split_basins,
+        available_ids=available_ids,
+        time_series_dir=time_series_dir,
+        split_periods=split_periods,
+        target_variable=args.target_variable,
+        split_min_valid_counts=split_min_valid_counts,
+        usable_year_lookup=usable_year_lookup,
+        min_annual_coverage=args.min_annual_coverage,
+    )
     attributes_path = build_static_attributes(profile_dir, available_ids)
 
     summary = {
@@ -395,7 +663,20 @@ def main() -> None:
         "missing_in_archive": not_found,
         "requested_split_files": {k: str(v) for k, v in split_paths.items()},
         "prepared_split_files": {k: str(v) for k, v in filtered_split_paths.items()},
+        "split_manifest_path": str(split_manifest_path),
         "prepared_split_counts": {k: sum(1 for _ in v.read_text().splitlines() if _) for k, v in filtered_split_paths.items()},
+        "split_periods": {
+            split: {
+                "start_date": start.strftime("%Y-%m-%d"),
+                "end_date": end.strftime("%Y-%m-%d"),
+            }
+            for split, (start, end) in split_periods.items()
+        },
+        "target_validity_gate": {
+            "target_variable": args.target_variable,
+            "min_valid_target_count": split_min_valid_counts,
+        },
+        "prepared_split_summary": prepared_split_summary,
     }
     summary_path = profile_dir / "prepare_summary.json"
     summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")

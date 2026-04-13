@@ -25,8 +25,8 @@
 ## 연구 질문
 
 1. `deterministic LSTM의 extreme flood underestimation이 probabilistic head만으로 얼마나 줄어드는가`
-2. `probabilistic LSTM 위에 physics-guided conceptual core를 추가하면 peak magnitude, low-flow bias, peak timing, 유역 일반화가 더 좋아지는가`
-3. `이 개선이 same-basin different-time뿐 아니라 다른 basin과 extreme-event holdout에서도 유지되는가`
+2. `이 개선이 same-basin different-time뿐 아니라 다른 basin과 extreme-event holdout에서도 유지되는가`
+3. `probabilistic head만으로 남는 한계는 무엇이며, future work에서 어떤 physics-guided 확장이 필요한가`
 
 ## 비교 모델
 
@@ -40,10 +40,10 @@
 backbone은 Model 1과 동일하고, 출력만 `q50, q90, q95, q99` 같은 quantile로 바꿉니다.  
 `tail-aware output`의 순수 효과를 보기 위한 비교축이다.
 
-### Model 3. Physics-guided probabilistic hybrid
+### Future Work. Physics-guided conceptual core
 
-LSTM encoder 뒤에 `flux / bounded-coefficient head`를 두고, conceptual storage와 routing core를 통과한 뒤 probabilistic head를 둔다.  
-`physics-guided structure`의 추가 가치를 보기 위한 비교축이다.
+physics-guided conceptual core는 현재 논문의 공식 비교축이 아니다.  
+다만 probabilistic head 이후에도 남는 timing, routing, state interpretability 문제를 다루기 위한 후속 확장 방향으로 유지한다.
 
 ## 데이터셋
 
@@ -110,15 +110,9 @@ L = L_center + λ1 L_q90 + λ2 L_q95 + λ3 L_q99
 
 핵심은 평균 회귀뿐 아니라 upper tail을 직접 학습시키는 것이다.
 
-### Model 3
+### Future Work 메모
 
-Model 2의 손실에 physics regularization을 추가한다.
-
-```text
-L = L_prob + λ4 L_mass_balance + λ5 L_nonnegativity + λ6 L_storage_bounds
-```
-
-즉, tail modeling과 physics consistency를 동시에 요구한다.
+physics-guided conceptual core를 붙일 경우에는 `Model 2의 probabilistic loss + physics regularization` 구조를 고려할 수 있다. 다만 이 항목은 현재 논문용 공식 실험 규칙이 아니라 후속 설계 메모다.
 
 ## 평가 지표
 
@@ -151,19 +145,19 @@ L = L_prob + λ4 L_mass_balance + λ5 L_nonnegativity + λ6 L_storage_bounds
 이 비교는 `tail-aware output`의 순수 효과를 보여준다.  
 만약 Model 2가 peak bias를 크게 줄인다면, 첫 번째 병목은 평균 회귀와 tail suppression이라는 해석이 가능하다.
 
-### Model 2 vs Model 3
+### Model 2 이후의 해석
 
-이 비교는 `physics-guided structure의 추가 가치`를 보여준다.  
-만약 Model 3가 timing이나 ungauged basin에서 더 좋다면, tail-aware output만으로 부족한 부분을 state/routing structure가 보완했다고 해석할 수 있다.
+현재 논문은 `Model 1 vs Model 2`의 차이를 `tail-aware output의 순수 효과`로 해석하는 데 집중한다.  
+이 비교 뒤에도 timing이나 routing 한계가 남는다면, 그때 `physics-guided state/routing structure`를 후속 연구 질문으로 제기하는 것이 자연스럽다.
 
 ## 문서 정리
 
 1. deterministic LSTM의 extreme flood underestimation을 probabilistic head가 얼마나 줄이는지 정량화한다.  
-2. probabilistic baseline 위에서 physics-guided conceptual core의 추가 이득을 검증한다.  
-3. temporal, basin holdout, extreme-event holdout에서 모델별 강점이 어떻게 갈리는지 분해해서 보여준다.
+2. temporal, basin holdout, extreme-event holdout에서 `Model 1 vs Model 2` 강점이 어떻게 갈리는지 분해해서 보여준다.  
+3. physics-guided conceptual core는 현재 논문 범위 밖의 future work로 둔다.
 
 ## 관련 문서
 
-- [`architecture.md`](architecture.md): 세 모델의 구조 설명
+- [`architecture.md`](architecture.md): 현재 논문 범위의 두 모델 구조와 future-work 메모
 - [`experiment_protocol.md`](experiment_protocol.md): 실행 규범과 config key
 - [`literature-review.md`](literature-review.md): 관련 문헌 배경
