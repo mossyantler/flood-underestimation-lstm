@@ -2,9 +2,9 @@
 
 ## 이 문서가 하는 일
 
-이 문서는 [study_method.md](./study_method.md)를 읽기 전에 먼저 보는 입문용 설명서다. 목표는 어려운 영어 용어를 단순히 한국말로 바꾸는 데 있지 않다. 각 용어가 정확히 무엇을 뜻하는지, 왜 논문에서 자꾸 등장하는지, CAMELS 프로젝트에서는 어떤 맥락으로 읽어야 하는지를 먼저 잡아 주려는 문서다.
+이 문서는 [lstm_hydrology_study_notes.md](./lstm_hydrology_study_notes.md)를 읽기 전에 먼저 보는 입문용 설명서다. 목표는 어려운 영어 용어를 단순히 한국말로 바꾸는 데 있지 않다. 각 용어가 정확히 무엇을 뜻하는지, 왜 논문에서 자꾸 등장하는지, CAMELS 프로젝트에서는 어떤 맥락으로 읽어야 하는지를 먼저 잡아 주려는 문서다.
 
-쉽게 말하면, `study_method.md`가 연구자용 정리라면 이 문서는 그 문서를 읽기 위한 준비 운동이다. 이 문서를 먼저 읽고 나면 `multi-basin`, `ungauged basin`, `probabilistic`, `physics-guided`, `routing`, `holdout`, `event-level metric` 같은 말이 갑자기 낯설게 튀어나오지 않게 하는 것이 목적이다.
+쉽게 말하면, `lstm_hydrology_study_notes.md`가 연구자용 정리라면 이 문서는 그 문서를 읽기 위한 준비 운동이다. 이 문서를 먼저 읽고 나면 `multi-basin`, `ungauged basin`, `probabilistic`, `physics-guided`, `routing`, `holdout`, `event-level metric` 같은 말이 갑자기 낯설게 튀어나오지 않게 하는 것이 목적이다.
 
 ## 먼저 아주 큰 그림
 
@@ -130,7 +130,7 @@
 
 그런데 flood 연구에서는 이 세 개만으로 부족하다. 이유는 간단하다. 평소 흐름을 잘 맞추면서도 홍수 peak만 계속 낮게 맞추는 모델이 있을 수 있기 때문이다. 그래서 `FHV`, `Peak Relative Error`, `Peak Timing Error`, `top 1% flow recall`, `event-level RMSE` 같은 high-flow 중심 지표를 따로 본다.
 
-이 문맥을 알고 나면, `study_method.md`에서 “평균 성능이 아니라 event-level metric이 필요하다”는 말이 왜 반복되는지 이해하기 쉬워진다.
+이 문맥을 알고 나면, `lstm_hydrology_study_notes.md`에서 “평균 성능이 아니라 event-level metric이 필요하다”는 말이 왜 반복되는지 이해하기 쉬워진다.
 
 ## big-data를 다룬다는 말은 무슨 뜻인가
 
@@ -148,9 +148,9 @@
 
 즉 big-data를 잘 다룬다는 것은 “큰 GPU를 쓴다”보다 “무슨 basin을 남기고, 무엇을 버리고, 어떻게 표준화하고, 어떻게 나눠서 비교할지 설계한다”에 더 가깝다.
 
-## study_method.md를 읽을 때 이 순서로 보면 좋다
+## lstm_hydrology_study_notes.md를 읽을 때 이 순서로 보면 좋다
 
-이제 [study_method.md](./study_method.md)를 볼 때는 아래 순서로 읽으면 된다.
+이제 [lstm_hydrology_study_notes.md](./lstm_hydrology_study_notes.md)를 볼 때는 아래 순서로 읽으면 된다.
 
 먼저 `먼저 결론`을 읽는다. 여기서 지금 분야가 어디로 이동했는지 큰 흐름을 잡으면 된다.
 
@@ -160,7 +160,7 @@
 
 마지막으로 `CAMELS 프로젝트에 바로 적용할 Study Method`를 보면 된다. 이 부분이 결국 현재 저장소에서 실제로 무엇을 해야 하는지로 이어진다.
 
-## study_method.md에서 자주 보이는 어려운 표현 빠른 해설
+## lstm_hydrology_study_notes.md에서 자주 보이는 어려운 표현 빠른 해설
 
 | 표현 | 쉬운 뜻 | 읽을 때의 포인트 |
 |---|---|---|
@@ -183,4 +183,4 @@
 
 ## 마지막 한 줄 정리
 
-이 문서를 다 읽은 뒤에는 `study_method.md`를 “어려운 논문 목록”으로 보지 말고, `입력 설계`, `출력 설계`, `구조 설계`, `유역 조사`, `데이터 설계`를 비교하는 지도처럼 보면 된다. 그렇게 읽기 시작하면 영어 용어가 많아도 문맥이 먼저 잡혀서 훨씬 덜 어렵다.
+이 문서를 다 읽은 뒤에는 `lstm_hydrology_study_notes.md`를 “어려운 논문 목록”으로 보지 말고, `입력 설계`, `출력 설계`, `구조 설계`, `유역 조사`, `데이터 설계`를 비교하는 지도처럼 보면 된다. 그렇게 읽기 시작하면 영어 용어가 많아도 문맥이 먼저 잡혀서 훨씬 덜 어렵다.

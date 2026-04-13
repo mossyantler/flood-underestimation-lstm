@@ -1,6 +1,6 @@
 # LSTM 개선형 Hydrology 논문 조사와 Study Method
 
-이 문서는 연구자 관점의 정리 문서다. 용어와 문맥이 아직 낯설다면 먼저 [study_method_beginner.md](./study_method_beginner.md)를 읽고 오는 편이 훨씬 수월하다.
+이 문서는 연구자 관점의 정리 문서다. 용어와 문맥이 아직 낯설다면 먼저 [lstm_hydrology_study_notes_beginner.md](./lstm_hydrology_study_notes_beginner.md)를 읽고 오는 편이 훨씬 수월하다.
 
 ## 이 문서의 목적
 
@@ -26,7 +26,7 @@
 
 | 문헌 | 무엇을 바꿨나 | 핵심 가정 | basin/data 처리 | 우리 프로젝트 함의 |
 |---|---|---|---|---|
-| [Kratzert et al., 2018, *Rainfall–runoff modelling using Long Short-Term Memory (LSTM) networks*](https://hess.copernicus.org/articles/22/6005/2018/) | local LSTM보다 regional LSTM을 명확한 baseline으로 제시 | 서로 다른 basin 사이에도 공유 가능한 hydrologic regularity가 있다 | CAMELS 기반 multi-basin 실험, 지역 학습과 basin별 학습을 직접 비교 | Model 1 baseline은 single-basin이 아니라 regional multi-basin이어야 한다 |
+| [Kratzert et al., 2018, *Rainfall–runoff modelling using Long Short-Term Memory (LSTM) networks*](https://hess.copernicus.org/articles/22/6005/2018/) | local LSTM보다 regional LSTM을 명확한 baseline으로 제시 | 서로 다른 basin 사이에도 공유 가능한 hydrologic regularity가 있다 | CAMELS 기반 multi-basin 실험, 지역 학습과 basin별 학습을 직접 비교 | Model 1 baseline은 single-basin이 아니라 multi-basin이어야 한다 |
 | [Kratzert et al., 2019, *Towards learning universal, regional, and local hydrological behaviors via machine learning applied to large-sample datasets*](https://hess.copernicus.org/articles/23/5089/2019/) | `EA-LSTM`으로 static attributes를 gate 수준에서 반영 | 정적 basin attribute는 basin identity를 요약하는 유효한 descriptor다 | CAMELS large-sample, dynamic forcing와 static attributes를 분리해서 사용 | static attribute 선택이 단순 부가정보가 아니라 basin generalization의 핵심이다 |
 | [Kratzert et al., 2019, *Toward improved predictions in ungauged basins: Exploiting the power of machine learning*](https://doi.org/10.1029/2019WR026065) | LSTM을 PUB 문제에 직접 적용 | ungauged basin도 nearby/similar catchment parameter transfer보다 data-driven regional learning이 더 낫다 | meteorological forcing + physical descriptors를 함께 사용 | DRBC holdout 같은 regional holdout 설계의 정당화에 바로 연결된다 |
 | [Lees et al., 2021, *Benchmarking data-driven rainfall–runoff models in Great Britain: a comparison of long short-term memory (LSTM)-based models with four lumped conceptual models*](https://hess.copernicus.org/articles/25/5517/2021/) | CAMELS-GB에서 LSTM과 개념모형을 공정 비교 | LSTM 평가는 반드시 strong hydrology benchmark와 함께 해야 한다 | 669개 GB catchment, daily large-sample benchmark | 우리도 deterministic baseline 비교를 단순 internal ablation로 끝내지 말고 hydrology convention 안에서 읽어야 한다 |

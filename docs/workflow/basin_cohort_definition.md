@@ -1,4 +1,4 @@
-# Basin Workflow
+# Basin Cohort Definition
 
 ## 서술 목적
 
@@ -18,6 +18,28 @@
 - source CSV와 컬럼 사전
 
 ## 상세 서술
+
+## 구조 개요
+
+```mermaid
+flowchart TD
+    A[DRBC boundary<br/>basins/drbc_boundary/drb_bnd_polygon.shp] --> B[CAMELSH mapping table<br/>camelsh_drbc_mapping.csv]
+
+    B --> C[DRBC holdout cohort]
+    B --> D[non-DRBC training pool]
+
+    C --> C1[outlet_in_drbc == True]
+    C1 --> C2[overlap_ratio_of_basin >= 0.9]
+    C2 --> C3[154 selected basins<br/>evaluation holdout cohort]
+
+    D --> D1[outlet_in_drbc == False]
+    D1 --> D2[overlap_ratio_of_basin <= 0.1<br/>or basin_intersects_drbc == False]
+    D2 --> D3[quality gate]
+    D3 --> D4[1923 quality-pass basins<br/>global training pool]
+
+    C3 -. analysis path .-> E[basin_analysis.md]
+    D4 -. split and training path .-> F[configs/basin_splits/*]
+```
 
 ## 현재 공식 기준
 
@@ -62,7 +84,7 @@
 
 ## 현재 selection rule
 
-현재 selection rule은 `outlet_in_drbc == True`와 `overlap_ratio_of_basin >= 0.9`를 동시에 만족하는 CAMELSH basin이다. 이 규칙은 [`build_drbc_camelsh_tables.py`](/Users/jang-minyeop/Project/CAMELS/scripts/build_drbc_camelsh_tables.py)에서 재현 가능하게 구현되어 있다.
+현재 selection rule은 `outlet_in_drbc == True`와 `overlap_ratio_of_basin >= 0.9`를 동시에 만족하는 CAMELSH basin이다. 이 규칙은 [`build_drbc_camelsh_tables.py`](../../scripts/build_drbc_camelsh_tables.py)에서 재현 가능하게 구현되어 있다.
 
 현재 summary는 아래와 같다.
 
@@ -92,6 +114,14 @@
 
 ## CAMELSH polygon 해석 원칙
 
+```mermaid
+flowchart LR
+    A[Official region anchor<br/>DRBC boundary] --> B[Outlet point is primary match anchor]
+    B --> C[Polygon overlap is selection and QC support]
+    C --> D[Do not treat CAMELSH polygon as DRBC or HUC replacement]
+    D --> E[HUC remains analysis grouping layer only]
+```
+
 중요한 점은 CAMELSH polygon, HUC polygon, DRBC polygon을 같은 경계 체계로 읽으면 안 된다는 것이다. 좌표계만 맞춘다고 경계가 같아지지 않는다. 따라서 현재 프로젝트의 공간 anchor는 polygon이 아니라 `gauge outlet`이다.
 
 현재 원칙은 아래처럼 고정한다.
@@ -117,11 +147,11 @@
 
 현재 기준 workflow에서 핵심 스크립트는 아래 넷이다.
 
-- [`build_drbc_camelsh_tables.py`](/Users/jang-minyeop/Project/CAMELS/scripts/build_drbc_camelsh_tables.py)
-- [`build_drbc_camelsh_gpkg.py`](/Users/jang-minyeop/Project/CAMELS/scripts/build_drbc_camelsh_gpkg.py)
-- [`build_drbc_basin_analysis_table.py`](/Users/jang-minyeop/Project/CAMELS/scripts/build_drbc_basin_analysis_table.py)
-- [`build_camelsh_non_drbc_training_pool.py`](/Users/jang-minyeop/Project/CAMELS/scripts/build_camelsh_non_drbc_training_pool.py)
-- [`build_drbc_holdout_split_files.py`](/Users/jang-minyeop/Project/CAMELS/scripts/build_drbc_holdout_split_files.py)
+- [`build_drbc_camelsh_tables.py`](../../scripts/build_drbc_camelsh_tables.py)
+- [`build_drbc_camelsh_gpkg.py`](../../scripts/build_drbc_camelsh_gpkg.py)
+- [`build_drbc_basin_analysis_table.py`](../../scripts/build_drbc_basin_analysis_table.py)
+- [`build_camelsh_non_drbc_training_pool.py`](../../scripts/build_camelsh_non_drbc_training_pool.py)
+- [`build_drbc_holdout_split_files.py`](../../scripts/build_drbc_holdout_split_files.py)
 
 HUC exploratory 스크립트들은 필요하면 다시 사용할 수 있지만, 현재 basin analysis의 공식 시작점은 아니다.
 
@@ -137,14 +167,14 @@ HUC exploratory 스크립트들은 필요하면 다시 사용할 수 있지만, 
 
 현재 split 파일도 이미 만들어져 있다.
 
-- broad: [`drbc_holdout_train_broad.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_train_broad.txt), [`drbc_holdout_validation_broad.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_validation_broad.txt), [`drbc_holdout_test_drbc_quality.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_test_drbc_quality.txt)
-- natural: [`drbc_holdout_train_natural.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_train_natural.txt), [`drbc_holdout_validation_natural.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_validation_natural.txt), [`drbc_holdout_test_drbc_quality_natural.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_test_drbc_quality_natural.txt)
+- broad: [`drbc_holdout_train_broad.txt`](../../configs/basin_splits/drbc_holdout_train_broad.txt), [`drbc_holdout_validation_broad.txt`](../../configs/basin_splits/drbc_holdout_validation_broad.txt), [`drbc_holdout_test_drbc_quality.txt`](../../configs/basin_splits/drbc_holdout_test_drbc_quality.txt)
+- natural: [`drbc_holdout_train_natural.txt`](../../configs/basin_splits/drbc_holdout_train_natural.txt), [`drbc_holdout_validation_natural.txt`](../../configs/basin_splits/drbc_holdout_validation_natural.txt), [`drbc_holdout_test_drbc_quality_natural.txt`](../../configs/basin_splits/drbc_holdout_test_drbc_quality_natural.txt)
 
 ## 관련 문서
 
 이 문서는 basin subset을 고정하는 문서다. 이후의 세부 작업은 아래 문서로 나뉜다.
 
-- source CSV와 컬럼 의미는 [`basin_explain.md`](basin_explain.md)에서 다룬다.
+- source CSV와 컬럼 의미는 [`basin_source_csv_guide.md`](basin_source_csv_guide.md)에서 다룬다.
 - 현재 analysis table, quality table, provisional screening 결과와 다음 작업 상태는 [`basin_analysis.md`](basin_analysis.md)에서 다룬다.
 - 논문 본문에서 사용할 공식 basin screening 절차와 수식은 [`basin_screening_method.md`](basin_screening_method.md)에서 다룬다.
 - observed-flow 기반 event table 정의는 [`event_response_spec.md`](event_response_spec.md), event type 해석은 [`flood_generation_typing.md`](flood_generation_typing.md)에서 다룬다.

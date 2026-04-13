@@ -1,25 +1,28 @@
 # Reference Notes
 
-이 폴더는 `workflow/`나 `research/`의 공식 설계 문서를 대체하지 않는다. 외부 강의, 영상, 교재, 블로그, 보조 메모를 `현재 CAMELS 연구 맥락으로 번역한 참고 노트`를 두는 곳이다.
+이 폴더는 외부 자료를 CAMELS 맥락으로 번역한 support note를 모은다. 공식 workflow와 연구 규칙은 이 폴더에 두지 않는다.
 
-역할은 세 가지로 한정한다.
+## Structure
 
-1. 외부 자료의 핵심 개념을 프로젝트 언어로 다시 정리한다.
-2. 바로 코드나 실험 설계에 연결될 만한 해석 포인트를 메모한다.
-3. 공식 방법론은 아니지만, 후속 feature engineering이나 해석 아이디어의 배경지식을 축적한다.
+```mermaid
+flowchart TD
+    A[references/README.md] --> B[lstm_hydrology_study_notes_beginner.md]
+    B --> C[lstm_hydrology_study_notes.md]
+    A --> D[river_basin_analysis_study_guide.md]
+    A -. handoff .-> E[workflow and research canonical docs]
+```
 
-반대로 아래 내용은 이 폴더에 두지 않는다.
+## Documents
 
-- 현재 저장소의 공식 workflow와 screening 기준
-- 논문 본문에 직접 들어갈 연구 설계의 source of truth
-- auto-generated memory file, slide export, 임시 산출물
+| Document | Role |
+| --- | --- |
+| [`lstm_hydrology_study_notes_beginner.md`](lstm_hydrology_study_notes_beginner.md) | LSTM hydrology 문헌을 읽기 위한 입문 노트 |
+| [`lstm_hydrology_study_notes.md`](lstm_hydrology_study_notes.md) | LSTM hydrology 문헌 지형도와 프로젝트 적용 메모 |
+| [`river_basin_analysis_study_guide.md`](river_basin_analysis_study_guide.md) | 유역 형상과 하천망 개념을 basin analysis 해석으로 연결하는 학습 가이드 |
 
-현재 `references/`의 자료는 아래와 같다.
+## Recommended order
 
-- [`youtube-river-basin-analysis-study-guide.md`](youtube-river-basin-analysis-study-guide.md): 유역 형상, 하천망, 형상계수, 경사, 차수 같은 전통 수문학 개념을 CAMELS basin analysis와 모델 오류 해석 관점으로 연결한 학습 가이드
-
-문서는 보통 아래 순서로 읽는다.
-
-1. 공식 workflow나 연구 설계는 먼저 [`../README.md`](../README.md), [`../workflow/basin.md`](../workflow/basin.md), [`../research/design.md`](../research/design.md)에서 확인한다.
-2. 그 다음 외부 개념을 보강하고 싶을 때 `references/` 노트를 읽는다.
-3. 참고 노트에서 얻은 아이디어가 실제 기준으로 승격되면, 다시 `workflow/`나 `research/` 문서로 옮겨 적는다.
+1. 공식 기준은 먼저 [`../README.md`](../README.md), [`../workflow/README.md`](../workflow/README.md), [`../research/README.md`](../research/README.md)에서 확인한다.
+2. LSTM hydrology 배경이 낯설다면 [`lstm_hydrology_study_notes_beginner.md`](lstm_hydrology_study_notes_beginner.md)부터 읽는다.
+3. 더 긴 문헌 메모는 [`lstm_hydrology_study_notes.md`](lstm_hydrology_study_notes.md)로 이어서 읽는다.
+4. basin geometry와 하천망 개념이 필요할 때 [`river_basin_analysis_study_guide.md`](river_basin_analysis_study_guide.md)를 본다.

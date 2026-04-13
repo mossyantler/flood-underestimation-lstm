@@ -22,6 +22,22 @@
 
 현재 프로젝트는 하나의 모델을 바로 제안하기보다, 세 단계 아키텍처를 비교하는 구조다.
 
+```mermaid
+flowchart TD
+    A[Common inputs<br/>dynamic forcing + static attributes] --> B[Shared multi-basin LSTM backbone]
+
+    B --> C[Model 1<br/>regression head]
+    C --> C1[Q_hat]
+
+    B --> D[Model 2<br/>probabilistic head]
+    D --> D1[q50, q90, q95, q99]
+
+    B --> E[Model 3<br/>flux or bounded-coefficient head]
+    E --> F[conceptual core<br/>storage + routing]
+    F --> G[probabilistic head]
+    G --> G1[final quantiles and optional Q_hat]
+```
+
 1. `Deterministic multi-basin LSTM`
 2. `Probabilistic multi-basin LSTM`
 3. `Physics-guided probabilistic hybrid`
@@ -42,24 +58,24 @@
 
 가장 단순한 baseline이다.
 
-```text
-inputs
-  -> LSTM encoder
-  -> regression head
-  -> Q_hat
+```mermaid
+flowchart LR
+    A[inputs] --> B[LSTM encoder]
+    B --> C[regression head]
+    C --> D[Q_hat]
 ```
 
 LSTM은 hidden state `h_t`를 만들고, regression head는 이를 최종 유량 `Q_hat`으로 바꾼다. 이 모델은 평균적인 수문곡선을 맞추는 기준선이다.
 
 ## 2. Probabilistic LSTM
 
-두 번째 모델은 backbone은 그대로 두고 출력층만 바꿉니다.
+두 번째 모델은 backbone은 그대로 두고 출력층만 바꾼다.
 
-```text
-inputs
-  -> LSTM encoder
-  -> probabilistic head
-  -> q50, q90, q95, q99
+```mermaid
+flowchart LR
+    A[inputs] --> B[LSTM encoder]
+    B --> C[probabilistic head]
+    C --> D[q50, q90, q95, q99]
 ```
 
 핵심은 point estimate 대신 `upper-tail quantiles`를 직접 예측하게 만드는 것이다. 이렇게 해야 평균 회귀로 생기는 `peak underestimation`을 더 직접적으로 줄일 수 있다.
@@ -72,15 +88,15 @@ inputs
 
 우리가 지향하는 구조는 다음과 같다.
 
-```text
-inputs
-  -> LSTM encoder
-  -> hydromet memory h_t
-  -> flux / bounded-coefficient head
-  -> conceptual core (storage + routing)
-  -> base hydrograph
-  -> probabilistic head
-  -> final quantiles / Q_hat
+```mermaid
+flowchart LR
+    A[inputs] --> B[LSTM encoder]
+    B --> C[hydromet memory h_t]
+    C --> D[flux or bounded-coefficient head]
+    D --> E[conceptual core<br/>storage + routing]
+    E --> F[base hydrograph]
+    F --> G[probabilistic head]
+    G --> H[final quantiles and optional Q_hat]
 ```
 
 여기서 중요한 점은 LSTM이 conceptual model의 파라미터 전체 `θ_t`를 시점별로 마음대로 바꾸는 것이 아니라, `melt`, `ET`, `infiltration`, `percolation`, `routing coefficient` 같은 제한된 flux 또는 bounded coefficient만 제안하도록 하는 것이다.
@@ -105,6 +121,19 @@ inputs
 
 ## head의 역할 구분
 
+```mermaid
+flowchart TD
+    A[hidden state h_t] --> B[regression head]
+    A --> C[probabilistic head]
+    A --> D[flux head]
+    A --> E[bounded coefficient head]
+
+    B --> B1[Q_hat]
+    C --> C1[q50, q90, q95, q99]
+    D --> D1[melt, ET, infiltration, percolation]
+    E --> E1[routing coefficient, partition factor]
+```
+
 현재 아키텍처에서는 head를 명확히 구분해서 이해해야 한다.
 
 - `regression head`: `h_t -> Q_hat`
@@ -116,13 +145,13 @@ inputs
 
 ## 문서 정리
 
-1. backbone은 첫 논문에서 `multi-basin LSTM`으로 고정한다.  
-2. probabilistic head를 먼저 넣어 tail modeling 효과를 분리한다.  
-3. physics-guided core는 후속 비교축으로 넣되, `dynamic-parameter shell`이 아니라 `state/flux-constrained` 구조로 설계한다.  
+1. backbone은 첫 논문에서 `multi-basin LSTM`으로 고정한다.
+2. probabilistic head를 먼저 넣어 tail modeling 효과를 분리한다.
+3. physics-guided core는 후속 비교축으로 넣되, `dynamic-parameter shell`이 아니라 `state/flux-constrained` 구조로 설계한다.
 4. 첫 논문은 CAMELSH hourly 기반 extreme flood response에 집중하고, sub-hourly flash flood는 후속 연구 주제로 분리한다.
 
 ## 관련 문서
 
 - [`design.md`](design.md): 연구 질문과 비교 가설
 - [`experiment_protocol.md`](experiment_protocol.md): split, loss, metric, config key
-- [`../workflow/prob_head.md`](../workflow/prob_head.md): quantile head의 직관 설명
+- [`probabilistic_head_guide.md`](probabilistic_head_guide.md): quantile head의 직관 설명

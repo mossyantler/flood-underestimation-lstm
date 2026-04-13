@@ -166,4 +166,4 @@ L = L_prob + λ4 L_mass_balance + λ5 L_nonnegativity + λ6 L_storage_bounds
 
 - [`architecture.md`](architecture.md): 세 모델의 구조 설명
 - [`experiment_protocol.md`](experiment_protocol.md): 실행 규범과 config key
-- [`literature-review.md`](literature-review.md): 관련 문헌 배경
+- [`literature_review.md`](literature_review.md): 관련 문헌 배경

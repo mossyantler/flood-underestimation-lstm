@@ -20,7 +20,7 @@
 
 이 문서에서 말하는 screening의 목적은 “어떤 basin이 모델 비교에 적합한가”를 정하는 것이지, 지도 위 모든 basin의 flood susceptibility를 새로 정의하는 것이 아니다. 현재 저장소의 정적 커스텀 점수도 공식 screening의 일부가 아니라 exploratory prioritization 도구로만 쓴다.
 
-현재 통과 basin 수나 생성된 테이블 같은 상태 정보는 [`basin_analysis.md`](basin_analysis.md), source CSV와 컬럼 사전은 [`basin_explain.md`](basin_explain.md)를 본다.
+현재 통과 basin 수나 생성된 테이블 같은 상태 정보는 [`basin_analysis.md`](basin_analysis.md), source CSV와 컬럼 사전은 [`basin_source_csv_guide.md`](basin_source_csv_guide.md)를 본다.
 
 ## 1. 전체 실험 구조
 
@@ -352,7 +352,7 @@ $$
 
 ## 관련 문서
 
-- basin subset과 공간 anchor는 [`basin.md`](basin.md)에서 정리한다.
+- basin subset과 공간 anchor는 [`basin_cohort_definition.md`](basin_cohort_definition.md)에서 정리한다.
 - 현재 산출물 상태와 provisional screening 결과는 [`basin_analysis.md`](basin_analysis.md)에서 다룬다.
-- source CSV와 정적 컬럼 사전은 [`basin_explain.md`](basin_explain.md)에서 다룬다.
+- source CSV와 정적 컬럼 사전은 [`basin_source_csv_guide.md`](basin_source_csv_guide.md)에서 다룬다.
 - event-level observed-flow 입력 규칙은 [`event_response_spec.md`](event_response_spec.md)에서 다룬다.

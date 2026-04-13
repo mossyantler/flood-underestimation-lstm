@@ -1,7 +1,7 @@
 # Project Agent Context
 
 이 문서는 코딩 에이전트가 CAMELS 프로젝트에서 작업할 때 참조해야 할 핵심 맥락을 정리한 것이다.
-연구 배경의 일반론이나 논문 서술 방향은 `docs/research/` 하위 문서를 참조한다.
+연구 배경과 실험 기준은 `docs/research/`, basin workflow 기준은 `docs/workflow/`, 문서 작성 규칙은 `docs/meta/writing_guide.md`를 참조한다.
 
 ---
 
@@ -67,12 +67,15 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 │   ├── drbc_boundary/  # DRBC Delaware River Basin 공식 경계
 │   ├── huc8_delware/   # 초기 HUC8 exploratory shapefile
 │   └── CAMELSH_data/   # CAMELSH shapefiles / attributes 추출본
-├── configs/             # NeuralHydrology 실험 설정 (현재 비어 있음)
+├── configs/             # NeuralHydrology 실험 설정
 ├── data/CAMELS_US/
 │   └── camels_attributes_v2.0/  # legacy CAMELS-US 속성 데이터
 ├── docs/
-│   ├── context/         # 프로젝트 맥락 문서
-│   └── research/        # architecture, design, literature-review
+│   ├── README.md        # human-facing docs portal
+│   ├── meta/            # 문서 작성 규칙
+│   ├── references/      # 참고 노트와 학습 자료
+│   ├── research/        # canonical research docs와 support docs
+│   └── workflow/        # canonical workflow docs와 support docs
 ├── output/
 │   └── basin/           # basin 관련 산출물
 ├── scripts/             # download, run 스크립트

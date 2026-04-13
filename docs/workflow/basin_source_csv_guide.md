@@ -18,18 +18,18 @@
 
 ## 상세 서술
 
-현재 기준 분석 테이블은 [`drbc_selected_basin_analysis_table.csv`](/Users/jang-minyeop/Project/CAMELS/output/basin/drbc_camelsh/analysis/drbc_selected_basin_analysis_table.csv)이며, 아래 8개 source CSV를 병합해 만든다.
+현재 기준 분석 테이블은 [`drbc_selected_basin_analysis_table.csv`](../../output/basin/drbc_camelsh/analysis/drbc_selected_basin_analysis_table.csv)이며, 아래 8개 source CSV를 병합해 만든다.
 
 | # | Source CSV | 역할 |
 |---|---|---|
-| 1 | [`camelsh_drbc_selected.csv`](/Users/jang-minyeop/Project/CAMELS/output/basin/drbc_camelsh/camelsh_drbc_selected.csv) | basin selection / 행 정의 |
-| 2 | [`attributes_gageii_BasinID.csv`](/Users/jang-minyeop/Project/CAMELS/basins/CAMELSH_data/attributes/attributes_gageii_BasinID.csv) | basin 식별 메타데이터 |
-| 3 | [`attributes_gageii_Topo.csv`](/Users/jang-minyeop/Project/CAMELS/basins/CAMELSH_data/attributes/attributes_gageii_Topo.csv) | 지형 특성 |
-| 4 | [`attributes_nldas2_climate.csv`](/Users/jang-minyeop/Project/CAMELS/basins/CAMELSH_data/attributes/attributes_nldas2_climate.csv) | 기후 요약 |
-| 5 | [`attributes_gageii_Hydro.csv`](/Users/jang-minyeop/Project/CAMELS/basins/CAMELSH_data/attributes/attributes_gageii_Hydro.csv) | 수문 응답 및 하천망 |
-| 6 | [`attributes_gageii_Soils.csv`](/Users/jang-minyeop/Project/CAMELS/basins/CAMELSH_data/attributes/attributes_gageii_Soils.csv) | 토양 특성 |
-| 7 | [`attributes_gageii_Geology.csv`](/Users/jang-minyeop/Project/CAMELS/basins/CAMELSH_data/attributes/attributes_gageii_Geology.csv) | 지질 배경 |
-| 8 | [`attributes_gageii_LC06_Basin.csv`](/Users/jang-minyeop/Project/CAMELS/basins/CAMELSH_data/attributes/attributes_gageii_LC06_Basin.csv) | 토지피복 (NLCD 2006) |
+| 1 | [`camelsh_drbc_selected.csv`](../../output/basin/drbc_camelsh/camelsh_drbc_selected.csv) | basin selection / 행 정의 |
+| 2 | [`attributes_gageii_BasinID.csv`](../../basins/CAMELSH_data/attributes/attributes_gageii_BasinID.csv) | basin 식별 메타데이터 |
+| 3 | [`attributes_gageii_Topo.csv`](../../basins/CAMELSH_data/attributes/attributes_gageii_Topo.csv) | 지형 특성 |
+| 4 | [`attributes_nldas2_climate.csv`](../../basins/CAMELSH_data/attributes/attributes_nldas2_climate.csv) | 기후 요약 |
+| 5 | [`attributes_gageii_Hydro.csv`](../../basins/CAMELSH_data/attributes/attributes_gageii_Hydro.csv) | 수문 응답 및 하천망 |
+| 6 | [`attributes_gageii_Soils.csv`](../../basins/CAMELSH_data/attributes/attributes_gageii_Soils.csv) | 토양 특성 |
+| 7 | [`attributes_gageii_Geology.csv`](../../basins/CAMELSH_data/attributes/attributes_gageii_Geology.csv) | 지질 배경 |
+| 8 | [`attributes_gageii_LC06_Basin.csv`](../../basins/CAMELSH_data/attributes/attributes_gageii_LC06_Basin.csv) | 토지피복 (NLCD 2006) |
 
 ---
 
@@ -49,7 +49,7 @@
 
 ## 1. Selection / Mapping CSV
 
-[`camelsh_drbc_selected.csv`](/Users/jang-minyeop/Project/CAMELS/output/basin/drbc_camelsh/camelsh_drbc_selected.csv)는 attribute 파일이 아니라 분석 테이블의 **행(row)을 결정하는 entry table**이다.
+[`camelsh_drbc_selected.csv`](../../output/basin/drbc_camelsh/camelsh_drbc_selected.csv)는 attribute 파일이 아니라 분석 테이블의 **행(row)을 결정하는 entry table**이다.
 
 | 컬럼 | 의미 | 해석 방법 |
 |---|---|---|
@@ -66,7 +66,7 @@
 
 ## 2. BasinID CSV
 
-[`attributes_gageii_BasinID.csv`](/Users/jang-minyeop/Project/CAMELS/basins/CAMELSH_data/attributes/attributes_gageii_BasinID.csv)는 basin의 식별 정보와 outlet 메타데이터를 담는다. 설명 변수라기보다 **병합 기준 정보**에 가깝다.
+[`attributes_gageii_BasinID.csv`](../../basins/CAMELSH_data/attributes/attributes_gageii_BasinID.csv)는 basin의 식별 정보와 outlet 메타데이터를 담는다. 설명 변수라기보다 **병합 기준 정보**에 가깝다.
 
 | 컬럼 | 의미 | 해석 방법 |
 |---|---|---|
@@ -84,7 +84,7 @@
 
 ## 3. Topography CSV
 
-[`attributes_gageii_Topo.csv`](/Users/jang-minyeop/Project/CAMELS/basins/CAMELSH_data/attributes/attributes_gageii_Topo.csv)는 basin의 지형적 성격을 담는다. 물이 얼마나 빨리 모이는지를 이해할 때 핵심이 되는 파일이다.
+[`attributes_gageii_Topo.csv`](../../basins/CAMELSH_data/attributes/attributes_gageii_Topo.csv)는 basin의 지형적 성격을 담는다. 물이 얼마나 빨리 모이는지를 이해할 때 핵심이 되는 파일이다.
 
 | 컬럼 | 의미 | 값이 클 때 | 해석 방법 |
 |---|---|---|---|
@@ -101,7 +101,7 @@
 
 ## 4. Climate CSV
 
-[`attributes_nldas2_climate.csv`](/Users/jang-minyeop/Project/CAMELS/basins/CAMELSH_data/attributes/attributes_nldas2_climate.csv)는 basin이 놓인 forcing regime을 요약한다. 홍수 위험을 직접 말해주는 파일은 아니지만, 어떤 물 공급이 어떤 패턴으로 들어오는지를 설명한다.
+[`attributes_nldas2_climate.csv`](../../basins/CAMELSH_data/attributes/attributes_nldas2_climate.csv)는 basin이 놓인 forcing regime을 요약한다. 홍수 위험을 직접 말해주는 파일은 아니지만, 어떤 물 공급이 어떤 패턴으로 들어오는지를 설명한다.
 
 | 컬럼 | 의미 | 값이 클 때 | 해석 방법 |
 |---|---|---|---|
@@ -120,7 +120,7 @@
 
 ## 5. Hydro CSV
 
-[`attributes_gageii_Hydro.csv`](/Users/jang-minyeop/Project/CAMELS/basins/CAMELSH_data/attributes/attributes_gageii_Hydro.csv)는 실제 basin response와 수문 네트워크 구조를 보여준다. **basin screening에서 가장 직접적인 증거가 되는 파일**이다.
+[`attributes_gageii_Hydro.csv`](../../basins/CAMELSH_data/attributes/attributes_gageii_Hydro.csv)는 실제 basin response와 수문 네트워크 구조를 보여준다. **basin screening에서 가장 직접적인 증거가 되는 파일**이다.
 
 | 컬럼 | 의미 | 값이 클 때 | 해석 방법 |
 |---|---|---|---|
@@ -138,7 +138,7 @@
 
 ## 6. Soils CSV
 
-[`attributes_gageii_Soils.csv`](/Users/jang-minyeop/Project/CAMELS/basins/CAMELSH_data/attributes/attributes_gageii_Soils.csv)는 basin의 저장 및 침투 성격을 보여준다.
+[`attributes_gageii_Soils.csv`](../../basins/CAMELSH_data/attributes/attributes_gageii_Soils.csv)는 basin의 저장 및 침투 성격을 보여준다.
 
 | 컬럼 | 의미 | 값이 클 때 | 해석 방법 |
 |---|---|---|---|
@@ -157,7 +157,7 @@
 
 ## 7. Geology CSV
 
-[`attributes_gageii_Geology.csv`](/Users/jang-minyeop/Project/CAMELS/basins/CAMELSH_data/attributes/attributes_gageii_Geology.csv)는 basin의 지질적 배경을 설명한다.
+[`attributes_gageii_Geology.csv`](../../basins/CAMELSH_data/attributes/attributes_gageii_Geology.csv)는 basin의 지질적 배경을 설명한다.
 
 | 컬럼 | 의미 | 값이 클 때 | 해석 방법 |
 |---|---|---|---|
@@ -172,7 +172,7 @@
 
 ## 8. Land Cover CSV
 
-[`attributes_gageii_LC06_Basin.csv`](/Users/jang-minyeop/Project/CAMELS/basins/CAMELSH_data/attributes/attributes_gageii_LC06_Basin.csv)는 NLCD 2006 기준 basin-scale 토지피복 조성을 담는다. basin의 표면 특성을 가장 직관적으로 보여주는 파일이다.
+[`attributes_gageii_LC06_Basin.csv`](../../basins/CAMELSH_data/attributes/attributes_gageii_LC06_Basin.csv)는 NLCD 2006 기준 basin-scale 토지피복 조성을 담는다. basin의 표면 특성을 가장 직관적으로 보여주는 파일이다.
 
 | 컬럼 | 의미 | 값이 클 때 | 해석 방법 |
 |---|---|---|---|
@@ -200,7 +200,7 @@
 
 ## 9. 분석 테이블 읽는 법
 
-[`drbc_selected_basin_analysis_table.csv`](/Users/jang-minyeop/Project/CAMELS/output/basin/drbc_camelsh/analysis/drbc_selected_basin_analysis_table.csv)는 다음 순서로 읽는다.
+[`drbc_selected_basin_analysis_table.csv`](../../output/basin/drbc_camelsh/analysis/drbc_selected_basin_analysis_table.csv)는 다음 순서로 읽는다.
 
 1. **Climate** → 어떤 물 공급이 어떤 패턴으로 들어오는가
 2. **Topo · Soils · Geology · Land Cover** → 그 물이 얼마나 빨리 유출로 전환되는가
@@ -252,6 +252,6 @@ land cover나 slope가 빠른 응답을 시사하더라도, `BFI_AVE`나 streamf
 
 ## 관련 문서
 
-- basin subset과 공간 기준은 [`basin.md`](basin.md)에서 고정한다.
+- basin subset과 공간 기준은 [`basin_cohort_definition.md`](basin_cohort_definition.md)에서 고정한다.
 - 현재 analysis table과 screening 산출물 상태는 [`basin_analysis.md`](basin_analysis.md)에서 다룬다.
 - 논문 본문용 screening 규범은 [`basin_screening_method.md`](basin_screening_method.md)에서 다룬다.
