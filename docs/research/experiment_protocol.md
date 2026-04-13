@@ -63,6 +63,7 @@
 | validation basin sampling | `validate_n_random_basins` | `200` |
 | built-in metric set | `metrics` | `NSE`, `KGE`, `FHV`, `Peak-Timing`, `Peak-MAPE` |
 | output 저장 | `save_all_output` | `True` |
+| validation prediction 저장 | `save_validation_results` | `True` |
 
 여기서 중요한 점은 `lagged Q`를 넣지 않는다는 것이다. lagged discharge를 넣으면 short-horizon baseline이 과도하게 강해져서, probabilistic head 자체가 peak underestimation을 얼마나 줄였는지 해석하기 어려워진다.
 
@@ -92,11 +93,15 @@ seeds: [111, 222, 333]
 
 추가 seed를 더 돌리는 것은 가능하지만, 본문 기준선은 위 세 seed를 먼저 끝낸다. 반대로 hardware 제약 때문에 seed를 줄이는 것은 공식 비교 실험에서는 허용하지 않는다.
 
+현재 broad 실행 스크립트는 `NH_SEED` 환경변수로 seed override를 받을 수 있다. 예를 들어 `NH_SEED=222 ./scripts/run_camelsh_model1_broad.sh`처럼 실행하면 temporary override config를 만들어 같은 broad 설정을 seed만 바꿔 반복할 수 있다.
+
 ### 1.4 환경 파라미터 취급 규칙
 
 `device`, `num_workers`, `cache_validation_data`, `log_interval` 같은 값은 실행 환경 파라미터다. 이 값들은 실험 재현성과 실행 가능성에는 중요하지만, 연구 질문 자체를 정의하는 핵심 통제변인과는 구분한다.
 
 공식 비교표와 논문 Methods에서는 가능한 한 같은 환경에서 Model 1과 Model 2를 돌린다. 다만 환경 차이 때문에 `batch_size`, `hidden_size`, `seq_length`, split, input 목록 같은 핵심 통제변인을 바꾸는 것은 허용하지 않는다. 현재 프로젝트의 공식 비교축은 broad prepared split과 broad config를 직접 사용하는 실행 기준이다.
+
+현재 broad config의 기본 `device`는 `cuda:0`으로 둔다. 다만 broad 실행 스크립트는 `NH_DEVICE` 환경변수로 일시 override를 받을 수 있으므로, 로컬 점검이 필요하면 `NH_DEVICE=mps` 또는 `NH_DEVICE=cpu`로 실행할 수 있다. 이 경우에도 공식 보고용 비교 실험에서는 Model 1과 Model 2에 같은 환경 값을 써야 한다.
 
 ## 2. 공통 데이터 규칙
 
