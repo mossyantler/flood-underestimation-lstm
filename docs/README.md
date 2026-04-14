@@ -28,6 +28,8 @@ flowchart TD
 
 공식 규칙, 정의, 실험 기준은 canonical 문서에만 둔다. guide, playbook, study note, writing guide는 support 문서다. support 문서는 설명과 배경을 보강하지만 source of truth가 되지 않는다.
 
+현재 논문의 공식 비교축은 Model 1 deterministic baseline과 Model 2 probabilistic baseline이다. research 경로는 이 두 모델 기준으로 읽으면 되고, 저장소에 남아 있는 Model 3 physics-guided hybrid 관련 메모는 현재 논문 본 비교가 아니라 후속 확장 방향으로 이해하면 된다.
+
 | Area | Role | Local index |
 | --- | --- | --- |
 | [`workflow/`](workflow/README.md) | basin selection, screening, event workflow의 공식 기준 | [`workflow/README.md`](workflow/README.md) |
@@ -73,6 +75,6 @@ flowchart TD
 ## Folder indexes
 
 - [`workflow/README.md`](workflow/README.md): workflow 문서의 관계와 읽기 순서를 정리한다.
-- [`research/README.md`](research/README.md): research 문서의 기준선과 support 문서를 정리한다.
+- [`research/README.md`](research/README.md): 현재 논문의 Model 1 vs Model 2 기준선과, 후속 확장으로 남겨 둔 Model 3 메모의 위치를 정리한다.
 - [`references/README.md`](references/README.md): 참고 노트의 역할과 읽기 순서를 정리한다.
 - [`meta/README.md`](meta/README.md): 문서 작성 규칙과 메타 문서를 정리한다.

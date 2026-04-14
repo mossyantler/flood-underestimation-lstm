@@ -23,22 +23,22 @@
 
 ```mermaid
 flowchart TD
-    A[DRBC boundary<br/>basins/drbc_boundary/drb_bnd_polygon.shp] --> B[CAMELSH mapping table<br/>camelsh_drbc_mapping.csv]
+    A["DRBC boundary<br/>basins/drbc_boundary/drb_bnd_polygon.shp"] --> B["CAMELSH mapping table<br/>camelsh_drbc_mapping.csv"]
 
-    B --> C[DRBC holdout cohort]
-    B --> D[non-DRBC training pool]
+    B --> C["DRBC holdout cohort"]
+    B --> D["non-DRBC training pool"]
 
-    C --> C1[outlet_in_drbc == True]
-    C1 --> C2[overlap_ratio_of_basin >= 0.9]
-    C2 --> C3[154 selected basins<br/>evaluation holdout cohort]
+    C --> C1["outlet_in_drbc == True"]
+    C1 --> C2["overlap_ratio_of_basin >= 0.9"]
+    C2 --> C3["154 selected basins<br/>evaluation holdout cohort"]
 
-    D --> D1[outlet_in_drbc == False]
-    D1 --> D2[overlap_ratio_of_basin <= 0.1<br/>or basin_intersects_drbc == False]
-    D2 --> D3[quality gate]
-    D3 --> D4[1923 quality-pass basins<br/>global training pool]
+    D --> D1["outlet_in_drbc == False"]
+    D1 --> D2["overlap_ratio_of_basin <= 0.1<br/>or basin_intersects_drbc == False"]
+    D2 --> D3["quality gate"]
+    D3 --> D4["1923 quality-pass basins<br/>global training pool"]
 
-    C3 -. analysis path .-> E[basin_analysis.md]
-    D4 -. split and training path .-> F[configs/basin_splits/*]
+    C3 -. analysis path .-> E["basin_analysis.md"]
+    D4 -. split and training path .-> F["configs/basin_splits/*"]
 ```
 
 ## 현재 공식 기준
@@ -116,10 +116,10 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    A[Official region anchor<br/>DRBC boundary] --> B[Outlet point is primary match anchor]
-    B --> C[Polygon overlap is selection and QC support]
-    C --> D[Do not treat CAMELSH polygon as DRBC or HUC replacement]
-    D --> E[HUC remains analysis grouping layer only]
+    A["Official region anchor<br/>DRBC boundary"] --> B["Outlet point is primary match anchor"]
+    B --> C["Polygon overlap is selection and QC support"]
+    C --> D["Do not treat CAMELSH polygon as DRBC or HUC replacement"]
+    D --> E["HUC remains analysis grouping layer only"]
 ```
 
 중요한 점은 CAMELSH polygon, HUC polygon, DRBC polygon을 같은 경계 체계로 읽으면 안 된다는 것이다. 좌표계만 맞춘다고 경계가 같아지지 않는다. 따라서 현재 프로젝트의 공간 anchor는 polygon이 아니라 `gauge outlet`이다.

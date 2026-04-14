@@ -6,7 +6,7 @@
 
 ```mermaid
 flowchart TD
-    A[meta/README.md] --> B[writing_guide.md<br/>docs writing rules]
+    A["meta/README.md"] --> B["writing_guide.md<br/>docs writing rules"]
 ```
 
 ## Support docs

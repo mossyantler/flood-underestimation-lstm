@@ -6,10 +6,10 @@
 
 ```mermaid
 flowchart TD
-    A[references/README.md] --> B[lstm_hydrology_study_notes_beginner.md]
-    B --> C[lstm_hydrology_study_notes.md]
-    A --> D[river_basin_analysis_study_guide.md]
-    A -. handoff .-> E[workflow and research canonical docs]
+    A["references/README.md"] --> B["lstm_hydrology_study_notes_beginner.md"]
+    B --> C["lstm_hydrology_study_notes.md"]
+    A --> D["river_basin_analysis_study_guide.md"]
+    A -. handoff .-> E["workflow and research canonical docs"]
 ```
 
 ## Documents

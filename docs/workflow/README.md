@@ -6,12 +6,12 @@
 
 ```mermaid
 flowchart TD
-    A[workflow/README.md] --> B[basin_cohort_definition.md<br/>holdout and training pool]
-    B --> C[basin_analysis.md<br/>current outputs and next step]
-    C --> D[basin_screening_method.md<br/>official screening logic]
-    D --> E[event_response_spec.md<br/>event extraction rules]
-    E --> F[flood_generation_typing.md<br/>event and basin typing]
-    B -. support .-> G[basin_source_csv_guide.md]
+    A["workflow/README.md"] --> B["basin_cohort_definition.md<br/>holdout and training pool"]
+    B --> C["basin_analysis.md<br/>current outputs and next step"]
+    C --> D["basin_screening_method.md<br/>official screening logic"]
+    D --> E["event_response_spec.md<br/>event extraction rules"]
+    E --> F["flood_generation_typing.md<br/>event and basin typing"]
+    B -. support .-> G["basin_source_csv_guide.md"]
     C -. support .-> G
     D -. support .-> G
 ```

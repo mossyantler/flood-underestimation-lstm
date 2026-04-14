@@ -32,7 +32,7 @@
 
 다만 우리는 그 방법을 그대로 복제하지는 않는다. 이유는 세 가지다.
 
-첫째, 그 논문은 `annual maxima + explainable LSTM + K-means`가 classification의 핵심인데, 우리 연구의 중심은 분류 자체가 아니라 `deterministic / probabilistic / physics-guided 모델 비교`다.
+첫째, 그 논문은 `annual maxima + explainable LSTM + K-means`가 classification의 핵심인데, 우리 연구의 중심은 분류 자체가 아니라 `Model 1 deterministic baseline과 Model 2 probabilistic baseline 비교`다.
 
 둘째, 우리는 `CAMELSH hourly`를 쓰기 때문에 annual maxima만 보는 것보다 threshold-exceeding high-flow event를 더 폭넓게 쓰는 편이 연구 목적에 맞다.
 
@@ -194,7 +194,7 @@ $$
 
 이 flood generation typing은 `학습 전 basin filtering`에 쓰지 않는 것이 좋다. 대신 다음 두 용도로 쓰는 것이 적절하다.
 
-첫째, `post-hoc interpretation`이다. 예를 들어 probabilistic head가 recent-precipitation basin에서 peak underestimation을 더 잘 줄였는지, physics-guided hybrid가 snowmelt basin에서 timing 이득이 있었는지를 볼 수 있다.
+첫째, `post-hoc interpretation`이다. 예를 들어 probabilistic head가 recent-precipitation basin에서 peak underestimation을 더 잘 줄였는지, 그 개선이 snowmelt basin이나 mixture basin에서도 유지되는지를 볼 수 있다.
 
 둘째, `stratified evaluation`이다. basin 전체 성능 평균만 보는 대신, dominant type별로 성능을 나누어 보면 모델 구조의 강점과 약점을 훨씬 더 분명하게 설명할 수 있다.
 

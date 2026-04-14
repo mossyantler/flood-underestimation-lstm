@@ -24,13 +24,13 @@
 
 ```mermaid
 flowchart TD
-    A[DRBC holdout cohort<br/>154 selected basins] --> B[static basin analysis table]
-    B --> C[streamflow quality table]
-    C --> D[provisional screening table]
-    D --> E[event response table<br/>planned]
-    E --> F[final screening table<br/>planned]
+    A["DRBC holdout cohort<br/>154 selected basins"] --> B["static basin analysis table"]
+    B --> C["streamflow quality table"]
+    C --> D["provisional screening table"]
+    D --> E["event response table<br/>planned"]
+    E --> F["final screening table<br/>planned"]
 
-    G[non-DRBC training pool<br/>1923 quality-pass basins] -. separate training path .-> H[training configs and experiments]
+    G["non-DRBC training pool<br/>1923 quality-pass basins"] -. separate training path .-> H["training configs and experiments"]
 ```
 
 DRBC 바깥의 학습용 basin pool은 [`camelsh_non_drbc_training_selected.csv`](../../output/basin/camelsh_training_non_drbc/camelsh_non_drbc_training_selected.csv)에 따로 정리되어 있고, 현재 quality-pass basin 수는 1923개다. 이 training pool은 outlet 기준으로는 DRBC 밖이고, polygon overlap은 source mismatch에 따른 small-overlap tolerance로 `0.1` 이하까지 허용한다.
@@ -112,12 +112,12 @@ final screening은 hourly 시계열이 준비되면 실행할 단계다. 이때�
 
 ```mermaid
 flowchart TD
-    A[drbc_selected_basin_analysis_table.csv<br/>static structural context]
-    B[drbc_streamflow_quality_table.csv<br/>quality gate and usability]
-    C[drbc_preliminary_screening_table.csv<br/>rank-based prioritization]
-    D[drbc_provisional_screening_table.csv<br/>broad and natural shortlist]
-    E[event_response_table<br/>planned observed-flow metrics]
-    F[final_screening_table<br/>planned final flood-prone cohort]
+    A["drbc_selected_basin_analysis_table.csv<br/>static structural context"]
+    B["drbc_streamflow_quality_table.csv<br/>quality gate and usability"]
+    C["drbc_preliminary_screening_table.csv<br/>rank-based prioritization"]
+    D["drbc_provisional_screening_table.csv<br/>broad and natural shortlist"]
+    E["event_response_table<br/>planned observed-flow metrics"]
+    F["final_screening_table<br/>planned final flood-prone cohort"]
 
     A --> B --> C --> D --> E --> F
 ```
