@@ -61,7 +61,7 @@ log_tensorboard: True
 log_n_figures: 0
 save_all_output: True
 save_weights_every: 1
-save_validation_results: False
+save_validation_results: True
 
 dataset: generic
 data_dir: ./data/CAMELSH_generic/drbc_holdout_broad

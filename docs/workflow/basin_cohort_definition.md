@@ -82,6 +82,9 @@ flowchart TD
 - `output/basin/camelsh_training_non_drbc/camelsh_non_drbc_training_summary.json`
   non-DRBC training pool의 basin 수, quality gate 기준, natural subset 수를 요약한 파일이다.
 
+- `output/basin/checklists/camelsh_basin_master_checklist_broad.csv`
+  CAMELSH 전체 9008 basin을 기준으로 `minimum quality gate`와 broad profile `usability_status`를 함께 기록한 공식 checklist다.
+
 ## 현재 selection rule
 
 현재 selection rule은 `outlet_in_drbc == True`와 `overlap_ratio_of_basin >= 0.9`를 동시에 만족하는 CAMELSH basin이다. 이 규칙은 [`build_drbc_camelsh_tables.py`](../../scripts/build_drbc_camelsh_tables.py)에서 재현 가능하게 구현되어 있다.
@@ -111,6 +114,8 @@ flowchart TD
 - 그중 hydromod risk가 없는 natural training basin: `248`
 
 이다.
+
+현재 전체 basin checklist는 이 `minimum quality gate`를 1차 스크린으로 기록하고, 그다음 broad split 후보에 대해서만 `split-level usability gate`를 적용한다. 즉 `except`는 quality failure가 아니라, quality는 통과했지만 split 기간 안에서 target `Streamflow` 유효값이 부족해 broad prepared split에서 제외된 basin을 뜻한다.
 
 ## CAMELSH polygon 해석 원칙
 
@@ -163,12 +168,14 @@ HUC exploratory 스크립트들은 필요하면 다시 사용할 수 있지만, 
 - `output/basin/drbc_camelsh/analysis/drbc_selected_basin_analysis_table.csv`
 - `output/basin/drbc_camelsh/analysis/drbc_selected_basin_analysis_summary.json`
 
-다음 작업은 DRBC holdout basin 분석 테이블 위에 forcing/streamflow 품질 정보와 event-level 지표를 붙여 flood-prone screening 단계로 넘어가는 것이다. training pool 쪽은 이미 quality-pass basin 목록을 고정했으니, 이후에는 split과 학습 config 설계로 이어가면 된다.
+다음 작업은 DRBC holdout basin 분석 테이블 위에 forcing/streamflow 품질 정보와 event-level 지표를 붙여 flood-prone screening 단계로 넘어가는 것이다. training pool 쪽은 quality-pass 목록까지만 고정된 상태이고, broad prepared split은 여기에 `split-level usability gate`를 추가로 적용한 결과다. 따라서 이후 실험에서는 raw split count보다 checklist와 prepared split count를 공식 기준으로 읽는 것이 맞다.
 
 현재 split 파일도 이미 만들어져 있다.
 
 - broad: [`drbc_holdout_train_broad.txt`](../../configs/basin_splits/drbc_holdout_train_broad.txt), [`drbc_holdout_validation_broad.txt`](../../configs/basin_splits/drbc_holdout_validation_broad.txt), [`drbc_holdout_test_drbc_quality.txt`](../../configs/basin_splits/drbc_holdout_test_drbc_quality.txt)
 - natural: [`drbc_holdout_train_natural.txt`](../../configs/basin_splits/drbc_holdout_train_natural.txt), [`drbc_holdout_validation_natural.txt`](../../configs/basin_splits/drbc_holdout_validation_natural.txt), [`drbc_holdout_test_drbc_quality_natural.txt`](../../configs/basin_splits/drbc_holdout_test_drbc_quality_natural.txt)
+
+현재 broad prepared split은 [`../../data/CAMELSH_generic/drbc_holdout_broad/splits/train.txt`](../../data/CAMELSH_generic/drbc_holdout_broad/splits/train.txt), [`../../data/CAMELSH_generic/drbc_holdout_broad/splits/validation.txt`](../../data/CAMELSH_generic/drbc_holdout_broad/splits/validation.txt), [`../../data/CAMELSH_generic/drbc_holdout_broad/splits/test.txt`](../../data/CAMELSH_generic/drbc_holdout_broad/splits/test.txt)를 사용한다. 이 prepared split은 `train 720`, `validation 168`, `test 168`의 minimum valid `Streamflow` count 기준을 broad split 후보에 적용한 결과다.
 
 ## 관련 문서
 

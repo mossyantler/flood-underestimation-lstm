@@ -1,13 +1,13 @@
 # Project Agent Context
 
 이 문서는 코딩 에이전트가 CAMELS 프로젝트에서 작업할 때 참조해야 할 핵심 맥락을 정리한 것이다.
-연구 배경과 실험 기준은 `docs/research/`, basin workflow 기준은 `docs/workflow/`, 문서 작성 규칙은 `docs/meta/writing_guide.md`를 참조한다.
+연구 배경의 일반론이나 논문 서술 방향은 `docs/research/` 하위 문서를 참조한다.
 
 ---
 
 ## 연구 목표 (한 줄)
 
-Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정**을 줄이기 위해, deterministic baseline과 probabilistic baseline의 차이를 정량 비교한다.
+Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정**을 줄이기 위해, deterministic baseline과 probabilistic quantile extension을 비교한다. physics-guided hybrid는 후속 확장으로 둔다.
 
 ## 작업 제목
 
@@ -16,21 +16,19 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 ## 핵심 가설
 
 1. Deterministic LSTM의 peak underestimation 상당 부분은 **output design** 문제이다. Probabilistic head만 추가해도 extreme flood 지표가 의미 있게 좋아질 수 있다.
-2. Backbone을 고정한 채 probabilistic head만 바꾸는 비교로도 `tail-aware output`의 순수 효과를 분리해 해석할 수 있다.
-3. 이 개선은 same-basin different-time뿐 아니라 DRBC regional holdout과 extreme-event holdout에서도 유지되어야 한다.
+2. physics-guided core는 후속 연구에서 **timing과 basin generalization**에 추가 이득을 줄 가능성이 있다.
+3. 이 후속 이득은 snow 영향 또는 groundwater 영향이 큰 유역에서 더 크게 나타날 수 있다.
 
 ---
 
-## 현재 논문 비교 구조
+## 공식 비교 구조
 
 | 모델 | 구조 | 역할 |
 |------|------|------|
 | Model 1 | Deterministic multi-basin LSTM | Baseline. 모든 개선은 이것 대비 비교 |
 | Model 2 | Probabilistic multi-basin LSTM (backbone 동일, head만 quantile) | Output design만으로 peak bias가 줄어드는지 검증 |
 
-현재 논문의 공식 비교는 Model 1과 Model 2다. Model 3인 physics-guided probabilistic hybrid는 저장소에 유지하지만, 이 논문의 비교 대상이 아니라 후속 연구 방향으로 둔다.
-
-자세한 아키텍처는 [`docs/research/architecture.md`](docs/research/architecture.md) 참조.
+`Model 3` 관련 conceptual core 설계 메모는 남겨 두되, 현재 논문의 공식 비교축에는 포함하지 않는다. 자세한 아키텍처는 [`docs/research/architecture.md`](docs/research/architecture.md) 참조.
 
 ---
 
@@ -39,7 +37,6 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 - **데이터셋**: CAMELSH hourly를 기본 데이터셋으로 사용한다. CAMELS-US daily는 legacy 비교 또는 참고 자료로만 둔다.
 - **시간 해상도**: 기본은 시간 단위(hourly)다. 필요 시 후속 단계에서 daily aggregation ablation을 별도로 둘 수 있다.
 - **Backbone**: 첫 논문에서는 LSTM 고정. Transformer 등은 후속으로 분리.
-- **현재 논문 모델 범위**: Model 1 deterministic baseline과 Model 2 probabilistic baseline만 공식 비교한다. Model 3 physics-guided hybrid는 후속 연구 메모로만 유지한다.
 
 ## 입력 구성
 
@@ -57,7 +54,7 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 
 - **전체 성능**: NSE, KGE, NSElog
 - **Flood-specific** (핵심): FHV, Peak Relative Error, Peak Timing Error, top 1% flow recall, event-level RMSE
-- **Model 2 추가**: pinball loss, coverage, calibration
+- **Probabilistic model 추가**: pinball loss, coverage, calibration
 
 ---
 
@@ -66,30 +63,40 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 ```text
 .
 ├── basins/
-│   ├── drbc_boundary/  # DRBC Delaware River Basin 공식 경계
-│   ├── huc8_delware/   # 초기 HUC8 exploratory shapefile
-│   └── CAMELSH_data/   # CAMELSH shapefiles / attributes 추출본
-├── configs/             # NeuralHydrology 실험 설정
-├── data/CAMELS_US/
-│   └── camels_attributes_v2.0/  # legacy CAMELS-US 속성 데이터
+│   ├── CAMELSH/         # CAMELSH upstream 로컬 체크아웃 (gitignored)
+│   ├── CAMELSH_data/    # CAMELSH shapefiles / attributes / hourly observed 추출본 (gitignored)
+│   ├── CAMELSH_download/ # CAMELSH 원본 다운로드 보관 디렉터리 (gitignored)
+│   ├── drbc_boundary/   # DRBC Delaware River Basin 공식 경계
+│   └── huc8_delware/    # 초기 HUC8 exploratory shapefile / QGIS 자산
+├── configs/
+│   └── basin_splits/    # holdout / training pool basin split 산출물
+├── data/
+│   ├── CAMELSH_generic/
+│   │   └── drbc_holdout_broad/  # NH-style CAMELSH generic 데이터셋 (gitignored)
+│   └── CAMELS_US/
+│       ├── basin_mean_forcing/  # legacy forcing 원본 (gitignored)
+│       ├── camels_attributes_v2.0/  # legacy CAMELS-US 속성 데이터
+│       └── usgs_streamflow/     # legacy streamflow 원본 (gitignored)
 ├── docs/
-│   ├── README.md        # human-facing docs portal
-│   ├── meta/            # 문서 작성 규칙
-│   ├── references/      # 참고 노트와 학습 자료
-│   ├── research/        # canonical research docs와 support docs
-│   └── workflow/        # canonical workflow docs와 support docs
-├── output/
-│   └── basin/           # basin 관련 산출물
-├── scripts/             # download, run 스크립트
-└── runs/                # (gitignored) 학습 출력
+│   ├── learn/           # 참고 학습 메모
+│   ├── references/      # glossary, proposal, planning 문서
+│   ├── research/        # architecture, design, literature-review
+│   └── workflow/        # basin selection / screening 워크플로
+├── scripts/             # 다운로드, 전처리, 분석, 실행 스크립트
+├── vendor/
+│   └── neuralhydrology/ # upstream 코드 참조용 vendor copy
+├── output/              # (gitignored) basin 분석 산출물, 필요 시 생성
+├── runs/                # (gitignored) 학습 출력, 필요 시 생성
+└── tmp/                 # (gitignored) scratch / download staging, 필요 시 생성
 ```
 
 - **대상 유역**: Delaware River Basin Commission 기준 Delaware River Basin. 공식 기준 레이어는 `basins/drbc_boundary/drb_bnd_polygon.shp`.
 - **학습 전략**: DRBC는 regional holdout / evaluation region으로 둔다. 모델 학습은 outlet가 DRBC 밖에 있고 polygon overlap이 `0.1` 이하인 tolerant non-DRBC CAMELSH basin에서 수행한다. 즉 현재 backbone은 Delaware regional model이 아니라, non-DRBC basin으로 학습한 global multi-basin model이다.
 - CAMELSH shapefile과 attributes 추출본은 `basins/CAMELSH_data/` 아래에 둔다.
 - Static attributes (`camels_attributes_v2.0/`)는 legacy 참고 자료이므로 유지한다.
-- 현재 `output/basin/drbc_camelsh/` 아래에 DRBC 기준 CAMELSH subset 산출물을 둔다.
-- 현재 `output/basin/camelsh_training_non_drbc/` 아래에 global training pool 산출물을 둔다.
+- 생성 산출물은 기본적으로 gitignored 디렉터리인 `output/`, `runs/`, `tmp/` 아래에 둔다.
+- DRBC 기준 CAMELSH subset 산출물은 `output/basin/drbc_camelsh/` 아래에 둔다.
+- global training pool 관련 산출물은 `output/basin/camelsh_training_non_drbc/` 아래에 둔다.
 - 현재 선택 규칙은 `outlet_in_drbc == True`와 `overlap_ratio_of_basin >= 0.9`이고, 이에 해당하는 basin은 `154개`다. outlet만 기준으로 보면 `192개`다.
 - 현재 training pool 규칙은 `outlet_in_drbc == False` 이고 `overlap_ratio_of_basin <= 0.1`까지는 source mismatch에 따른 small overlap으로 허용하는 것이다. 그다음 usable year / estimated-flow fraction / boundary confidence quality gate를 적용한다. 현재 quality-pass training basin은 `1923개`다.
 - 현재 `scripts/build_drbc_basin_analysis_table.py`로 static basin analysis table을 생성하며, 결과는 `output/basin/drbc_camelsh/analysis/` 아래에 둔다.
@@ -103,6 +110,6 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 
 ## 구현 순서 원칙
 
-1. Model 1 (deterministic) → Model 2 (probabilistic) 순서로 현재 논문의 공식 비교를 먼저 재현 가능하게 구현
-2. Model 3 (physics-guided hybrid)은 이 논문 범위 밖의 후속 연구로 두고, Model 1 vs Model 2 결과 해석 이후에 별도 확장한다
+1. Model 1 (deterministic) → Model 2 (probabilistic) 순서로 먼저 재현 가능하게 구현
+2. Model 3 (physics-guided hybrid)은 현재 논문 범위 밖의 exploratory / future work로 둔다
 3. 모델 학습 전에 **basin 조사 단계** 선행: DRBC boundary 기준 holdout subset 확정 → non-DRBC training pool 확정 → DRBC selected basin static/profile 분석 → forcing/streamflow 결합 → flood-prone basin screening table 생성

@@ -1,0 +1,6 @@
+
+		begin
+      f = addfile("/Users/jang-minyeop/Project/CAMELS/data/CAMELSH_generic/drbc_holdout_broad/time_series/03229610.nc","r")
+      print(f)
+		end
+    
