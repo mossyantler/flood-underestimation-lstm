@@ -13,7 +13,7 @@ test_start_date: "01/01/2014"
 test_end_date: "31/12/2016"
 
 seed: 111
-device: cuda
+device: cuda:0
 
 validate_every: 1
 validate_n_random_basins: 200
