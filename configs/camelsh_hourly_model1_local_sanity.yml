@@ -1,9 +1,9 @@
-experiment_name: camelsh_hourly_model1_drbc_holdout_broad
+experiment_name: camelsh_hourly_model1_local_sanity
 run_dir: ./runs
 
-train_basin_file: ./data/CAMELSH_generic/drbc_holdout_broad/splits/train.txt
-validation_basin_file: ./data/CAMELSH_generic/drbc_holdout_broad/splits/validation.txt
-test_basin_file: ./data/CAMELSH_generic/drbc_holdout_broad/splits/test.txt
+train_basin_file: ./configs/basin_splits/local_sanity_train.txt
+validation_basin_file: ./configs/basin_splits/local_sanity_validation.txt
+test_basin_file: ./configs/basin_splits/local_sanity_test.txt
 
 train_start_date: "01/01/2000"
 train_end_date: "31/12/2010"
@@ -13,10 +13,10 @@ test_start_date: "01/01/2014"
 test_end_date: "31/12/2016"
 
 seed: 111
-device: cuda
+device: mps
 
-validate_every: 1
-validate_n_random_basins: 200
+validate_every: 5
+validate_n_random_basins: 5
 cache_validation_data: True
 metrics:
   - NSE
@@ -30,28 +30,28 @@ head: regression
 loss: nse
 output_activation: linear
 
-hidden_size: 256
+hidden_size: 128
 initial_forget_bias: 3
-output_dropout: 0.4
+output_dropout: 0.3
 
 optimizer: Adam
 learning_rate:
   0: 1e-3
-  10: 5e-4
-  20: 1e-4
-batch_size: 512
-epochs: 30
+  30: 5e-4
+  60: 1e-4
+batch_size: 32
+epochs: 100
 clip_gradient_norm: 1
 
 predict_last_n: 24
 seq_length: 336
 
-num_workers: 8
+num_workers: 0
 log_interval: 20
 log_tensorboard: True
 log_n_figures: 0
 save_all_output: True
-save_weights_every: 1
+save_weights_every: 10
 save_validation_results: False
 
 dataset: generic

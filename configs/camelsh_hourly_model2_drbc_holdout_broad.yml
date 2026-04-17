@@ -13,7 +13,7 @@ test_start_date: "01/01/2014"
 test_end_date: "31/12/2016"
 
 seed: 111
-device: mps
+device: cuda
 
 validate_every: 1
 validate_n_random_basins: 200
@@ -39,23 +39,23 @@ quantile_loss_weights:
   - 1.0
   - 1.0
 
-hidden_size: 128
+hidden_size: 256
 initial_forget_bias: 3
-output_dropout: 0.3
+output_dropout: 0.4
 
 optimizer: Adam
 learning_rate:
   0: 1e-3
   10: 5e-4
   20: 1e-4
-batch_size: 256
+batch_size: 512
 epochs: 30
 clip_gradient_norm: 1
 
 predict_last_n: 24
 seq_length: 336
 
-num_workers: 4
+num_workers: 8
 log_interval: 20
 log_tensorboard: True
 log_n_figures: 0

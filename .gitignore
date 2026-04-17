@@ -1,5 +1,6 @@
 .DS_Store
 .venv/
+.env
 __pycache__/
 .pytest_cache/
 .codex_tasks/
@@ -16,3 +17,4 @@ basins/huc8_delware/*.qgz
 data/CAMELSH_generic/
 data/CAMELS_US/basin_mean_forcing/
 data/CAMELS_US/usgs_streamflow/
+*.pem
