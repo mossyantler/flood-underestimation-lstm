@@ -13,17 +13,25 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 │   ├── drbc_boundary/   # DRBC Delaware River Basin 공식 경계
 │   ├── huc8_delware/    # 초기 HUC8 exploratory shapefile
 │   └── CAMELSH_data/    # CAMELSH shapefiles / attributes 추출본
-├── configs/             # NeuralHydrology 실험 설정
+├── configs/
+│   ├── README.md        # canonical/dev config 역할 설명
+│   ├── dev/             # local sanity 등 개발용 설정
+│   └── basin_splits/    # raw split membership file
 ├── data/CAMELS_US/
 │   └── camels_attributes_v2.0/  # legacy CAMELS-US 속성 데이터
 ├── docs/
+│   ├── archive/         # 과거 proposal 및 보존용 초안
 │   ├── README.md        # 문서 인덱스와 읽기 순서
 │   ├── workflow/        # basin 처리 절차와 데이터 준비 워크플로
-│   ├── research/        # architecture, design, literature-review
+│   ├── research/        # architecture, design, literature_review
 │   └── references/      # 참고 자료와 학습 노트
 ├── output/
 │   └── basin/           # basin 관련 산출물
-├── scripts/             # basin 전처리, download, run 스크립트
+├── scripts/
+│   ├── README.md        # canonical/official/dev script 역할 설명
+│   ├── official/        # 공식 실험 실행 진입점
+│   ├── dev/             # 개발용 실행 진입점
+│   └── check_repo_integrity.py  # 간단한 저장소 무결성 검사
 └── runs/                # (gitignored) 학습 출력
 ```
 
@@ -59,16 +67,16 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 - [`camelsh_non_drbc_training_summary.json`](/Users/jang-minyeop/Project/CAMELS/output/basin/camelsh_training_non_drbc/camelsh_non_drbc_training_summary.json): global training pool 요약 수치다.
 - [`camelsh_basin_master_checklist_broad.csv`](/Users/jang-minyeop/Project/CAMELS/output/basin/checklists/camelsh_basin_master_checklist_broad.csv): CAMELSH 전체 9008 basin에 대해 minimum quality gate와 broad profile `usability_status`를 함께 기록한 공식 checklist다.
 - [`camelsh_basin_master_checklist_broad_summary.json`](/Users/jang-minyeop/Project/CAMELS/output/basin/checklists/camelsh_basin_master_checklist_broad_summary.json): broad checklist 집계 요약이다.
-- [`drbc_holdout_train_broad.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_train_broad.txt), [`drbc_holdout_validation_broad.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_validation_broad.txt), [`drbc_holdout_test_drbc_quality.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_test_drbc_quality.txt): 기본 broad split basin file이다.
-- [`drbc_holdout_train_natural.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_train_natural.txt), [`drbc_holdout_validation_natural.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_validation_natural.txt), [`drbc_holdout_test_drbc_quality_natural.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_test_drbc_quality_natural.txt): natural split basin file이다.
-- [`drbc_holdout_split_summary.json`](/Users/jang-minyeop/Project/CAMELS/output/basin/splits/drbc_holdout/drbc_holdout_split_summary.json): global training / regional holdout split 요약이다.
-- [`split_manifest.csv`](/Users/jang-minyeop/Project/CAMELS/data/CAMELSH_generic/drbc_holdout_broad/splits/split_manifest.csv): broad split 후보 basin의 prepared split 상태와 exclusion reason을 기록한 manifest다.
+- [`drbc_holdout_train_broad.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_train_broad.txt), [`drbc_holdout_validation_broad.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_validation_broad.txt), [`drbc_holdout_test_drbc_quality.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_test_drbc_quality.txt): broad 원본 basin membership file이다. 이 파일은 usability gate 적용 전 단계의 basin 구성을 기록한다.
+- [`drbc_holdout_train_natural.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_train_natural.txt), [`drbc_holdout_validation_natural.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_validation_natural.txt), [`drbc_holdout_test_drbc_quality_natural.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_test_drbc_quality_natural.txt): natural 원본 basin membership file이다.
+- [`drbc_holdout_split_summary.json`](/Users/jang-minyeop/Project/CAMELS/output/basin/splits/drbc_holdout/drbc_holdout_split_summary.json): global training / regional holdout raw split 요약이다.
+- [`split_manifest.csv`](/Users/jang-minyeop/Project/CAMELS/data/CAMELSH_generic/drbc_holdout_broad/splits/split_manifest.csv): broad split 후보 basin의 prepared split 상태와 exclusion reason을 기록한 manifest다. 공식 실행 기준은 이 manifest와 prepared split이다.
 
 현재 DRBC holdout basin subset은 `outlet_in_drbc == True` 이고 `overlap_ratio_of_basin >= 0.9`인 CAMELSH `154개`다. outlet가 DRBC 안에 들어오는 basin은 `192개`이고, 그중 polygon overlap 기준으로 최종 selected set이 `154개`다.
 
 반대로 학습용 global training pool은 `outlet은 DRBC 밖에 있고`, polygon overlap은 `0.1 이하`까지 허용한 basin으로 잡는다. 이건 CAMELSH polygon과 DRBC 경계 source 차이 때문에 생기는 작은 시각적 겹침을 포함하기 위한 tolerant rule이다. 현재 기준으로 tolerant outside basin은 `8800개`이고, 이 중 quality gate를 통과한 학습 basin은 `1923개`, hydromod risk가 없는 natural training basin은 `248개`다. 실제 tolerant overlap으로 추가된 quality-pass basin은 `3개`뿐이다.
 
-현재 기본 split은 `global training + DRBC regional holdout evaluation` 구조다. 원본 broad basin split은 `train 1722 / validation 201 / DRBC quality-pass test 38`이고, 현재 broad prepared split은 `minimum quality gate` 이후 `split-level usability gate`를 적용한 결과로 `train 1705 / validation 198 / test 38`이다. natural 기준 원본 split은 `train 213 / validation 35 / DRBC natural quality-pass test 8`이다.
+현재 기본 split은 `global training + DRBC regional holdout evaluation` 구조다. 다만 여기서 숫자는 두 층으로 읽어야 한다. `configs/basin_splits/` 아래의 원본 broad basin split은 `train 1722 / validation 201 / DRBC quality-pass test 38`이고, 공식 baseline이 실제로 읽는 broad prepared split은 `data/CAMELSH_generic/drbc_holdout_broad/splits/` 아래의 `train 1705 / validation 198 / test 38`이다. 즉 논문과 실행 기준에서 우선적으로 참조해야 하는 값은 prepared split과 basin master checklist다. natural 기준 원본 split은 `train 213 / validation 35 / DRBC natural quality-pass test 8`이다.
 
 현재 기준은 `DRBC boundary + CAMELSH outlets/selected table`이다. CAMELSH polygon은 selection/QC용으로는 쓰지만, DRBC나 HUC와 같은 공식 경계 polygon으로 보지는 않는다.
 
@@ -76,8 +84,10 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 
 ## 관련 문서
 
-- [`docs/workflow/project_overview.md`](docs/workflow/project_overview.md) — 처음 읽는 사람을 위한 프로젝트 안내서와 workflow 지도
+- [`docs/workflow/README.md`](docs/workflow/README.md) — basin selection, screening, event workflow의 읽기 순서와 구조 지도
 - [`agents.md`](agents.md) — 에이전트 작업 맥락 및 프로젝트 규칙
 - [`docs/README.md`](docs/README.md) — `docs/` 전체 문서 인덱스와 카테고리별 읽기 순서
+- [`configs/README.md`](configs/README.md) — canonical config, raw split, dev config의 역할 구분
+- [`scripts/README.md`](scripts/README.md) — official/dev 실행 진입점과 integrity check 안내
 - [`docs/workflow/event_response_spec.md`](docs/workflow/event_response_spec.md) — hourly event extraction 규칙, threshold fallback, rainfall window, 출력 스키마
 - [`docs/research/defense_playbook.md`](docs/research/defense_playbook.md) — 설계 디펜드용 예상 질문, 취약점, 우선 보강 항목 정리

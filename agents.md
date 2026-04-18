@@ -105,8 +105,32 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 ## 개발 환경 규칙
 
 - **패키지 관리**: `uv` 표준. 새 코드는 `uv run`으로 실행 가능해야 한다.
+- **터미널 PATH**: `uv`, `python`, `soffice`, `brew` 등 Homebrew 도구를 사용할 때는 항상 먼저 `export PATH="/opt/homebrew/bin:$PATH"`를 적용한다.
 - **전처리/분석**: Python 스크립트 또는 notebook. DRBC holdout subset 정의, non-DRBC training pool 정의, 속성 병합, 홍수 취약 후보 추출 등을 수행한다.
 - **반복 가능성**: one-off 분석이 아닌 반복 가능한 스크립트 형태로 유지.
+
+## 문서 정합성 유지 규칙
+
+프로젝트의 파일 구조, 공식 실험 설정, 연구 질문, workflow, 실행 진입점, 산출물 위치가 추가/삭제/변경되면, 그 변경이 `canonical` 범위에 영향을 주는지 먼저 판단한다.
+
+다음 항목에 영향이 있으면, 코드 변경과 같은 작업 안에서 관련 문서를 함께 갱신한다.
+
+- `AGENTS.md`
+- `README.md`
+- `docs/README.md`
+- 해당 canonical `docs/research/`, `docs/workflow/` 문서
+- 관련 `configs/README.md`, `scripts/README.md`, 실행 스크립트
+
+특히 아래 변경은 문서 동기화를 필수로 한다.
+
+- 공식 모델 비교축 변경
+- 공식 config key 또는 기본값 변경
+- split source-of-truth 변경
+- 파일/폴더 경로 이동 또는 이름 변경
+- 공식 실행 진입점 변경
+- 산출물 저장 위치 변경
+
+반대로 dev-only 실험, local sanity 설정, exploratory 메모, archive 이동처럼 공식 기준에 직접 영향을 주지 않는 변경은 `AGENTS.md`까지 반드시 갱신할 필요는 없다. 이 경우에는 해당 `dev` 또는 `archive` 문서만 갱신한다.
 
 ## 구현 순서 원칙
 

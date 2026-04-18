@@ -1,9 +1,9 @@
 experiment_name: camelsh_hourly_model2_local_sanity
 run_dir: ./runs
 
-train_basin_file: ./configs/basin_splits/local_sanity_train.txt
-validation_basin_file: ./configs/basin_splits/local_sanity_validation.txt
-test_basin_file: ./configs/basin_splits/local_sanity_test.txt
+train_basin_file: ./configs/dev/basin_splits/local_sanity_train.txt
+validation_basin_file: ./configs/dev/basin_splits/local_sanity_validation.txt
+test_basin_file: ./configs/dev/basin_splits/local_sanity_test.txt
 
 train_start_date: "01/01/2000"
 train_end_date: "31/12/2010"

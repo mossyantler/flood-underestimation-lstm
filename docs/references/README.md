@@ -16,13 +16,13 @@
 
 현재 `references/`의 자료는 아래와 같다.
 
-- [`youtube-river-basin-analysis-study-guide.md`](youtube-river-basin-analysis-study-guide.md): 유역 형상, 하천망, 형상계수, 경사, 차수 같은 전통 수문학 개념을 CAMELS basin analysis와 모델 오류 해석 관점으로 연결한 학습 가이드
-- [`research-plan-extreme-flood-underestimation.md`](research-plan-extreme-flood-underestimation.md): 극한 홍수 첨두 과소추정 문제를 중심으로, 변수 정의와 모델 구조까지 풀어서 쓴 상세 연구계획서 초안
-- [`research-proposal-submission-draft.md`](research-proposal-submission-draft.md): 표지와 목차를 포함한 제출용 연구계획서 문체의 초안
+- [`river_basin_analysis_study_guide.md`](river_basin_analysis_study_guide.md): 유역 형상, 하천망, 형상계수, 경사, 차수 같은 전통 수문학 개념을 CAMELS basin analysis와 모델 오류 해석 관점으로 연결한 학습 가이드
 - [`model-hyperparameter-glossary.md`](model-hyperparameter-glossary.md): CAMELS 실험에서 자주 쓰는 하이퍼파라미터와 주요 config 파라미터를 의미, 영향, 현재 값 기준으로 정리한 사전
+
+proposal 초안과 planning snapshot은 현재 `references/`가 아니라 [`../archive/README.md`](../archive/README.md) 아래에서 관리한다.
 
 문서는 보통 아래 순서로 읽는다.
 
-1. 공식 workflow나 연구 설계는 먼저 [`../README.md`](../README.md), [`../workflow/basin.md`](../workflow/basin.md), [`../research/design.md`](../research/design.md)에서 확인한다.
+1. 공식 workflow나 연구 설계는 먼저 [`../README.md`](../README.md), [`../workflow/basin_cohort_definition.md`](../workflow/basin_cohort_definition.md), [`../research/design.md`](../research/design.md)에서 확인한다.
 2. 그 다음 외부 개념을 보강하고 싶을 때 `references/` 노트를 읽는다.
 3. 참고 노트에서 얻은 아이디어가 실제 기준으로 승격되면, 다시 `workflow/`나 `research/` 문서로 옮겨 적는다.

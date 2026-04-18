@@ -98,5 +98,5 @@ inputs
 
 - [`design.md`](design.md): 연구 질문과 비교 가설
 - [`experiment_protocol.md`](experiment_protocol.md): split, loss, metric, config key
-- [`../workflow/prob_head.md`](../workflow/prob_head.md): quantile head의 직관 설명
+- [`probabilistic_head_guide.md`](probabilistic_head_guide.md): quantile head의 직관 설명
 - [`conceptual_core_design.md`](conceptual_core_design.md): future-work conceptual core 메모

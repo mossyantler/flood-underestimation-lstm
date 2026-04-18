@@ -160,4 +160,4 @@ physics-guided conceptual core를 붙일 경우에는 `Model 2의 probabilistic 
 
 - [`architecture.md`](architecture.md): 현재 논문 범위의 두 모델 구조와 future-work 메모
 - [`experiment_protocol.md`](experiment_protocol.md): 실행 규범과 config key
-- [`literature-review.md`](literature-review.md): 관련 문헌 배경
+- [`literature_review.md`](literature_review.md): 관련 문헌 배경

@@ -30,16 +30,16 @@ head: regression
 loss: nse
 output_activation: linear
 
-hidden_size: 256
+hidden_size: 128
 initial_forget_bias: 3
-output_dropout: 0.4
+output_dropout: 0.3
 
 optimizer: Adam
 learning_rate:
   0: 1e-3
   10: 5e-4
   20: 1e-4
-batch_size: 512
+batch_size: 256
 epochs: 30
 clip_gradient_norm: 1
 

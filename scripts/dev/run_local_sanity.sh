@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
 
 if [ ! -d ".venv" ]; then
@@ -24,7 +24,7 @@ if [ ! -d "$DATA_DIR/time_series" ]; then
   exit 1
 fi
 
-CONFIG_FILE="$ROOT_DIR/configs/camelsh_hourly_model1_drbc_holdout_broad.yml"
+CONFIG_FILE="$ROOT_DIR/configs/dev/camelsh_hourly_model1_local_sanity.yml"
 TMP_CONFIG=""
 
 cleanup() {
@@ -68,7 +68,7 @@ PY
   CONFIG_FILE="$TMP_CONFIG"
 fi
 
-echo "Running Model 1 broad config: $CONFIG_FILE"
+echo "Running local sanity config: $CONFIG_FILE"
 
 python -m neuralhydrology.nh_run train \
   --config-file "$CONFIG_FILE"

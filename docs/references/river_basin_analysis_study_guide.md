@@ -278,7 +278,7 @@
 
 ## 관련 문서
 
-- basin subset과 공간 기준은 [`../workflow/basin.md`](../workflow/basin.md)에서 다룬다.
-- source CSV와 정적 속성 해석은 [`../workflow/basin_explain.md`](../workflow/basin_explain.md)에서 다룬다.
+- basin subset과 공간 기준은 [`../workflow/basin_cohort_definition.md`](../workflow/basin_cohort_definition.md)에서 다룬다.
+- source CSV와 정적 속성 해석은 [`../workflow/basin_source_csv_guide.md`](../workflow/basin_source_csv_guide.md)에서 다룬다.
 - 현재 screening workflow 상태는 [`../workflow/basin_analysis.md`](../workflow/basin_analysis.md)에서 다룬다.
 - 공식 screening 규범은 [`../workflow/basin_screening_method.md`](../workflow/basin_screening_method.md)에서 다룬다.

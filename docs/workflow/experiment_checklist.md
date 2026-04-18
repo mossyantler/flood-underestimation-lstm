@@ -37,24 +37,24 @@
   첫 논문 범위에서 무엇을 고정하고 무엇만 바꾸는지가 이미 정리돼 있다.
 
 - [x] basin subset과 holdout / training pool 역할이 문서화되어 있다.
-  기준 문서는 [`basin.md`](basin.md)다.
+  기준 문서는 [`basin_cohort_definition.md`](basin_cohort_definition.md)다.
 
 - [x] probabilistic head의 개념 설명 문서가 있다.
-  기준 문서는 [`prob_head.md`](prob_head.md)다.
+  기준 문서는 [`../research/probabilistic_head_guide.md`](../research/probabilistic_head_guide.md)다.
 
 ## 2. Basin / split / data 준비 (4 / 5 완료, 80%)
 
 - [x] DRBC holdout region과 non-DRBC training pool 규칙이 고정되어 있다.
-  관련 설명과 basin 수치는 [`basin.md`](basin.md), [`basin_analysis.md`](basin_analysis.md)에 정리돼 있다.
+  관련 설명과 basin 수치는 [`basin_cohort_definition.md`](basin_cohort_definition.md), [`basin_analysis.md`](basin_analysis.md)에 정리돼 있다.
 
-- [x] broad / natural basin split 파일이 준비되어 있다.
-  현재 `configs/basin_splits/` 아래에 train / validation / test 텍스트 파일이 있고, broad split은 `1722 / 201 / 38`, natural split은 `213 / 35 / 8` basin으로 나뉘어 있다.
+- [x] raw basin split 파일과 공식 prepared split이 모두 준비되어 있다.
+  `configs/basin_splits/` 아래의 원본 membership 파일 기준으로는 broad split이 `1722 / 201 / 38`, natural split이 `213 / 35 / 8` basin으로 나뉘어 있다. 다만 현재 공식 baseline 실행이 실제로 읽는 prepared broad split은 `data/CAMELSH_generic/drbc_holdout_broad/splits/` 아래의 `1705 / 198 / 38`이다.
 
 - [x] prepared generic dataset이 존재한다.
   [`../../data/CAMELSH_generic/drbc_holdout_broad`](../../data/CAMELSH_generic/drbc_holdout_broad) 아래에 `attributes/static_attributes.csv`, `prepare_summary.json`, `splits/`, `time_series/`가 있으며 현재 `time_series`에는 `1961`개 `.nc` 파일이 있다.
 
 - [x] prepared split manifest와 NH-style 데이터 구조가 갖춰져 있다.
-  `splits/split_manifest.csv`, `train.txt`, `validation.txt`, `test.txt`가 모두 존재한다.
+  `splits/split_manifest.csv`, `train.txt`, `validation.txt`, `test.txt`가 모두 존재한다. 공식 실행과 논문 baseline count는 이 prepared split과 manifest를 기준으로 읽는 것이 맞다.
 
 - [ ] basin 분석 / screening 산출물을 로컬에서 바로 열 수 있는 상태는 아니다.
   관련 스크립트와 문서는 있지만, 현재 `output/` 디렉터리는 정리돼 있어서 공식 CSV / JSON / GPKG 산출물은 다시 생성해야 한다.
@@ -68,7 +68,7 @@
   [`../../configs/camelsh_hourly_model2_drbc_holdout_broad.yml`](../../configs/camelsh_hourly_model2_drbc_holdout_broad.yml)이 준비되어 있다.
 
 - [x] 실행 셸 스크립트가 있다.
-  [`../../scripts/run_camelsh_model1_broad.sh`](../../scripts/run_camelsh_model1_broad.sh), [`../../scripts/run_camelsh_model2_broad.sh`](../../scripts/run_camelsh_model2_broad.sh)이 준비되어 있다. 현재 논문 범위에서 공식 실행 대상은 Model 1과 Model 2 broad run이다.
+  [`../../scripts/official/run_broad_multiseed.sh`](../../scripts/official/run_broad_multiseed.sh)로 Model 1과 Model 2 broad run을 multi-seed로 실행할 수 있고, [`../../scripts/dev/run_local_sanity.sh`](../../scripts/dev/run_local_sanity.sh)로 로컬 점검을 수행할 수 있다.
 
 - [ ] 현재 로컬에 공식 학습 run 산출물은 없다.
   `runs/`를 정리한 상태이므로 checkpoint, TensorBoard log, `output.log` 같은 결과물은 다시 생성해야 한다.
@@ -103,7 +103,7 @@
 ## 관련 문서
 
 - 실험 규범: [`../research/experiment_protocol.md`](../research/experiment_protocol.md)
-- basin subset 기준: [`basin.md`](basin.md)
+- basin subset 기준: [`basin_cohort_definition.md`](basin_cohort_definition.md)
 - basin analysis 현재 상태: [`basin_analysis.md`](basin_analysis.md)
 - event 정의 규칙: [`event_response_spec.md`](event_response_spec.md)
-- probabilistic head 설명: [`prob_head.md`](prob_head.md)
+- probabilistic head 설명: [`../research/probabilistic_head_guide.md`](../research/probabilistic_head_guide.md)

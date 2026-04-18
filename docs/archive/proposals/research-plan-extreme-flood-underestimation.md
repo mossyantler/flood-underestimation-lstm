@@ -2,7 +2,7 @@
 
 ## 문서 목적
 
-이 문서는 CAMELS 프로젝트의 연구계획서를 `비전공 검토자도 읽을 수 있는 수준`으로 정리한 참고 노트다. 공식 실험 규칙과 구현 source of truth는 [`../research/design.md`](../research/design.md), [`../research/architecture.md`](../research/architecture.md), [`../research/experiment_protocol.md`](../research/experiment_protocol.md)에 두고, 이 문서는 그 내용을 계획서 문체와 설명 중심 구조로 다시 풀어 적는다.
+이 문서는 CAMELS 프로젝트의 연구계획서를 `비전공 검토자도 읽을 수 있는 수준`으로 정리한 참고 노트다. 공식 실험 규칙과 구현 source of truth는 [`../../research/design.md`](../../research/design.md), [`../../research/architecture.md`](../../research/architecture.md), [`../../research/experiment_protocol.md`](../../research/experiment_protocol.md)에 두고, 이 문서는 그 내용을 계획서 문체와 설명 중심 구조로 다시 풀어 적는다.
 
 이 문서의 핵심 질문은 하나다. `왜 기존 deterministic multi-basin LSTM은 극한 홍수에서 첨두 유량을 낮게 예측하는가, 그리고 그 문제를 probabilistic head가 얼마나 줄일 수 있는가`이다. physics-guided conceptual core는 현재 논문 범위 밖의 future work로 둔다.
 
@@ -293,7 +293,7 @@ Extreme-event holdout은 `아주 큰 홍수 이벤트를 일부러 학습에서 
 
 쉽게 말하면 이런 생각이다. 모델이 평소 홍수는 잘 맞추더라도, 아주 큰 홍수는 학습에서 거의 본 적이 없으면 peak를 다시 눌러서 예측할 수 있다. Extreme-event holdout은 바로 그 약점을 일부러 드러내기 위한 시험이다.
 
-Event 정의는 [`../workflow/event_response_spec.md`](../workflow/event_response_spec.md)를 따른다. 핵심 규칙은 아래와 같다.
+Event 정의는 [`../../workflow/event_response_spec.md`](../../workflow/event_response_spec.md)를 따른다. 핵심 규칙은 아래와 같다.
 
 1. 각 basin에서 먼저 유난히 큰 유량을 고르기 위해 기본 threshold를 hourly discharge의 $Q_{0.99}$로 둔다. 이는 해당 basin의 전체 시간 중 상위 1% 정도에 해당하는 높은 유량만 우선 보겠다는 뜻이다.
 2. 어떤 basin은 $Q_{0.99}$를 넘는 event가 너무 적을 수 있다. 이 경우 표본이 부족해지므로 $Q_{0.98}$, 그래도 부족하면 $Q_{0.95}$까지 완화해서 최소한 분석 가능한 event 수를 확보한다.
@@ -425,7 +425,7 @@ Model 2 broad config의 주요값은 아래와 같다.
 3. event response table을 만들고 observed high-flow relevance를 계산한다.
 4. broad cohort와 natural cohort를 분리해 sensitivity를 본다.
 
-Event table은 [`../workflow/event_response_spec.md`](../workflow/event_response_spec.md)를 따른다. 여기서 계산하는 주요 변수는 아래와 같다.
+Event table은 [`../../workflow/event_response_spec.md`](../../workflow/event_response_spec.md)를 따른다. 여기서 계산하는 주요 변수는 아래와 같다.
 
 | 변수 | 의미 |
 | --- | --- |
@@ -555,7 +555,7 @@ CAMELSH hourly + attributes
 
 공식 기준 문서는 아래를 우선한다.
 
-- [`../research/design.md`](../research/design.md)
-- [`../research/architecture.md`](../research/architecture.md)
-- [`../research/experiment_protocol.md`](../research/experiment_protocol.md)
-- [`../workflow/event_response_spec.md`](../workflow/event_response_spec.md)
+- [`../../research/design.md`](../../research/design.md)
+- [`../../research/architecture.md`](../../research/architecture.md)
+- [`../../research/experiment_protocol.md`](../../research/experiment_protocol.md)
+- [`../../workflow/event_response_spec.md`](../../workflow/event_response_spec.md)
