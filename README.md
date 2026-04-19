@@ -8,13 +8,14 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 
 ```text
 .
-├── agents.md            # 에이전트 작업 맥락
+├── AGENTS.md            # 에이전트 작업 맥락
 ├── basins/
 │   ├── drbc_boundary/   # DRBC Delaware River Basin 공식 경계
 │   ├── huc8_delware/    # 초기 HUC8 exploratory shapefile
 │   └── CAMELSH_data/    # CAMELSH shapefiles / attributes 추출본
 ├── configs/
 │   ├── README.md        # canonical/dev config 역할 설명
+│   ├── pilot/           # scaling pilot 전용 config / split
 │   ├── dev/             # local sanity 등 개발용 설정
 │   └── basin_splits/    # raw split membership file
 ├── data/CAMELS_US/
@@ -28,8 +29,9 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 ├── output/
 │   └── basin/           # basin 관련 산출물
 ├── scripts/
-│   ├── README.md        # canonical/official/dev script 역할 설명
+│   ├── README.md        # canonical/official/pilot/dev script 역할 설명
 │   ├── official/        # 공식 실험 실행 진입점
+│   ├── pilot/           # scaling pilot 실행 진입점
 │   ├── dev/             # 개발용 실행 진입점
 │   └── check_repo_integrity.py  # 간단한 저장소 무결성 검사
 └── runs/                # (gitignored) 학습 출력
@@ -57,6 +59,10 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 - [`build_drbc_basin_analysis_table.py`](/Users/jang-minyeop/Project/CAMELS/scripts/build_drbc_basin_analysis_table.py): selected 154 basin에 CAMELSH static attributes를 병합해 basin analysis table을 만든다.
 - [`build_camelsh_non_drbc_training_pool.py`](/Users/jang-minyeop/Project/CAMELS/scripts/build_camelsh_non_drbc_training_pool.py): DRBC 밖의 CAMELSH basin을 quality gate로 다시 걸러 학습용 global training pool을 만든다. 좌표/경계 source 차이로 인한 작은 overlap은 `overlap_ratio <= 0.1`까지 허용한다.
 - [`build_drbc_holdout_split_files.py`](/Users/jang-minyeop/Project/CAMELS/scripts/build_drbc_holdout_split_files.py): non-DRBC training pool을 train/validation으로 나누고, DRBC holdout test basin file을 만든다.
+- [`build_scaling_pilot_splits.py`](/Users/jang-minyeop/Project/CAMELS/scripts/pilot/build_scaling_pilot_splits.py): raw broad non-DRBC pool `1923`을 source-of-truth로 두고, prepared broad train/validation basin에서 HUC02-stratified scaling pilot subset `100 / 300 / 600`을 생성한다.
+- [`build_scaling_pilot_attribute_diagnostics.py`](/Users/jang-minyeop/Project/CAMELS/scripts/pilot/build_scaling_pilot_attribute_diagnostics.py): prepared executable pool 대비 pilot subset의 `area`, `slope`, `aridity`, `snow_fraction`, `soil_depth`, `permeability`, `forest_fraction`, `baseflow_index` 분포 보존 정도를 정량 비교한다.
+- [`plot_scaling_pilot_diagnostics.py`](/Users/jang-minyeop/Project/CAMELS/scripts/pilot/plot_scaling_pilot_diagnostics.py): distribution diagnostics CSV를 해석하기 쉬운 summary line chart, attribute heatmap, combined mismatch ranking plot으로 변환한다.
+- [`run_deterministic_scaling_pilot.sh`](/Users/jang-minyeop/Project/CAMELS/scripts/pilot/run_deterministic_scaling_pilot.sh): deterministic Model 1 scaling pilot을 size/seed별로 실행한다. pilot run은 `./runs/scaling_pilot` 아래에 저장돼 official broad run과 섞이지 않는다. `NH_RESUME=1`로 checkpoint resume을, `NH_SAVE_ALL_OUTPUT=False`나 `NH_SAVE_VALIDATION_RESULTS=False`로 storage-constrained validation override를 줄 수 있다.
 - [`camelsh_drbc_mapping.csv`](/Users/jang-minyeop/Project/CAMELS/output/basin/drbc_camelsh/camelsh_drbc_mapping.csv): CAMELSH 전체 9008 basin 평가 결과다.
 - [`camelsh_drbc_selected.csv`](/Users/jang-minyeop/Project/CAMELS/output/basin/drbc_camelsh/camelsh_drbc_selected.csv): 현재 공식 basin candidate table이다.
 - [`drbc_camelsh_layers.gpkg`](/Users/jang-minyeop/Project/CAMELS/output/basin/drbc_camelsh/drbc_camelsh_layers.gpkg): QGIS 기본 확인 패키지다.
@@ -71,12 +77,19 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 - [`drbc_holdout_train_natural.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_train_natural.txt), [`drbc_holdout_validation_natural.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_validation_natural.txt), [`drbc_holdout_test_drbc_quality_natural.txt`](/Users/jang-minyeop/Project/CAMELS/configs/basin_splits/drbc_holdout_test_drbc_quality_natural.txt): natural 원본 basin membership file이다.
 - [`drbc_holdout_split_summary.json`](/Users/jang-minyeop/Project/CAMELS/output/basin/splits/drbc_holdout/drbc_holdout_split_summary.json): global training / regional holdout raw split 요약이다.
 - [`split_manifest.csv`](/Users/jang-minyeop/Project/CAMELS/data/CAMELSH_generic/drbc_holdout_broad/splits/split_manifest.csv): broad split 후보 basin의 prepared split 상태와 exclusion reason을 기록한 manifest다. 공식 실행 기준은 이 manifest와 prepared split이다.
+- [`configs/pilot/basin_splits/scaling_pilot_summary.json`](/Users/jang-minyeop/Project/CAMELS/configs/pilot/basin_splits/scaling_pilot_summary.json): deterministic scaling pilot subset 생성 요약이다. raw broad pool `1923`과 prepared executable pool `1903`을 함께 기록한다.
+- [`configs/pilot/basin_splits/prepared_pool_manifest.csv`](/Users/jang-minyeop/Project/CAMELS/configs/pilot/basin_splits/prepared_pool_manifest.csv): pilot이 실제로 샘플링한 prepared non-DRBC broad pool manifest다. subset manifest와 같은 static attribute 컬럼을 포함한다.
+- [`configs/pilot/diagnostics/attribute_distribution_scope_summary.csv`](/Users/jang-minyeop/Project/CAMELS/configs/pilot/diagnostics/attribute_distribution_scope_summary.csv): prepared pool 대비 subset별 static attribute 분포 보존 요약이다.
+- [`configs/pilot/diagnostics/plots/plot_manifest.json`](/Users/jang-minyeop/Project/CAMELS/configs/pilot/diagnostics/plots/plot_manifest.json): scaling pilot diagnostics를 빠르게 읽기 위한 SVG plot 목록과 해석 메모다.
+- [`configs/pilot/camelsh_hourly_model1_drbc_holdout_scaling_100.yml`](/Users/jang-minyeop/Project/CAMELS/configs/pilot/camelsh_hourly_model1_drbc_holdout_scaling_100.yml), [`configs/pilot/camelsh_hourly_model1_drbc_holdout_scaling_300.yml`](/Users/jang-minyeop/Project/CAMELS/configs/pilot/camelsh_hourly_model1_drbc_holdout_scaling_300.yml), [`configs/pilot/camelsh_hourly_model1_drbc_holdout_scaling_600.yml`](/Users/jang-minyeop/Project/CAMELS/configs/pilot/camelsh_hourly_model1_drbc_holdout_scaling_600.yml): deterministic scaling pilot 전용 config다. broad official config와 별도 경로로 관리한다.
 
 현재 DRBC holdout basin subset은 `outlet_in_drbc == True` 이고 `overlap_ratio_of_basin >= 0.9`인 CAMELSH `154개`다. outlet가 DRBC 안에 들어오는 basin은 `192개`이고, 그중 polygon overlap 기준으로 최종 selected set이 `154개`다.
 
 반대로 학습용 global training pool은 `outlet은 DRBC 밖에 있고`, polygon overlap은 `0.1 이하`까지 허용한 basin으로 잡는다. 이건 CAMELSH polygon과 DRBC 경계 source 차이 때문에 생기는 작은 시각적 겹침을 포함하기 위한 tolerant rule이다. 현재 기준으로 tolerant outside basin은 `8800개`이고, 이 중 quality gate를 통과한 학습 basin은 `1923개`, hydromod risk가 없는 natural training basin은 `248개`다. 실제 tolerant overlap으로 추가된 quality-pass basin은 `3개`뿐이다.
 
 현재 기본 split은 `global training + DRBC regional holdout evaluation` 구조다. 다만 여기서 숫자는 두 층으로 읽어야 한다. `configs/basin_splits/` 아래의 원본 broad basin split은 `train 1722 / validation 201 / DRBC quality-pass test 38`이고, 공식 baseline이 실제로 읽는 broad prepared split은 `data/CAMELSH_generic/drbc_holdout_broad/splits/` 아래의 `train 1705 / validation 198 / test 38`이다. 즉 논문과 실행 기준에서 우선적으로 참조해야 하는 값은 prepared split과 basin master checklist다. natural 기준 원본 split은 `train 213 / validation 35 / DRBC natural quality-pass test 8`이다.
+
+compute 제약을 반영한 `scaling pilot`은 main comparison과 역할을 분리한다. pilot은 raw non-DRBC broad pool `1923`을 기준으로 basin 수를 줄일 수 있는지 보는 운영 결정용 실험이고, 실제 실행 가능한 subset은 broad prepared split manifest를 통과한 `1903` basin에서 HUC02-stratified 방식으로 생성한다. 현재 tracked pilot subset은 `100 / 300 / 600`이고, 모두 DRBC test `38` basin과 `2000–2010 / 2011–2013 / 2014–2016` 시간 구간을 유지한다. 다만 basin-count 선택은 DRBC test metric이 아니라 `non-DRBC validation 성능 + static attribute distribution diagnostics + compute cost`를 함께 보고 내린다. 이 pilot 결과는 최종 basin 수를 정하기 위한 근거로만 쓰며, 논문의 공식 `Model 1 vs Model 2` 본 비교 결과로 직접 보고하지 않는다.
 
 현재 기준은 `DRBC boundary + CAMELSH outlets/selected table`이다. CAMELSH polygon은 selection/QC용으로는 쓰지만, DRBC나 HUC와 같은 공식 경계 polygon으로 보지는 않는다.
 
@@ -85,9 +98,9 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 ## 관련 문서
 
 - [`docs/workflow/README.md`](docs/workflow/README.md) — basin selection, screening, event workflow의 읽기 순서와 구조 지도
-- [`agents.md`](agents.md) — 에이전트 작업 맥락 및 프로젝트 규칙
+- [`AGENTS.md`](AGENTS.md) — 에이전트 작업 맥락 및 프로젝트 규칙
 - [`docs/README.md`](docs/README.md) — `docs/` 전체 문서 인덱스와 카테고리별 읽기 순서
-- [`configs/README.md`](configs/README.md) — canonical config, raw split, dev config의 역할 구분
-- [`scripts/README.md`](scripts/README.md) — official/dev 실행 진입점과 integrity check 안내
+- [`configs/README.md`](configs/README.md) — canonical config, pilot config, raw split, dev config의 역할 구분
+- [`scripts/README.md`](scripts/README.md) — official/pilot/dev 실행 진입점과 integrity check 안내
 - [`docs/workflow/event_response_spec.md`](docs/workflow/event_response_spec.md) — hourly event extraction 규칙, threshold fallback, rainfall window, 출력 스키마
 - [`docs/research/defense_playbook.md`](docs/research/defense_playbook.md) — 설계 디펜드용 예상 질문, 취약점, 우선 보강 항목 정리
