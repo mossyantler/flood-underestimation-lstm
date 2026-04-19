@@ -1,0 +1,22 @@
+{
+  "output_dir": "configs/pilot/diagnostics/plots",
+  "plots": [
+    {
+      "name": "scope_summary_metrics",
+      "path": "configs/pilot/diagnostics/plots/scope_summary_metrics.svg"
+    },
+    {
+      "name": "smd_heatmaps",
+      "path": "configs/pilot/diagnostics/plots/smd_heatmaps.svg"
+    },
+    {
+      "name": "combined_attribute_ranking",
+      "path": "configs/pilot/diagnostics/plots/combined_attribute_ranking.svg"
+    }
+  ],
+  "interpretation_notes": [
+    "scope_summary_metrics: subset size별 max/mean abs standardized mean diff를 비교한다.",
+    "smd_heatmaps: 속성별 standardized mean diff의 방향과 크기를 scope별로 본다.",
+    "combined_attribute_ranking: combined scope에서 어떤 속성이 subset mismatch를 주도하는지 본다."
+  ]
+}

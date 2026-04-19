@@ -1,0 +1,42 @@
+{
+  "prepared_pool_manifest": "configs/pilot/basin_splits/prepared_pool_manifest.csv",
+  "attribute_columns": [
+    "area",
+    "slope",
+    "aridity",
+    "snow_fraction",
+    "soil_depth",
+    "permeability",
+    "forest_fraction",
+    "baseflow_index"
+  ],
+  "subset_summaries": [
+    {
+      "subset_size": 100,
+      "manifest_path": "configs/pilot/basin_splits/scaling_100/manifest.csv",
+      "combined_count": 100,
+      "train_count": 90,
+      "validation_count": 10
+    },
+    {
+      "subset_size": 300,
+      "manifest_path": "configs/pilot/basin_splits/scaling_300/manifest.csv",
+      "combined_count": 300,
+      "train_count": 269,
+      "validation_count": 31
+    },
+    {
+      "subset_size": 600,
+      "manifest_path": "configs/pilot/basin_splits/scaling_600/manifest.csv",
+      "combined_count": 600,
+      "train_count": 538,
+      "validation_count": 62
+    }
+  ],
+  "outputs": {
+    "stats_csv": "configs/pilot/diagnostics/attribute_distribution_stats.csv",
+    "comparisons_csv": "configs/pilot/diagnostics/attribute_distribution_comparisons.csv",
+    "scope_summary_csv": "configs/pilot/diagnostics/attribute_distribution_scope_summary.csv"
+  },
+  "selection_guidance": "Use non-DRBC validation performance together with these attribute-preservation diagnostics and compute cost when choosing the final basin count. Do not choose the pilot basin count from the DRBC holdout test metrics."
+}

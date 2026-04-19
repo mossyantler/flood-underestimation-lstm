@@ -1,0 +1,83 @@
+experiment_name: camelsh_hourly_model1_drbc_holdout_scaling_pilot_600
+run_dir: ./runs/scaling_pilot
+
+train_basin_file: ./configs/pilot/basin_splits/scaling_600/train.txt
+validation_basin_file: ./configs/pilot/basin_splits/scaling_600/validation.txt
+test_basin_file: ./configs/pilot/basin_splits/scaling_600/test.txt
+
+train_start_date: "01/01/2000"
+train_end_date: "31/12/2010"
+validation_start_date: "01/01/2011"
+validation_end_date: "31/12/2013"
+test_start_date: "01/01/2014"
+test_end_date: "31/12/2016"
+
+seed: 111
+device: cuda:0
+
+validate_every: 1
+validate_n_random_basins: 200
+cache_validation_data: True
+metrics:
+  - NSE
+  - KGE
+  - FHV
+  - Peak-Timing
+  - Peak-MAPE
+
+model: cudalstm
+head: regression
+loss: nse
+output_activation: linear
+
+hidden_size: 128
+initial_forget_bias: 3
+output_dropout: 0.3
+
+optimizer: Adam
+learning_rate:
+  0: 1e-3
+  10: 5e-4
+  20: 1e-4
+batch_size: 256
+epochs: 30
+clip_gradient_norm: 1
+
+predict_last_n: 24
+seq_length: 336
+
+num_workers: 8
+log_interval: 20
+log_tensorboard: True
+log_n_figures: 0
+save_all_output: True
+save_weights_every: 1
+save_validation_results: True
+
+dataset: generic
+data_dir: ./data/CAMELSH_generic/drbc_holdout_broad
+dynamic_inputs:
+  - Rainf
+  - Tair
+  - PotEvap
+  - SWdown
+  - Qair
+  - PSurf
+  - Wind_E
+  - Wind_N
+  - LWdown
+  - CAPE
+  - CRainf_frac
+static_attributes:
+  - area
+  - slope
+  - aridity
+  - snow_fraction
+  - soil_depth
+  - permeability
+  - forest_fraction
+  - baseflow_index
+target_variables:
+  - Streamflow
+clip_targets_to_zero:
+  - Streamflow
