@@ -49,7 +49,7 @@
 
 - [`research/architecture.md`](research/architecture.md): 현재 논문 범위의 deterministic / probabilistic 두 모델 구조와 future-work conceptual core 메모
 - [`research/design.md`](research/design.md): 연구 질문, split, loss, 평가 지표를 포함한 실험 설계
-- [`research/experiment_protocol.md`](research/experiment_protocol.md): split 생성 규칙, config key 대응, built-in/custom metric 경계, run 산출물 규칙을 한 번에 묶은 실행 프로토콜
+- [`research/experiment_protocol.md`](research/experiment_protocol.md): split 생성 규칙, config key 대응, built-in/custom metric 경계, run 산출물 규칙과 scaling pilot의 운영 경계 및 basin-count 선택 기준을 한 번에 묶은 실행 프로토콜
 - [`research/literature_review.md`](research/literature_review.md): related work 서술 방향과 보강이 필요한 선행연구 축 정리
 - [`research/defense_playbook.md`](research/defense_playbook.md): 설계 디펜드용 예상 질문, 취약점, 권장 설계 변경안 정리
 
@@ -65,4 +65,4 @@
 - [`archive/proposals/research-plan-extreme-flood-underestimation.md`](archive/proposals/research-plan-extreme-flood-underestimation.md): 비전공 검토자 기준으로 다시 풀어 쓴 상세 연구계획서 초안과 Markdown 구조도 작성 팁
 - [`archive/proposals/research-proposal-submission-draft.md`](archive/proposals/research-proposal-submission-draft.md): 표지, 목차, 본문 구성을 갖춘 제출용 연구계획서 초안
 
-에이전트 작업 맥락은 루트의 [`AGENTS.md`](../agents.md)를 참조한다.
+에이전트 작업 맥락은 루트의 [`AGENTS.md`](../AGENTS.md)를 참조한다.

@@ -39,6 +39,7 @@ flowchart TD
 
     C3 -. analysis path .-> E["basin_analysis.md"]
     D4 -. split and training path .-> F["configs/basin_splits/*"]
+    D4 -. scaling pilot path .-> G["configs/pilot/basin_splits/scaling_*"]
 ```
 
 ## 현재 공식 기준
@@ -117,6 +118,8 @@ flowchart TD
 
 현재 전체 basin checklist는 이 `minimum quality gate`를 1차 스크린으로 기록하고, 그다음 broad split 후보에 대해서만 `split-level usability gate`를 적용한다. 즉 `except`는 quality failure가 아니라, quality는 통과했지만 split 기간 안에서 target `Streamflow` 유효값이 부족해 broad prepared split에서 제외된 basin을 뜻한다.
 
+compute 제약을 반영한 scaling pilot은 이 training pool을 `source-of-truth`로 유지하되, 실행 가능한 subset은 broad prepared split manifest를 통해 다시 잠근다. 즉 pilot의 설명 단위는 raw non-DRBC broad pool `1923`이지만, 실제 tracked subset은 broad prepared train/validation `1903` basin에서 HUC02-stratified 방식으로 뽑는다. 이건 `전국 범위 frame을 유지한 채 basin 수를 어디까지 줄일지`를 정하기 위한 운영 결정용 단계이고, 공식 `Model 1 vs Model 2` 본 비교를 대체하지 않는다. 현재는 subset manifest에 핵심 static attribute를 같이 기록하고, prepared pool 대비 distribution diagnostics를 별도로 계산한다.
+
 ## CAMELSH polygon 해석 원칙
 
 ```mermaid
@@ -157,6 +160,10 @@ flowchart LR
 - [`build_drbc_basin_analysis_table.py`](../../scripts/build_drbc_basin_analysis_table.py)
 - [`build_camelsh_non_drbc_training_pool.py`](../../scripts/build_camelsh_non_drbc_training_pool.py)
 - [`build_drbc_holdout_split_files.py`](../../scripts/build_drbc_holdout_split_files.py)
+- [`../../scripts/pilot/build_scaling_pilot_splits.py`](../../scripts/pilot/build_scaling_pilot_splits.py)
+- [`../../scripts/pilot/build_scaling_pilot_attribute_diagnostics.py`](../../scripts/pilot/build_scaling_pilot_attribute_diagnostics.py)
+- [`../../scripts/pilot/plot_scaling_pilot_diagnostics.py`](../../scripts/pilot/plot_scaling_pilot_diagnostics.py)
+- [`../../scripts/pilot/run_deterministic_scaling_pilot.sh`](../../scripts/pilot/run_deterministic_scaling_pilot.sh)
 
 HUC exploratory 스크립트들은 필요하면 다시 사용할 수 있지만, 현재 basin analysis의 공식 시작점은 아니다.
 
@@ -174,8 +181,11 @@ HUC exploratory 스크립트들은 필요하면 다시 사용할 수 있지만, 
 
 - broad: [`drbc_holdout_train_broad.txt`](../../configs/basin_splits/drbc_holdout_train_broad.txt), [`drbc_holdout_validation_broad.txt`](../../configs/basin_splits/drbc_holdout_validation_broad.txt), [`drbc_holdout_test_drbc_quality.txt`](../../configs/basin_splits/drbc_holdout_test_drbc_quality.txt)
 - natural: [`drbc_holdout_train_natural.txt`](../../configs/basin_splits/drbc_holdout_train_natural.txt), [`drbc_holdout_validation_natural.txt`](../../configs/basin_splits/drbc_holdout_validation_natural.txt), [`drbc_holdout_test_drbc_quality_natural.txt`](../../configs/basin_splits/drbc_holdout_test_drbc_quality_natural.txt)
+- scaling pilot: [`../../configs/pilot/basin_splits/scaling_100/`](../../configs/pilot/basin_splits/scaling_100), [`../../configs/pilot/basin_splits/scaling_300/`](../../configs/pilot/basin_splits/scaling_300), [`../../configs/pilot/basin_splits/scaling_600/`](../../configs/pilot/basin_splits/scaling_600)
 
 현재 broad prepared split은 [`../../data/CAMELSH_generic/drbc_holdout_broad/splits/train.txt`](../../data/CAMELSH_generic/drbc_holdout_broad/splits/train.txt), [`../../data/CAMELSH_generic/drbc_holdout_broad/splits/validation.txt`](../../data/CAMELSH_generic/drbc_holdout_broad/splits/validation.txt), [`../../data/CAMELSH_generic/drbc_holdout_broad/splits/test.txt`](../../data/CAMELSH_generic/drbc_holdout_broad/splits/test.txt)를 사용한다. 이 prepared split은 `train 720`, `validation 168`, `test 168`의 minimum valid `Streamflow` count 기준을 broad split 후보에 적용한 결과다.
+
+현재 scaling pilot split은 broad prepared split의 test basin `38개`와 시간 구간을 그대로 유지한 채, non-DRBC broad train/validation basin만 `100 / 300 / 600` 규모로 줄인 deterministic pilot이다. tracked subset summary는 [`../../configs/pilot/basin_splits/scaling_pilot_summary.json`](../../configs/pilot/basin_splits/scaling_pilot_summary.json)에 두고, prepared pool manifest와 static attribute diagnostics는 [`../../configs/pilot/basin_splits/prepared_pool_manifest.csv`](../../configs/pilot/basin_splits/prepared_pool_manifest.csv), [`../../configs/pilot/diagnostics/attribute_distribution_scope_summary.csv`](../../configs/pilot/diagnostics/attribute_distribution_scope_summary.csv)에 둔다. 해석용 plot 목록은 [`../../configs/pilot/diagnostics/plots/plot_manifest.json`](../../configs/pilot/diagnostics/plots/plot_manifest.json)에 두고, pilot basin 수는 DRBC test metric이 아니라 non-DRBC validation 결과와 이 diagnostics를 함께 보고 결정한다.
 
 ## 관련 문서
 
