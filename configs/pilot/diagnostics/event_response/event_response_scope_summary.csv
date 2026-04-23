@@ -1,0 +1,4 @@
+subset_size,scope,metric_with_max_abs_smd,max_abs_standardized_mean_diff,mean_abs_standardized_mean_diff,num_metrics_abs_smd_gt_0_10,num_metrics_abs_smd_gt_0_25,num_metrics_abs_smd_gt_0_50
+300,combined,event_duration_median_hours,0.0584254929214072,0.028338488270998902,0,0,0
+300,train,event_duration_median_hours,0.05671672149372236,0.030050036404945583,0,0,0
+300,validation,rbi,0.08906655572558118,0.0491901513624478,0,0,0

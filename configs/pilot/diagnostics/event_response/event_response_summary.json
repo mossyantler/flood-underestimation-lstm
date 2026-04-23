@@ -1,0 +1,33 @@
+{
+  "prepared_pool_manifest": "configs/pilot/basin_splits/prepared_pool_manifest.csv",
+  "prepared_pool_count": 1903,
+  "subset_summaries": [
+    {
+      "subset_size": 300,
+      "manifest_path": "configs/pilot/basin_splits/scaling_300/manifest.csv",
+      "combined_count": 300,
+      "train_count": 269,
+      "validation_count": 31,
+      "subset_event_table_path": "configs/pilot/diagnostics/event_response/scaling_300_event_response_table.csv",
+      "subset_basin_summary_path": "configs/pilot/diagnostics/event_response/scaling_300_event_response_basin_summary.csv",
+      "subset_skipped_path": "configs/pilot/diagnostics/event_response/scaling_300_event_response_skipped_basins.csv"
+    }
+  ],
+  "observed_metric_columns": [
+    "annual_peak_unit_area_median",
+    "q99_event_frequency",
+    "rbi",
+    "unit_area_peak_median",
+    "rising_time_median_hours",
+    "event_duration_median_hours",
+    "event_count",
+    "annual_peak_years"
+  ],
+  "outputs": {
+    "prepared_pool_basin_summary_csv": "configs/pilot/diagnostics/event_response/prepared_pool_event_response_basin_summary.csv",
+    "stats_csv": "configs/pilot/diagnostics/event_response/event_response_distribution_stats.csv",
+    "comparisons_csv": "configs/pilot/diagnostics/event_response/event_response_distribution_comparisons.csv",
+    "scope_summary_csv": "configs/pilot/diagnostics/event_response/event_response_scope_summary.csv"
+  },
+  "selection_guidance": "Use non-DRBC validation performance together with static-attribute diagnostics, these observed-flow event-response diagnostics, and compute cost when deciding whether a fixed scaling subset preserves training-pool representativeness."
+}

@@ -1,0 +1,138 @@
+{
+  "prepared_pool_manifest": "configs/pilot/basin_splits/prepared_pool_manifest.csv",
+  "prepared_event_summary": "configs/pilot/diagnostics/event_response/prepared_pool_event_response_basin_summary.csv",
+  "subset_manifest": "configs/pilot/basin_splits/scaling_300/manifest.csv",
+  "subset_size": 300,
+  "subset_train_size": 269,
+  "subset_validation_size": 31,
+  "num_replicates": 200,
+  "random_seed": 20260421,
+  "outputs": {
+    "actual_scope_summary_csv": "configs/pilot/diagnostics/permutation_benchmark/subset300_actual_scope_summary.csv",
+    "replicate_scope_summary_csv": "configs/pilot/diagnostics/permutation_benchmark/subset300_random_replicate_scope_summary.csv",
+    "benchmark_summary_csv": "configs/pilot/diagnostics/permutation_benchmark/subset300_random_benchmark_summary.csv"
+  },
+  "interpretation_note": "Lower mismatch statistics are better. lower_tail_percentile near 0 means the adopted subset is unusually well matched to the prepared pool relative to random same-size subsets.",
+  "key_benchmark_rows": [
+    {
+      "domain": "event_response",
+      "scope": "combined",
+      "statistic": "max_abs_standardized_mean_diff",
+      "actual_value": 0.0584254929214072,
+      "random_p50": 0.07602082177974734,
+      "random_p95": 0.1407456088698706,
+      "lower_tail_percentile": 20.0,
+      "outperforms_random_fraction": 80.0
+    },
+    {
+      "domain": "event_response",
+      "scope": "combined",
+      "statistic": "mean_abs_standardized_mean_diff",
+      "actual_value": 0.02833848827099885,
+      "random_p50": 0.03851940775681337,
+      "random_p95": 0.07539454791016079,
+      "lower_tail_percentile": 21.5,
+      "outperforms_random_fraction": 78.5
+    },
+    {
+      "domain": "event_response",
+      "scope": "train",
+      "statistic": "max_abs_standardized_mean_diff",
+      "actual_value": 0.05671672149372236,
+      "random_p50": 0.08103660880977091,
+      "random_p95": 0.15091708806228035,
+      "lower_tail_percentile": 14.499999999999998,
+      "outperforms_random_fraction": 85.5
+    },
+    {
+      "domain": "event_response",
+      "scope": "train",
+      "statistic": "mean_abs_standardized_mean_diff",
+      "actual_value": 0.030050036404945614,
+      "random_p50": 0.041446792636291,
+      "random_p95": 0.08010464070777153,
+      "lower_tail_percentile": 21.5,
+      "outperforms_random_fraction": 78.5
+    },
+    {
+      "domain": "event_response",
+      "scope": "validation",
+      "statistic": "max_abs_standardized_mean_diff",
+      "actual_value": 0.08906655572558118,
+      "random_p50": 0.2589442132259654,
+      "random_p95": 0.4301379033780167,
+      "lower_tail_percentile": 3.5000000000000004,
+      "outperforms_random_fraction": 96.5
+    },
+    {
+      "domain": "event_response",
+      "scope": "validation",
+      "statistic": "mean_abs_standardized_mean_diff",
+      "actual_value": 0.04919015136244781,
+      "random_p50": 0.12292810599492779,
+      "random_p95": 0.22738695451585036,
+      "lower_tail_percentile": 2.5,
+      "outperforms_random_fraction": 97.5
+    },
+    {
+      "domain": "static_attributes",
+      "scope": "combined",
+      "statistic": "max_abs_standardized_mean_diff",
+      "actual_value": 0.07089032592308564,
+      "random_p50": 0.0898967581342134,
+      "random_p95": 0.13551430113080537,
+      "lower_tail_percentile": 23.5,
+      "outperforms_random_fraction": 76.5
+    },
+    {
+      "domain": "static_attributes",
+      "scope": "combined",
+      "statistic": "mean_abs_standardized_mean_diff",
+      "actual_value": 0.04671788947976951,
+      "random_p50": 0.04159090014964831,
+      "random_p95": 0.0662566352031267,
+      "lower_tail_percentile": 64.5,
+      "outperforms_random_fraction": 35.5
+    },
+    {
+      "domain": "static_attributes",
+      "scope": "train",
+      "statistic": "max_abs_standardized_mean_diff",
+      "actual_value": 0.07185880829413911,
+      "random_p50": 0.09094084602436467,
+      "random_p95": 0.1467296897356491,
+      "lower_tail_percentile": 19.5,
+      "outperforms_random_fraction": 80.5
+    },
+    {
+      "domain": "static_attributes",
+      "scope": "train",
+      "statistic": "mean_abs_standardized_mean_diff",
+      "actual_value": 0.05025985753049393,
+      "random_p50": 0.04308039909940935,
+      "random_p95": 0.07308760597126107,
+      "lower_tail_percentile": 70.5,
+      "outperforms_random_fraction": 29.5
+    },
+    {
+      "domain": "static_attributes",
+      "scope": "validation",
+      "statistic": "max_abs_standardized_mean_diff",
+      "actual_value": 0.14171575150696783,
+      "random_p50": 0.26841179023325235,
+      "random_p95": 0.4145869994170704,
+      "lower_tail_percentile": 5.5,
+      "outperforms_random_fraction": 94.5
+    },
+    {
+      "domain": "static_attributes",
+      "scope": "validation",
+      "statistic": "mean_abs_standardized_mean_diff",
+      "actual_value": 0.03343865187366157,
+      "random_p50": 0.12555049533149576,
+      "random_p95": 0.20452157968295948,
+      "lower_tail_percentile": 0.0,
+      "outperforms_random_fraction": 100.0
+    }
+  ]
+}

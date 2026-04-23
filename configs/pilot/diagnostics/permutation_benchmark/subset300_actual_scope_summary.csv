@@ -1,0 +1,7 @@
+subset_size,scope,feature_with_max_abs_smd,max_abs_standardized_mean_diff,mean_abs_standardized_mean_diff,num_features_abs_smd_gt_0_10,num_features_abs_smd_gt_0_25,num_features_abs_smd_gt_0_50,domain
+300,combined,event_duration_median_hours,0.0584254929214072,0.02833848827099885,0,0,0,event_response
+300,train,event_duration_median_hours,0.05671672149372236,0.030050036404945614,0,0,0,event_response
+300,validation,rbi,0.08906655572558118,0.04919015136244781,0,0,0,event_response
+300,combined,soil_depth,0.07089032592308564,0.04671788947976951,0,0,0,static_attributes
+300,train,area,0.07185880829413911,0.05025985753049393,0,0,0,static_attributes
+300,validation,soil_depth,0.14171575150696783,0.03343865187366157,1,0,0,static_attributes
