@@ -28,6 +28,7 @@
 | `research/architecture.md`             | 현재 논문 범위의 두 모델 구조와 future-work core 메모를 어떻게 구분할 것인가          | exact split 규칙, config key, run artifact 규칙                    |
 | `research/design.md`                   | 이 연구가 무엇을 묻고 어떤 비교를 왜 하는가                                           | 구현 세부 키 이름, built-in/custom metric 경계                     |
 | `research/experiment_protocol.md`      | 실험을 실제로 어떤 split, loss, metric, config key로 실행할 것인가                    | 개념적 배경의 긴 설명, 학부 수준 직관 가이드                       |
+| `research/result_analysis_protocol.md` | 학습과 test 이후 Model 1/2 산출물을 어떤 순서와 기준으로 비교하고 해석할 것인가       | split 생성 규칙, event extraction 구현 세부, quantile head 직관   |
 | `research/literature_review.md`        | 어떤 문헌을 어디에 왜 인용할 것인가                                                   | 공식 실험 규칙, 현재 코드 상태                                     |
 | `research/defense_playbook.md`         | 교수님/심사 질문에 어떤 논리로 답하고, 어디를 먼저 보강해야 하는가                    | source CSV 세부 사전, 구현 코드 라인별 설명                        |
 | `references/*`                         | 외부 자료를 프로젝트 맥락으로 어떻게 소화할 것인가                                    | 프로젝트의 공식 기준 문서 역할                                     |
@@ -50,6 +51,8 @@
 - [`research/architecture.md`](research/architecture.md): 현재 논문 범위의 deterministic / probabilistic 두 모델 구조와 future-work conceptual core 메모
 - [`research/design.md`](research/design.md): 연구 질문, split, loss, 평가 지표를 포함한 실험 설계
 - [`research/experiment_protocol.md`](research/experiment_protocol.md): split 생성 규칙, config key 대응, built-in/custom metric 경계, run 산출물 규칙과 scaling pilot의 운영 경계 및 basin-count 선택 기준을 한 번에 묶은 실행 프로토콜
+- [`research/result_analysis_protocol.md`](research/result_analysis_protocol.md): Model 1 / Model 2 학습과 DRBC test 이후 raw artifact에서 어떤 표와 그림을 만들고 어떤 순서로 비교·해석할지 정리한 결과 분석 프로토콜
+- [`research/subset300_representativeness_report.md`](research/subset300_representativeness_report.md): adopted `scaling_300` subset이 prepared pool을 얼마나 잘 대표하는지와, 왜 이를 현재 main comparison cohort로 고정하는지를 해석한 보고서
 - [`research/literature_review.md`](research/literature_review.md): related work 서술 방향과 보강이 필요한 선행연구 축 정리
 - [`research/defense_playbook.md`](research/defense_playbook.md): 설계 디펜드용 예상 질문, 취약점, 권장 설계 변경안 정리
 

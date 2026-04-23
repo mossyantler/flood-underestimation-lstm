@@ -179,9 +179,13 @@ snow-related event typing을 위해 아래를 계산한다.
 
 event_mean_temp는 event start부터 event end까지 평균 온도, antecedent_mean_temp_7d는 peak 직전 7일 평균 온도다.
 
+`peak_rain_intensity_6h`는 현재 1차 구현에서는 `peak 포함 직전 6시간 window` 안에서의 최대 hourly rainfall 값으로 둔다. 즉 recent-rain window와 같은 시간 범위를 보되, 총량이 아니라 짧은 고강도 forcing proxy를 따로 기록하는 용도다.
+
 ### 7.4 Season flags
 
 `cold_season_flag`는 peak month가 `11, 12, 1, 2, 3` 중 하나이면 True로 둔다. 이건 초기 proxy 규칙이고, 나중에 SWE 자료가 확보되면 snow-related flag를 더 직접적으로 계산할 수 있다.
+
+`water_year`는 미국 수문학 관례를 따라 `10월~다음 해 9월`을 한 해로 본다. 즉 `10, 11, 12월` peak는 다음 calendar year의 water year로 기록한다.
 
 ## 8. Event response descriptor 정의
 

@@ -30,7 +30,7 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 
 `Model 3` 관련 conceptual core 설계 메모는 남겨 두되, 현재 논문의 공식 비교축에는 포함하지 않는다. 자세한 아키텍처는 [`docs/research/architecture.md`](docs/research/architecture.md) 참조.
 
-`scaling pilot`은 별도 운영 결정용 실험이다. deterministic Model 1만 사용해 전국 범위 stratified subset `100 / 300 / 600`에서 basin 수를 줄여도 되는지 먼저 점검하고, 이 결과로 최종 main comparison basin 수를 정한다. 이 pilot은 본문용 `Model 1 vs Model 2` 공식 비교 결과로 직접 보고하지 않는다. basin 수 선택은 `non-DRBC validation 성능 + static attribute distribution diagnostics + compute cost`를 함께 보고 내리며, DRBC holdout test metric으로 pilot basin 수를 고르지 않는다.
+`scaling pilot`은 basin 수를 정하기 위한 운영 결정용 실험이었다. deterministic Model 1로 전국 범위 stratified subset `100 / 300 / 600`을 비교한 뒤, 현재 compute-constrained main comparison의 non-DRBC train/validation basin 수는 `300`으로 고정한다. 이 선택은 `non-DRBC validation 성능 + static attribute distribution diagnostics + observed-flow event-response diagnostics + random same-size subset benchmark + compute cost`를 함께 보고 내리며, DRBC holdout test metric으로 pilot basin 수를 고르지 않는다. 현재 seed `111`에서 사용한 `scaling_300` subset을 고정하고, remaining seed `222`, `333`의 Model 1 / Model 2도 같은 subset을 그대로 재사용한다.
 
 ---
 
@@ -103,7 +103,7 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 - global training pool 관련 산출물은 `output/basin/camelsh_training_non_drbc/` 아래에 둔다.
 - 현재 선택 규칙은 `outlet_in_drbc == True`와 `overlap_ratio_of_basin >= 0.9`이고, 이에 해당하는 basin은 `154개`다. outlet만 기준으로 보면 `192개`다.
 - 현재 training pool 규칙은 `outlet_in_drbc == False` 이고 `overlap_ratio_of_basin <= 0.1`까지는 source mismatch에 따른 small overlap으로 허용하는 것이다. 그다음 usable year / estimated-flow fraction / boundary confidence quality gate를 적용한다. 현재 quality-pass training basin은 `1923개`다.
-- compute 절감용 scaling pilot은 이 `1923개` raw non-DRBC broad pool을 source-of-truth로 보되, 실행 가능한 subset은 broad prepared split manifest를 통해 `train 1705 / validation 198`의 prepared broad basin에서 뽑는다. 현재 HUC02-stratified pilot subset `100 / 300 / 600`, prepared pool manifest, 그리고 static attribute distribution diagnostics는 `configs/pilot/` 아래에 둔다.
+- compute 절감용 scaling pilot은 이 `1923개` raw non-DRBC broad pool을 source-of-truth로 보되, 실행 가능한 subset은 broad prepared split manifest를 통해 `train 1705 / validation 198`의 prepared broad basin에서 뽑는다. 현재 HUC02-stratified subset `100 / 300 / 600`, prepared pool manifest, static attribute distribution diagnostics, observed-flow event-response diagnostics, random same-size subset benchmark diagnostics는 `configs/pilot/` 아래에 둔다. 현재 채택된 basin 수는 `300`이고, main comparison 실행은 `configs/pilot/basin_splits/scaling_300/`을 train/validation basin file로 고정한다.
 - 현재 `scripts/build_drbc_basin_analysis_table.py`로 static basin analysis table을 생성하며, 결과는 `output/basin/drbc_camelsh/analysis/` 아래에 둔다.
 - 다음 단계는 DRBC holdout basin들에 forcing/streamflow 품질 정보와 event-level 지표를 붙여 flood-prone screening으로 넘어가는 것이다.
 

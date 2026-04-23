@@ -118,7 +118,7 @@ flowchart TD
 
 현재 전체 basin checklist는 이 `minimum quality gate`를 1차 스크린으로 기록하고, 그다음 broad split 후보에 대해서만 `split-level usability gate`를 적용한다. 즉 `except`는 quality failure가 아니라, quality는 통과했지만 split 기간 안에서 target `Streamflow` 유효값이 부족해 broad prepared split에서 제외된 basin을 뜻한다.
 
-compute 제약을 반영한 scaling pilot은 이 training pool을 `source-of-truth`로 유지하되, 실행 가능한 subset은 broad prepared split manifest를 통해 다시 잠근다. 즉 pilot의 설명 단위는 raw non-DRBC broad pool `1923`이지만, 실제 tracked subset은 broad prepared train/validation `1903` basin에서 HUC02-stratified 방식으로 뽑는다. 이건 `전국 범위 frame을 유지한 채 basin 수를 어디까지 줄일지`를 정하기 위한 운영 결정용 단계이고, 공식 `Model 1 vs Model 2` 본 비교를 대체하지 않는다. 현재는 subset manifest에 핵심 static attribute를 같이 기록하고, prepared pool 대비 distribution diagnostics를 별도로 계산한다.
+compute 제약을 반영한 scaling pilot은 이 training pool을 `source-of-truth`로 유지하되, 실행 가능한 subset은 broad prepared split manifest를 통해 다시 잠근다. 즉 pilot의 설명 단위는 raw non-DRBC broad pool `1923`이지만, 실제 tracked subset은 broad prepared train/validation `1903` basin에서 HUC02-stratified 방식으로 뽑는다. 이건 `전국 범위 frame을 유지한 채 basin 수를 어디까지 줄일지`를 정하기 위한 운영 결정용 단계였다. 현재는 subset manifest에 핵심 static attribute를 같이 기록하고, prepared pool 대비 static distribution diagnostics, observed-flow event-response diagnostics, random same-size subset benchmark를 별도로 계산한다. pilot decision은 `300`에서 닫았고, 본 실험은 [`../../configs/pilot/basin_splits/scaling_300/`](../../configs/pilot/basin_splits/scaling_300/)을 train/validation basin file로 고정해 seed `111 / 222 / 333`의 Model 1 / Model 2에 재사용한다.
 
 ## CAMELSH polygon 해석 원칙
 
@@ -162,8 +162,10 @@ flowchart LR
 - [`build_drbc_holdout_split_files.py`](../../scripts/build_drbc_holdout_split_files.py)
 - [`../../scripts/pilot/build_scaling_pilot_splits.py`](../../scripts/pilot/build_scaling_pilot_splits.py)
 - [`../../scripts/pilot/build_scaling_pilot_attribute_diagnostics.py`](../../scripts/pilot/build_scaling_pilot_attribute_diagnostics.py)
+- [`../../scripts/pilot/build_scaling_pilot_event_response_diagnostics.py`](../../scripts/pilot/build_scaling_pilot_event_response_diagnostics.py)
 - [`../../scripts/pilot/plot_scaling_pilot_diagnostics.py`](../../scripts/pilot/plot_scaling_pilot_diagnostics.py)
 - [`../../scripts/pilot/run_deterministic_scaling_pilot.sh`](../../scripts/pilot/run_deterministic_scaling_pilot.sh)
+- [`../../scripts/official/run_subset300_multiseed.sh`](../../scripts/official/run_subset300_multiseed.sh)
 
 HUC exploratory 스크립트들은 필요하면 다시 사용할 수 있지만, 현재 basin analysis의 공식 시작점은 아니다.
 
@@ -175,7 +177,7 @@ HUC exploratory 스크립트들은 필요하면 다시 사용할 수 있지만, 
 - `output/basin/drbc_camelsh/analysis/drbc_selected_basin_analysis_table.csv`
 - `output/basin/drbc_camelsh/analysis/drbc_selected_basin_analysis_summary.json`
 
-다음 작업은 DRBC holdout basin 분석 테이블 위에 forcing/streamflow 품질 정보와 event-level 지표를 붙여 flood-prone screening 단계로 넘어가는 것이다. training pool 쪽은 quality-pass 목록까지만 고정된 상태이고, broad prepared split은 여기에 `split-level usability gate`를 추가로 적용한 결과다. 따라서 이후 실험에서는 raw split count보다 checklist와 prepared split count를 공식 기준으로 읽는 것이 맞다.
+다음 작업은 DRBC holdout basin 분석 테이블 위에 forcing/streamflow 품질 정보와 event-level 지표를 붙여 flood-prone screening 단계로 넘어가는 것이다. training pool 쪽은 quality-pass 목록까지만 고정된 상태이고, broad prepared split은 여기에 `split-level usability gate`를 추가로 적용한 결과다. 따라서 이후 실험에서는 raw split count보다 checklist와 prepared split count를 기준 풀로 읽는 것이 맞다. 다만 현재 compute-constrained main comparison의 직접 실행 split은 broad prepared split 전체가 아니라, 그 prepared pool에서 고정한 `scaling_300` subset이다.
 
 현재 split 파일도 이미 만들어져 있다.
 
@@ -185,7 +187,7 @@ HUC exploratory 스크립트들은 필요하면 다시 사용할 수 있지만, 
 
 현재 broad prepared split은 [`../../data/CAMELSH_generic/drbc_holdout_broad/splits/train.txt`](../../data/CAMELSH_generic/drbc_holdout_broad/splits/train.txt), [`../../data/CAMELSH_generic/drbc_holdout_broad/splits/validation.txt`](../../data/CAMELSH_generic/drbc_holdout_broad/splits/validation.txt), [`../../data/CAMELSH_generic/drbc_holdout_broad/splits/test.txt`](../../data/CAMELSH_generic/drbc_holdout_broad/splits/test.txt)를 사용한다. 이 prepared split은 `train 720`, `validation 168`, `test 168`의 minimum valid `Streamflow` count 기준을 broad split 후보에 적용한 결과다.
 
-현재 scaling pilot split은 broad prepared split의 test basin `38개`와 시간 구간을 그대로 유지한 채, non-DRBC broad train/validation basin만 `100 / 300 / 600` 규모로 줄인 deterministic pilot이다. tracked subset summary는 [`../../configs/pilot/basin_splits/scaling_pilot_summary.json`](../../configs/pilot/basin_splits/scaling_pilot_summary.json)에 두고, prepared pool manifest와 static attribute diagnostics는 [`../../configs/pilot/basin_splits/prepared_pool_manifest.csv`](../../configs/pilot/basin_splits/prepared_pool_manifest.csv), [`../../configs/pilot/diagnostics/attribute_distribution_scope_summary.csv`](../../configs/pilot/diagnostics/attribute_distribution_scope_summary.csv)에 둔다. 해석용 plot 목록은 [`../../configs/pilot/diagnostics/plots/plot_manifest.json`](../../configs/pilot/diagnostics/plots/plot_manifest.json)에 두고, pilot basin 수는 DRBC test metric이 아니라 non-DRBC validation 결과와 이 diagnostics를 함께 보고 결정한다.
+현재 scaling pilot split은 broad prepared split의 test basin `38개`와 시간 구간을 그대로 유지한 채, non-DRBC broad train/validation basin만 `100 / 300 / 600` 규모로 줄인 deterministic pilot이다. tracked subset summary는 [`../../configs/pilot/basin_splits/scaling_pilot_summary.json`](../../configs/pilot/basin_splits/scaling_pilot_summary.json)에 두고, prepared pool manifest와 static attribute diagnostics는 [`../../configs/pilot/basin_splits/prepared_pool_manifest.csv`](../../configs/pilot/basin_splits/prepared_pool_manifest.csv), [`../../configs/pilot/diagnostics/attribute_distribution_scope_summary.csv`](../../configs/pilot/diagnostics/attribute_distribution_scope_summary.csv)에 둔다. observed-flow representativeness diagnostics는 [`../../configs/pilot/diagnostics/event_response/event_response_scope_summary.csv`](../../configs/pilot/diagnostics/event_response/event_response_scope_summary.csv)와 관련 CSV/JSON에 두고, random same-size subset benchmark는 [`../../configs/pilot/diagnostics/permutation_benchmark/subset300_random_benchmark_summary.csv`](../../configs/pilot/diagnostics/permutation_benchmark/subset300_random_benchmark_summary.csv)에 둔다. 현재 `scaling_300`은 event-response 기준 max absolute standardized mean difference가 `combined 0.0584`, `train 0.0567`, `validation 0.0891`로 모두 `0.10` 아래였고, random benchmark에서도 validation mismatch가 대부분의 random subset보다 작았다. 이 결과를 근거로 현재 본 실험의 고정 basin subset으로 채택했다. pilot basin 수는 DRBC test metric이 아니라 non-DRBC validation 결과와 이 diagnostics를 함께 보고 결정한다.
 
 ## 관련 문서
 

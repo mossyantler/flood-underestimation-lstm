@@ -12,6 +12,7 @@ flowchart TD
     B --> C["literature_review.md<br/>related work map"]
     B --> D["architecture.md<br/>model structure"]
     D --> E["experiment_protocol.md<br/>execution rules"]
+    E --> H["result_analysis_protocol.md<br/>comparison and interpretation"]
     D -. support .-> F["probabilistic_head_guide.md"]
     B -. support .-> G["defense_playbook.md"]
 ```
@@ -23,6 +24,7 @@ flowchart TD
 | [`design.md`](design.md) | 연구 질문, 비교축, 평가 방향을 정리한다. |
 | [`architecture.md`](architecture.md) | 현재 논문의 Model 1과 Model 2 구조를 고정하고, 저장소에 남겨 둔 Model 3 개념의 위치를 후속 확장으로 정리한다. |
 | [`experiment_protocol.md`](experiment_protocol.md) | 현재 논문 비교의 split, loss, metric, config 규칙을 고정한다. |
+| [`result_analysis_protocol.md`](result_analysis_protocol.md) | 학습과 test가 끝난 뒤 Model 1과 Model 2 산출물을 어떤 순서와 기준으로 비교하고 해석할지를 고정한다. |
 | [`literature_review.md`](literature_review.md) | related work의 축과 인용 방향을 정리한다. |
 
 ## Support docs
@@ -38,5 +40,6 @@ flowchart TD
 2. [`literature_review.md`](literature_review.md)
 3. [`architecture.md`](architecture.md)
 4. [`experiment_protocol.md`](experiment_protocol.md)
-5. 필요할 때 [`probabilistic_head_guide.md`](probabilistic_head_guide.md)
-6. 방어 논리 점검이 필요할 때 [`defense_playbook.md`](defense_playbook.md)
+5. [`result_analysis_protocol.md`](result_analysis_protocol.md)
+6. 필요할 때 [`probabilistic_head_guide.md`](probabilistic_head_guide.md)
+7. 방어 논리 점검이 필요할 때 [`defense_playbook.md`](defense_playbook.md)
