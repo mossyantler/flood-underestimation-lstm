@@ -205,7 +205,7 @@ class BaseTester(object):
         results = defaultdict(dict)
         all_output = {basin: None for basin in basins}
 
-        pbar = tqdm(basins, file=sys.stdout, disable=self._disable_pbar)
+        pbar = tqdm(basins, file=sys.stdout, disable=self._disable_pbar, dynamic_ncols=True)
         pbar.set_description('# Validation' if self.period == "validation" else "# Evaluation")
 
         for basin in pbar:

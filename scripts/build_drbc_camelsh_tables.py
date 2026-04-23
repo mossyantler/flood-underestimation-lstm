@@ -56,7 +56,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--min-overlap-ratio",
         type=float,
-        default=0.0,
+        default=0.9,
         help="Minimum basin overlap ratio required in addition to outlet_in_drbc.",
     )
     return parser.parse_args()

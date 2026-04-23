@@ -363,7 +363,7 @@ class BaseDataset(Dataset):
 
             if not self._disable_pbar:
                 LOGGER.info("Loading basin data into xarray data set.")
-            for basin in tqdm(self.basins, disable=self._disable_pbar, file=sys.stdout):
+            for basin in tqdm(self.basins, disable=self._disable_pbar, file=sys.stdout, dynamic_ncols=True):
                 df = self._load_basin_data(basin)
 
                 # add columns from dataframes passed as additional data files
@@ -534,7 +534,7 @@ class BaseDataset(Dataset):
         if not self._disable_pbar:
             LOGGER.info("Calculating target variable stds per basin")
         nan_basins = []
-        for basin in tqdm(self.basins, file=sys.stdout, disable=self._disable_pbar):
+        for basin in tqdm(self.basins, file=sys.stdout, disable=self._disable_pbar, dynamic_ncols=True):
 
             obs = xr.sel(basin=basin)[self.cfg.target_variables].to_array().values
             if np.sum(~np.isnan(obs)) > 1:
@@ -558,7 +558,7 @@ class BaseDataset(Dataset):
         # list to collect basins ids of basins without a single training sample
         basins_without_samples = []
         basin_coordinates = xr["basin"].values.tolist()
-        for basin in tqdm(basin_coordinates, file=sys.stdout, disable=self._disable_pbar):
+        for basin in tqdm(basin_coordinates, file=sys.stdout, disable=self._disable_pbar, dynamic_ncols=True):
 
             # store data of each frequency as numpy array of shape [time steps, features] and dates as numpy array of
             # shape (time steps,)
