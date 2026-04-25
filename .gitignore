@@ -6,6 +6,7 @@ __pycache__/
 .codex_tasks/
 .playwright-cli/
 docs/**/CLAUDE.md
+docs/undergrad_explainer/
 runs/
 output/
 tmp/

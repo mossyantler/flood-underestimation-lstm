@@ -3,9 +3,9 @@
 이 디렉토리는 역할에 따라 스크립트를 구분한다.
 
 - 루트 `scripts/`:
-  데이터 준비, basin 분석, screening, integrity check, NeuralHydrology resume run 평탄화 helper처럼 canonical workflow에 직접 연결되는 스크립트를 둔다. 현재 DRBC screening 쪽 canonical 진입점에는 `build_drbc_basin_analysis_table.py`, `build_drbc_streamflow_quality_table.py`, `build_drbc_preliminary_screening_table.py`, `build_drbc_provisional_screening_table.py`, `build_drbc_event_response_table.py`가 포함된다.
+  데이터 준비, basin 분석, screening, integrity check, NeuralHydrology resume run 평탄화 helper처럼 canonical workflow에 직접 연결되는 스크립트를 둔다. 현재 DRBC screening 쪽 canonical 진입점에는 `build_drbc_basin_analysis_table.py`, `build_drbc_streamflow_quality_table.py`, `build_drbc_preliminary_screening_table.py`, `build_drbc_provisional_screening_table.py`, `build_drbc_event_response_table.py`가 포함된다. 서버 all-basin flood analysis용으로는 `build_camelsh_return_period_references.py`, `build_camelsh_event_response_table.py`, `build_camelsh_flood_generation_typing.py`를 순서대로 사용한다.
 - `scripts/official/`:
-  공식 실험 실행 진입점을 둔다. 현재는 full broad runner `run_broad_multiseed.sh`와, compute-constrained main comparison에서 fixed `scaling_300` subset을 seed `111 / 222 / 333`과 Model 1 / Model 2에 공통 적용하는 `run_subset300_multiseed.sh`를 함께 둔다.
+  공식 실험 실행 진입점을 둔다. 현재는 full broad runner `run_broad_multiseed.sh`와, compute-constrained main comparison에서 fixed `scaling_300` subset을 Model 1 / Model 2 seed `111 / 222 / 444`에 공통 적용하는 `run_subset300_multiseed.sh`를 함께 둔다. Model 2 seed `333`은 NaN loss로 실패했고, 공정한 paired-seed 비교를 위해 Model 1 seed `333`도 final aggregate에서 제외한다. `.nc` rsync 이후 서버 유역 분석은 `run_camelsh_flood_analysis.sh`가 return-period reference, event response, flood generation typing을 한 번에 실행한다.
 - `scripts/pilot/`:
   deterministic scaling pilot용 전국 stratified subset 생성, static attribute distribution diagnostics, observed-flow event-response diagnostics, random same-size subset benchmark, diagnostics 해석용 plot 생성, 실행 진입점을 둔다. 이 경로는 basin-count selection의 근거를 남기는 운영 pilot 경로이며, 현재는 채택된 `300` subset의 representativeness audit 근거도 함께 둔다. pilot runner는 `NH_RESUME=1`, `NH_SAVE_ALL_OUTPUT=False`, `NH_SAVE_VALIDATION_RESULTS=False` 같은 환경변수 override를 받아 storage-constrained 실행을 지원하고, resume 후에는 `scripts/flatten_nh_resume_run.py`를 통해 nested `continue_training_from_epoch...` 체인을 자동으로 평탄화한다.
 - `scripts/dev/`:
@@ -15,4 +15,13 @@
 
 ```bash
 uv run scripts/check_repo_integrity.py
+```
+
+서버에서 rsync가 끝난 hourly NetCDF 전체를 분석할 때는 아래처럼 실행한다. Ubuntu 원격 서버에서는 Homebrew PATH를 추가하지 않는다.
+
+```bash
+TIMESERIES_DIR=/path/to/time_series \
+OUTPUT_DIR=output/basin/camelsh_all/flood_analysis \
+WORKERS=2 \
+bash scripts/official/run_camelsh_flood_analysis.sh
 ```

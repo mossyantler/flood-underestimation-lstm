@@ -212,6 +212,8 @@ $$
 
 이 순서를 지키면 classification 모듈이 연구 전체를 잡아먹지 않고, 모델 비교라는 본 주제를 유지할 수 있다.
 
+현재 구현 진입점은 `scripts/build_camelsh_flood_generation_typing.py`다. 입력은 `event_response_table.csv`이고, event별 score와 label은 `flood_generation_event_types.csv`, basin별 dominant/mixture summary는 `flood_generation_basin_summary.csv`로 쓴다. 기본 score는 basin 내부 rank를 사용하고, `dominant_flood_generation_type`은 특정 type share가 `0.6` 이상일 때만 dominant로 두며 그보다 낮으면 `mixture`로 둔다.
+
 ## 11. 참고 문헌과 링크
 
 - Jiang, S., Bevacqua, E., and Zscheischler, J. (2022): River flooding mechanisms and their changes in Europe revealed by explainable machine learning, HESS, 26, 6339–6359. [https://hess.copernicus.org/articles/26/6339/2022/](https://hess.copernicus.org/articles/26/6339/2022/)

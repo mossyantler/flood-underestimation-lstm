@@ -11,7 +11,7 @@ fi
 source .venv/bin/activate
 export PYTHONPATH="$ROOT_DIR/vendor/neuralhydrology${PYTHONPATH:+:$PYTHONPATH}"
 
-SEEDS=(111 222 333)
+SEEDS=(111 222 444)
 MODELS=("model1" "model2")
 
 echo "=== Starting Full Multi-Seed Training (Model 1 & Model 2) ==="

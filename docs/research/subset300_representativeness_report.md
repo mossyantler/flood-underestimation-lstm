@@ -2,7 +2,7 @@
 
 ## 목적
 
-이 문서는 현재 compute-constrained main comparison에서 사용하는 `scaling_300` subset이 prepared non-DRBC executable pool을 얼마나 잘 대표하는지 해석하고, 왜 이 subset을 seed `111 / 222 / 333`의 Model 1 / Model 2에 공통으로 고정해도 되는지를 기록한다.
+이 문서는 현재 compute-constrained main comparison에서 사용하는 `scaling_300` subset이 prepared non-DRBC executable pool을 얼마나 잘 대표하는지 해석하고, 왜 이 subset을 Model 1 / Model 2 seed `111 / 222 / 444`에 공통으로 고정해도 되는지를 기록한다. Model 2 seed `333`은 NaN loss로 중단되었고, 공정한 paired-seed 비교를 위해 완료된 Model 1 seed `333`도 final aggregate에서 제외한다.
 
 핵심 질문은 두 가지다.
 
@@ -152,8 +152,8 @@ static benchmark는 조금 더 혼합적이다.
 이 보고서를 기준으로 현재 운영 결정은 아래처럼 고정한다.
 
 1. 현재 `scaling_300` subset을 compute-constrained main comparison의 공식 train/validation basin file로 유지한다.
-2. 이미 완료된 seed `111`의 Model 1 / Model 2 run은 유효한 본 실험 산출물로 유지한다.
-3. 남은 seed `222`, `333`의 Model 1 / Model 2는 같은 subset을 그대로 재사용한다.
+2. 완료된 Model 1 seed `111 / 222 / 444`과 Model 2 seed `111 / 222` run은 유효한 본 실험 산출물로 유지한다.
+3. Model 2 seed `333`은 NaN loss로 중단되었으므로, replacement seed `444`도 같은 subset을 그대로 재사용한다. 완료된 Model 1 seed `333`은 paired-seed fairness를 위해 final aggregate에서 제외한다.
 4. 이후 성능 해석은 `subset300 main comparison`으로 따로 부르고, broad prepared split 전체와는 구분해 기록한다.
 
 공식 실행 진입점은 [`../../scripts/official/run_subset300_multiseed.sh`](../../scripts/official/run_subset300_multiseed.sh)다.

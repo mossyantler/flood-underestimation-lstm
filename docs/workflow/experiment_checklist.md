@@ -4,7 +4,7 @@
 
 이 문서는 첫 논문 범위의 CAMELSH 실험 절차를 `실행 체크리스트` 형태로 정리하고, 현재 저장소 기준으로 어디까지 완료되었는지 추적하기 위한 문서다.
 
-현재 상태 평가는 `2026-04-21` 로컬 워크트리를 기준으로 한다. 특히 `runs/`, `output/`, `tmp/` 같은 생성 산출물은 수시로 정리하거나 다시 생성하므로, `코드/설정은 준비되어 있어도 로컬 산출물이 현재 없는 단계`는 완료로 세지지 않는다.
+현재 상태 평가는 `2026-04-25` 로컬 워크트리와 Elice 서버 실행 준비 상태를 기준으로 한다. 특히 `runs/`, `output/`, `tmp/` 같은 생성 산출물은 수시로 정리하거나 다시 생성하므로, `코드/설정은 준비되어 있어도 로컬 산출물이 현재 없는 단계`는 완료로 세지지 않는다.
 
 ## 상태 표기 규칙
 
@@ -25,8 +25,8 @@
 | 1. 실험 설계 고정 | 4.0 / 4.0 | 100% |
 | 2. Basin / split / data 준비 | 4.5 / 5.0 | 90% |
 | 3. 모델 설정 및 실행 파이프라인 | 4.0 / 5.0 | 80% |
-| 4. Screening / event 분석 | 4.0 / 5.0 | 80% |
-| 전체 | 16.5 / 19.0 | 87% |
+| 4. Screening / event 분석 | 5.0 / 6.0 | 83% |
+| 전체 | 17.5 / 20.0 | 88% |
 
 ## 1. 실험 설계 고정 (4 / 4 완료, 100%)
 
@@ -68,15 +68,15 @@
   [`../../configs/camelsh_hourly_model2_drbc_holdout_broad.yml`](../../configs/camelsh_hourly_model2_drbc_holdout_broad.yml)이 준비되어 있다.
 
 - [x] 실행 셸 스크립트가 있다.
-  [`../../scripts/official/run_broad_multiseed.sh`](../../scripts/official/run_broad_multiseed.sh)로 reference broad run을 multi-seed로 실행할 수 있고, 현재 채택된 `subset300` main comparison은 [`../../scripts/official/run_subset300_multiseed.sh`](../../scripts/official/run_subset300_multiseed.sh)로 seed `111 / 222 / 333`의 Model 1 / Model 2를 같은 basin file로 반복 실행할 수 있다. [`../../scripts/dev/run_local_sanity.sh`](../../scripts/dev/run_local_sanity.sh)는 로컬 점검용이다.
+  [`../../scripts/official/run_broad_multiseed.sh`](../../scripts/official/run_broad_multiseed.sh)로 reference broad run을 multi-seed로 실행할 수 있고, 현재 채택된 `subset300` main comparison은 [`../../scripts/official/run_subset300_multiseed.sh`](../../scripts/official/run_subset300_multiseed.sh)로 Model 1 / Model 2 seed `111 / 222 / 444`를 같은 basin file로 반복 실행할 수 있다. Model 2 seed `333`은 NaN loss로 실패했고, Model 1 seed `333`도 final aggregate에서 제외한다. [`../../scripts/dev/run_local_sanity.sh`](../../scripts/dev/run_local_sanity.sh)는 로컬 점검용이다.
 
 - [~] 현재 로컬에 공식 학습 run 산출물이 일부 있다.
-  [`../../runs/subset_comparison/camelsh_hourly_model1_drbc_holdout_subset300_seed111_1904_073325`](../../runs/subset_comparison/camelsh_hourly_model1_drbc_holdout_subset300_seed111_1904_073325), [`../../runs/subset_comparison/camelsh_hourly_model2_drbc_holdout_subset300_seed111_1904_232450`](../../runs/subset_comparison/camelsh_hourly_model2_drbc_holdout_subset300_seed111_1904_232450)에 현재 채택된 `subset300` main comparison의 seed `111` run 산출물이 있다. 다만 공식 3-seed 비교를 닫으려면 seed `222`, `333`을 같은 subset으로 더 실행해야 한다.
+  `runs/subset_comparison` 아래에 Model 1 seed `111 / 222 / 333 / 444`와 Model 2 seed `111 / 222`의 complete run 산출물이 있다. final aggregate에는 Model 1 seed `111 / 222 / 444`만 쓰고, Model 1 seed `333`은 paired-seed fairness를 위해 제외한다. Model 2 seed `333`은 NaN loss로 중단된 실패 run이고, replacement seed `444`는 같은 subset과 `batch_size=384`로 시작되어 현재 local artifact 기준 epoch `001`까지만 동기화되어 있다.
 
 - [~] 비교용 metric / report 산출물이 부분적으로 있다.
-  위 subset300 seed `111` run에는 validation metric CSV와 epoch summary가 생성돼 있어 단일 seed 수준 비교는 가능하다. 다만 논문 본문 기준의 `3-seed mean ± std` 결과표와 최종 test aggregate report는 아직 없다.
+  완료된 subset300 run에는 validation metric CSV와 epoch summary가 생성돼 있어 부분 비교는 가능하다. 다만 논문 본문 기준의 model별 `3-repeat mean ± std` 결과표와 최종 test aggregate report는 아직 없다.
 
-## 4. Screening / event 분석 (4 / 5 완료, 80%)
+## 4. Screening / event 분석 (5 / 6 완료, 83%)
 
 - [x] streamflow quality gate 계산 스크립트가 있다.
   [`../../scripts/build_drbc_streamflow_quality_table.py`](../../scripts/build_drbc_streamflow_quality_table.py)가 준비되어 있다.
@@ -85,20 +85,24 @@
   [`../../scripts/build_drbc_preliminary_screening_table.py`](../../scripts/build_drbc_preliminary_screening_table.py), [`../../scripts/build_drbc_provisional_screening_table.py`](../../scripts/build_drbc_provisional_screening_table.py)가 준비되어 있다.
 
 - [x] event response 규칙 문서와 공식 extraction 스크립트가 있다.
-  [`event_response_spec.md`](event_response_spec.md)에서 threshold, separation, descriptor 규칙을 고정했고, [`../../scripts/build_drbc_event_response_table.py`](../../scripts/build_drbc_event_response_table.py)로 그 spec을 실행할 수 있다.
+  [`event_response_spec.md`](event_response_spec.md)에서 threshold, separation, descriptor 규칙을 고정했고, [`../../scripts/build_drbc_event_response_table.py`](../../scripts/build_drbc_event_response_table.py)로 DRBC holdout event table을 실행할 수 있다. 전 유역 서버 분석은 [`../../scripts/official/run_camelsh_flood_analysis.sh`](../../scripts/official/run_camelsh_flood_analysis.sh)가 return-period reference, event response, flood generation typing을 순서대로 실행한다.
 
 - [x] observed-flow 기반 event response table 생성이 가능하고 현재 로컬 산출물도 있다.
   [`../../output/basin/drbc_camelsh/screening/event_response_table.csv`](../../output/basin/drbc_camelsh/screening/event_response_table.csv), [`../../output/basin/drbc_camelsh/screening/event_response_basin_summary.csv`](../../output/basin/drbc_camelsh/screening/event_response_basin_summary.csv), [`../../output/basin/drbc_camelsh/screening/event_response_summary.json`](../../output/basin/drbc_camelsh/screening/event_response_summary.json)이 생성돼 있고, 현재 quality-pass basin 38개에서 총 7137개 event가 추출된 상태다.
+
+- [x] all-basin observed-flow 분석 runner가 준비되어 있다.
+  [`../../scripts/build_camelsh_return_period_references.py`](../../scripts/build_camelsh_return_period_references.py), [`../../scripts/build_camelsh_event_response_table.py`](../../scripts/build_camelsh_event_response_table.py), [`../../scripts/build_camelsh_flood_generation_typing.py`](../../scripts/build_camelsh_flood_generation_typing.py)가 준비되어 있고, 서버 runner는 기본 `WORKERS=2`와 progress bar를 사용한다. 산출물 위치는 `output/basin/camelsh_all/flood_analysis/`다.
 
 - [ ] final screening table과 최종 flood-prone cohort는 아직 확정되지 않았다.
   현재 문서 기준으로도 `static analysis -> quality gate -> provisional screening`까지만 완료된 상태다.
 
 ## 지금 바로 다음에 할 일
 
-1. `event_response_basin_summary.csv`와 quality / static table을 합쳐 `final screening table`을 만든다.
-2. final flood-prone cohort를 확정하고, 그 cohort 기준으로 공식 DRBC evaluation 범위를 잠근다.
-3. [`../../scripts/official/run_subset300_multiseed.sh`](../../scripts/official/run_subset300_multiseed.sh)로 seed `222`, `333`의 Model 1 / Model 2를 현재 고정한 `scaling_300` subset에서 추가 실행한다.
-4. subset300 기준 `3-seed mean ± std` validation/test 결과표를 만들고, 필요하면 broad reference run은 별도 보강 실험으로 분리한다.
+1. 서버 all-basin observed-flow runner 산출물을 확인하고, 필요한 경우 DRBC holdout final screening에 쓸 subset을 추출한다.
+2. `event_response_basin_summary.csv`와 quality / static table을 합쳐 `final screening table`을 만든다.
+3. final flood-prone cohort를 확정하고, 그 cohort 기준으로 공식 DRBC evaluation 범위를 잠근다.
+4. [`../../scripts/official/run_subset300_multiseed.sh`](../../scripts/official/run_subset300_multiseed.sh)로 Model 2 replacement seed `444`를 현재 고정한 `scaling_300` subset에서 완료한다.
+5. subset300 기준 model별 `3-repeat mean ± std` validation/test 결과표를 만들고, 필요하면 broad reference run은 별도 보강 실험으로 분리한다.
 
 ## 관련 문서
 

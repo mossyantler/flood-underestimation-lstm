@@ -56,13 +56,13 @@
 | dropout | `output_dropout` | `0.3` |
 | optimizer | `optimizer` | `Adam` |
 | learning rate schedule | `learning_rate` | epoch `0: 10^{-3}`, `10: 5 \times 10^{-4}`, `20: 10^{-4}` |
-| batch size | `batch_size` | `256` |
+| batch size | `batch_size` | broad reference `256`; subset300 main comparison actual run `384` |
 | epochs | `epochs` | `30` |
 | gradient clipping | `clip_gradient_norm` | `1` |
-| validation cadence | `validate_every` | `1` |
-| validation basin sampling | `validate_n_random_basins` | `200` |
+| validation cadence | `validate_every` | broad reference `1`; subset300 main comparison actual run `5` |
+| validation basin sampling | `validate_n_random_basins` | broad reference `200`; subset300 main comparison actual run `31` |
 | built-in metric set | `metrics` | `NSE`, `KGE`, `FHV`, `Peak-Timing`, `Peak-MAPE` |
-| output 저장 | `save_all_output` | `True` |
+| output 저장 | `save_all_output` | broad reference `True`; subset300 main comparison actual run `False` |
 | validation prediction 저장 | `save_validation_results` | `True` |
 
 여기서 중요한 점은 `lagged Q`를 넣지 않는다는 것이다. lagged discharge를 넣으면 short-horizon baseline이 과도하게 강해져서, probabilistic head 자체가 peak underestimation을 얼마나 줄였는지 해석하기 어려워진다.
@@ -83,23 +83,24 @@
 
 ### 1.3 Seed protocol 고정 규칙
 
-single seed 비교는 모델 비교 논문에서 취약하므로, 본 실험의 공식 보고 규칙은 `3-seed average`로 잠근다. 첫 제출 버전의 기본 seed set은 아래처럼 둔다.
+single seed 비교는 모델 비교 논문에서 취약하므로, 본 실험의 공식 보고 규칙은 모델별 `3-repeat average`로 잠근다. 첫 제출 버전의 기본 seed set은 아래처럼 둔다.
 
 ```yaml
-seeds: [111, 222, 333]
+model1_seeds: [111, 222, 444]
+model2_seeds: [111, 222, 444]
 ```
 
-각 seed에 대해 Model 1과 Model 2를 모두 같은 조건으로 반복 실행한다. 논문 본문과 내부 요약표에는 basin-aggregate metric의 `mean \pm std`를 우선 보고한다.
+Model 1과 Model 2는 같은 `scaling_300` basin file과 같은 runtime setting으로 반복 실행한다. Model 2 seed `333`은 NaN loss로 중단되어 final comparison에서는 seed `444`를 replacement repeat로 쓴다. 공정한 paired-seed 비교를 위해 완료된 Model 1 seed `333`도 final aggregate에서 제외한다. 논문 본문과 내부 요약표에는 basin-aggregate metric의 `mean \pm std`를 우선 보고한다.
 
-추가 seed를 더 돌리는 것은 가능하지만, 본문 기준선은 위 세 seed를 먼저 끝낸다. 반대로 hardware 제약 때문에 seed를 줄이는 것은 공식 비교 실험에서는 허용하지 않는다.
+추가 seed를 더 돌리는 것은 가능하지만, 본문 기준선은 모델별 세 repeat를 먼저 끝낸다. 반대로 hardware 제약 때문에 repeat 수를 줄이는 것은 공식 비교 실험에서는 허용하지 않는다.
 
-seed override가 필요하면 broad config를 임시로 복사해 seed만 바꾼 temporary override config를 만들어 반복 실행하면 된다. 현재 저장소에는 reference broad runner [`../../scripts/official/run_broad_multiseed.sh`](../../scripts/official/run_broad_multiseed.sh), 현재 채택된 fixed `subset300` main comparison runner [`../../scripts/official/run_subset300_multiseed.sh`](../../scripts/official/run_subset300_multiseed.sh), 로컬 점검용 실행 스크립트 [`../../scripts/dev/run_local_sanity.sh`](../../scripts/dev/run_local_sanity.sh)가 있다. deterministic scaling pilot은 별도 경로 [`../../scripts/pilot/run_deterministic_scaling_pilot.sh`](../../scripts/pilot/run_deterministic_scaling_pilot.sh)로 분리해 두고, 본 3-seed main comparison runner와 섞지 않는다.
+seed override가 필요하면 broad config를 임시로 복사해 seed만 바꾼 temporary override config를 만들어 반복 실행하면 된다. 현재 저장소에는 reference broad runner [`../../scripts/official/run_broad_multiseed.sh`](../../scripts/official/run_broad_multiseed.sh), 현재 채택된 fixed `subset300` main comparison runner [`../../scripts/official/run_subset300_multiseed.sh`](../../scripts/official/run_subset300_multiseed.sh), 로컬 점검용 실행 스크립트 [`../../scripts/dev/run_local_sanity.sh`](../../scripts/dev/run_local_sanity.sh)가 있다. deterministic scaling pilot은 별도 경로 [`../../scripts/pilot/run_deterministic_scaling_pilot.sh`](../../scripts/pilot/run_deterministic_scaling_pilot.sh)로 분리해 두고, 본 3-repeat main comparison runner와 섞지 않는다.
 
 ### 1.4 환경 파라미터 취급 규칙
 
 `device`, `num_workers`, `cache_validation_data`, `log_interval` 같은 값은 실행 환경 파라미터다. 이 값들은 실험 재현성과 실행 가능성에는 중요하지만, 연구 질문 자체를 정의하는 핵심 통제변인과는 구분한다.
 
-공식 비교표와 논문 Methods에서는 가능한 한 같은 환경에서 Model 1과 Model 2를 돌린다. 다만 환경 차이 때문에 `batch_size`, `hidden_size`, `seq_length`, split, input 목록 같은 핵심 통제변인을 바꾸는 것은 허용하지 않는다. 현재 compute-constrained 공식 비교축은 broad config를 reference로 유지하되, basin file은 [`../../configs/pilot/basin_splits/scaling_300/`](../../configs/pilot/basin_splits/scaling_300/)으로 고정한 `subset300` 실행 기준이다.
+공식 비교표와 논문 Methods에서는 가능한 한 같은 환경에서 Model 1과 Model 2를 돌린다. 다만 환경 차이 때문에 `batch_size`, `hidden_size`, `seq_length`, split, input 목록 같은 핵심 통제변인을 모델별로 다르게 바꾸는 것은 허용하지 않는다. 현재 compute-constrained 공식 비교축은 broad config를 reference로 유지하되, basin file은 [`../../configs/pilot/basin_splits/scaling_300/`](../../configs/pilot/basin_splits/scaling_300/)으로 고정한 `subset300` 실행 기준이다. 실제 subset300 run config에는 helper override로 `batch_size=384`, `validate_every=5`, `validate_n_random_basins=31`, `save_all_output=False`, `save_validation_results=True`가 저장된다.
 
 현재 broad config의 기본 `device`는 `cuda:0`으로 둔다. 다만 broad 실행 스크립트는 `NH_DEVICE` 환경변수로 일시 override를 받을 수 있으므로, 로컬 점검이 필요하면 `NH_DEVICE=mps` 또는 `NH_DEVICE=cpu`로 실행할 수 있다. 이 경우에도 공식 보고용 비교 실험에서는 Model 1과 Model 2에 같은 환경 값을 써야 한다.
 
@@ -115,10 +116,10 @@ scaling pilot은 `최종 non-DRBC basin 수를 운영적으로 정하기 위한 
 2. backbone과 시간 경계는 official broad setup과 같게 둔다. 즉 `hidden_size=128`, `seq_length=336`, `predict_last_n=24`, `train 2000–2010`, `validation 2011–2013`, `test 2014–2016`을 유지한다.
 3. basin 수만 바꾼다. 현재 tracked subset은 `100 / 300 / 600`이고, raw broad non-DRBC pool `1923`을 source-of-truth로 보되 실제 실행 가능한 subset은 broad prepared train/validation basin `1903`에서 HUC02-stratified 방식으로 생성한다.
 4. pilot run은 official broad config와 출력 경로를 공유하지 않는다. 현재 pilot config는 [`../../configs/pilot/`](../../configs/pilot/), subset manifest는 [`../../configs/pilot/basin_splits/`](../../configs/pilot/basin_splits/), run output은 `./runs/scaling_pilot` 아래에 둔다.
-5. pilot의 기본 실행 단위는 `from-scratch deterministic run`이다. 다만 본문용 공식 보고 규칙인 `3-seed average`는 main comparison에만 잠그고, pilot은 운영 판단용 기본 seed로 먼저 돌린다.
+5. pilot의 기본 실행 단위는 `from-scratch deterministic run`이다. 다만 본문용 공식 보고 규칙인 model별 `3-repeat average`는 main comparison에만 잠그고, pilot은 운영 판단용 기본 seed로 먼저 돌린다.
 6. basin-count 선택은 `non-DRBC validation 성능 + static attribute distribution diagnostics + observed-flow event-response diagnostics + random same-size subset benchmark + compute cost`를 함께 보고 내린다. DRBC holdout test metric은 pilot basin 수 선택에 사용하지 않는다. subset 생성 논리는 `fixed benchmark reuse` 관행과 `cLHS-style covariate representativeness` 아이디어를 절충한 것으로 읽는다.
 
-pilot 의사결정은 현재 `300`에서 닫는다. 대표성 점검은 [`../../configs/pilot/diagnostics/attribute_distribution_scope_summary.csv`](../../configs/pilot/diagnostics/attribute_distribution_scope_summary.csv), [`../../configs/pilot/diagnostics/event_response/event_response_scope_summary.csv`](../../configs/pilot/diagnostics/event_response/event_response_scope_summary.csv), [`../../configs/pilot/diagnostics/permutation_benchmark/subset300_random_benchmark_summary.csv`](../../configs/pilot/diagnostics/permutation_benchmark/subset300_random_benchmark_summary.csv)를 함께 기준으로 읽는다. observed-flow 진단에서 `scaling_300`의 max absolute standardized mean difference는 `combined 0.0584`, `train 0.0567`, `validation 0.0891`로 모두 `0.10` 아래였고, random same-size subset benchmark에서도 event-response validation mismatch는 random draw의 `96.5~97.5%`보다 더 좋았다. 현재는 seed `111`에서 사용한 같은 `scaling_300` basin file을 seed `222`, `333`의 Model 1 / Model 2에도 그대로 재사용한다.
+pilot 의사결정은 현재 `300`에서 닫는다. 대표성 점검은 [`../../configs/pilot/diagnostics/attribute_distribution_scope_summary.csv`](../../configs/pilot/diagnostics/attribute_distribution_scope_summary.csv), [`../../configs/pilot/diagnostics/event_response/event_response_scope_summary.csv`](../../configs/pilot/diagnostics/event_response/event_response_scope_summary.csv), [`../../configs/pilot/diagnostics/permutation_benchmark/subset300_random_benchmark_summary.csv`](../../configs/pilot/diagnostics/permutation_benchmark/subset300_random_benchmark_summary.csv)를 함께 기준으로 읽는다. observed-flow 진단에서 `scaling_300`의 max absolute standardized mean difference는 `combined 0.0584`, `train 0.0567`, `validation 0.0891`로 모두 `0.10` 아래였고, random same-size subset benchmark에서도 event-response validation mismatch는 random draw의 `96.5~97.5%`보다 더 좋았다. 현재는 seed `111`에서 사용한 같은 `scaling_300` basin file을 Model 1 / Model 2 seed `111 / 222 / 444`에도 그대로 재사용한다.
 
 따라서 Methods나 내부 결과표에서 pilot 결과를 인용할 때는 반드시 `basin-count selection pilot` 또는 `operational scaling pilot`이라고 명시해야 한다. 다만 pilot decision이 이미 닫힌 뒤의 본 실험 실행은 `subset300 main comparison`으로 따로 부르고, `main comparison result`와 파일 경로를 분리해 기록한다.
 
@@ -188,7 +189,7 @@ scaling pilot은 위 official broad split과 test region을 고정한 채, non-D
 요약 수치는 [`../../output/basin/splits/drbc_holdout/drbc_holdout_split_summary.json`](../../output/basin/splits/drbc_holdout/drbc_holdout_split_summary.json)에 정리한다.
 pilot subset 요약과 stratified manifest는 [`../../configs/pilot/basin_splits/scaling_pilot_summary.json`](../../configs/pilot/basin_splits/scaling_pilot_summary.json), [`../../configs/pilot/basin_splits/prepared_pool_manifest.csv`](../../configs/pilot/basin_splits/prepared_pool_manifest.csv), 각 `scaling_*/manifest.csv`에 정리한다. static attribute distribution diagnostics는 [`../../configs/pilot/diagnostics/attribute_distribution_scope_summary.csv`](../../configs/pilot/diagnostics/attribute_distribution_scope_summary.csv)와 관련 CSV/JSON에 정리하고, 해석용 시각화 목록은 [`../../configs/pilot/diagnostics/plots/plot_manifest.json`](../../configs/pilot/diagnostics/plots/plot_manifest.json)에 정리한다.
 
-현재 본 실험의 공식 train/validation basin file은 위 tracked subset 중 `pilot 300`만 사용한다. 즉 train `269`, validation `31`, test `38` 구성을 seed `111 / 222 / 333`의 Model 1 / Model 2에 공통으로 고정하고, 공식 실행 진입점은 [`../../scripts/official/run_subset300_multiseed.sh`](../../scripts/official/run_subset300_multiseed.sh)다. broad prepared split 전체 `1705 / 198 / 38`은 subset 생성의 source pool과 reference architecture context로 유지하되, 현재 compute-constrained main comparison의 직접 실행 split은 아니다.
+현재 본 실험의 공식 train/validation basin file은 위 tracked subset 중 `pilot 300`만 사용한다. 즉 train `269`, validation `31`, test `38` 구성을 Model 1 / Model 2 seed `111 / 222 / 444`에 공통으로 고정하고, 공식 실행 진입점은 [`../../scripts/official/run_subset300_multiseed.sh`](../../scripts/official/run_subset300_multiseed.sh)다. broad prepared split 전체 `1705 / 198 / 38`은 subset 생성의 source pool과 reference architecture context로 유지하되, 현재 compute-constrained main comparison의 직접 실행 split은 아니다.
 
 이 split은 문헌에서 말하는 PUB/PUR 성격의 regionalization 평가에 해당한다. 중요한 점은 여기서 평가 대상이 regional holdout일 뿐, 학습 모델 자체는 non-DRBC basin들로 학습한 global model이라는 것이다.
 

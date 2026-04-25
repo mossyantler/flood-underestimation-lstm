@@ -290,6 +290,57 @@ $$
 
 `RBI`는 hydrograph의 급격한 변화를 정량화한다. 우리 연구가 peak underestimation과 빠른 flood response에 관심이 있기 때문에, flashiness는 매우 직접적인 relevance metric이다.
 
+### 4.6 재현기간별 강수량과 홍수량 reference descriptor
+
+Observed-flow screening의 핵심 점수는 여전히 `annual peak specific discharge`, `Q99 event frequency`, `RBI`를 중심으로 둔다. 다만 basin 해석과 event response table의 맥락 설명을 강화하기 위해, 재현기간별 강수량과 홍수량을 `reference descriptor`로 추가한다.
+
+이 descriptor는 공식 모델 성능 metric도 아니고, Model 2의 `q99`와 직접 비교하는 target도 아니다. 역할은 각 basin의 extreme rainfall forcing scale과 observed flood magnitude scale을 설명하는 것이다.
+
+권장 return period set은 아래처럼 둔다.
+
+```text
+T = 2, 5, 10, 25, 50, 100 years
+```
+
+강수 쪽은 duration별 precipitation frequency estimate를 둔다. 문서와 산출물에서는 `P100` 대신 `prec_ari100_24h`처럼 `prec_ari{T}_{duration}` 형식을 권장한다. 예를 들어 duration \(d\)에 대해 \(P_{i,T}^{(d)}\)를 basin \(i\)의 \(T\)-year precipitation depth로 정의하되, 컬럼명은 아래처럼 둔다.
+
+```text
+prec_ari2_1h, prec_ari5_1h, ..., prec_ari100_1h
+prec_ari2_6h, prec_ari5_6h, ..., prec_ari100_6h
+prec_ari2_24h, prec_ari5_24h, ..., prec_ari100_24h
+prec_ari2_72h, prec_ari5_72h, ..., prec_ari100_72h
+```
+
+이 duration set은 event response table의 forcing window와 맞춘다. `1h`는 peak 직전 최대 hourly rainfall intensity proxy와 연결하고, `6h`, `24h`, `72h`는 각각 `recent_rain_6h`, `recent_rain_24h`, `recent_rain_72h`와 직접 비교한다. 따라서 `24h`는 대표 예시일 뿐 단독 기준이 아니며, hourly flood response 해석에서는 네 duration을 함께 둔다.
+
+장기적으로 공식 참고값은 NOAA Atlas 14 / PFDS의 precipitation frequency estimates를 사용하는 것이 가장 좋다. basin-level 값은 구현 단계에서 outlet point, basin centroid, 또는 gridded estimate의 area-weighted average 중 하나로 고정해야 한다. 다만 현재 서버 all-basin 구현은 CAMELSH hourly forcing에서 duration별 rolling precipitation annual maximum을 뽑아 Gumbel 분포를 맞춘 proxy를 우선 생성한다. 따라서 현재 산출물은 공식 NOAA frequency product가 아니라 `prec_ari_source`와 함께 해석하는 내부 reference다.
+
+유량 쪽은 annual maximum streamflow series 기반 flood-frequency estimate를 둔다. 문서와 산출물에서는 `Q100` 대신 `flood_ari100`처럼 `flood_ari{T}` 형식을 권장한다. basin \(i\)의 water year \(y\)에서 annual maximum hourly streamflow를
+
+$$
+M_{i,y} = \max_{t \in y} Q_{i,t}
+$$
+
+로 두고, return period \(T\)에 대응하는 flood magnitude를 \(F^{\mathrm{flood}}_{i,T}\)로 기록한다.
+
+가능하면 USGS annual peak record와 Bulletin 17C / PeakFQ / StreamStats 계열 결과를 우선 reference로 사용한다. CAMELSH hourly streamflow에서 직접 계산할 경우에는 `hourly annual maximum based flood_ari reference estimate` 또는 `proxy`로 명시한다. 특히 100년 값은 관측 record length보다 긴 tail extrapolation이 될 수 있으므로, record length와 confidence flag를 함께 둔다.
+
+이 descriptor를 event table과 결합하면 event별 상대 규모도 계산할 수 있다.
+
+$$
+\mathrm{peak\_to\_flood\_ari100}_{e,i}
+=
+\frac{Q^{\mathrm{peak}}_{e,i}}{F^{\mathrm{flood}}_{i,100}}
+$$
+
+$$
+\mathrm{rain24h\_to\_prec\_ari100\_24h}_{e,i}
+=
+\frac{P^{(24h)}_{e,i}}{P^{(24h)}_{i,100}}
+$$
+
+이 값들은 event가 해당 basin의 참고 극한 규모에 비해 어느 정도였는지 설명하는 데 쓴다. 단, `100-year rainfall event`가 곧 `100-year flood event`를 만든다고 해석하면 안 된다. antecedent wetness, snowmelt, storage, hydromodification, basin shape가 rainfall-runoff 변환을 바꾸기 때문이다.
+
 ## 6. Step 4: broad / natural cohort 분리
 
 final observed-flow screening 이후에는 hydromodification risk를 기준으로 cohort를 두 개로 나눈다.
@@ -332,6 +383,7 @@ $$
 
 - basin behavior를 climate, topography, hydrology, land cover, soil, geology로 설명하는 large-sample framework는 Addor et al. (2017)의 CAMELS 데이터셋 설명과 정합적이다.
 - annual peak series를 이용한 flood frequency 접근은 Bulletin 17C의 전통적 framework와 정합적이다.
+- 재현기간별 precipitation frequency estimate는 NOAA Atlas 14 / PFDS를 공식 참고값으로 사용한다.
 - event runoff coefficient와 storm response를 event rainfall, basin storage, antecedent condition과 연결해 해석하는 접근은 Merz and Blöschl (2009)와 정합적이다.
 - flashiness를 정량화하는 데 RBI를 사용하는 것은 실제 hourly streamflow classification에 이를 사용한 HESS 2023 연구와 정합적이다.
 
@@ -340,6 +392,7 @@ $$
 ## 9. 참고 문헌과 링크
 
 - Addor, N., Newman, A. J., Mizukami, N., and Clark, M. P. (2017): The CAMELS data set: catchment attributes and meteorology for large-sample studies, HESS, 21, 5293–5313. [https://hess.copernicus.org/articles/21/5293/2017/hess-21-5293-2017.html](https://hess.copernicus.org/articles/21/5293/2017/hess-21-5293-2017.html)
+- NOAA Atlas 14 / Precipitation Frequency Data Server: precipitation frequency estimates by duration and average recurrence interval. [https://hdsc.nws.noaa.gov/pfds/](https://hdsc.nws.noaa.gov/pfds/)
 - Merz, R. and Blöschl, G. (2009): A regional analysis of event runoff coefficients with respect to climate and catchment characteristics in Austria, Water Resources Research, 45, W01405. [https://www.waterresources.at/fileadmin/user_uploads/Publications/Merz_and_Bloeschl_WRR_2009.pdf](https://www.waterresources.at/fileadmin/user_uploads/Publications/Merz_and_Bloeschl_WRR_2009.pdf)
 - England, J. F. Jr. et al. (2019): Guidelines for determining flood flow frequency — Bulletin 17C, U.S. Geological Survey. [https://www.usgs.gov/publications/guidelines-determining-flood-flow-frequency-bulletin-17c](https://www.usgs.gov/publications/guidelines-determining-flood-flow-frequency-bulletin-17c)
 - Stein, E. D. et al. (2023): Advancing stream classification and hydrologic modeling of ungaged basins for environmental flow management in coastal southern California, HESS, 27, 3021–3047. [https://hess.copernicus.org/articles/27/3021/2023/hess-27-3021-2023.html](https://hess.copernicus.org/articles/27/3021/2023/hess-27-3021-2023.html)

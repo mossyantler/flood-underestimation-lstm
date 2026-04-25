@@ -34,6 +34,12 @@ OBSERVED_METRIC_COLUMNS = [
     "event_count",
     "annual_peak_years",
 ]
+SUBSET_EVENT_METADATA_COLUMNS = [
+    "pilot_split",
+    "original_split",
+    "camelsh_huc02",
+    "obs_years_usable",
+]
 DEFAULT_SUBSET_SIZES = [300]
 
 
@@ -439,12 +445,33 @@ def build_subset_event_table(
             )
 
     events = pd.DataFrame(event_rows, columns=er.EVENT_COLUMNS)
+    events = attach_subset_event_metadata(events, subset_manifest)
     if not events.empty:
         events = events.sort_values(["gauge_id", "event_peak", "event_id"]).reset_index(drop=True)
     skipped = pd.DataFrame(skipped_rows, columns=er.SKIPPED_COLUMNS)
     if not skipped.empty:
         skipped = skipped.sort_values("gauge_id").reset_index(drop=True)
     return events, skipped
+
+
+def attach_subset_event_metadata(events: pd.DataFrame, subset_manifest: pd.DataFrame) -> pd.DataFrame:
+    metadata_cols = [
+        col for col in SUBSET_EVENT_METADATA_COLUMNS if col in subset_manifest.columns
+    ]
+    if not metadata_cols:
+        return events
+
+    metadata = subset_manifest[["gauge_id", *metadata_cols]].drop_duplicates("gauge_id")
+    if events.empty:
+        events = events.copy()
+        for col in metadata_cols:
+            events[col] = pd.Series(dtype=metadata[col].dtype)
+    else:
+        events = events.merge(metadata, on="gauge_id", how="left", validate="many_to_one")
+
+    leading_cols = ["gauge_id", *metadata_cols]
+    remaining_cols = [col for col in events.columns if col not in leading_cols]
+    return events[leading_cols + remaining_cols]
 
 
 def main() -> None:
@@ -513,6 +540,12 @@ def main() -> None:
         events.to_csv(subset_event_path, index=False)
         skipped.to_csv(subset_skipped_path, index=False)
 
+        split_event_paths: dict[str, str] = {}
+        for split in ["train", "validation"]:
+            split_event_path = args.output_dir / f"scaling_{subset_size}_{split}_event_response_table.csv"
+            events[events["pilot_split"] == split].copy().to_csv(split_event_path, index=False)
+            split_event_paths[split] = str(split_event_path)
+
         subset_summaries.append(
             {
                 "subset_size": subset_size,
@@ -521,6 +554,7 @@ def main() -> None:
                 "train_count": int((subset_summary["pilot_split"] == "train").sum()),
                 "validation_count": int((subset_summary["pilot_split"] == "validation").sum()),
                 "subset_event_table_path": str(subset_event_path),
+                "subset_split_event_table_paths": split_event_paths,
                 "subset_basin_summary_path": str(subset_summary_path),
                 "subset_skipped_path": str(subset_skipped_path),
             }

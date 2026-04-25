@@ -30,7 +30,7 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 
 `Model 3` 관련 conceptual core 설계 메모는 남겨 두되, 현재 논문의 공식 비교축에는 포함하지 않는다. 자세한 아키텍처는 [`docs/research/architecture.md`](docs/research/architecture.md) 참조.
 
-`scaling pilot`은 basin 수를 정하기 위한 운영 결정용 실험이었다. deterministic Model 1로 전국 범위 stratified subset `100 / 300 / 600`을 비교한 뒤, 현재 compute-constrained main comparison의 non-DRBC train/validation basin 수는 `300`으로 고정한다. 이 선택은 `non-DRBC validation 성능 + static attribute distribution diagnostics + observed-flow event-response diagnostics + random same-size subset benchmark + compute cost`를 함께 보고 내리며, DRBC holdout test metric으로 pilot basin 수를 고르지 않는다. 현재 seed `111`에서 사용한 `scaling_300` subset을 고정하고, remaining seed `222`, `333`의 Model 1 / Model 2도 같은 subset을 그대로 재사용한다.
+`scaling pilot`은 basin 수를 정하기 위한 운영 결정용 실험이었다. deterministic Model 1로 전국 범위 stratified subset `100 / 300 / 600`을 비교한 뒤, 현재 compute-constrained main comparison의 non-DRBC train/validation basin 수는 `300`으로 고정한다. 이 선택은 `non-DRBC validation 성능 + static attribute distribution diagnostics + observed-flow event-response diagnostics + random same-size subset benchmark + compute cost`를 함께 보고 내리며, DRBC holdout test metric으로 pilot basin 수를 고르지 않는다. 현재 seed `111`에서 사용한 `scaling_300` subset을 고정하고, Model 1 / Model 2 seed `111 / 222 / 444`가 같은 subset을 그대로 재사용한다. Model 2 seed `333`은 NaN loss로 중단되었고, 공정한 paired-seed 비교를 위해 완료된 Model 1 seed `333`도 final aggregate에서 제외한다.
 
 ---
 
