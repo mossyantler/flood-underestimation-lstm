@@ -43,7 +43,7 @@ flowchart TD
 | `validation_metrics.csv` | `runs/<run>/validation/model_epoch*/validation_metrics.csv` | 어떤 epoch를 대표로 고를지 정할 때 봐요.                              |
 | `test_metrics.csv`       | `runs/<run>/test/model_epoch*/test_metrics.csv`             | 기본 성능 지표를 가장 먼저 확인할 때 봐요.                            |
 | `test_results.p`         | `runs/<run>/test/model_epoch*/test_results.p`               | custom 지표, event 분석, 사례 그림을 만들 때 필요해요.                |
-| `test_all_output.p`      | `runs/<run>/test/model_epoch*/test_all_output.p`            | `Model 2`의 quantile 결과와 coverage, calibration을 볼 때 필요해요. |
+| `test_all_output.p`      | `runs/<run>/test/model_epoch*/test_all_output.p`            | `Model 2`의 quantile 결과와 coverage, calibration을 볼 때 필요해요. 저장 비용이 크기 때문에 모든 epoch sweep의 필수 파일은 아니고, selected checkpoint 중심으로 만들어요. |
 
 ## 어떤 지표를 왜 보는가
 
@@ -107,9 +107,20 @@ flowchart TD
 
 ### 2단계. 대표 epoch 고르기
 
-대표 epoch는 `validation`만 보고 정해요. 현재 가장 무난한 규칙은 `validation median NSE가 가장 좋은 epoch`를 고르는 거예요.
+대표 epoch는 `validation`만 보고 정해요. 현재 가장 무난한 규칙은 `validation median NSE가 가장 좋은 epoch`를 고르는 거예요. Model 1의 loss는 `NSE`, Model 2의 loss는 `pinball`이라서 validation loss끼리 직접 비교하면 기준이 섞입니다.
 
-이 단계의 목적은 “어느 checkpoint를 공식 결과로 쓸 것인가”를 먼저 잠그는 거예요. `test`를 보고 고르면 안 돼요.
+현재 subset300 validation CSV 기준 primary checkpoint는 아래처럼 잠가요. 이 단계의 목적은 “어느 checkpoint를 공식 결과로 쓸 것인가”를 먼저 정하는 거예요. `test`를 보고 고르면 안 돼요.
+
+| model | seed | primary epoch |
+| --- | ---: | ---: |
+| Model 1 | 111 | 25 |
+| Model 1 | 222 | 10 |
+| Model 1 | 444 | 15 |
+| Model 2 | 111 | 5 |
+| Model 2 | 222 | 10 |
+| Model 2 | 444 | 10 |
+
+동시에 validation이 저장된 epoch `005 / 010 / 015 / 020 / 025 / 030` 전체에 DRBC test를 돌리는 것은 괜찮아요. 다만 이건 primary epoch를 고르는 과정이 아니라, checkpoint sensitivity와 epoch30 fixed-budget robustness를 확인하는 diagnostic sweep으로 표시해야 해요.
 
 ### 3단계. 중앙예측 성능표 만들기
 
@@ -222,6 +233,8 @@ flowchart TD
 | `홍수/분포 비교` | `Model 2`의 `q90/q95/q99`까지 포함한 지표 | `Model 2`가 tail과 uncertainty에서 어떤 장점을 갖는지 보여주는 구역이에요. |
 
 중요한 점은 `q95`, `q99`는 `Model 1`의 단일 예측값과 완전히 같은 역할이 아니라는 거예요. 그래서 이 구역에서는 단순 `승/패 개수`보다는 `포착 비율`, `포함 비율`, `coverage`, `calibration`처럼 더 맞는 이름을 쓰는 것이 좋아요.
+
+운영상으로는 모든 validation epoch sweep에서 먼저 `test_metrics.csv`와 `test_results.p`만 만들어 `Model 1`과 `Model 2(q50)`의 중앙예측 성능을 확인하는 편이 안전해요. `test_all_output.p`는 `y_quantiles` 외에도 full output을 크게 저장할 수 있으므로, `q90/q95/q99` 기반 coverage와 calibration은 primary checkpoint와 꼭 필요한 robustness checkpoint에만 만들거나, 필요한 quantile만 뽑는 lean export로 계산하는 것이 좋아요.
 
 이 표를 통해 답하려는 질문은 아래와 같아요.
 
@@ -513,7 +526,9 @@ calibration error(q99) = empirical coverage(q99) - 0.99
 ## 아주 짧은 체크리스트
 
 - [ ] 대표 epoch를 `validation`만 보고 골랐는가
+- [ ] all validation epoch test sweep을 primary selection이 아니라 sensitivity / robustness 분석으로 표시했는가
 - [ ] `Model 2`의 대표 예측을 `q50`으로 비교했는가
+- [ ] `Model 2` seed `444`의 resume 사용, NaN skip 허용값, checkpoint 복구 여부를 run note에 남겼는가
 - [ ] 전체 성능과 홍수 성능을 따로 봤는가
 - [ ] basin별 비교를 했는가
 - [ ] event별 비교를 했는가

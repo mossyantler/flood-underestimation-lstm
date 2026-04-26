@@ -70,11 +70,11 @@
 - [x] 실행 셸 스크립트가 있다.
   [`../../scripts/official/run_broad_multiseed.sh`](../../scripts/official/run_broad_multiseed.sh)로 reference broad run을 multi-seed로 실행할 수 있고, 현재 채택된 `subset300` main comparison은 [`../../scripts/official/run_subset300_multiseed.sh`](../../scripts/official/run_subset300_multiseed.sh)로 Model 1 / Model 2 seed `111 / 222 / 444`를 같은 basin file로 반복 실행할 수 있다. Model 2 seed `333`은 NaN loss로 실패했고, Model 1 seed `333`도 final aggregate에서 제외한다. [`../../scripts/dev/run_local_sanity.sh`](../../scripts/dev/run_local_sanity.sh)는 로컬 점검용이다.
 
-- [~] 현재 로컬에 공식 학습 run 산출물이 일부 있다.
-  `runs/subset_comparison` 아래에 Model 1 seed `111 / 222 / 333 / 444`와 Model 2 seed `111 / 222`의 complete run 산출물이 있다. final aggregate에는 Model 1 seed `111 / 222 / 444`만 쓰고, Model 1 seed `333`은 paired-seed fairness를 위해 제외한다. Model 2 seed `333`은 NaN loss로 중단된 실패 run이고, replacement seed `444`는 같은 subset과 `batch_size=384`로 시작되어 현재 local artifact 기준 epoch `001`까지만 동기화되어 있다.
+- [~] 현재 공식 학습 run 산출물은 paired seed 기준으로 거의 닫혔다.
+  `runs/subset_comparison` 아래에 Model 1 seed `111 / 222 / 333 / 444`와 Model 2 seed `111 / 222`의 complete run 산출물이 있다. final aggregate에는 Model 1 seed `111 / 222 / 444`만 쓰고, Model 1 seed `333`은 paired-seed fairness를 위해 제외한다. Model 2 seed `333`은 NaN loss로 중단된 실패 run이다. replacement seed `444`는 같은 subset과 `batch_size=384`로 epoch 15까지 진행한 뒤 epoch 16에서 isolated NaN loss로 멈췄고, `allow_subsequent_nan_losses=3` resume으로 원격 서버에서 epoch 30까지 완료했다. 다만 resume 산출물이 `_resume_archive/continue_training_from_epoch015` 아래에 남아 있을 수 있으므로, epoch `020 / 025 / 030` test 전에 `model_epoch016.pt`부터 `model_epoch030.pt`와 해당 validation folder가 top-level run directory에 있는지 확인한다.
 
 - [~] 비교용 metric / report 산출물이 부분적으로 있다.
-  완료된 subset300 run에는 validation metric CSV와 epoch summary가 생성돼 있어 부분 비교는 가능하다. 다만 논문 본문 기준의 model별 `3-repeat mean ± std` 결과표와 최종 test aggregate report는 아직 없다.
+  완료된 subset300 run에는 validation metric CSV와 epoch summary가 생성돼 있어 부분 비교는 가능하다. primary reporting checkpoint는 validation median NSE 기준으로 잠그고, DRBC test는 validation이 저장된 epoch `005 / 010 / 015 / 020 / 025 / 030` 전체 sweep을 sensitivity / robustness 결과로 추가한다. 다만 논문 본문 기준의 model별 `3-repeat mean ± std` 결과표와 최종 test aggregate report는 아직 없다.
 
 ## 4. Screening / event 분석 (5 / 6 완료, 83%)
 
@@ -101,8 +101,10 @@
 1. 서버 all-basin observed-flow runner 산출물을 확인하고, 필요한 경우 DRBC holdout final screening에 쓸 subset을 추출한다.
 2. `event_response_basin_summary.csv`와 quality / static table을 합쳐 `final screening table`을 만든다.
 3. final flood-prone cohort를 확정하고, 그 cohort 기준으로 공식 DRBC evaluation 범위를 잠근다.
-4. [`../../scripts/official/run_subset300_multiseed.sh`](../../scripts/official/run_subset300_multiseed.sh)로 Model 2 replacement seed `444`를 현재 고정한 `scaling_300` subset에서 완료한다.
-5. subset300 기준 model별 `3-repeat mean ± std` validation/test 결과표를 만들고, 필요하면 broad reference run은 별도 보강 실험으로 분리한다.
+4. Model 2 seed `444` resume 산출물을 top-level 원래 run directory로 복구하고, epoch `016-030` checkpoint와 `validation/model_epoch020/025/030`이 보이는지 확인한다.
+5. GPU에서 paired seed `111 / 222 / 444`의 Model 1 / Model 2 validation-epoch DRBC test sweep을 돌린다. 이미 완성된 `test_metrics.csv`와 `test_results.p`는 skip하고, 중간에 끊긴 epoch는 다시 돌린다.
+6. subset300 기준 model별 `3-repeat mean ± std` primary validation-best 결과표와 all-epoch sensitivity 결과표를 분리해서 만든다.
+7. Model 2의 `q90/q95/q99` coverage/calibration은 모든 epoch에 `test_all_output.p`를 만들기보다 primary checkpoint와 필요한 robustness checkpoint에서 lean export 또는 selected all-output으로 계산한다.
 
 ## 관련 문서
 
