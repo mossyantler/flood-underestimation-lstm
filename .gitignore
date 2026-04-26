@@ -7,6 +7,7 @@ __pycache__/
 .playwright-cli/
 docs/**/CLAUDE.md
 docs/undergrad_explainer/
+docs/references/flood_generation_typing_literature/
 runs/
 output/
 tmp/
