@@ -25,17 +25,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--training-selected-csv",
         type=Path,
-        default=Path("output/basin/camelsh_training_non_drbc/camelsh_non_drbc_training_selected.csv"),
+        default=Path("output/basin/all/screening/training_non_drbc/camelsh_non_drbc_training_selected.csv"),
     )
     parser.add_argument(
         "--drbc-selected-csv",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/camelsh_drbc_selected.csv"),
+        default=Path("output/basin/drbc/basin_define/camelsh_drbc_selected.csv"),
     )
     parser.add_argument(
         "--drbc-quality-csv",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/screening/drbc_streamflow_quality_table.csv"),
+        default=Path("output/basin/drbc/screening/drbc_streamflow_quality_table.csv"),
     )
     parser.add_argument(
         "--splits-dir",
@@ -45,7 +45,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--summary-dir",
         type=Path,
-        default=Path("output/basin/splits/drbc_holdout"),
+        default=Path("output/basin/all/screening/splits/drbc_holdout"),
     )
     parser.add_argument("--validation-fraction", type=float, default=0.1)
     parser.add_argument("--seed", type=int, default=20260404)

@@ -43,13 +43,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-png",
         type=Path,
-        default=Path("output/basin/checklists/plots/drbc_holdout_broad_usable_year_timeline.png"),
+        default=Path("output/basin/all/screening/plots/drbc_holdout_broad_usable_year_timeline.png"),
         help="Output PNG path.",
     )
     parser.add_argument(
         "--output-svg",
         type=Path,
-        default=Path("output/basin/checklists/plots/drbc_holdout_broad_usable_year_timeline.svg"),
+        default=Path("output/basin/all/screening/plots/drbc_holdout_broad_usable_year_timeline.svg"),
         help="Optional SVG path for vector export.",
     )
     return parser.parse_args()

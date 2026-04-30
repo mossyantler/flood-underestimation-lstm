@@ -18,11 +18,38 @@ THRESHOLD_LEVELS = (("Q99", 0.99), ("Q98", 0.98), ("Q95", 0.95))
 COLD_SEASON_MONTHS = {11, 12, 1, 2, 3}
 INTER_EVENT_SEPARATION_HOURS = 72
 MIN_EVENT_COUNT = 5
+EVENT_CANDIDATE_LABEL = "observed_high_flow_candidate"
+EVENT_DETECTION_BASIS_PREFIX = "observed_streamflow_quantile_threshold"
+FLOOD_RELEVANCE_UNRATED = "high_flow_candidate_unrated"
+FLOOD_RELEVANCE_BELOW_2YR = "high_flow_below_2yr_proxy"
+DEGREE_DAY_TCRIT_C = 1.0
+DEGREE_DAY_FACTOR_MM_PER_DAY_C = 2.0
+DEGREE_DAY_SNOW_WINDOW_DAYS = 7
+SNOWMELT_MIN_MM = 1.0
+SNOWMELT_MIN_VALID_WINDOW_COUNT = 10
+RAIN_SNOWMELT_MIN_FRACTION = 1.0 / 3.0
+PRECIP_THRESHOLD_QUANTILE = 0.9
+PRECIP_THRESHOLD_MIN_VALID_WINDOW_COUNT = 10
 
 FLOOD_TYPES = (
     "recent_precipitation",
     "antecedent_precipitation",
     "snowmelt_or_rain_on_snow",
+    "uncertain_high_flow_candidate",
+)
+
+DEGREE_DAY_EVENT_COLUMNS = (
+    "degree_day_rain_7d",
+    "degree_day_snowmelt_7d",
+    "degree_day_water_input_7d",
+    "degree_day_snowmelt_fraction_7d",
+    "degree_day_rain_fraction_7d",
+    "basin_snowmelt_7d_p90",
+    "basin_snowmelt_valid_window_count",
+    "basin_rain_1d_p90",
+    "basin_rain_3d_p90",
+    "basin_rain_7d_p90",
+    "basin_rain_30d_p90",
 )
 
 
@@ -524,6 +551,201 @@ def calculate_rbi(streamflow: pd.Series) -> float | pd.NA:
     return float(numerator / denominator)
 
 
+def quantile_from_positive_windows(
+    values: pd.Series,
+    *,
+    quantile: float = PRECIP_THRESHOLD_QUANTILE,
+    min_value: float = 0.0,
+    min_count: int = PRECIP_THRESHOLD_MIN_VALID_WINDOW_COUNT,
+) -> tuple[float | pd.NA, int]:
+    clean = pd.to_numeric(values, errors="coerce").dropna()
+    clean = clean[np.isfinite(clean)]
+    clean = clean[clean > min_value]
+    count = int(len(clean))
+    if count < min_count:
+        return pd.NA, count
+    return float(clean.quantile(quantile)), count
+
+
+def build_degree_day_basin_proxy(
+    frame: pd.DataFrame,
+    *,
+    tcrit_c: float = DEGREE_DAY_TCRIT_C,
+    degree_day_factor: float = DEGREE_DAY_FACTOR_MM_PER_DAY_C,
+) -> tuple[pd.DataFrame, dict[str, object]]:
+    rainfall = pd.to_numeric(frame["Rainf"], errors="coerce").clip(lower=0)
+    tair = pd.to_numeric(frame["Tair"], errors="coerce")
+
+    daily_precip = rainfall.resample("D").sum(min_count=1)
+    daily_temp = tair.resample("D").mean()
+    daily = pd.DataFrame({"precip_mm": daily_precip, "temp_c": daily_temp})
+
+    rows: list[dict[str, object]] = []
+    snowpack = 0.0
+    for timestamp, row in daily.iterrows():
+        precip = row["precip_mm"]
+        temp = row["temp_c"]
+        snowpack_start = snowpack
+
+        if pd.isna(precip) or pd.isna(temp):
+            rows.append(
+                {
+                    "date": timestamp,
+                    "degree_day_rain_1d": pd.NA,
+                    "degree_day_snowfall_1d": pd.NA,
+                    "degree_day_snowmelt_1d": pd.NA,
+                    "degree_day_water_input_1d": pd.NA,
+                    "degree_day_snowpack_swe_start": snowpack_start,
+                    "degree_day_snowpack_swe_end": snowpack,
+                }
+            )
+            continue
+
+        precip = max(0.0, float(precip))
+        temp = float(temp)
+        if temp <= tcrit_c:
+            rain = 0.0
+            snowfall = precip
+            snowmelt = 0.0
+            snowpack += snowfall
+        else:
+            rain = precip
+            snowfall = 0.0
+            melt_potential = max(0.0, degree_day_factor * (temp - tcrit_c))
+            snowmelt = min(snowpack, melt_potential)
+            snowpack -= snowmelt
+
+        rows.append(
+            {
+                "date": timestamp,
+                "degree_day_rain_1d": rain,
+                "degree_day_snowfall_1d": snowfall,
+                "degree_day_snowmelt_1d": snowmelt,
+                "degree_day_water_input_1d": rain + snowmelt,
+                "degree_day_snowpack_swe_start": snowpack_start,
+                "degree_day_snowpack_swe_end": snowpack,
+            }
+        )
+
+    proxy = pd.DataFrame(rows)
+    if proxy.empty:
+        empty_stats = {column: pd.NA for column in DEGREE_DAY_EVENT_COLUMNS}
+        empty_stats["basin_snowmelt_valid_window_count"] = 0
+        return pd.DataFrame(), empty_stats
+
+    proxy = proxy.set_index("date")
+    proxy["degree_day_rain_3d"] = proxy["degree_day_rain_1d"].rolling(window=3, min_periods=3).sum()
+    proxy["degree_day_rain_7d"] = proxy["degree_day_rain_1d"].rolling(
+        window=DEGREE_DAY_SNOW_WINDOW_DAYS,
+        min_periods=DEGREE_DAY_SNOW_WINDOW_DAYS,
+    ).sum()
+    proxy["degree_day_rain_30d"] = proxy["degree_day_rain_1d"].rolling(window=30, min_periods=30).sum()
+    proxy["degree_day_snowmelt_7d"] = proxy["degree_day_snowmelt_1d"].rolling(
+        window=DEGREE_DAY_SNOW_WINDOW_DAYS,
+        min_periods=DEGREE_DAY_SNOW_WINDOW_DAYS,
+    ).sum()
+    proxy["degree_day_water_input_7d"] = proxy["degree_day_water_input_1d"].rolling(
+        window=DEGREE_DAY_SNOW_WINDOW_DAYS,
+        min_periods=DEGREE_DAY_SNOW_WINDOW_DAYS,
+    ).sum()
+
+    snowmelt_p90, snowmelt_count = quantile_from_positive_windows(
+        proxy["degree_day_snowmelt_7d"],
+        min_value=SNOWMELT_MIN_MM - 1e-12,
+        min_count=SNOWMELT_MIN_VALID_WINDOW_COUNT,
+    )
+    rain_1d_p90, _ = quantile_from_positive_windows(proxy["degree_day_rain_1d"])
+    rain_3d_p90, _ = quantile_from_positive_windows(proxy["degree_day_rain_3d"])
+    rain_7d_p90, _ = quantile_from_positive_windows(proxy["degree_day_rain_7d"])
+    rain_30d_p90, _ = quantile_from_positive_windows(proxy["degree_day_rain_30d"])
+
+    stats = {
+        "basin_snowmelt_7d_p90": snowmelt_p90,
+        "basin_snowmelt_valid_window_count": snowmelt_count,
+        "basin_rain_1d_p90": rain_1d_p90,
+        "basin_rain_3d_p90": rain_3d_p90,
+        "basin_rain_7d_p90": rain_7d_p90,
+        "basin_rain_30d_p90": rain_30d_p90,
+    }
+    return proxy, stats
+
+
+def degree_day_event_descriptors(
+    peak_time: pd.Timestamp,
+    *,
+    degree_day_proxy: pd.DataFrame | None,
+    degree_day_stats: dict[str, object] | None,
+) -> dict[str, object]:
+    result = {column: pd.NA for column in DEGREE_DAY_EVENT_COLUMNS}
+    result["snow_related_flag"] = pd.NA
+    result["rain_on_snow_proxy"] = pd.NA
+
+    if degree_day_stats:
+        for key, value in degree_day_stats.items():
+            if key in result:
+                result[key] = value
+
+    if degree_day_proxy is None or degree_day_proxy.empty:
+        return result
+
+    peak_day = pd.Timestamp(peak_time).normalize()
+    if peak_day not in degree_day_proxy.index:
+        return result
+
+    row = degree_day_proxy.loc[peak_day]
+    rain_7d = row.get("degree_day_rain_7d", pd.NA)
+    snowmelt_7d = row.get("degree_day_snowmelt_7d", pd.NA)
+    water_input_7d = row.get("degree_day_water_input_7d", pd.NA)
+
+    result["degree_day_rain_7d"] = to_float(rain_7d)
+    result["degree_day_snowmelt_7d"] = to_float(snowmelt_7d)
+    result["degree_day_water_input_7d"] = to_float(water_input_7d)
+
+    water_value = pd.to_numeric(pd.Series([water_input_7d]), errors="coerce").iloc[0]
+    rain_value = pd.to_numeric(pd.Series([rain_7d]), errors="coerce").iloc[0]
+    snowmelt_value = pd.to_numeric(pd.Series([snowmelt_7d]), errors="coerce").iloc[0]
+    if pd.notna(water_value) and float(water_value) > 0:
+        result["degree_day_snowmelt_fraction_7d"] = float(snowmelt_value / water_value)
+        result["degree_day_rain_fraction_7d"] = float(rain_value / water_value)
+
+    snowmelt_p90 = pd.to_numeric(pd.Series([result.get("basin_snowmelt_7d_p90")]), errors="coerce").iloc[0]
+    valid_count = pd.to_numeric(
+        pd.Series([result.get("basin_snowmelt_valid_window_count")]),
+        errors="coerce",
+    ).iloc[0]
+    snowmelt_proxy = (
+        pd.notna(snowmelt_value)
+        and pd.notna(snowmelt_p90)
+        and pd.notna(valid_count)
+        and float(snowmelt_value) >= float(snowmelt_p90)
+        and float(snowmelt_value) >= SNOWMELT_MIN_MM
+        and int(valid_count) >= SNOWMELT_MIN_VALID_WINDOW_COUNT
+    )
+
+    snow_fraction = pd.to_numeric(
+        pd.Series([result.get("degree_day_snowmelt_fraction_7d")]),
+        errors="coerce",
+    ).iloc[0]
+    rain_fraction = pd.to_numeric(
+        pd.Series([result.get("degree_day_rain_fraction_7d")]),
+        errors="coerce",
+    ).iloc[0]
+    rain_on_snow = (
+        pd.notna(water_value)
+        and float(water_value) > 0
+        and pd.notna(snowmelt_value)
+        and float(snowmelt_value) >= SNOWMELT_MIN_MM
+        and pd.notna(snow_fraction)
+        and float(snow_fraction) >= RAIN_SNOWMELT_MIN_FRACTION
+        and pd.notna(rain_fraction)
+        and float(rain_fraction) >= RAIN_SNOWMELT_MIN_FRACTION
+    )
+
+    result["rain_on_snow_proxy"] = bool(rain_on_snow)
+    result["snow_related_flag"] = bool(rain_on_snow or snowmelt_proxy)
+    return result
+
+
 def build_event_row(
     *,
     basin: pd.Series,
@@ -533,6 +755,8 @@ def build_event_row(
     threshold_label: str,
     threshold_value: float,
     area_sqkm: float | pd.NA,
+    degree_day_proxy: pd.DataFrame | None = None,
+    degree_day_stats: dict[str, object] | None = None,
 ) -> dict[str, object]:
     streamflow = frame["Streamflow"]
     rainfall = frame["Rainf"]
@@ -562,7 +786,7 @@ def build_event_row(
     antecedent_30d_start = peak_time - pd.Timedelta(hours=743)
     antecedent_end = peak_time - pd.Timedelta(hours=24)
 
-    return {
+    row = {
         "gauge_id": basin["gauge_id"],
         "gauge_name": basin.get("gauge_name", pd.NA),
         "state": basin.get("state", pd.NA),
@@ -572,6 +796,10 @@ def build_event_row(
         "snow_fraction": to_float(basin.get("snow_fraction")),
         "selected_threshold_quantile": threshold_label,
         "selected_threshold_value": float(threshold_value),
+        "event_detection_basis": f"{EVENT_DETECTION_BASIS_PREFIX}_{threshold_label}",
+        "event_candidate_label": EVENT_CANDIDATE_LABEL,
+        "flood_relevance_tier": FLOOD_RELEVANCE_UNRATED,
+        "flood_relevance_basis": "streamflow_quantile_threshold_only",
         "event_id": f"{basin['gauge_id']}_event_{event_number:03d}",
         "event_start": event_start.isoformat(),
         "event_peak": peak_time.isoformat(),
@@ -600,6 +828,14 @@ def build_event_row(
         "api_7d": pd.NA,
         "api_30d": pd.NA,
     }
+    row.update(
+        degree_day_event_descriptors(
+            peak_time,
+            degree_day_proxy=degree_day_proxy,
+            degree_day_stats=degree_day_stats,
+        )
+    )
+    return row
 
 
 def build_basin_event_summary_row(
@@ -632,6 +868,9 @@ def build_basin_event_summary_row(
         "q98_event_count": threshold_counts.get("Q98", 0),
         "q95_event_count": threshold_counts.get("Q95", 0),
         "event_count": int(len(extracted_events)),
+        "flood_like_ge_2yr_proxy_event_count": 0,
+        "high_flow_below_2yr_proxy_event_count": 0,
+        "high_flow_candidate_unrated_event_count": int(len(extracted_events)),
         "annual_peak_years": 0,
         "unit_area_peak_median": pd.NA,
         "unit_area_peak_p90": pd.NA,
@@ -665,6 +904,13 @@ def build_basin_event_summary_row(
 
     if extracted_events:
         events = pd.DataFrame(extracted_events)
+        if "flood_relevance_tier" in events.columns:
+            tiers = events["flood_relevance_tier"].value_counts(dropna=False)
+            base["flood_like_ge_2yr_proxy_event_count"] = int(
+                events["flood_relevance_tier"].astype(str).str.startswith("flood_like_ge_").sum()
+            )
+            base["high_flow_below_2yr_proxy_event_count"] = int(tiers.get(FLOOD_RELEVANCE_BELOW_2YR, 0))
+            base["high_flow_candidate_unrated_event_count"] = int(tiers.get(FLOOD_RELEVANCE_UNRATED, 0))
         base["unit_area_peak_median"] = to_float(pd.to_numeric(events["unit_area_peak"], errors="coerce").median())
         base["unit_area_peak_p90"] = to_float(pd.to_numeric(events["unit_area_peak"], errors="coerce").quantile(0.9))
         base["rising_time_median_hours"] = to_float(pd.to_numeric(events["rising_time_hours"], errors="coerce").median())
@@ -684,6 +930,25 @@ def safe_ratio(numerator: object, denominator: object) -> float | pd.NA:
     if pd.isna(num) or pd.isna(den) or den == 0:
         return pd.NA
     return float(num / den)
+
+
+def classify_flood_relevance_tier(event_row: dict[str, object], return_periods: Iterable[int]) -> str:
+    qualifying_periods: list[int] = []
+    has_valid_reference_ratio = False
+
+    for period in sorted(int(item) for item in return_periods):
+        ratio = pd.to_numeric(pd.Series([event_row.get(f"peak_to_flood_ari{period}")]), errors="coerce").iloc[0]
+        if pd.isna(ratio):
+            continue
+        has_valid_reference_ratio = True
+        if float(ratio) >= 1.0:
+            qualifying_periods.append(period)
+
+    if qualifying_periods:
+        return f"flood_like_ge_{max(qualifying_periods)}yr_proxy"
+    if has_valid_reference_ratio:
+        return FLOOD_RELEVANCE_BELOW_2YR
+    return FLOOD_RELEVANCE_UNRATED
 
 
 class ProgressReporter:

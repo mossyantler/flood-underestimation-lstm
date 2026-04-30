@@ -6,9 +6,11 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import os
+from pathlib import Path
 
-OUTPUT_PATH = "/Users/jang-minyeop/Project/CAMELS/output/timeseries_split_overview.png"
-os.makedirs("/Users/jang-minyeop/Project/CAMELS/output", exist_ok=True)
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+OUTPUT_PATH = PROJECT_ROOT / "output/basin/timeseries/timeseries_split_overview.png"
+os.makedirs(OUTPUT_PATH.parent, exist_ok=True)
 
 C_TRAIN = "#4C72B0"
 C_VAL   = "#DD8452"

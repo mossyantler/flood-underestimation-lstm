@@ -1,0 +1,13 @@
+# Model Analysis Output Layout
+
+이 문서는 `output/model_analysis/` 아래 산출물 폴더의 역할을 설명한다. 폴더명에는 더 이상 `subset300_` prefix를 붙이지 않는다. 현재 실험이 고정 300-basin main comparison이라는 사실은 config와 runner 이름에서 확인하고, 산출물 경로는 분석 목적 중심으로 읽는다.
+
+| Folder | Purpose |
+| --- | --- |
+| `overall_analysis/` | Model 1/2 seed별 validation checkpoint sweep 결과를 모은다. `basin_metrics.csv`, primary epoch summary, epoch metric box plot, primary paired-seed delta chart, outlier diagnostics가 들어간다. |
+| `quantile_analysis/` | 모든 validation checkpoint의 required-series와 q50/q90/q95/q99 hydrograph 분석 결과를 둔다. high-flow strata, peak-hour, quantile coverage, event-regime 분석의 기준 입력이다. |
+| `extreme_rain/primary/` | validation 기준 primary checkpoint만 사용한 extreme-rain exposure/stress-test 산출물이다. event catalog, inference required-series, paired delta aggregate, event plot을 포함한다. |
+| `extreme_rain/all/` | primary 선택과 분리된 checkpoint sensitivity 진단용 extreme-rain sweep 산출물이다. validation epoch grid `005 / 010 / 015 / 020 / 025 / 030` 전체를 비교한다. |
+| `../basin/timeseries/` | fixed split의 target/input coverage, basin time-series overview, 단일 sequence 구조 진단 산출물. 시간축 coverage는 basin/data support 성격이므로 `model_analysis/`가 아니라 `output/basin/timeseries/`에 둔다. |
+
+현재 로컬에 없는 `natural_robustness/`, `probabilistic_diagnostics/` 같은 폴더는 해당 분석을 새로 실행할 때만 생성된다. 생성되면 이 문서와 `scripts/README.md`의 경로 설명을 함께 갱신한다.

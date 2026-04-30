@@ -21,7 +21,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--defined-dir",
         type=Path,
-        default=Path("output/basin/huc8_delware_camelsh/defined_from_mostly_huc10"),
+        default=Path("output/basin/drbc/archive/huc8_delaware_camelsh/defined_from_mostly_huc10"),
         help="Directory containing defined_region.geojson and defined_huc8/10/12.geojson.",
     )
     parser.add_argument(
@@ -39,7 +39,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("output/basin/huc8_delware_camelsh/camelsh_from_defined_region"),
+        default=Path("output/basin/drbc/archive/huc8_delaware_camelsh/camelsh_from_defined_region"),
         help="Directory where matched CAMELSH outputs will be written.",
     )
     parser.add_argument(

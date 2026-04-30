@@ -24,6 +24,7 @@ RUN_SAVE_ALL_OUTPUT="${NH_SAVE_ALL_OUTPUT:-False}"
 RUN_SAVE_VALIDATION_RESULTS="${NH_SAVE_VALIDATION_RESULTS:-True}"
 RUN_SAVE_WEIGHTS_EVERY="${NH_SAVE_WEIGHTS_EVERY:-1}"
 RUN_LOG_TENSORBOARD="${NH_LOG_TENSORBOARD:-False}"
+RUN_ALLOW_SUBSEQUENT_NAN_LOSSES="${NH_ALLOW_SUBSEQUENT_NAN_LOSSES:-}"
 RUN_DRY_RUN="${NH_DRY_RUN:-0}"
 RUN_EXPERIMENT_SUFFIX="${NH_EXPERIMENT_SUFFIX:-}"
 RUN_RESUME="${NH_RESUME:-1}"
@@ -72,7 +73,7 @@ for MODEL in "${MODELS[@]}"; do
 
   for SEED in "${SEEDS[@]}"; do
     TMP_CONFIG="$(mktemp "${TMPDIR:-/tmp}/camelsh_subset_${SIZE}_${MODEL}_seed${SEED}.XXXXXX")"
-    export BASE_CONFIG TMP_CONFIG MODEL SIZE SEED RUN_ROOT RUN_EPOCHS RUN_BATCH_SIZE RUN_NUM_WORKERS RUN_VALIDATE_EVERY RUN_CACHE_VALIDATION RUN_DEVICE RUN_SAVE_ALL_OUTPUT RUN_SAVE_VALIDATION_RESULTS RUN_SAVE_WEIGHTS_EVERY RUN_LOG_TENSORBOARD RUN_EXPERIMENT_SUFFIX RUN_RESUME ROOT_DIR FLATTEN_HELPER SPLIT_DIR VALIDATION_COUNT
+    export BASE_CONFIG TMP_CONFIG MODEL SIZE SEED RUN_ROOT RUN_EPOCHS RUN_BATCH_SIZE RUN_NUM_WORKERS RUN_VALIDATE_EVERY RUN_CACHE_VALIDATION RUN_DEVICE RUN_SAVE_ALL_OUTPUT RUN_SAVE_VALIDATION_RESULTS RUN_SAVE_WEIGHTS_EVERY RUN_LOG_TENSORBOARD RUN_ALLOW_SUBSEQUENT_NAN_LOSSES RUN_EXPERIMENT_SUFFIX RUN_RESUME ROOT_DIR FLATTEN_HELPER SPLIT_DIR VALIDATION_COUNT
     RESUME_INFO="$(
       python - <<'PY'
 import os
@@ -107,6 +108,7 @@ save_all_output = parse_bool(os.environ["RUN_SAVE_ALL_OUTPUT"])
 save_validation_results = parse_bool(os.environ["RUN_SAVE_VALIDATION_RESULTS"])
 save_weights_every = int(os.environ["RUN_SAVE_WEIGHTS_EVERY"])
 log_tensorboard = parse_bool(os.environ["RUN_LOG_TENSORBOARD"])
+allow_subsequent_nan_losses = os.environ["RUN_ALLOW_SUBSEQUENT_NAN_LOSSES"].strip()
 validation_count = int(os.environ["VALIDATION_COUNT"])
 suffix = os.environ.get("RUN_EXPERIMENT_SUFFIX", "").strip()
 resume_requested = parse_bool(os.environ.get("RUN_RESUME", "1"))
@@ -122,6 +124,8 @@ cfg["save_all_output"] = save_all_output
 cfg["save_validation_results"] = save_validation_results
 cfg["save_weights_every"] = save_weights_every
 cfg["log_tensorboard"] = log_tensorboard
+if allow_subsequent_nan_losses:
+    cfg["allow_subsequent_nan_losses"] = int(allow_subsequent_nan_losses)
 cfg["run_dir"] = str(run_root)
 cfg["train_basin_file"] = str(split_dir / "train.txt")
 cfg["validation_basin_file"] = str(split_dir / "validation.txt")
@@ -222,6 +226,8 @@ if resume_requested and run_root.exists():
             "log_tensorboard": log_tensorboard,
             "device": device,
         }
+        if allow_subsequent_nan_losses:
+            cfg["allow_subsequent_nan_losses"] = int(allow_subsequent_nan_losses)
         resume_state = {
             "mode": "continue",
             "experiment_name": experiment_name,
@@ -246,6 +252,9 @@ PY
     echo "Config: $TMP_CONFIG"
     echo "Run root: $RUN_ROOT"
     echo "Overrides: batch_size=${RUN_BATCH_SIZE}, num_workers=${RUN_NUM_WORKERS}, validate_every=${RUN_VALIDATE_EVERY}, cache_validation_data=${RUN_CACHE_VALIDATION}, save_all_output=${RUN_SAVE_ALL_OUTPUT}, save_validation_results=${RUN_SAVE_VALIDATION_RESULTS}"
+    if [ -n "$RUN_ALLOW_SUBSEQUENT_NAN_LOSSES" ]; then
+      echo "NaN loss tolerance: allow_subsequent_nan_losses=${RUN_ALLOW_SUBSEQUENT_NAN_LOSSES}"
+    fi
     if [ "$mode" = "continue" ]; then
       echo "Resume run dir: $matched_run_dir"
       echo "Continue from epoch: $last_common_epoch | remaining_epochs=${remaining_epochs}"

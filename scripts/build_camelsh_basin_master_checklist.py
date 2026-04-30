@@ -25,7 +25,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--mapping-csv",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/camelsh_drbc_mapping.csv"),
+        default=Path("output/basin/drbc/basin_define/camelsh_drbc_mapping.csv"),
         help="Full CAMELSH-to-DRBC mapping table covering all basins.",
     )
     parser.add_argument(
@@ -64,7 +64,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("output/basin/checklists"),
+        default=Path("output/basin/all/screening"),
         help="Directory where the master checklist and summary will be written.",
     )
     parser.add_argument("--min-annual-coverage", type=float, default=0.8)

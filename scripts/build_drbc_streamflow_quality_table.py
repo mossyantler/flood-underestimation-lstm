@@ -22,7 +22,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--selected-csv",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/camelsh_drbc_selected.csv"),
+        default=Path("output/basin/drbc/basin_define/camelsh_drbc_selected.csv"),
     )
     parser.add_argument(
         "--info-csv",
@@ -37,7 +37,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/screening"),
+        default=Path("output/basin/drbc/screening"),
     )
     parser.add_argument("--min-usable-years", dest="min_observed_years", type=int, default=10)
     parser.add_argument("--min-observed-years", dest="min_observed_years", type=int)

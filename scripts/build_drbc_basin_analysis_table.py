@@ -53,7 +53,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--selected-csv",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/camelsh_drbc_selected.csv"),
+        default=Path("output/basin/drbc/basin_define/camelsh_drbc_selected.csv"),
         help="Selected DRBC CAMELSH basin table.",
     )
     parser.add_argument(
@@ -65,8 +65,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/analysis"),
-        help="Directory where analysis tables will be written.",
+        default=Path("output/basin/drbc/analysis/basin_attributes"),
+        help="Basin-attributes analysis root. Tables and metadata are written under this directory.",
     )
     return parser.parse_args()
 
@@ -195,16 +195,19 @@ def build_summary(df: pd.DataFrame, analysis_df: pd.DataFrame) -> dict:
 
 def main() -> None:
     args = parse_args()
-    args.output_dir.mkdir(parents=True, exist_ok=True)
+    table_dir = args.output_dir / "tables"
+    metadata_dir = args.output_dir / "metadata"
+    table_dir.mkdir(parents=True, exist_ok=True)
+    metadata_dir.mkdir(parents=True, exist_ok=True)
 
     selected = read_selected(args.selected_csv)
     merged = merge_attributes(selected, args.attributes_dir)
     analysis = build_analysis_table(merged)
     summary = build_summary(merged, analysis)
 
-    merged_path = args.output_dir / "drbc_selected_static_attributes_full.csv"
-    analysis_path = args.output_dir / "drbc_selected_basin_analysis_table.csv"
-    summary_path = args.output_dir / "drbc_selected_basin_analysis_summary.json"
+    merged_path = table_dir / "drbc_selected_static_attributes_full.csv"
+    analysis_path = table_dir / "drbc_selected_basin_analysis_table.csv"
+    summary_path = metadata_dir / "drbc_selected_basin_analysis_summary.json"
 
     merged.to_csv(merged_path, index=False)
     analysis.to_csv(analysis_path, index=False)

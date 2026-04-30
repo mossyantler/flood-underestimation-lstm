@@ -45,6 +45,10 @@ EVENT_BASE_COLUMNS = [
     "snow_fraction",
     "selected_threshold_quantile",
     "selected_threshold_value",
+    "event_detection_basis",
+    "event_candidate_label",
+    "flood_relevance_tier",
+    "flood_relevance_basis",
     "event_id",
     "event_start",
     "event_peak",
@@ -67,6 +71,7 @@ EVENT_BASE_COLUMNS = [
     "event_mean_temp",
     "antecedent_mean_temp_7d",
     "peak_temp",
+    *fu.DEGREE_DAY_EVENT_COLUMNS,
     "event_runoff_coefficient",
     "snow_related_flag",
     "rain_on_snow_proxy",
@@ -90,6 +95,9 @@ SUMMARY_BASE_COLUMNS = [
     "q98_event_count",
     "q95_event_count",
     "event_count",
+    "flood_like_ge_2yr_proxy_event_count",
+    "high_flow_below_2yr_proxy_event_count",
+    "high_flow_candidate_unrated_event_count",
     "annual_peak_years",
     "unit_area_peak_median",
     "unit_area_peak_p90",
@@ -131,7 +139,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--return-period-csv",
         type=Path,
-        default=Path("output/basin/camelsh_all/flood_analysis/return_period_reference_table.csv"),
+        default=Path("output/basin/all/analysis/return_period/tables/return_period_reference_table.csv"),
         help="Optional return-period reference table produced by build_camelsh_return_period_references.py.",
     )
     parser.add_argument(
@@ -142,8 +150,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("output/basin/camelsh_all/flood_analysis"),
-        help="Directory for event-response outputs.",
+        default=Path("output/basin/all/analysis"),
+        help="Analysis root directory. Event-response tables and metadata are written under event_response/.",
     )
     parser.add_argument(
         "--min-annual-coverage",
@@ -257,6 +265,8 @@ def attach_return_ratios(
                 return_ref.get(f"prec_ari{period}_{duration}h"),
             )
 
+    event_row["flood_relevance_tier"] = fu.classify_flood_relevance_tier(event_row, return_periods)
+    event_row["flood_relevance_basis"] = "streamflow_quantile_threshold_plus_CAMELSH_hourly_return_period_proxy"
     return event_row
 
 
@@ -320,6 +330,7 @@ def process_basin(task: dict[str, Any]) -> tuple[list[dict[str, object]], dict[s
         min_event_count=task["min_event_count"],
         separation_hours=task["inter_event_separation_hours"],
     )
+    degree_day_proxy, degree_day_stats = fu.build_degree_day_basin_proxy(frame)
 
     area_candidates = pd.to_numeric(pd.Series([basin.get("drain_sqkm_attr"), basin.get("area")]), errors="coerce").dropna()
     area_sqkm = float(area_candidates.iloc[0]) if not area_candidates.empty and float(area_candidates.iloc[0]) > 0 else pd.NA
@@ -334,6 +345,8 @@ def process_basin(task: dict[str, Any]) -> tuple[list[dict[str, object]], dict[s
             threshold_label=threshold_label,
             threshold_value=threshold_value,
             area_sqkm=area_sqkm,
+            degree_day_proxy=degree_day_proxy,
+            degree_day_stats=degree_day_stats,
         )
         attach_return_ratios(
             event_row,
@@ -377,7 +390,10 @@ def iter_results(tasks: list[dict[str, Any]], workers: int) -> list[tuple[list[d
 
 def main() -> None:
     args = parse_args()
-    args.output_dir.mkdir(parents=True, exist_ok=True)
+    table_dir = args.output_dir / "event_response" / "tables"
+    metadata_dir = args.output_dir / "event_response" / "metadata"
+    table_dir.mkdir(parents=True, exist_ok=True)
+    metadata_dir.mkdir(parents=True, exist_ok=True)
 
     metadata_paths = args.metadata_csv if args.metadata_csv is not None else DEFAULT_METADATA
     gauge_ids = fu.discover_gauge_ids(
@@ -441,10 +457,10 @@ def main() -> None:
     if not skipped.empty:
         skipped = skipped.sort_values("gauge_id").reset_index(drop=True)
 
-    events_path = args.output_dir / "event_response_table.csv"
-    summary_path = args.output_dir / "event_response_basin_summary.csv"
-    skipped_path = args.output_dir / "event_response_skipped_basins.csv"
-    json_path = args.output_dir / "event_response_summary.json"
+    events_path = table_dir / "event_response_table.csv"
+    summary_path = table_dir / "event_response_basin_summary.csv"
+    skipped_path = table_dir / "event_response_skipped_basins.csv"
+    json_path = metadata_dir / "event_response_summary.json"
 
     events.to_csv(events_path, index=False)
     summary.to_csv(summary_path, index=False)
@@ -460,6 +476,11 @@ def main() -> None:
         "timeseries_dir": str(args.timeseries_dir),
         "return_period_csv": str(args.return_period_csv) if return_period_df is not None else None,
         "workers": args.workers,
+        "degree_day_tcrit_c": fu.DEGREE_DAY_TCRIT_C,
+        "degree_day_factor_mm_per_day_c": fu.DEGREE_DAY_FACTOR_MM_PER_DAY_C,
+        "degree_day_snow_window_days": fu.DEGREE_DAY_SNOW_WINDOW_DAYS,
+        "snowmelt_min_mm": fu.SNOWMELT_MIN_MM,
+        "snowmelt_min_valid_window_count": fu.SNOWMELT_MIN_VALID_WINDOW_COUNT,
         "outputs": {
             "event_response_table": str(events_path),
             "event_response_basin_summary": str(summary_path),

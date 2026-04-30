@@ -2,7 +2,9 @@
 # /// script
 # dependencies = [
 #   "netCDF4>=1.7",
+#   "numpy>=2.0",
 #   "pandas>=2.2",
+#   "scipy>=1.13",
 #   "xarray>=2024.1",
 # ]
 # ///
@@ -11,17 +13,27 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 import pandas as pd
 import xarray as xr
 
+SCRIPT_ROOT = Path(__file__).resolve().parent
+if str(SCRIPT_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_ROOT))
+
+import camelsh_flood_analysis_utils as fu
+
 
 THRESHOLD_LEVELS: list[tuple[str, float]] = [("Q99", 0.99), ("Q98", 0.98), ("Q95", 0.95)]
 COLD_SEASON_MONTHS = {11, 12, 1, 2, 3}
 INTER_EVENT_SEPARATION_HOURS = 72
 MIN_EVENT_COUNT = 5
+EVENT_CANDIDATE_LABEL = "observed_high_flow_candidate"
+EVENT_DETECTION_BASIS_PREFIX = "observed_streamflow_quantile_threshold"
+FLOOD_RELEVANCE_UNRATED = "high_flow_candidate_unrated"
 EVENT_COLUMNS = [
     "gauge_id",
     "gauge_name",
@@ -29,6 +41,10 @@ EVENT_COLUMNS = [
     "drain_sqkm_attr",
     "selected_threshold_quantile",
     "selected_threshold_value",
+    "event_detection_basis",
+    "event_candidate_label",
+    "flood_relevance_tier",
+    "flood_relevance_basis",
     "event_id",
     "event_start",
     "event_peak",
@@ -51,6 +67,7 @@ EVENT_COLUMNS = [
     "event_mean_temp",
     "antecedent_mean_temp_7d",
     "peak_temp",
+    *fu.DEGREE_DAY_EVENT_COLUMNS,
     "event_runoff_coefficient",
     "snow_related_flag",
     "rain_on_snow_proxy",
@@ -71,6 +88,9 @@ SUMMARY_COLUMNS = [
     "q98_event_count",
     "q95_event_count",
     "event_count",
+    "flood_like_ge_2yr_proxy_event_count",
+    "high_flow_below_2yr_proxy_event_count",
+    "high_flow_candidate_unrated_event_count",
     "annual_peak_years",
     "unit_area_peak_median",
     "unit_area_peak_p90",
@@ -111,13 +131,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--selected-csv",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/camelsh_drbc_selected.csv"),
+        default=Path("output/basin/drbc/basin_define/camelsh_drbc_selected.csv"),
         help="Selected DRBC CAMELSH basin table.",
     )
     parser.add_argument(
         "--quality-csv",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/screening/drbc_streamflow_quality_table.csv"),
+        default=Path("output/basin/drbc/screening/drbc_streamflow_quality_table.csv"),
         help="Streamflow quality gate table.",
     )
     parser.add_argument(
@@ -141,8 +161,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/screening"),
-        help="Directory where event response outputs will be written.",
+        default=Path("output/basin/drbc/analysis/event_response"),
+        help="DRBC event-response analysis root. Tables and metadata are written under this directory.",
     )
     parser.add_argument(
         "--include-quality-fail",
@@ -401,6 +421,8 @@ def build_event_row(
     threshold_label: str,
     threshold_value: float,
     area_sqkm: float | pd.NA,
+    degree_day_proxy: pd.DataFrame | None = None,
+    degree_day_stats: dict[str, object] | None = None,
 ) -> dict[str, object]:
     streamflow = frame["Streamflow"]
     rainfall = frame["Rainf"]
@@ -430,13 +452,17 @@ def build_event_row(
     antecedent_30d_start = peak_time - pd.Timedelta(hours=743)
     antecedent_end = peak_time - pd.Timedelta(hours=24)
 
-    return {
+    row = {
         "gauge_id": basin["gauge_id"],
         "gauge_name": basin["gauge_name"],
         "state": basin["state"],
         "drain_sqkm_attr": to_number(basin.get("drain_sqkm_attr")),
         "selected_threshold_quantile": threshold_label,
         "selected_threshold_value": float(threshold_value),
+        "event_detection_basis": f"{EVENT_DETECTION_BASIS_PREFIX}_{threshold_label}",
+        "event_candidate_label": EVENT_CANDIDATE_LABEL,
+        "flood_relevance_tier": FLOOD_RELEVANCE_UNRATED,
+        "flood_relevance_basis": "streamflow_quantile_threshold_only",
         "event_id": f"{basin['gauge_id']}_event_{event_number:03d}",
         "event_start": event_start.isoformat(),
         "event_peak": peak_time.isoformat(),
@@ -465,6 +491,14 @@ def build_event_row(
         "api_7d": pd.NA,
         "api_30d": pd.NA,
     }
+    row.update(
+        fu.degree_day_event_descriptors(
+            peak_time,
+            degree_day_proxy=degree_day_proxy,
+            degree_day_stats=degree_day_stats,
+        )
+    )
+    return row
 
 
 def build_basin_summary_row(
@@ -496,6 +530,9 @@ def build_basin_summary_row(
         "q98_event_count": threshold_counts.get("Q98", 0),
         "q95_event_count": threshold_counts.get("Q95", 0),
         "event_count": int(len(extracted_events)),
+        "flood_like_ge_2yr_proxy_event_count": 0,
+        "high_flow_below_2yr_proxy_event_count": 0,
+        "high_flow_candidate_unrated_event_count": int(len(extracted_events)),
         "annual_peak_years": 0,
         "unit_area_peak_median": pd.NA,
         "unit_area_peak_p90": pd.NA,
@@ -540,7 +577,10 @@ def build_basin_summary_row(
 
 def main() -> None:
     args = parse_args()
-    args.output_dir.mkdir(parents=True, exist_ok=True)
+    table_dir = args.output_dir / "tables"
+    metadata_dir = args.output_dir / "metadata"
+    table_dir.mkdir(parents=True, exist_ok=True)
+    metadata_dir.mkdir(parents=True, exist_ok=True)
 
     basins = build_basin_table(args)
     if basins.empty:
@@ -594,6 +634,7 @@ def main() -> None:
 
         threshold_label, threshold_value, clusters, threshold_counts = select_threshold(streamflow)
         threshold_usage[threshold_label] += 1
+        degree_day_proxy, degree_day_stats = fu.build_degree_day_basin_proxy(frame)
 
         area_candidates = pd.to_numeric(
             pd.Series([basin_series.get("drain_sqkm_attr"), basin_series.get("area")]),
@@ -611,6 +652,8 @@ def main() -> None:
                 threshold_label=threshold_label,
                 threshold_value=threshold_value,
                 area_sqkm=area_sqkm,
+                degree_day_proxy=degree_day_proxy,
+                degree_day_stats=degree_day_stats,
             )
             basin_events.append(event_row)
             event_rows.append(event_row)
@@ -636,10 +679,10 @@ def main() -> None:
     if not events.empty:
         events = events.sort_values(["gauge_id", "event_peak", "event_id"]).reset_index(drop=True)
 
-    events_path = args.output_dir / "event_response_table.csv"
-    summary_path = args.output_dir / "event_response_basin_summary.csv"
-    skipped_path = args.output_dir / "event_response_skipped_basins.csv"
-    json_path = args.output_dir / "event_response_summary.json"
+    events_path = table_dir / "event_response_table.csv"
+    summary_path = table_dir / "event_response_basin_summary.csv"
+    skipped_path = table_dir / "event_response_skipped_basins.csv"
+    json_path = metadata_dir / "event_response_summary.json"
 
     events.to_csv(events_path, index=False)
     summary.to_csv(summary_path, index=False)
@@ -653,6 +696,11 @@ def main() -> None:
         "no_valid_streamflow_count": int((summary["processing_status"] == "no_valid_streamflow").sum()),
         "total_event_count": int(len(events)),
         "threshold_usage": threshold_usage,
+        "degree_day_tcrit_c": fu.DEGREE_DAY_TCRIT_C,
+        "degree_day_factor_mm_per_day_c": fu.DEGREE_DAY_FACTOR_MM_PER_DAY_C,
+        "degree_day_snow_window_days": fu.DEGREE_DAY_SNOW_WINDOW_DAYS,
+        "snowmelt_min_mm": fu.SNOWMELT_MIN_MM,
+        "snowmelt_min_valid_window_count": fu.SNOWMELT_MIN_VALID_WINDOW_COUNT,
         "output_files": {
             "event_response_table": str(events_path),
             "event_response_basin_summary": str(summary_path),

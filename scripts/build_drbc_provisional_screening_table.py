@@ -24,22 +24,22 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--analysis-csv",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/analysis/drbc_selected_basin_analysis_table.csv"),
+        default=Path("output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_basin_analysis_table.csv"),
     )
     parser.add_argument(
         "--quality-csv",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/screening/drbc_streamflow_quality_table.csv"),
+        default=Path("output/basin/drbc/screening/drbc_streamflow_quality_table.csv"),
     )
     parser.add_argument(
         "--preliminary-csv",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/screening/drbc_preliminary_screening_table.csv"),
+        default=Path("output/basin/drbc/screening/drbc_preliminary_screening_table.csv"),
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/screening"),
+        default=Path("output/basin/drbc/screening"),
     )
     parser.add_argument("--broad-top-k", type=int, default=15)
     parser.add_argument("--natural-top-k", type=int, default=8)

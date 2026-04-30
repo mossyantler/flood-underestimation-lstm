@@ -67,8 +67,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("output/basin/camelsh_all/flood_analysis"),
-        help="Directory for return-period outputs.",
+        default=Path("output/basin/all/analysis"),
+        help="Analysis root directory. Return-period tables and metadata are written under return_period/.",
     )
     parser.add_argument(
         "--return-periods",
@@ -166,7 +166,10 @@ def iter_results(tasks: list[dict[str, Any]], workers: int) -> list[tuple[dict[s
 
 def main() -> None:
     args = parse_args()
-    args.output_dir.mkdir(parents=True, exist_ok=True)
+    table_dir = args.output_dir / "return_period" / "tables"
+    metadata_dir = args.output_dir / "return_period" / "metadata"
+    table_dir.mkdir(parents=True, exist_ok=True)
+    metadata_dir.mkdir(parents=True, exist_ok=True)
 
     if not args.timeseries_dir.exists():
         raise SystemExit(f"Time-series directory does not exist: {args.timeseries_dir}")
@@ -215,10 +218,10 @@ def main() -> None:
     if not skipped.empty:
         skipped = skipped.sort_values("gauge_id").reset_index(drop=True)
 
-    reference_path = args.output_dir / "return_period_reference_table.csv"
-    skipped_path = args.output_dir / "return_period_skipped_basins.csv"
-    summary_path = args.output_dir / "return_period_summary.json"
-    annual_path = args.output_dir / "return_period_annual_maxima.csv"
+    reference_path = table_dir / "return_period_reference_table.csv"
+    skipped_path = table_dir / "return_period_skipped_basins.csv"
+    summary_path = metadata_dir / "return_period_summary.json"
+    annual_path = table_dir / "return_period_annual_maxima.csv"
 
     reference.to_csv(reference_path, index=False)
     skipped.to_csv(skipped_path, index=False)

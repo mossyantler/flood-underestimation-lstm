@@ -24,7 +24,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--mapping-csv",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/camelsh_drbc_mapping.csv"),
+        default=Path("output/basin/drbc/basin_define/camelsh_drbc_mapping.csv"),
         help="Full CAMELSH-to-DRBC mapping table.",
     )
     parser.add_argument(
@@ -42,7 +42,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("output/basin/camelsh_training_non_drbc"),
+        default=Path("output/basin/all/screening/training_non_drbc"),
         help="Directory where training-pool outputs will be written.",
     )
     parser.add_argument("--min-annual-coverage", type=float, default=0.8)

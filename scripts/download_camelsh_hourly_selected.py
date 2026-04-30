@@ -26,7 +26,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--selected-ids-path",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/camelsh_drbc_selected_ids.txt"),
+        default=Path("output/basin/drbc/basin_define/camelsh_drbc_selected_ids.txt"),
         help="Text file containing selected gauge IDs, one per line.",
     )
     parser.add_argument(

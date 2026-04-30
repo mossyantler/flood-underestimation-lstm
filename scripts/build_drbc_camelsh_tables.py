@@ -50,8 +50,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("output/basin/drbc_camelsh"),
-        help="Directory where output tables will be written.",
+        default=Path("output/basin/drbc/basin_define"),
+        help="Directory where DRBC basin-definition tables will be written.",
     )
     parser.add_argument(
         "--min-overlap-ratio",

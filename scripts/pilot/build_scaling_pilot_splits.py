@@ -62,7 +62,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--training-selected-csv",
         type=Path,
-        default=Path("output/basin/camelsh_training_non_drbc/camelsh_non_drbc_training_selected.csv"),
+        default=Path("output/basin/all/screening/training_non_drbc/camelsh_non_drbc_training_selected.csv"),
         help=(
             "Optional quality-pass non-DRBC training pool table. If present, metadata from "
             "this file are reused, otherwise basin attributes are used as fallback."

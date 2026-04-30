@@ -24,13 +24,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--input-dir",
         type=Path,
-        default=Path("output/basin/huc8_delware_camelsh/camelsh_from_defined_region"),
+        default=Path("output/basin/drbc/archive/huc8_delaware_camelsh/camelsh_from_defined_region"),
         help="Directory containing camelsh_outlets.geojson and camelsh_basins.geojson.",
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("output/basin/huc8_delware_camelsh/camelsh_from_defined_region"),
+        default=Path("output/basin/drbc/archive/huc8_delaware_camelsh/camelsh_from_defined_region"),
         help="Directory where pair layers will be written.",
     )
     return parser.parse_args()

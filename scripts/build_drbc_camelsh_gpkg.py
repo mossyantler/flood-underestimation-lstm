@@ -39,19 +39,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--selected-csv",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/camelsh_drbc_selected.csv"),
+        default=Path("output/basin/drbc/basin_define/camelsh_drbc_selected.csv"),
         help="CSV of selected Delaware CAMELSH basins.",
     )
     parser.add_argument(
         "--intersect-only-csv",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/camelsh_drbc_intersect_only.csv"),
+        default=Path("output/basin/drbc/basin_define/camelsh_drbc_intersect_only.csv"),
         help="CSV of CAMELSH basins whose polygons intersect DRBC but outlets are outside.",
     )
     parser.add_argument(
         "--output-gpkg",
         type=Path,
-        default=Path("output/basin/drbc_camelsh/drbc_camelsh_layers.gpkg"),
+        default=Path("output/basin/drbc/basin_define/drbc_camelsh_layers.gpkg"),
         help="Output GeoPackage path.",
     )
     return parser.parse_args()
