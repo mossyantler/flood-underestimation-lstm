@@ -180,5 +180,7 @@ static benchmark는 조금 더 혼합적이다.
 - [`../../../../configs/pilot/diagnostics/event_response/event_response_scope_summary.csv`](../../../../configs/pilot/diagnostics/event_response/event_response_scope_summary.csv)
 - [`../../../../configs/pilot/diagnostics/permutation_benchmark/subset300_random_benchmark_summary.csv`](../../../../configs/pilot/diagnostics/permutation_benchmark/subset300_random_benchmark_summary.csv)
 - [`../../../../configs/pilot/diagnostics/permutation_benchmark/subset300_random_benchmark_summary.json`](../../../../configs/pilot/diagnostics/permutation_benchmark/subset300_random_benchmark_summary.json)
+- [`../../../../output/basin/all/screening/subset300_spatial_split/figures/subset300_conus_split_map.png`](../../../../output/basin/all/screening/subset300_spatial_split/figures/subset300_conus_split_map.png)
+- [`../../../../scripts/official/plot_subset300_split_map.py`](../../../../scripts/official/plot_subset300_split_map.py)
 - [`../../../../scripts/pilot/build_scaling_pilot_event_response_diagnostics.py`](../../../../scripts/pilot/build_scaling_pilot_event_response_diagnostics.py)
 - [`../../../../scripts/pilot/build_scaling_pilot_random_subset_benchmark.py`](../../../../scripts/pilot/build_scaling_pilot_random_subset_benchmark.py)

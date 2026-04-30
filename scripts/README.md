@@ -84,7 +84,7 @@ uv run scripts/apply_usgs_peak_flow_to_ml_experiment_csvs.py
 
 루트의 `build_camelsh_flood_generation_ml_clusters.py`는 초기 `KMeans(k=4)` exploratory helper로 남겨 둔다. production entry point로 승격하기 전까지는 논문용 판단 근거를 위 dev scripts의 비교 결과에 둔다.
 
-subset300 Model 1/2 seed/epoch sweep 결과를 다시 집계하고 chart를 만들 때는 아래처럼 실행한다. 산출물은 `output/model_analysis/overall_analysis/` 아래에 생성된다.
+subset300 Model 1/2 seed/epoch sweep 결과를 다시 집계하고 chart를 만들 때는 아래처럼 실행한다. 산출물은 `output/model_analysis/overall_analysis/` 아래에 생성되며, 공식 primary 비교는 `main_comparison/`, epoch sensitivity는 `epoch_sensitivity/`, 실행 기록은 `run_records/`로 나뉜다.
 
 ```bash
 uv run scripts/official/analyze_subset300_epoch_results.py
@@ -96,13 +96,13 @@ epoch별 basin-level metric 분포를 Model/seed별 box plot으로 확인할 때
 uv run python scripts/official/plot_subset300_epoch_metric_boxplots.py
 ```
 
-box plot 이상치가 어떤 basin에서 반복되는지 조사할 때는 아래 diagnostic을 실행한다. 같은 1.5 IQR 기준으로 outlier record를 만들고, basin metadata와 `2014-2016` test 기간 observed Streamflow 통계를 붙여 `output/model_analysis/overall_analysis/outlier_diagnostics/` 아래에 쓴다.
+box plot 이상치가 어떤 basin에서 반복되는지 조사할 때는 아래 diagnostic을 실행한다. 같은 1.5 IQR 기준으로 outlier record를 만들고, basin metadata와 `2014-2016` test 기간 observed Streamflow 통계를 붙여 `output/model_analysis/overall_analysis/result_checks/outlier_checks/` 아래에 쓴다.
 
 ```bash
 uv run python scripts/official/analyze_subset300_epoch_metric_outliers.py
 ```
 
-Primary checkpoint에서 paired seed 비교를 볼 때는 아래 chart script를 사용한다. 같은 seed와 같은 DRBC basin에서 `Model 2 q50 - Model 1` delta를 계산한 기존 `primary_epoch_basin_deltas.csv`를 사용하며, seed별 delta box plot과 median-delta heatmap을 `charts/primary_paired_seed_comparison/` 아래에 만든다.
+Primary checkpoint에서 paired seed 비교를 볼 때는 아래 chart script를 사용한다. 같은 seed와 같은 DRBC basin에서 `Model 2 q50 - Model 1` delta를 계산한 `main_comparison/tables/primary_epoch_basin_deltas.csv`를 사용하며, seed별 delta box plot과 median-delta heatmap을 `main_comparison/figures/paired_seed_comparison/` 아래에 만든다.
 
 ```bash
 uv run python scripts/official/plot_subset300_primary_paired_seed_comparison.py
@@ -112,6 +112,12 @@ uv run python scripts/official/plot_subset300_primary_paired_seed_comparison.py
 
 ```bash
 uv run scripts/official/plot_subset300_timeseries_coverage.py
+```
+
+고정 300-basin split의 공간 분포를 CONUS state boundary와 DRBC boundary 위에서 확인할 때는 아래 map script를 사용한다. 산출물은 `output/basin/all/screening/subset300_spatial_split/` 아래에 `figures/subset300_conus_split_map.{png,svg}`, basin label table, manifest로 저장된다.
+
+```bash
+uv run scripts/official/plot_subset300_split_map.py
 ```
 
 같은 외형으로 target coverage가 아니라 모델에 dynamic input window로 실제 들어간 시간의 union만 보려면 `--chart-kind input`을 사용한다. 이 경우 기존 target chart를 덮어쓰지 않고 `output/basin/timeseries/input_coverage/` 아래의 `figures/`, `tables/spans.csv`, `metadata/manifest.json`으로 별도로 쓴다. Input chart는 전체 관측 가능 기간이 아니라 실제 input으로 사용된 기간에 x축을 맞춰 확대해서 그린다.

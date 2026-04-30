@@ -25,7 +25,7 @@ Model 2의 `q50`은 중앙예측선이다. Model 1과의 중앙예측 성능 비
 
 | 분석 | 주요 산출물 |
 | --- | --- |
-| Primary 전체 성능 / epoch metric box plot | `output/model_analysis/overall_analysis/`, `output/model_analysis/overall_analysis/charts/epoch_metric_boxplots/` |
+| Primary 전체 성능 / epoch metric box plot | `output/model_analysis/overall_analysis/main_comparison/`, `output/model_analysis/overall_analysis/epoch_sensitivity/figures/epoch_metric_boxplots/` |
 | High-flow / peak | `output/model_analysis/quantile_analysis/analysis/` |
 | Event-regime | `output/model_analysis/quantile_analysis/event_regime_analysis/` |
 | Extreme-rain stress | `output/model_analysis/extreme_rain/primary/` |

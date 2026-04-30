@@ -9,7 +9,7 @@
 완료에 가깝다. 세 종류의 sensitivity 산출물이 있다.
 
 ```text
-output/model_analysis/overall_analysis/
+output/model_analysis/overall_analysis/epoch_sensitivity/
 output/model_analysis/quantile_analysis/
 output/model_analysis/extreme_rain/all/
 ```
@@ -22,13 +22,13 @@ Sensitivity에는 두 종류가 있다. 첫째, same-epoch comparison은 Model 1
 
 ## 생성된 표와 차트
 
-Epoch metric sweep에는 `test_same_epoch_delta_summary.csv`, `epoch_metric_summary.csv`, `training_epoch_log.csv`, `validation_epoch_log.csv`가 있다. Basin-level metric 분포를 직접 보는 box plot은 `charts/epoch_metric_boxplots/`에 따로 둔다. Hydrograph all-epoch 분석에는 flow stratum summary와 quantile gap summary가 있다. Extreme-rain all-validation-epoch 분석에는 `paired_delta_epoch_aggregate.csv`, `cohort_epoch_predictor_aggregate.csv`, `rain_cohort_epoch_predictor_aggregate.csv`가 있다.
+Epoch metric sweep에는 `epoch_sensitivity/tables/test_same_epoch_delta_summary.csv`, `epoch_sensitivity/tables/epoch_metric_summary.csv`, `epoch_sensitivity/logs/training_epoch_log.csv`, `epoch_sensitivity/logs/validation_epoch_log.csv`가 있다. Basin-level metric 분포를 직접 보는 box plot은 `epoch_sensitivity/figures/epoch_metric_boxplots/`에 따로 둔다. Hydrograph all-epoch 분석에는 flow stratum summary와 quantile gap summary가 있다. Extreme-rain all-validation-epoch 분석에는 `paired_delta_epoch_aggregate.csv`, `cohort_epoch_predictor_aggregate.csv`, `rain_cohort_epoch_predictor_aggregate.csv`가 있다.
 
 주요 chart는 아래에 있다.
 
 ```text
-output/model_analysis/overall_analysis/charts/test_same_epoch_delta_summary.png
-output/model_analysis/overall_analysis/charts/epoch_metric_boxplots/
+output/model_analysis/overall_analysis/epoch_sensitivity/figures/test_same_epoch_delta_summary.png
+output/model_analysis/overall_analysis/epoch_sensitivity/figures/epoch_metric_boxplots/
 output/model_analysis/quantile_analysis/analysis/charts/top1_underestimation_fraction_by_epoch.png
 output/model_analysis/quantile_analysis/analysis/charts/top1_q99_q50_gap_pct_obs_by_epoch.png
 ```

@@ -14,11 +14,17 @@ import pandas as pd
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_INPUT = REPO_ROOT / "output/model_analysis/overall_analysis/basin_metrics.csv"
-DEFAULT_PRIMARY_SUMMARY = REPO_ROOT / "output/model_analysis/overall_analysis/primary_epoch_summary.csv"
+DEFAULT_INPUT = (
+    REPO_ROOT
+    / "output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv"
+)
+DEFAULT_PRIMARY_SUMMARY = (
+    REPO_ROOT
+    / "output/model_analysis/overall_analysis/main_comparison/tables/primary_epoch_summary.csv"
+)
 DEFAULT_OUTPUT_DIR = (
     REPO_ROOT
-    / "output/model_analysis/overall_analysis/charts/primary_epoch_metric_boxplots"
+    / "output/model_analysis/overall_analysis/main_comparison/figures/metric_boxplots"
 )
 OFFICIAL_SEEDS = [111, 222, 444]
 MODELS = ["model1", "model2"]

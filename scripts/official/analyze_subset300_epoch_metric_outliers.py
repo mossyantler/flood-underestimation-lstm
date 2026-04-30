@@ -11,8 +11,13 @@ import xarray as xr
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_INPUT = REPO_ROOT / "output/model_analysis/overall_analysis/basin_metrics.csv"
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/overall_analysis/outlier_diagnostics"
+DEFAULT_INPUT = (
+    REPO_ROOT
+    / "output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv"
+)
+DEFAULT_OUTPUT_DIR = (
+    REPO_ROOT / "output/model_analysis/overall_analysis/result_checks/outlier_checks"
+)
 DEFAULT_TIMESERIES_DIR = REPO_ROOT / "data/CAMELSH_generic/drbc_holdout_broad/time_series"
 DEFAULT_DRBC_ATTRIBUTES = (
     REPO_ROOT / "output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_basin_analysis_table.csv"

@@ -14,7 +14,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import MultipleLocator
 
 
 RUN_RE = re.compile(r"camelsh_hourly_(model[12])_drbc_holdout_subset300_seed(\d+)_")
@@ -54,6 +54,11 @@ OFFICIAL_SEEDS = tuple(sorted({seed for _, seed in PRIMARY_EPOCHS}))
 MODEL_LABELS = {"model1": "Model 1", "model2": "Model 2"}
 MODEL_COLORS = {"model1": "#1f77b4", "model2": "#d62728"}
 SEED_MARKERS = {111: "o", 222: "s", 444: "^"}
+
+
+def _set_epoch_tick_interval(ax: plt.Axes) -> None:
+    """Use the validation checkpoint cadence without changing the x-axis span."""
+    ax.xaxis.set_major_locator(MultipleLocator(5))
 
 
 @dataclass(frozen=True)
@@ -347,7 +352,7 @@ def _save_epoch_summary_plot(summary: pd.DataFrame, split: str, output_path: Pat
         ax.set_title(title)
         ax.set_xlabel("Epoch")
         ax.grid(True, color="#dddddd", linewidth=0.7, alpha=0.8)
-        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        _set_epoch_tick_interval(ax)
 
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=4, frameon=False)
@@ -378,7 +383,7 @@ def _save_training_loss_plot(train_logs: pd.DataFrame, output_path: Path) -> Non
         ax.set_ylabel("avg_loss")
         ax.set_yscale("log")
         ax.grid(True, color="#dddddd", linewidth=0.7, alpha=0.8)
-        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        _set_epoch_tick_interval(ax)
         ax.legend(frameon=False)
     fig.tight_layout()
     fig.savefig(output_path, dpi=180)
@@ -441,11 +446,12 @@ def _save_delta_plot(delta_summary: pd.DataFrame, output_path: Path) -> None:
         return
 
     metrics = [
-        ("median_delta_NSE", "Median delta NSE"),
-        ("median_delta_KGE", "Median delta KGE"),
-        ("median_abs_FHV_reduction", "Median |FHV| reduction"),
-        ("median_Peak_Timing_reduction", "Median peak timing reduction"),
-        ("median_Peak_MAPE_reduction", "Median peak MAPE reduction"),
+        ("median_delta_NSE", "Median delta NSE (M2 - M1)"),
+        ("median_delta_KGE", "Median delta KGE (M2 - M1)"),
+        ("median_delta_FHV", "Median signed FHV delta (M2 - M1)"),
+        ("median_abs_FHV_reduction", "Median |FHV| reduction (|M1| - |M2|)"),
+        ("median_Peak_Timing_reduction", "Median peak timing reduction (M1 err - M2 err)"),
+        ("median_Peak_MAPE_reduction", "Median peak MAPE reduction (M1 err - M2 err)"),
     ]
     fig, axes = plt.subplots(2, 3, figsize=(14, 8), sharex=True)
     axes = axes.ravel()
@@ -457,12 +463,20 @@ def _save_delta_plot(delta_summary: pd.DataFrame, output_path: Path) -> None:
         ax.set_title(title)
         ax.set_xlabel("Epoch")
         ax.grid(True, color="#dddddd", linewidth=0.7, alpha=0.8)
-        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    axes[-1].axis("off")
+        _set_epoch_tick_interval(ax)
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=4, frameon=False)
-    fig.suptitle("Test paired same-epoch deltas: Model 2 - Model 1")
-    fig.tight_layout(rect=[0, 0.08, 1, 0.95])
+    fig.suptitle("Test paired same-epoch deltas and error reductions")
+    fig.text(
+        0.5,
+        0.925,
+        "NSE/KGE: M2 - M1. Signed FHV: M2 - M1, where above 0 means upward FHV shift. Error reductions: above 0 favors M2.",
+        ha="center",
+        va="center",
+        fontsize=9.5,
+        color="#374151",
+    )
+    fig.tight_layout(rect=[0, 0.08, 1, 0.91])
     fig.savefig(output_path, dpi=180)
     plt.close(fig)
 
@@ -643,8 +657,23 @@ def _write_summary_markdown(
 
 def analyze(run_root: Path, output_dir: Path) -> dict[str, str]:
     output_dir.mkdir(parents=True, exist_ok=True)
-    charts_dir = output_dir / "charts"
-    charts_dir.mkdir(parents=True, exist_ok=True)
+    main_tables_dir = output_dir / "main_comparison" / "tables"
+    main_figures_dir = output_dir / "main_comparison" / "figures"
+    main_report_dir = output_dir / "main_comparison" / "report"
+    sensitivity_tables_dir = output_dir / "epoch_sensitivity" / "tables"
+    sensitivity_logs_dir = output_dir / "epoch_sensitivity" / "logs"
+    sensitivity_figures_dir = output_dir / "epoch_sensitivity" / "figures"
+    run_records_dir = output_dir / "run_records"
+    for directory in [
+        main_tables_dir,
+        main_figures_dir,
+        main_report_dir,
+        sensitivity_tables_dir,
+        sensitivity_logs_dir,
+        sensitivity_figures_dir,
+        run_records_dir,
+    ]:
+        directory.mkdir(parents=True, exist_ok=True)
 
     manifest, selected_candidates = _discover_metric_files(run_root)
     metric_rows = _read_metric_rows(selected_candidates)
@@ -659,18 +688,18 @@ def analyze(run_root: Path, output_dir: Path) -> dict[str, str]:
     )
 
     paths = {
-        "manifest": output_dir / "metric_file_manifest.csv",
-        "basin_metrics": output_dir / "basin_metrics.csv",
-        "epoch_metric_summary": output_dir / "epoch_metric_summary.csv",
-        "training_epoch_log": output_dir / "training_epoch_log.csv",
-        "validation_epoch_log": output_dir / "validation_epoch_log.csv",
-        "test_same_epoch_basin_deltas": output_dir / "test_same_epoch_basin_deltas.csv",
-        "test_same_epoch_delta_summary": output_dir / "test_same_epoch_delta_summary.csv",
-        "primary_epoch_summary": output_dir / "primary_epoch_summary.csv",
-        "primary_epoch_basin_deltas": output_dir / "primary_epoch_basin_deltas.csv",
-        "primary_epoch_delta_summary": output_dir / "primary_epoch_delta_summary.csv",
-        "analysis_summary": output_dir / "analysis_summary.md",
-        "metadata": output_dir / "analysis_metadata.json",
+        "manifest": run_records_dir / "metric_file_manifest.csv",
+        "basin_metrics": sensitivity_tables_dir / "basin_metrics.csv",
+        "epoch_metric_summary": sensitivity_tables_dir / "epoch_metric_summary.csv",
+        "training_epoch_log": sensitivity_logs_dir / "training_epoch_log.csv",
+        "validation_epoch_log": sensitivity_logs_dir / "validation_epoch_log.csv",
+        "test_same_epoch_basin_deltas": sensitivity_tables_dir / "test_same_epoch_basin_deltas.csv",
+        "test_same_epoch_delta_summary": sensitivity_tables_dir / "test_same_epoch_delta_summary.csv",
+        "primary_epoch_summary": main_tables_dir / "primary_epoch_summary.csv",
+        "primary_epoch_basin_deltas": main_tables_dir / "primary_epoch_basin_deltas.csv",
+        "primary_epoch_delta_summary": main_tables_dir / "primary_epoch_delta_summary.csv",
+        "analysis_summary": main_report_dir / "analysis_summary.md",
+        "metadata": run_records_dir / "analysis_metadata.json",
     }
 
     manifest.to_csv(paths["manifest"], index=False)
@@ -684,11 +713,11 @@ def analyze(run_root: Path, output_dir: Path) -> dict[str, str]:
     primary_deltas.to_csv(paths["primary_epoch_basin_deltas"], index=False)
     primary_delta_summary.to_csv(paths["primary_epoch_delta_summary"], index=False)
 
-    _save_epoch_summary_plot(summary, "validation", charts_dir / "validation_epoch_median_metrics.png")
-    _save_epoch_summary_plot(summary, "test", charts_dir / "test_epoch_median_metrics.png")
-    _save_training_loss_plot(train_logs, charts_dir / "training_loss_by_epoch.png")
-    _save_delta_plot(same_epoch_delta_summary, charts_dir / "test_same_epoch_delta_summary.png")
-    _save_primary_delta_boxplot(primary_deltas, charts_dir / "primary_epoch_basin_deltas.png")
+    _save_epoch_summary_plot(summary, "validation", sensitivity_figures_dir / "validation_epoch_median_metrics.png")
+    _save_epoch_summary_plot(summary, "test", sensitivity_figures_dir / "test_epoch_median_metrics.png")
+    _save_training_loss_plot(train_logs, sensitivity_figures_dir / "training_loss_by_epoch.png")
+    _save_delta_plot(same_epoch_delta_summary, sensitivity_figures_dir / "test_same_epoch_delta_summary.png")
+    _save_primary_delta_boxplot(primary_deltas, main_figures_dir / "primary_epoch_basin_deltas.png")
     _write_summary_markdown(
         paths["analysis_summary"], manifest, summary, primary, same_epoch_delta_summary
     )
@@ -704,7 +733,17 @@ def analyze(run_root: Path, output_dir: Path) -> dict[str, str]:
         "validation_log_rows": int(len(val_logs)),
         "same_epoch_delta_rows": int(len(same_epoch_deltas)),
         "primary_delta_rows": int(len(primary_deltas)),
-        "charts": sorted(str(path) for path in charts_dir.glob("*.png")),
+        "figures": sorted(
+            str(path)
+            for directory in [main_figures_dir, sensitivity_figures_dir]
+            for path in directory.glob("*.png")
+        ),
+        "layout": {
+            "main_comparison": str(output_dir / "main_comparison"),
+            "epoch_sensitivity": str(output_dir / "epoch_sensitivity"),
+            "result_checks": str(output_dir / "result_checks"),
+            "run_records": str(run_records_dir),
+        },
         "primary_epochs": {f"{model}_seed{seed}": epoch for (model, seed), epoch in PRIMARY_EPOCHS.items()},
         "official_seeds": list(OFFICIAL_SEEDS),
         "excluded_seeds": [333],
