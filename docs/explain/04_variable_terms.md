@@ -316,8 +316,8 @@ $$
 
 | 값 | 계산 대상 | 쉬운 해석 |
 | --- | --- | --- |
-| `prec_ari100_24h` | 24시간 rolling precipitation의 annual maximum series에 맞춘 CAMELSH hourly proxy, 또는 나중에 붙일 NOAA Atlas 14 duration별 estimate | 24시간 강수량 기준 100년 빈도 강수 |
-| `flood_ari100` | annual maximum streamflow series에 맞춘 CAMELSH hourly proxy, 또는 나중에 붙일 USGS/Bulletin 17C 계열 reference | 100년 빈도 홍수량 또는 1% AEP flood |
+| `prec_ari100_24h` | 24시간 rolling precipitation의 annual maximum series에 맞춘 CAMELSH hourly proxy. 별도 비교용으로 NOAA Atlas 14 point/gridmean/areal-ARF reference도 둔다. | 24시간 강수량 기준 100년 빈도 강수 |
+| `flood_ari100` | annual maximum streamflow series에 맞춘 CAMELSH hourly proxy. 별도 비교용으로 USGS StreamStats/GageStats peak-flow reference도 둔다. | 100년 빈도 홍수량 또는 1% AEP flood |
 | hourly `Q99` | 한 basin의 전체 hourly streamflow 시계열 | 전체 시간 중 상위 1% 유량 기준 |
 | Model `q99` | 모델이 각 시점마다 출력하는 conditional quantile | 해당 시점 조건에서의 상위 예측선 |
 

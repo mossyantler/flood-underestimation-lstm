@@ -126,16 +126,16 @@ output/model_analysis/quantile_analysis/analysis/charts/
 | all validation epoch test | 완료 | seed 111/222/444, epoch 005-030 전체를 test했다. |
 | hydrograph + quantile export | 완료 | `q50/q90/q95/q99` 시계열과 그림을 만들었다. |
 | peak underestimation 분석 | 완료 | upper quantile이 과소추정을 줄인다는 신호를 확인했다. |
-| calibration 해석 | 진행 중 | q99가 충분히 calibrated되지는 않았음을 확인했다. |
+| calibration 해석 | 부분 완료 | one-sided coverage와 upper-tail gap은 확인했고, formal pinball/AQS와 calibration table은 아직 예정 분석이다. |
 | event-level 분석 | 1차 완료 | observed high-flow event candidate와 event-regime별 차이를 정리했다. |
-| extreme-rain stress test | 진행 중 | primary checkpoint 결과는 완료했고, 모든 validation checkpoint sensitivity run을 추가로 돌리고 있다. |
+| extreme-rain stress test | 완료에 가까움 | primary checkpoint와 모든 validation checkpoint sensitivity 산출물이 생성되어 있고, 논문용 compact figure와 대표 event plot 선별이 남아 있다. |
 
 ## 이 결과를 한 문장으로 말하면
 
 Deterministic LSTM은 큰 홍수 첨두를 낮게 예측하는 경향이 있고, 같은 LSTM backbone에 probabilistic upper quantile head를 붙이면 `q95/q99`를 통해 그 과소추정을 줄일 수 있다. 다만 현재 quantile은 아직 정확히 calibrated된 예측구간은 아니므로, 논문에서는 “잘 보정된 확률구간”보다 “홍수 첨두를 덜 놓치게 하는 upper-tail 출력”으로 설명하는 것이 맞다.
 
-## 다음에 붙는 보조 test
+## 함께 읽을 보조 test
 
-이 hydrograph 분석은 DRBC test 기간 전체에서 큰 유량 시간을 보는 방식이다. 다음 보조 test는 반대로 강수에서 출발한다. 즉 hourly `Rainf`에서 ARI25/50/100급 비가 온 event를 먼저 찾고, 그 뒤 유량이 실제로 얼마나 올랐는지를 붙인다.
+이 hydrograph 분석은 DRBC test 기간 전체에서 큰 유량 시간을 보는 방식이다. 함께 읽어야 할 보조 test는 반대로 강수에서 출발한다. 즉 hourly `Rainf`에서 ARI25/50/100급 비가 온 event를 먼저 찾고, 그 뒤 유량이 실제로 얼마나 올랐는지를 붙인다.
 
 이렇게 해야 “모델이 큰 유량을 덜 놓치는가”뿐 아니라, “100년급에 가까운 비가 왔을 때 모델이 필요한 만큼 유량을 올리는가”도 볼 수 있다. 자세한 설명은 [`10_extreme_rain_stress_test.md`](10_extreme_rain_stress_test.md)에 정리한다.

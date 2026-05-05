@@ -30,7 +30,7 @@ output/model_analysis/probabilistic_diagnostics/
 
 현재 quantile set은 `q50/q90/q95/q99`뿐이다. Lower quantile이 없으므로 central prediction interval, interval score, Winkler score, 95% PI width는 공식 metric으로 쓰지 않는다.
 
-`coverage_fraction = mean(obs <= q_tau)`는 전체 test period에서는 empirical one-sided coverage로 읽을 수 있다. 하지만 observed top 1% 같은 조건부 high-flow stratum에서는 formal calibration이라기보다 tail hit-rate로 읽어야 한다. 이미 관측 유량이 큰 시점만 골랐기 때문이다.
+`coverage_fraction = mean(obs <= q_tau)`는 전체 test period에서는 empirical one-sided coverage로 읽을 수 있다. 하지만 observed Q99 exceedance 같은 조건부 high-flow stratum에서는 formal calibration이라기보다 tail hit-rate로 읽어야 한다. 이미 관측 유량이 큰 시점만 골랐기 때문이다.
 
 ## 주의점
 

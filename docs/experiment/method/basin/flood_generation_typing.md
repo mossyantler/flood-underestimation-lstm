@@ -232,7 +232,7 @@ $$
 
 이 순서를 지키면 classification 모듈이 연구 전체를 잡아먹지 않고, 모델 비교라는 본 주제를 유지할 수 있다. rule을 먼저 만드는 이유는 ML cluster 이름을 붙일 때 물리적 sanity check가 필요하기 때문이다. ML을 주 분석 축으로 쓰더라도, rule과 충돌하는 부분을 보면 cluster가 무엇을 뜻하는지 더 조심스럽게 해석할 수 있다.
 
-rule-based 구현 진입점은 `scripts/build_camelsh_flood_generation_typing.py`다. 입력은 `event_response_table.csv`이고, event별 label은 `flood_generation_event_types.csv`, basin별 dominant/mixture summary는 `flood_generation_basin_summary.csv`로 쓴다. 기본 method는 `degree_day_v2`이고, `dominant_flood_generation_type`은 특정 type share가 `0.6` 이상일 때만 dominant로 두며 그보다 낮으면 `mixture`로 둔다.
+rule-based 구현 진입점은 `scripts/basin/all/build_camelsh_flood_generation_typing.py`다. 입력은 `event_response_table.csv`이고, event별 label은 `flood_generation_event_types.csv`, basin별 dominant/mixture summary는 `flood_generation_basin_summary.csv`로 쓴다. 기본 method는 `degree_day_v2`이고, `dominant_flood_generation_type`은 특정 type share가 `0.6` 이상일 때만 dominant로 두며 그보다 낮으면 `mixture`로 둔다.
 
 ## 10.1 Adopted ML event-regime clustering
 
@@ -261,9 +261,9 @@ cluster 이름은 현재 다음처럼 쓴다.
 현재 dev 분석 진입점은 아래 스크립트들이다.
 
 ```bash
-uv run scripts/dev/compare_camelsh_flood_generation_ml_variants.py
-uv run scripts/dev/plot_camelsh_flood_generation_ml_variant.py
-uv run scripts/dev/plot_camelsh_basin_group_maps.py
+uv run scripts/basin/event_regime/compare_camelsh_flood_generation_ml_variants.py
+uv run scripts/basin/event_regime/plot_camelsh_flood_generation_ml_variant.py
+uv run scripts/basin/event_regime/plot_camelsh_basin_group_maps.py
 ```
 
 산출물은 `output/basin/all/archive/event_regime_variants/` 아래에 둔다. 논문용 production entry point로 승격할 때는 위 dev 스크립트의 선택값, 즉 `kmeans__hydromet_only_7__k3`와 cluster naming을 고정해서 official script로 정리한다.

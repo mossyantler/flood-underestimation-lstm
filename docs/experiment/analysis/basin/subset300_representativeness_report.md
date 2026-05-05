@@ -156,7 +156,7 @@ static benchmark는 조금 더 혼합적이다.
 3. Model 2 seed `333`은 NaN loss로 중단되었으므로, replacement seed `444`도 같은 subset을 그대로 재사용한다. 완료된 Model 1 seed `333`은 paired-seed fairness를 위해 final aggregate에서 제외한다.
 4. 이후 성능 해석은 `subset300 main comparison`으로 따로 부르고, broad prepared split 전체와는 구분해 기록한다.
 
-공식 실행 진입점은 [`../../../../scripts/official/run_subset300_multiseed.sh`](../../../../scripts/official/run_subset300_multiseed.sh)다.
+공식 실행 진입점은 [`../../../../scripts/runs/official/run_subset300_multiseed.sh`](../../../../scripts/runs/official/run_subset300_multiseed.sh)다.
 
 이 운영 결정은 선행연구 맥락과도 맞는다. 즉 이후 Model 1 / Model 2의 seed 비교에서는 subset을 다시 흔들지 않고, 고정된 benchmark cohort를 유지하는 것이 더 타당하다.
 
@@ -181,6 +181,6 @@ static benchmark는 조금 더 혼합적이다.
 - [`../../../../configs/pilot/diagnostics/permutation_benchmark/subset300_random_benchmark_summary.csv`](../../../../configs/pilot/diagnostics/permutation_benchmark/subset300_random_benchmark_summary.csv)
 - [`../../../../configs/pilot/diagnostics/permutation_benchmark/subset300_random_benchmark_summary.json`](../../../../configs/pilot/diagnostics/permutation_benchmark/subset300_random_benchmark_summary.json)
 - [`../../../../output/basin/all/screening/subset300_spatial_split/figures/subset300_conus_split_map.png`](../../../../output/basin/all/screening/subset300_spatial_split/figures/subset300_conus_split_map.png)
-- [`../../../../scripts/official/plot_subset300_split_map.py`](../../../../scripts/official/plot_subset300_split_map.py)
-- [`../../../../scripts/pilot/build_scaling_pilot_event_response_diagnostics.py`](../../../../scripts/pilot/build_scaling_pilot_event_response_diagnostics.py)
-- [`../../../../scripts/pilot/build_scaling_pilot_random_subset_benchmark.py`](../../../../scripts/pilot/build_scaling_pilot_random_subset_benchmark.py)
+- [`../../../../scripts/basin/split_diagnostics/plot_subset300_split_map.py`](../../../../scripts/basin/split_diagnostics/plot_subset300_split_map.py)
+- [`../../../../scripts/scaling/build_scaling_pilot_event_response_diagnostics.py`](../../../../scripts/scaling/build_scaling_pilot_event_response_diagnostics.py)
+- [`../../../../scripts/scaling/build_scaling_pilot_random_subset_benchmark.py`](../../../../scripts/scaling/build_scaling_pilot_random_subset_benchmark.py)

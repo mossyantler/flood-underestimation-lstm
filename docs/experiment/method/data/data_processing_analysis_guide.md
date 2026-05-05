@@ -72,6 +72,8 @@ DRBC holdout basin은 `outlet_in_drbc == True`이고 `overlap_ratio_of_basin >= 
 | `BASIN_BOUNDARY_CONFIDENCE >= 7` | basin 경계 신뢰도 기준 | forcing/attribute와 outlet 유량의 공간 대응이 너무 불확실한 basin을 줄인다. |
 | hydromodification flags | dam, canal, power, NPDES 등 영향 | broad pool에서는 바로 제외하지 않고, 별도 natural pool을 만들 때 사용한다. |
 
+여기서 `BASIN_BOUNDARY_CONFIDENCE`는 CAMELSH/GAGES-II의 `attributes_gageii_Bound_QA.csv`에서 가져온 boundary QA 지표다. 이 값은 이 프로젝트에서 새로 geometry 연산으로 만든 점수가 아니라, delineated basin polygon이 outlet gauge의 실제 기여 배수면적을 얼마나 잘 대표하는지 평가한 metadata다. 구체적으로는 delineated basin area와 NWIS drainage area의 일치도, HUC10 boundary와의 정합성, gauge point가 basin boundary 및 streamlines와 기하적으로 말이 되는 위치에 있는지를 함께 본다. 이 정합성이 낮으면 polygon 안에서 집계한 forcing/static attribute와 gauge에서 관측한 `Streamflow` target이 서로 다른 공간을 가리킬 수 있으므로, 현재 quality gate에서는 confidence `7` 이상만 유지한다.
+
 이 gate를 통과한 broad non-DRBC training basin은 문서 기준 `1923개`다. hydromodification risk가 없는 natural subset은 `248개`다. 현재 main comparison은 natural-only가 아니라 broad pool에서 출발한다. 이유는 compute-constrained 상황에서도 national-scale multi-basin diversity를 유지하려는 목적이 크기 때문이다. Natural-only는 해석상 깨끗하지만 basin 수와 지역 다양성이 크게 줄어든다.
 
 DRBC 쪽도 별도 streamflow quality gate를 통과한 basin만 test에 들어간다. 현재 raw broad split 기준 DRBC quality-pass test는 `38개`다.
@@ -329,7 +331,7 @@ Snow branch가 아니면 recent precipitation과 antecedent precipitation을 본
 
 Observed high-flow event table은 streamflow에서 출발한다. 즉 유량이 실제로 오른 event를 중심으로 본다. 그런데 연구 질문에는 또 다른 질문이 있다. 모델이 극한호우 forcing을 학습 중에 본 적이 있는가, 그리고 DRBC historical extreme-rain event에서 관측 유량 response가 있을 때 peak를 따라가는가다.
 
-이를 위해 `scripts/official/build_subset300_extreme_rain_event_catalog.py`는 hourly `Rainf` rolling sum에서 직접 rain-event catalog를 만든다. 기준은 `prec_ari25/50/100`과 near-ARI100이다. Active rain hour 사이 gap이 `72h` 이하면 같은 storm으로 병합한다.
+이를 위해 `scripts/model/extreme_rain/build_subset300_extreme_rain_event_catalog.py`는 hourly `Rainf` rolling sum에서 직접 rain-event catalog를 만든다. 기준은 `prec_ari25/50/100`과 near-ARI100이다. Active rain hour 사이 gap이 `72h` 이하면 같은 storm으로 병합한다.
 
 이 catalog는 네 split을 본다.
 
@@ -371,40 +373,40 @@ Response window는 `[rain_start - 24h, rain_end + 168h]`다. LSTM inference bloc
 
 ```bash
 # DRBC spatial mapping and basin tables
-uv run scripts/build_drbc_camelsh_tables.py
-uv run scripts/build_drbc_basin_analysis_table.py
+uv run scripts/basin/drbc/build_drbc_camelsh_tables.py
+uv run scripts/basin/drbc/build_drbc_basin_analysis_table.py
 
 # Non-DRBC training pool and raw split
-uv run scripts/build_camelsh_non_drbc_training_pool.py
-uv run scripts/build_drbc_holdout_split_files.py
+uv run scripts/basin/all/build_camelsh_non_drbc_training_pool.py
+uv run scripts/basin/drbc/build_drbc_holdout_split_files.py
 
 # NeuralHydrology generic dataset
-uv run scripts/prepare_camelsh_generic_dataset.py --profile broad
+uv run scripts/data/prepare_camelsh_generic_dataset.py --profile broad
 
 # Scaling pilot split and diagnostics
-uv run scripts/pilot/build_scaling_pilot_splits.py
-uv run scripts/pilot/build_scaling_pilot_attribute_diagnostics.py
-uv run scripts/pilot/build_scaling_pilot_event_response_diagnostics.py
-uv run scripts/pilot/build_scaling_pilot_random_subset_benchmark.py
+uv run scripts/scaling/build_scaling_pilot_splits.py
+uv run scripts/scaling/build_scaling_pilot_attribute_diagnostics.py
+uv run scripts/scaling/build_scaling_pilot_event_response_diagnostics.py
+uv run scripts/scaling/build_scaling_pilot_random_subset_benchmark.py
 
 # All-basin flood analysis after hourly .nc files are available
-bash scripts/official/run_camelsh_flood_analysis.sh
-uv run scripts/fetch_usgs_streamstats_peak_flow_references.py --workers 8
+bash scripts/runs/official/run_camelsh_flood_analysis.sh
+uv run scripts/basin/reference/fetch_usgs_streamstats_peak_flow_references.py --workers 8
 
 # Main Model 1 / Model 2 subset300 comparison
-bash scripts/official/run_subset300_multiseed.sh
+bash scripts/runs/official/run_subset300_multiseed.sh
 
 # Model result analysis
-uv run scripts/official/analyze_subset300_epoch_results.py
-uv run scripts/official/plot_subset300_hydrographs.py --epochs all --output-dir output/model_analysis/quantile_analysis
-uv run scripts/official/analyze_subset300_hydrograph_outputs.py
-uv run scripts/official/analyze_subset300_event_regime_errors.py
+uv run scripts/model/overall/analyze_subset300_epoch_results.py
+uv run scripts/model/hydrograph/plot_subset300_hydrographs.py --epochs all --output-dir output/model_analysis/quantile_analysis
+uv run scripts/model/hydrograph/analyze_subset300_hydrograph_outputs.py
+uv run scripts/model/event_regime/analyze_subset300_event_regime_errors.py
 
 # Extreme-rain exposure and stress test
-uv run scripts/official/build_subset300_extreme_rain_event_catalog.py
-uv run scripts/official/infer_subset300_extreme_rain_windows.py --device cuda:0
-uv run scripts/official/analyze_subset300_extreme_rain_stress_test.py
-uv run scripts/official/plot_subset300_extreme_rain_events.py
+uv run scripts/model/extreme_rain/build_subset300_extreme_rain_event_catalog.py
+uv run scripts/model/extreme_rain/infer_subset300_extreme_rain_windows.py --device cuda:0
+uv run scripts/model/extreme_rain/analyze_subset300_extreme_rain_stress_test.py
+uv run scripts/model/extreme_rain/plot_subset300_extreme_rain_events.py
 ```
 
 원격 Ubuntu GPU 서버에서는 Homebrew PATH를 추가하지 않는다. 로컬 macOS에서 `uv`, `python`, `brew`를 쓸 때만 `export PATH="/opt/homebrew/bin:$PATH"`를 먼저 적용한다.

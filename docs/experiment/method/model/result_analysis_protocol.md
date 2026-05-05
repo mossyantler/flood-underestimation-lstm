@@ -238,7 +238,7 @@ Event 분석은 event가 basin 안에 nested되어 있다는 점을 조심해야
 현재 subset300 산출물에서는 아래 스크립트가 이 단계를 담당해요.
 
 ```bash
-uv run scripts/official/analyze_subset300_event_regime_errors.py
+uv run scripts/model/event_regime/analyze_subset300_event_regime_errors.py
 ```
 
 이 스크립트는 observed high-flow event candidate window 안에서 observed peak, predictor peak, event-level RMSE, threshold exceedance recall을 계산하고, 본문 주 분석은 ML-based `hydromet_only_7 + KMeans(k=3)` event-regime으로 나눕니다. 같은 결과에서 `degree_day_v2` rule label sensitivity도 함께 만들지만, rule label은 causal mechanism 확정이 아니라 QA/baseline으로만 읽어야 해요.
@@ -602,7 +602,7 @@ calibration error(q99) = empirical coverage(q99) - 0.99
 - [ ] 전체 성능과 홍수 성능을 따로 봤는가
 - [ ] basin별 비교를 했는가
 - [ ] event별 비교를 했는가
-- [ ] event별 비교를 `scripts/official/analyze_subset300_event_regime_errors.py`로 재현할 수 있는가
+- [ ] event별 비교를 `scripts/model/event_regime/analyze_subset300_event_regime_errors.py`로 재현할 수 있는가
 - [ ] event table을 official flood inventory가 아니라 observed high-flow candidate table로 해석했는가
 - [ ] `selected_threshold_quantile`, `flood_relevance_tier`, `return_period_confidence_flag`를 결과표에 같이 남겼는가. 원본에 없는 flag는 `not_available`로 명시했는가
 - [ ] `Q99-only` candidate와 fallback 포함 candidate에서 핵심 결론이 유지되는가

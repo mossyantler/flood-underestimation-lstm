@@ -88,7 +88,7 @@ flowchart TD
 
 ## 현재 selection rule
 
-현재 selection rule은 `outlet_in_drbc == True`와 `overlap_ratio_of_basin >= 0.9`를 동시에 만족하는 CAMELSH basin이다. 이 규칙은 [`build_drbc_camelsh_tables.py`](../../../../scripts/build_drbc_camelsh_tables.py)에서 재현 가능하게 구현되어 있다.
+현재 selection rule은 `outlet_in_drbc == True`와 `overlap_ratio_of_basin >= 0.9`를 동시에 만족하는 CAMELSH basin이다. 이 규칙은 [`build_drbc_camelsh_tables.py`](../../../../scripts/basin/drbc/build_drbc_camelsh_tables.py)에서 재현 가능하게 구현되어 있다.
 
 현재 summary는 아래와 같다.
 
@@ -155,17 +155,17 @@ flowchart LR
 
 현재 기준 workflow에서 핵심 스크립트는 아래 넷이다.
 
-- [`build_drbc_camelsh_tables.py`](../../../../scripts/build_drbc_camelsh_tables.py)
-- [`build_drbc_camelsh_gpkg.py`](../../../../scripts/build_drbc_camelsh_gpkg.py)
-- [`build_drbc_basin_analysis_table.py`](../../../../scripts/build_drbc_basin_analysis_table.py)
-- [`build_camelsh_non_drbc_training_pool.py`](../../../../scripts/build_camelsh_non_drbc_training_pool.py)
-- [`build_drbc_holdout_split_files.py`](../../../../scripts/build_drbc_holdout_split_files.py)
-- [`../../../../scripts/pilot/build_scaling_pilot_splits.py`](../../../../scripts/pilot/build_scaling_pilot_splits.py)
-- [`../../../../scripts/pilot/build_scaling_pilot_attribute_diagnostics.py`](../../../../scripts/pilot/build_scaling_pilot_attribute_diagnostics.py)
-- [`../../../../scripts/pilot/build_scaling_pilot_event_response_diagnostics.py`](../../../../scripts/pilot/build_scaling_pilot_event_response_diagnostics.py)
-- [`../../../../scripts/pilot/plot_scaling_pilot_diagnostics.py`](../../../../scripts/pilot/plot_scaling_pilot_diagnostics.py)
-- [`../../../../scripts/pilot/run_deterministic_scaling_pilot.sh`](../../../../scripts/pilot/run_deterministic_scaling_pilot.sh)
-- [`../../../../scripts/official/run_subset300_multiseed.sh`](../../../../scripts/official/run_subset300_multiseed.sh)
+- [`build_drbc_camelsh_tables.py`](../../../../scripts/basin/drbc/build_drbc_camelsh_tables.py)
+- [`build_drbc_camelsh_gpkg.py`](../../../../scripts/basin/drbc/build_drbc_camelsh_gpkg.py)
+- [`build_drbc_basin_analysis_table.py`](../../../../scripts/basin/drbc/build_drbc_basin_analysis_table.py)
+- [`build_camelsh_non_drbc_training_pool.py`](../../../../scripts/basin/all/build_camelsh_non_drbc_training_pool.py)
+- [`build_drbc_holdout_split_files.py`](../../../../scripts/basin/drbc/build_drbc_holdout_split_files.py)
+- [`../../../../scripts/scaling/build_scaling_pilot_splits.py`](../../../../scripts/scaling/build_scaling_pilot_splits.py)
+- [`../../../../scripts/scaling/build_scaling_pilot_attribute_diagnostics.py`](../../../../scripts/scaling/build_scaling_pilot_attribute_diagnostics.py)
+- [`../../../../scripts/scaling/build_scaling_pilot_event_response_diagnostics.py`](../../../../scripts/scaling/build_scaling_pilot_event_response_diagnostics.py)
+- [`../../../../scripts/scaling/plot_scaling_pilot_diagnostics.py`](../../../../scripts/scaling/plot_scaling_pilot_diagnostics.py)
+- [`../../../../scripts/runs/pilot/run_deterministic_scaling_pilot.sh`](../../../../scripts/runs/pilot/run_deterministic_scaling_pilot.sh)
+- [`../../../../scripts/runs/official/run_subset300_multiseed.sh`](../../../../scripts/runs/official/run_subset300_multiseed.sh)
 
 HUC exploratory 스크립트들은 필요하면 다시 사용할 수 있지만, 현재 basin analysis의 공식 시작점은 아니다.
 

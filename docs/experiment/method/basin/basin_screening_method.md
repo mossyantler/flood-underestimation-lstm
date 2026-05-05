@@ -201,7 +201,11 @@ $$
 
 유역 경계 polygon이 있다고 해서 그 basin boundary가 항상 신뢰할 만하다는 뜻은 아니다. GAGES-II 기반 `BASIN_BOUNDARY_CONFIDENCE`는 basin area와 NWIS drainage area의 일치도, HUC10과의 정합성, gauge 위치와 basin boundary 및 하천망의 관계를 바탕으로 매겨진 QA 지표다.
 
-즉 우리는 “polygon이 있는 basin”이 아니라 “경계 품질이 충분한 basin”만 남긴다. 이는 model input basin과 observed discharge target의 공간 일관성에 중요하다.
+여기서 “basin boundary가 실제 drainage area를 잘 대표한다”는 말은, 해당 polygon이 outlet gauge로 물을 보내는 실제 기여 면적을 충분히 잘 나타낸다는 뜻이다. 수문 모델에서는 polygon 안의 forcing과 static attribute를 입력으로 쓰고, 같은 유역의 outlet gauge에서 관측된 `Streamflow`를 target으로 비교한다. 만약 polygon 밖의 비가 실제로는 gauge로 흘러오거나, polygon 안의 일부가 다른 하천으로 빠져나간다면 입력 공간과 관측 target 공간이 어긋난다.
+
+따라서 `BASIN_BOUNDARY_CONFIDENCE`는 이 프로젝트에서 새로 산출한 모델 feature가 아니라, `attributes_gageii_Bound_QA.csv`에 포함된 QA metadata로 사용한다. 원자료 설명 기준 이 점수는 drainage area consistency, HUC10 alignment, gauge-to-boundary/streamline geometry를 종합한 정성적 confidence score이며, 값이 높을수록 basin polygon과 실제 drainage area의 대응을 더 신뢰할 수 있다.
+
+즉 우리는 “polygon이 있는 basin”이 아니라 “경계 품질이 충분한 basin”만 남긴다. 이는 model input basin과 observed discharge target의 공간 일관성에 중요하다. 현재 공식 quality gate는 `BASIN_BOUNDARY_CONFIDENCE >= 7`을 사용한다.
 
 ## 5. Step 3: Observed-flow 기반 flood-relevant basin 선정
 
@@ -323,7 +327,7 @@ $$
 
 로 두고, return period \(T\)에 대응하는 flood magnitude를 \(F^{\mathrm{flood}}_{i,T}\)로 기록한다.
 
-가능하면 USGS annual peak record와 Bulletin 17C / PeakFQ / StreamStats 계열 결과를 우선 reference로 사용한다. 현재 반복 가능한 보조 구현은 `scripts/fetch_usgs_streamstats_peak_flow_references.py`로 USGS StreamStats/GageStats `Peak-Flow Statistics`를 가져와 기존 CAMELSH proxy `flood_ari*` 옆에 `usgs_flood_ari*`를 붙이는 방식이다. StreamStats 원자료는 `ft^3/s`이므로 병합 테이블의 기본 `usgs_flood_ari*` 값은 `m3/s`로 변환하고, citation provenance는 별도 table에 남긴다. CAMELSH hourly streamflow에서 직접 계산할 경우에는 `hourly annual maximum based flood_ari reference estimate` 또는 `proxy`로 명시한다. 특히 100년 값은 관측 record length보다 긴 tail extrapolation이 될 수 있으므로, record length와 confidence flag를 함께 둔다.
+가능하면 USGS annual peak record와 Bulletin 17C / PeakFQ / StreamStats 계열 결과를 우선 reference로 사용한다. 현재 반복 가능한 보조 구현은 `scripts/basin/reference/fetch_usgs_streamstats_peak_flow_references.py`로 USGS StreamStats/GageStats `Peak-Flow Statistics`를 가져와 기존 CAMELSH proxy `flood_ari*` 옆에 `usgs_flood_ari*`를 붙이는 방식이다. StreamStats 원자료는 `ft^3/s`이므로 병합 테이블의 기본 `usgs_flood_ari*` 값은 `m3/s`로 변환하고, citation provenance는 별도 table에 남긴다. CAMELSH hourly streamflow에서 직접 계산할 경우에는 `hourly annual maximum based flood_ari reference estimate` 또는 `proxy`로 명시한다. 특히 100년 값은 관측 record length보다 긴 tail extrapolation이 될 수 있으므로, record length와 confidence flag를 함께 둔다.
 
 이 descriptor를 event table과 결합하면 event별 상대 규모도 계산할 수 있다.
 

@@ -6,7 +6,7 @@
 
 ## 상태
 
-표 분석은 완료에 가깝고, 논문용 그림은 아직 보강이 필요하다. `scripts/official/analyze_subset300_event_regime_errors.py`가 실행되어 event-level long/wide table, ML event-regime aggregate, flood relevance tier sensitivity, rule-label sensitivity가 생성되어 있다.
+표 분석은 완료에 가깝고, 논문용 그림은 아직 보강이 필요하다. `scripts/model/event_regime/analyze_subset300_event_regime_errors.py`가 실행되어 event-level long/wide table, ML event-regime aggregate, flood relevance tier sensitivity, rule-label sensitivity가 생성되어 있다.
 
 주요 산출물은 아래에 있다.
 

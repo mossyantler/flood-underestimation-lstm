@@ -11,6 +11,7 @@
 ## Current Notes
 
 - [`basin/river_basin_analysis_study_guide.md`](basin/river_basin_analysis_study_guide.md): 전통 유역 분석 개념을 CAMELS basin analysis와 연결한 학습 가이드
+- [`basin/usgs_station_notes/`](basin/usgs_station_notes/): event suppression / managed-flow 진단 전에 확인한 USGS station page와 annual water-data report PDF 요약
 - [`method/model-hyperparameter-glossary.md`](method/model-hyperparameter-glossary.md): 하이퍼파라미터와 config 파라미터 사전
 - [`method/literature_review.md`](method/literature_review.md): related work 서술 방향과 보강할 인용 축
 - [`analysis/flood_generation_typing_literature/`](analysis/flood_generation_typing_literature/): flood-generation type과 event classification 문헌 메모

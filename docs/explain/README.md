@@ -43,4 +43,6 @@ flowchart TD
 - `docs/experiment/method/basin/basin_screening_method.md`
 - `docs/experiment/method/basin/event_response_spec.md`
 
-이 폴더는 설명용 문서이므로 `.gitignore`에 등록되어 있다. 연구 기준을 바꿔야 할 때는 이 폴더만 고치지 말고, 위 canonical 문서를 먼저 확인해야 한다.
+결과 해석 상태와 산출물 위치는 `docs/experiment/analysis/model/README.md`와 그 하위 분석 문서를 먼저 확인한다.
+
+이 폴더는 설명용 문서이지만 저장소에 함께 보관한다. 연구 기준을 바꿔야 할 때는 이 폴더만 고치지 말고, 위 canonical 문서를 먼저 확인해야 한다.

@@ -46,19 +46,19 @@ flowchart TD
 1. Epoch sweep은 아래 스크립트로 집계한다. 이 단계는 validation/test metric, FHV, Peak-MAPE, Peak-Timing을 basin 단위로 확인하는 역할이다.
 
 ```bash
-uv run scripts/official/analyze_subset300_epoch_results.py
+uv run scripts/model/overall/analyze_subset300_epoch_results.py
 ```
 
 2. Hourly high-flow stratum 분석은 아래 스크립트로 수행한다. 이 단계는 basin top 1%, top 0.1%, observed peak hour에서 Model 1과 Model 2 quantile output을 비교한다.
 
 ```bash
-uv run scripts/official/analyze_subset300_hydrograph_outputs.py
+uv run scripts/model/hydrograph/analyze_subset300_hydrograph_outputs.py
 ```
 
 3. Event-regime model-error 분석은 아래 스크립트로 수행한다. 이 단계는 event window 안에서 observed peak, predictor peak, event RMSE, threshold exceedance recall을 계산한 뒤 ML event-regime을 주 stratification으로 사용한다.
 
 ```bash
-uv run scripts/official/analyze_subset300_event_regime_errors.py
+uv run scripts/model/event_regime/analyze_subset300_event_regime_errors.py
 ```
 
 기본 출력 위치는 아래다.
@@ -70,21 +70,33 @@ output/model_analysis/quantile_analysis/event_regime_analysis/
 4. 극한호우 exposure와 historical stress test는 아래 순서로 수행한다. Catalog 단계는 train/validation에 ARI25/50/100급 rain forcing이 있었는지 답하고, inference/analyze 단계는 DRBC holdout basin의 historical extreme-rain response에서 기존 Model 1/2 checkpoint가 peak를 따라가는지 평가한다. 기본 실행은 validation 기준 primary checkpoint를 사용하고, 별도 sensitivity 실행에서는 validation checkpoint grid `005 / 010 / 015 / 020 / 025 / 030` 전체를 같은 epoch 번호의 Model 1/2 쌍으로 평가한다.
 
 ```bash
-uv run scripts/official/build_subset300_extreme_rain_event_catalog.py
-uv run scripts/official/infer_subset300_extreme_rain_windows.py --device cuda:0
-uv run scripts/official/analyze_subset300_extreme_rain_stress_test.py
+uv run scripts/model/extreme_rain/build_subset300_extreme_rain_event_catalog.py
+uv run scripts/model/extreme_rain/infer_subset300_extreme_rain_windows.py --device cuda:0
+uv run scripts/model/extreme_rain/analyze_subset300_extreme_rain_stress_test.py
 ```
 
 원격 A100 서버에서는 `tmux` 안에서 아래 wrapper를 실행한다. 이 wrapper는 catalog, inference, analysis 로그를 각각 `logs/extreme_rain_catalog.log`, `logs/extreme_rain_inference.log`, `logs/extreme_rain_analysis.log`에 남긴다.
 
 ```bash
-DEVICE=cuda:0 bash scripts/official/run_subset300_extreme_rain_stress_test.sh
+DEVICE=cuda:0 bash scripts/runs/official/run_subset300_extreme_rain_stress_test.sh
 ```
 
 Primary checkpoint stress test의 기본 출력 위치는 아래다.
 
 ```text
 output/model_analysis/extreme_rain/primary/
+```
+
+5. Broad vs Natural robustness 분석은 기존 primary 산출물을 cohort로 다시 나누어 계산한다. Natural test basin 8개가 Broad test basin 38개의 부분집합이므로, output에는 `broad_all_38`, `natural_8`, `broad_non_natural_30`을 함께 둔다.
+
+```bash
+uv run scripts/model/overall/analyze_natural_broad_comparison.py
+```
+
+출력 위치는 아래다.
+
+```text
+output/model_analysis/natural_broad_comparison/
 ```
 
 모든 validation checkpoint를 대상으로 한 sensitivity run은 catalog를 재사용하고 output root를 분리한다.
@@ -97,7 +109,7 @@ VALIDATION_EPOCHS="5 10 15 20 25 30" \
 BLOCKS_CSV=output/model_analysis/extreme_rain/primary/exposure/inference_blocks.csv \
 COHORT_CSV=output/model_analysis/extreme_rain/primary/exposure/drbc_historical_stress_cohort.csv \
 DEVICE=cuda:0 \
-bash scripts/official/run_subset300_extreme_rain_stress_test.sh
+bash scripts/runs/official/run_subset300_extreme_rain_stress_test.sh
 ```
 
 이 sensitivity 출력 위치는 아래다.

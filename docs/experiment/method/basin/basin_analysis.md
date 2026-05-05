@@ -116,7 +116,7 @@ event response table의 한 행도 official flood occurrence가 아니라 observ
 전 유역 서버 분석은 아래 runner가 담당한다.
 
 ```bash
-bash scripts/official/run_camelsh_flood_analysis.sh
+bash scripts/runs/official/run_camelsh_flood_analysis.sh
 ```
 
 이 runner는 `return_period_reference_table.csv`, `event_response_table.csv`, `event_response_basin_summary.csv`, `flood_generation_event_types.csv`, `flood_generation_basin_summary.csv`를 만든다. 서버 기본 worker 수는 `WORKERS=4`이고, return-period 단계와 event-response 단계에는 progress bar가 출력된다. 이미 return-period reference가 만들어져 있으면 `RUN_RETURN_PERIOD=0`으로 두고 event response와 `degree_day_v2` rule-based QA/baseline typing만 다시 갱신할 수 있다.

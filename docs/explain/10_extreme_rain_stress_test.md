@@ -112,6 +112,12 @@ Primary checkpoint 결과는 아래에 둔다.
 output/model_analysis/extreme_rain/primary/
 ```
 
+대표 event에서 실제 flow graph가 어떻게 생겼는지는 아래 diagnostic에서 본다. 같은 event 하나를 seed `111 / 222 / 444` 패널로 나누고, observed flow, Model 1, Model 2 `q50/q95/q99`를 함께 그려 둔 것이다.
+
+```text
+output/model_analysis/extreme_rain/primary/flow_graph_diagnostic/
+```
+
 모든 validation checkpoint sensitivity 결과는 아래에 둔다.
 
 ```text
@@ -129,6 +135,10 @@ Primary run 기준으로 train/validation exposure는 실제로 있었다. train
 DRBC historical stress period인 1980-2024에서는 response metric까지 가능한 stress event가 236개였고, 이 중 positive-response가 156개, negative-control이 80개였다. 이 event set으로 Model 1과 Model 2를 다시 비교했다.
 
 큰 방향은 hydrograph 분석과 비슷하다. Model 2의 `q50`은 central prediction이라 Model 1보다 항상 낫지 않다. 하지만 `q90/q95/q99`는 positive-response event에서 peak underestimation을 줄이고 threshold recall을 올리는 경향을 보인다. 특히 `q99`는 peak를 더 자주 덮지만, negative-control에서도 flood threshold를 넘을 가능성이 커지므로 false-positive tradeoff를 같이 봐야 한다.
+
+대표 flow graph에서도 같은 패턴이 보인다. Positive-response 사례에서는 `q50`이 peak를 낮게 잡는 동안 `q95/q99`가 관측 peak 쪽으로 올라가고, low-response negative-control 사례에서는 관측 유량이 낮은데도 `q99`가 flood proxy를 넘는 장면이 나온다. 그래서 그림은 "Model 2가 평균적으로 더 좋다"가 아니라 "upper quantile은 놓치는 큰 peak를 줄이지만 경보처럼 쓰면 과대반응도 같이 생긴다"는 메시지를 보여주는 용도다.
+
+All-validation-epoch sensitivity도 같은 236개 event와 38개 basin을 대상으로 생성되어 있다. 이 결과는 primary checkpoint를 바꾸기 위한 근거가 아니라, upper-tail 효과와 false-positive tradeoff가 epoch `005 / 010 / 015 / 020 / 025 / 030` 전반에서 얼마나 유지되는지 보는 보조 확인이다.
 
 ## 결론을 어떻게 써야 할까
 

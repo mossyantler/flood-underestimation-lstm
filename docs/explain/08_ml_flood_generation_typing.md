@@ -362,12 +362,12 @@ output/basin/all/archive/event_regime_variants/
 현재 선택된 variant 비교와 그림은 dev script로 재현한다.
 
 ```bash
-uv run scripts/dev/compare_camelsh_flood_generation_ml_variants.py
-uv run scripts/dev/plot_camelsh_flood_generation_ml_variant.py
-uv run scripts/dev/plot_camelsh_basin_group_maps.py
+uv run scripts/basin/event_regime/compare_camelsh_flood_generation_ml_variants.py
+uv run scripts/basin/event_regime/plot_camelsh_flood_generation_ml_variant.py
+uv run scripts/basin/event_regime/plot_camelsh_basin_group_maps.py
 ```
 
-주의할 점은 `scripts/build_camelsh_flood_generation_ml_clusters.py`는 이전 optional KMeans sensitivity script라는 것이다. 현재 논문 분석용으로 채택한 improved variant는 `hydromet_only_7 + KMeans(k=3)`이고, 이 선택 근거는 `output/basin/all/archive/event_regime_variants/`와 `output/basin/all/analysis/event_regime/tables/` 아래에 남긴다. 나중에 이 분석을 완전히 official pipeline으로 올리려면 dev script를 canonical script로 승격하고 README를 다시 정리하면 된다.
+주의할 점은 `scripts/basin/all/build_camelsh_flood_generation_ml_clusters.py`는 이전 optional KMeans sensitivity script라는 것이다. 현재 논문 분석용으로 채택한 improved variant는 `hydromet_only_7 + KMeans(k=3)`이고, 이 선택 근거는 `output/basin/all/archive/event_regime_variants/`와 `output/basin/all/analysis/event_regime/tables/` 아래에 남긴다. 나중에 이 분석을 완전히 official pipeline으로 올리려면 dev script를 canonical script로 승격하고 README를 다시 정리하면 된다.
 
 ## 16. 아주 간단한 Python 흐름
 

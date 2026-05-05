@@ -8,7 +8,7 @@
 
 ## 상태
 
-완료에 가깝다. `scripts/official/analyze_subset300_epoch_results.py`가 실행되어 validation/test metric, primary epoch summary, basin-level paired delta, chart가 생성되어 있다.
+완료에 가깝다. `scripts/model/overall/analyze_subset300_epoch_results.py`가 실행되어 validation/test metric, primary epoch summary, basin-level paired delta, chart가 생성되어 있다.
 
 주요 산출물은 아래에 있다.
 
