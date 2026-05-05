@@ -3,7 +3,7 @@
 이 디렉토리는 실험 설정 파일을 역할별로 나눈다.
 
 - 루트 `configs/`의 `camelsh_hourly_*_drbc_holdout_broad.yml`:
-  현재 논문 본문과 공식 비교 실험의 reference broad config다. 다만 현재 compute-constrained main comparison 실행은 이 broad config를 그대로 복사하지 않고, `scripts/official/run_subset300_multiseed.sh`에서 `configs/pilot/basin_splits/scaling_300/` basin file을 override해 사용한다.
+  현재 논문 본문과 공식 비교 실험의 reference broad config다. 다만 현재 compute-constrained main comparison 실행은 이 broad config를 그대로 복사하지 않고, `scripts/runs/official/run_subset300_multiseed.sh`에서 `configs/pilot/basin_splits/scaling_300/` basin file을 override해 사용한다.
 - `configs/pilot/`:
   deterministic scaling pilot 전용 config, basin split, prepared pool manifest, static/observed-flow distribution diagnostics, random same-size subset benchmark, diagnostics plot을 둔다. 이 경로는 원래 최종 basin 수를 정하기 위한 운영 결정용 pilot이었고, 현재는 선택 결과가 `300`으로 닫힌 상태에서 adopted subset manifest와 representativeness audit 근거를 같이 보관한다.
 - `configs/basin_splits/`:
