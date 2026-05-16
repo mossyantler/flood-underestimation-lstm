@@ -1,14 +1,26 @@
 import {
   SECTION_LABEL,
   SECTION_SUBTITLE,
+  SECTION_ACCENT,
   type SectionId,
 } from "@/lib/sections";
 import { evidenceRows } from "@/lib/dashboard-data";
 
 export function ContextSidebar({ activeId }: { activeId: SectionId }) {
+  const accent = SECTION_ACCENT[activeId];
+
   return (
     <aside className="ctx-sidebar">
-      <div className="ctx-product-mark">C</div>
+      <div
+        className="ctx-product-mark"
+        style={{
+          background: `color-mix(in srgb, ${accent} 14%, #0a0a0a)`,
+          border: `1px solid ${accent}`,
+          color: accent,
+        }}
+      >
+        {activeId}
+      </div>
       <p className="ctx-welcome">CAMELS Dashboard</p>
       <h2 className="ctx-title">{SECTION_LABEL[activeId]}</h2>
       <p className="ctx-subtitle">{SECTION_SUBTITLE[activeId]}</p>

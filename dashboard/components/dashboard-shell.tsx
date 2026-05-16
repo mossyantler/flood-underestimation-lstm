@@ -1,3 +1,5 @@
+"use client";
+import { useState } from "react";
 import { SLUG_TO_ID, type SectionId } from "@/lib/sections";
 import { IconRail } from "./icon-rail";
 import { ContextSidebar } from "./context-sidebar";
@@ -10,10 +12,15 @@ interface DashboardShellProps {
 
 export function DashboardShell({ slug, children }: DashboardShellProps) {
   const activeId: SectionId = SLUG_TO_ID[slug] ?? "O";
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
-    <div className="dash-shell">
-      <IconRail activeId={activeId} />
+    <div className="dash-shell" data-sidebar={sidebarOpen ? "open" : "closed"}>
+      <IconRail
+        activeId={activeId}
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={() => setSidebarOpen((v) => !v)}
+      />
       <ContextSidebar activeId={activeId} />
       <div>
         <MobileTopBar activeId={activeId} />

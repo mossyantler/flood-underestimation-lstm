@@ -70,6 +70,18 @@ h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -0.01em; }
   display: grid;
   grid-template-columns: 60px 240px minmax(0, 1fr);
   min-height: 100dvh;
+  transition: grid-template-columns 0.22s ease;
+}
+
+.dash-shell[data-sidebar="closed"] {
+  grid-template-columns: 60px 0px minmax(0, 1fr);
+}
+
+.dash-shell[data-sidebar="closed"] .ctx-sidebar {
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+  border-right-width: 0;
 }
 
 /* ── Icon Rail ── */
@@ -102,7 +114,10 @@ h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -0.01em; }
   font-size: 16px;
   color: var(--ink);
   margin-bottom: 10px;
+  transition: background 0.15s, opacity 0.1s;
 }
+
+.rail-brand:hover { background: #1a3530; opacity: 0.85; }
 
 .rail-btn {
   width: 36px;
@@ -142,28 +157,32 @@ h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -0.01em; }
   position: sticky;
   top: 0;
   height: 100dvh;
-  overflow-y: auto;
+  overflow: hidden;
+  min-width: 0;
   background: var(--sidebar-bg);
   border-right: 1px solid var(--hairline);
   padding: 20px 20px 24px;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  transition: opacity 0.15s ease, padding 0.22s ease, border-right-width 0.22s ease;
+}
+
+.dash-shell[data-sidebar="open"] .ctx-sidebar {
+  overflow-y: auto;
 }
 
 .ctx-product-mark {
   width: 60px;
   height: 60px;
-  background: #101d1a;
-  border: 1px solid var(--accent-brand);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   font-size: 32px;
-  color: var(--ink);
   flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .ctx-welcome { font-size: 11px; color: var(--ink-muted); margin-top: -6px; }
