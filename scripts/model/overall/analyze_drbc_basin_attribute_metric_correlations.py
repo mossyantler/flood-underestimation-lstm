@@ -142,26 +142,22 @@ def load_deterministic_metrics(
     raw["basin"] = raw["basin"].str.zfill(8)
     raw = raw[raw["split"] == "test"]
 
-    rows = []
+    seed_dfs = []
     for seed in seeds:
         m1_epoch = PRIMARY_EPOCHS[seed]["model1"]
         m2_epoch = PRIMARY_EPOCHS[seed]["model2"]
-        m1 = raw[(raw["model"] == "model1") & (raw["seed"] == seed) & (raw["epoch"] == m1_epoch)]
-        m2 = raw[(raw["model"] == "model2") & (raw["seed"] == seed) & (raw["epoch"] == m2_epoch)]
-        for _, row in m1.iterrows():
-            basin = row["basin"]
-            m2_row = m2[m2["basin"] == basin]
-            if m2_row.empty:
-                continue
-            m2r = m2_row.iloc[0]
-            rows.append({
-                "seed": seed, "basin": basin,
-                "m1_NSE": row["NSE"], "m1_KGE": row["KGE"], "m1_FHV": row["FHV"],
-                "m1_Peak_Timing": row["Peak-Timing"], "m1_Peak_MAPE": row["Peak-MAPE"],
-                "m2_NSE": m2r["NSE"], "m2_KGE": m2r["KGE"], "m2_FHV": m2r["FHV"],
-                "m2_Peak_Timing": m2r["Peak-Timing"], "m2_Peak_MAPE": m2r["Peak-MAPE"],
-            })
-    seed_df = pd.DataFrame(rows)
+        m1 = raw[(raw["model"] == "model1") & (raw["seed"] == seed) & (raw["epoch"] == m1_epoch)][
+            ["basin", "NSE", "KGE", "FHV", "Peak-Timing", "Peak-MAPE"]
+        ].rename(columns={"NSE": "m1_NSE", "KGE": "m1_KGE", "FHV": "m1_FHV",
+                           "Peak-Timing": "m1_Peak_Timing", "Peak-MAPE": "m1_Peak_MAPE"})
+        m2 = raw[(raw["model"] == "model2") & (raw["seed"] == seed) & (raw["epoch"] == m2_epoch)][
+            ["basin", "NSE", "KGE", "FHV", "Peak-Timing", "Peak-MAPE"]
+        ].rename(columns={"NSE": "m2_NSE", "KGE": "m2_KGE", "FHV": "m2_FHV",
+                           "Peak-Timing": "m2_Peak_Timing", "Peak-MAPE": "m2_Peak_MAPE"})
+        merged_seed = m1.merge(m2, on="basin", how="inner")
+        merged_seed["seed"] = seed
+        seed_dfs.append(merged_seed)
+    seed_df = pd.concat(seed_dfs, ignore_index=True)
 
     deltas = pd.read_csv(deltas_path, dtype={"basin": str})
     deltas["basin"] = deltas["basin"].str.zfill(8)
@@ -207,12 +203,18 @@ def compute_obs_features(series_dir: Path) -> pd.DataFrame:
 
 
 def pinball_loss(obs: np.ndarray, pred: np.ndarray, tau: float) -> float:
-    err = obs - pred
+    mask = np.isfinite(obs) & np.isfinite(pred)
+    if mask.sum() == 0:
+        return float("nan")
+    err = obs[mask] - pred[mask]
     return float(np.mean(np.where(err >= 0, tau * err, (tau - 1) * err)))
 
 
 def coverage_fraction(obs: np.ndarray, pred: np.ndarray) -> float:
-    return float(np.mean(obs <= pred))
+    mask = np.isfinite(obs) & np.isfinite(pred)
+    if mask.sum() == 0:
+        return float("nan")
+    return float(np.mean(obs[mask] <= pred[mask]))
 
 
 def tail_hit_rate(obs: np.ndarray, q99_pred: np.ndarray) -> float:
