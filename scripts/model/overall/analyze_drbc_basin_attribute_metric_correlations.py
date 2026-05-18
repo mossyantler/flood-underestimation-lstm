@@ -106,6 +106,154 @@ DEFAULT_SERIES_DIR = REPO_ROOT / "output/model_analysis/quantile_analysis/requir
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/overall_analysis/main_comparison/drbc_attribute_metric_correlations"
 
 
+def load_basin_features(path: Path, basin_ids: set[str] | None = None) -> pd.DataFrame:
+    df = pd.read_csv(path, dtype={"gauge_id": str})
+    df["gauge_id"] = df["gauge_id"].str.zfill(8)
+    if basin_ids is not None:
+        df = df[df["gauge_id"].isin(basin_ids)].reset_index(drop=True)
+
+    out = pd.DataFrame({"basin": df["gauge_id"]})
+    out["area"] = df["drain_sqkm_attr"]
+    out["log10_area"] = np.log10(df["drain_sqkm_attr"].clip(lower=1e-6))
+    out["snow_fraction"] = df["frac_snow"]
+    out["seasonal"] = df["p_seasonality"]
+    out["latitude"] = df["lat_gage"]
+    out["elevation"] = df["elev_mean_m"]
+    out["slope"] = df["slope_pct"]
+    out["human_use"] = df["developed_frac"]
+    out["land_use"] = df["forest_frac"]
+    out["permeability"] = df["soil_permeability_index"]
+    out["aridity"] = df["aridity"]
+    out["baseflow_index"] = df["baseflow_index_pct"]
+    out["high_prec_freq"] = df["high_prec_freq"]
+    out["soil_water_capacity"] = df["soil_available_water_capacity"]
+    out["sand_frac"] = df["SANDAVE"] / 100.0
+    out["clay_frac"] = df["CLAYAVE"] / 100.0
+
+    assert len(out) == 38, f"Expected 38 basins, got {len(out)}"
+    assert out["basin"].nunique() == 38
+    return out.set_index("basin")
+
+
+def load_deterministic_metrics(
+    metrics_path: Path, deltas_path: Path, seeds: list[int]
+) -> pd.DataFrame:
+    raw = pd.read_csv(metrics_path, dtype={"basin": str})
+    raw["basin"] = raw["basin"].str.zfill(8)
+    raw = raw[raw["split"] == "test"]
+
+    rows = []
+    for seed in seeds:
+        m1_epoch = PRIMARY_EPOCHS[seed]["model1"]
+        m2_epoch = PRIMARY_EPOCHS[seed]["model2"]
+        m1 = raw[(raw["model"] == "model1") & (raw["seed"] == seed) & (raw["epoch"] == m1_epoch)]
+        m2 = raw[(raw["model"] == "model2") & (raw["seed"] == seed) & (raw["epoch"] == m2_epoch)]
+        for _, row in m1.iterrows():
+            basin = row["basin"]
+            m2_row = m2[m2["basin"] == basin]
+            if m2_row.empty:
+                continue
+            m2r = m2_row.iloc[0]
+            rows.append({
+                "seed": seed, "basin": basin,
+                "m1_NSE": row["NSE"], "m1_KGE": row["KGE"], "m1_FHV": row["FHV"],
+                "m1_Peak_Timing": row["Peak-Timing"], "m1_Peak_MAPE": row["Peak-MAPE"],
+                "m2_NSE": m2r["NSE"], "m2_KGE": m2r["KGE"], "m2_FHV": m2r["FHV"],
+                "m2_Peak_Timing": m2r["Peak-Timing"], "m2_Peak_MAPE": m2r["Peak-MAPE"],
+            })
+    seed_df = pd.DataFrame(rows)
+
+    deltas = pd.read_csv(deltas_path, dtype={"basin": str})
+    deltas["basin"] = deltas["basin"].str.zfill(8)
+    deltas = deltas[deltas["seed"].isin(seeds)][
+        ["seed", "basin", "delta_NSE", "delta_KGE", "delta_FHV",
+         "Peak_Timing_reduction", "Peak_MAPE_reduction"]
+    ]
+
+    merged = seed_df.merge(deltas, on=["seed", "basin"], how="inner")
+
+    agg = merged.drop(columns=["seed"]).groupby("basin").median()
+    assert len(agg) == 38, f"Expected 38 basins after aggregation, got {len(agg)}"
+    return agg
+
+
+def compute_obs_features(series_dir: Path) -> pd.DataFrame:
+    seed = 111
+    epoch = PRIMARY_EPOCHS[seed]["model2"]  # epoch 5
+    path = series_dir / f"seed{seed}" / f"epoch{epoch:03d}_required_series.csv"
+    df = pd.read_csv(path, usecols=["basin", "obs"], dtype={"basin": str})
+    df["basin"] = df["basin"].str.zfill(8)
+
+    rows = []
+    for basin, grp in df.groupby("basin", sort=False):
+        obs = grp["obs"].dropna().to_numpy(dtype=float)
+        mean_flow = float(np.mean(obs))
+        cv = float(np.std(obs) / mean_flow) if mean_flow > 0 else float("nan")
+        q10 = float(np.percentile(obs, 90))   # exceedance 10% = 90th percentile
+        q90 = float(np.percentile(obs, 10))   # exceedance 90% = 10th percentile
+        fdc_slope = float(np.log10(q10 / q90)) if q90 > 0 else float("nan")
+        q99 = float(np.percentile(obs, 99))
+        rows.append({
+            "basin": basin,
+            "obs_cv": cv,
+            "obs_fdc_slope": fdc_slope,
+            "obs_q99": q99,
+            "obs_mean_flow": mean_flow,
+        })
+
+    out = pd.DataFrame(rows).set_index("basin")
+    assert len(out) == 38, f"Expected 38 basins, got {len(out)}"
+    return out
+
+
+def pinball_loss(obs: np.ndarray, pred: np.ndarray, tau: float) -> float:
+    err = obs - pred
+    return float(np.mean(np.where(err >= 0, tau * err, (tau - 1) * err)))
+
+
+def coverage_fraction(obs: np.ndarray, pred: np.ndarray) -> float:
+    return float(np.mean(obs <= pred))
+
+
+def tail_hit_rate(obs: np.ndarray, q99_pred: np.ndarray) -> float:
+    threshold = np.percentile(obs, 99)
+    mask = obs >= threshold
+    if mask.sum() == 0:
+        return float("nan")
+    return float(np.mean(obs[mask] <= q99_pred[mask]))
+
+
+def compute_probabilistic_metrics(series_dir: Path, seeds: list[int]) -> pd.DataFrame:
+    seed_results: list[pd.DataFrame] = []
+
+    for seed in seeds:
+        epoch = PRIMARY_EPOCHS[seed]["model2"]
+        path = series_dir / f"seed{seed}" / f"epoch{epoch:03d}_required_series.csv"
+        usecols = ["basin", "obs"] + QUANTILES
+        df = pd.read_csv(path, usecols=usecols, dtype={"basin": str})
+        df["basin"] = df["basin"].str.zfill(8)
+
+        rows = []
+        for basin, grp in df.groupby("basin", sort=False):
+            grp = grp.dropna(subset=["obs"])
+            obs = grp["obs"].to_numpy(dtype=float)
+            rec: dict[str, object] = {"seed": seed, "basin": basin}
+            for q in QUANTILES:
+                pred = grp[q].to_numpy(dtype=float)
+                tau = TAUS[q]
+                rec[f"pinball_{q}"] = pinball_loss(obs, pred, tau)
+                rec[f"coverage_{q}"] = coverage_fraction(obs, pred)
+            rec["tail_hit_q99"] = tail_hit_rate(obs, grp["q99"].to_numpy(dtype=float))
+            rows.append(rec)
+        seed_results.append(pd.DataFrame(rows))
+
+    all_seeds = pd.concat(seed_results, ignore_index=True)
+    prob_cols = [f"pinball_{q}" for q in QUANTILES] + [f"coverage_{q}" for q in QUANTILES] + ["tail_hit_q99"]
+    agg = all_seeds.drop(columns=["seed"]).groupby("basin")[prob_cols].median()
+    assert len(agg) == 38, f"Expected 38 basins, got {len(agg)}"
+    return agg
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="DRBC basin attribute × model metric Spearman correlation")
     p.add_argument("--seeds", nargs="+", type=int, default=OFFICIAL_SEEDS)
@@ -122,7 +270,27 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    print(f"Output: {args.output_dir}")
+
+    print("Loading basin features...")
+    _raw_metrics = pd.read_csv(args.basin_metrics, dtype={"basin": str})
+    _raw_metrics["basin"] = _raw_metrics["basin"].str.zfill(8)
+    _model_basin_ids: set[str] = set(_raw_metrics[_raw_metrics["split"] == "test"]["basin"].unique())
+    features = load_basin_features(args.drbc_attrs, basin_ids=_model_basin_ids)
+    print(f"Features: {features.shape}  columns={list(features.columns)}")
+
+    print("Loading deterministic metrics...")
+    det_metrics = load_deterministic_metrics(args.basin_metrics, args.basin_deltas, args.seeds)
+    print(f"Det metrics: {det_metrics.shape}  columns={list(det_metrics.columns)}")
+
+    print("Computing obs-based features...")
+    obs_features = compute_obs_features(args.series_dir)
+    print(f"Obs features: {obs_features.shape}")
+    print(obs_features[["obs_cv", "obs_fdc_slope", "obs_q99", "obs_mean_flow"]].describe().round(3))
+
+    print("Computing probabilistic metrics...")
+    prob_metrics = compute_probabilistic_metrics(args.series_dir, args.seeds)
+    print(f"Prob metrics: {prob_metrics.shape}")
+    print(prob_metrics.describe().round(4))
 
 
 if __name__ == "__main__":
