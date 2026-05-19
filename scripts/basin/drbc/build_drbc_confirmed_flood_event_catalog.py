@@ -3,6 +3,8 @@
 # dependencies = [
 #   "numpy>=2.0",
 #   "pandas>=2.2",
+#   "pyarrow>=16.0",
+#   "requests>=2.31",
 #   "xarray>=2024.1",
 #   "netCDF4>=1.6",
 # ]
@@ -20,10 +22,14 @@ NC 파일이 없는 basin은 건너뛴다. NC 파일 준비:
 from __future__ import annotations
 
 import argparse
+import gzip
+import io
+import re
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import requests
 import xarray as xr
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -31,6 +37,10 @@ ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_COVERAGE_CSV = ROOT / "output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv"
 DEFAULT_DATA_DIR = ROOT / "data/CAMELSH_generic/drbc_holdout_broad/time_series"
 DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/confirmed_flood/catalog"
+DEFAULT_NOAA_CACHE = ROOT / "output/model_analysis/confirmed_flood/noaa_cache"
+
+NOAA_BASE_URL = "https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/"
+NOAA_FLOOD_TYPES = {"Flood", "Flash Flood", "Coastal Flood"}
 
 EXCLUDE_START = pd.Timestamp("2000-01-01", tz="UTC")
 EXCLUDE_END = pd.Timestamp("2013-12-31 23:59:59", tz="UTC")
@@ -51,6 +61,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--data-dir", type=Path, default=DEFAULT_DATA_DIR)
     p.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     p.add_argument("--limit-basins", type=int, default=None, help="Smoke test용 basin 수 제한")
+    p.add_argument("--noaa-cache", type=Path, default=DEFAULT_NOAA_CACHE)
+    p.add_argument("--skip-noaa", action="store_true", help="NOAA annotation 건너뜀")
     return p.parse_args()
 
 
@@ -92,6 +104,81 @@ def _assign_tier(peak_cms: float, moderate_cms: float | None, major_cms: float |
     if moderate_cms is not None and peak_cms >= moderate_cms:
         return "moderate"
     return "minor"
+
+
+def load_noaa_storm_events(years: list[int], cache_dir: Path) -> pd.DataFrame:
+    """NOAA NCEI Storm Events CSV를 연도별 다운로드/캐시 후 Flood 유형만 반환."""
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    frames = []
+    index_html: str | None = None
+
+    for year in years:
+        cache_path = cache_dir / f"storm_events_{year}.parquet"
+        if cache_path.exists():
+            frames.append(pd.read_parquet(cache_path))
+            continue
+        if index_html is None:
+            resp = requests.get(NOAA_BASE_URL, timeout=30)
+            resp.raise_for_status()
+            index_html = resp.text
+
+        pattern = rf"StormEvents_details-ftp_v1\.0_d{year}_c\d+\.csv\.gz"
+        matches = re.findall(pattern, index_html)
+        if not matches:
+            print(f"  [NOAA] {year}: 파일 없음")
+            continue
+        filename = sorted(matches)[-1]
+        print(f"  [NOAA] Downloading {filename} ...")
+        gz_resp = requests.get(NOAA_BASE_URL + filename, timeout=120)
+        gz_resp.raise_for_status()
+        df = pd.read_csv(
+            io.StringIO(gzip.decompress(gz_resp.content).decode("latin-1")),
+            usecols=["BEGIN_YEARMONTH", "BEGIN_DAY", "END_YEARMONTH", "END_DAY",
+                     "STATE_FIPS", "CZ_FIPS", "EVENT_TYPE"],
+            dtype=str,
+            low_memory=False,
+        )
+        df = df[df["EVENT_TYPE"].isin(NOAA_FLOOD_TYPES)].copy()
+        df["county_fips"] = df["STATE_FIPS"].str.zfill(2) + df["CZ_FIPS"].str.zfill(3)
+        df["begin_date"] = pd.to_datetime(
+            df["BEGIN_YEARMONTH"].str[:4] + "-" + df["BEGIN_YEARMONTH"].str[4:] + "-" + df["BEGIN_DAY"].str.zfill(2),
+            errors="coerce",
+        )
+        df["end_date"] = pd.to_datetime(
+            df["END_YEARMONTH"].str[:4] + "-" + df["END_YEARMONTH"].str[4:] + "-" + df["END_DAY"].str.zfill(2),
+            errors="coerce",
+        )
+        df = df[["county_fips", "begin_date", "end_date"]].dropna()
+        df.to_parquet(cache_path, index=False)
+        frames.append(df)
+
+    return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(
+        columns=["county_fips", "begin_date", "end_date"]
+    )
+
+
+def annotate_noaa(
+    events: list[dict],
+    coverage_df: pd.DataFrame,
+    noaa_df: pd.DataFrame,
+) -> list[dict]:
+    """각 event에 noaa_corroborated boolean 부여 (county FIPS + peak ±2일 매칭)."""
+    fips_map = coverage_df.set_index("usgs_id")["county_fips"].to_dict()
+    for ev in events:
+        county_fips = fips_map.get(ev["usgs_id"])
+        if county_fips is None or noaa_df.empty:
+            ev["noaa_corroborated"] = False
+            continue
+        peak = pd.Timestamp(ev["peak_time"])
+        window_start = peak - pd.Timedelta(days=2)
+        window_end = peak + pd.Timedelta(days=2)
+        match = noaa_df[
+            (noaa_df["county_fips"] == county_fips) &
+            (noaa_df["begin_date"] <= window_end) &
+            (noaa_df["end_date"] >= window_start)
+        ]
+        ev["noaa_corroborated"] = len(match) > 0
+    return events
 
 
 def extract_events_from_nc(
@@ -218,6 +305,14 @@ def main() -> None:
         events = extract_events_from_nc(usgs_id, nc_path, minor_cms, moderate_cms, major_cms)
         print(f"    → {len(events)} events")
         all_events.extend(events)
+
+    if all_events and not args.skip_noaa:
+        peak_years = sorted({pd.Timestamp(ev["peak_time"]).year for ev in all_events})
+        print(f"\nDownloading NOAA Storm Events for {len(peak_years)} years ...")
+        noaa_df = load_noaa_storm_events(peak_years, args.noaa_cache)
+        all_events = annotate_noaa(all_events, cov, noaa_df)
+        n_corr = sum(ev["noaa_corroborated"] for ev in all_events)
+        print(f"NOAA corroborated: {n_corr}/{len(all_events)} ({100*n_corr/max(len(all_events),1):.1f}%)")
 
     df = pd.DataFrame(all_events) if all_events else pd.DataFrame(columns=[
         "usgs_id", "peak_time", "peak_discharge_cms", "flood_tier",
