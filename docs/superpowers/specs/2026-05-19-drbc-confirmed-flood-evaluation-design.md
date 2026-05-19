@@ -190,6 +190,37 @@ warmup 시작 지점이 CAMELSH 시계열 시작보다 앞이면 해당 event dr
 
 ---
 
+## Database 저장 규칙
+
+CSV는 file-system source-of-truth로 유지하고, PostgreSQL과 DuckDB는 조회·join 편의를 위한 cache 계층이다. 기존 `database/postgres/init_camels_analysis_db.sql` 및 `database/duckdb/camels_duckdb_tool.py` 패턴을 그대로 따른다.
+
+### PostgreSQL (`analysis` schema)
+
+| 테이블 | 원천 CSV | 주요 컬럼 |
+|--------|---------|---------|
+| `analysis.nws_flood_stage_coverage` | `coverage/nws_flood_stage_coverage.csv` | `usgs_id`, `nws_location_id`, `minor_discharge_cms`, `moderate_discharge_cms`, `major_discharge_cms`, `coverage_status` |
+| `analysis.nws_coverage_bias` | `coverage/coverage_bias_report.csv` | `attribute`, `covered_median`, `missing_median`, `ks_stat`, `ks_pvalue` |
+| `analysis.drbc_confirmed_flood_events` | `catalog/drbc_confirmed_flood_event_catalog.csv` | `usgs_id`, `peak_time`, `peak_discharge_cms`, `flood_tier`, `tier_limited`, `noaa_corroborated`, `period`, `forcing_coverage_min` |
+| `analysis.drbc_confirmed_flood_performance` | `performance/*.csv` | `usgs_id`, `peak_time`, `model`, `seed`, `quantile`, `obs_peak`, `pred_peak`, `peak_under_deficit`, `threshold_recall`, `event_nrmse`, `flood_tier`, `noaa_corroborated` |
+
+각 테이블에 `source_path text`, `imported_at timestamptz DEFAULT now()` 컬럼을 표준으로 포함한다.
+
+`init_camels_analysis_db.sql`에 위 4개 테이블 DDL을 추가하고, `import_camels_csvs.py`에 import 로직을 추가한다.
+
+### DuckDB view
+
+기존 `camels_duckdb_tool.py`의 `views` 명령에 아래 view를 등록한다.
+
+| View | 설명 |
+|------|------|
+| `confirmed_flood_events` | `drbc_confirmed_flood_events` CSV glob 직독 또는 Parquet |
+| `confirmed_flood_performance` | `drbc_confirmed_flood_performance` CSV glob |
+| `confirmed_flood_coverage` | `nws_flood_stage_coverage` + `nws_coverage_bias` join |
+
+DBeaver에서 `analysis.drbc_confirmed_flood_events`로 직접 조회하거나, DuckDB view를 통해 ad hoc 탐색이 가능하도록 한다.
+
+---
+
 ## 커버리지 리스크 대응
 
 NWS flood stage 커버리지가 70개 미만으로 낮게 나올 경우, USGS NWIS annual peak flow를 anchor로 쓰는 hybrid 방식으로 전환한다. 이 경우 각 연도의 annual peak 발생 시점 중 return period ≥ 2yr인 event를 confirmed flood로 정의하고, NOAA annotation을 primary corroboration으로 올린다. 이 전환 여부는 커버리지 확인 스크립트 실행 결과에 따라 결정한다.
