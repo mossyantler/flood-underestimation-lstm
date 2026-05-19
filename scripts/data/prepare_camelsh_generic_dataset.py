@@ -36,7 +36,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--profile",
-        choices=["broad", "natural"],
+        choices=["broad", "natural", "broad_all_drbc"],
         default="broad",
         help="Which DRBC holdout profile to prepare.",
     )
@@ -114,6 +114,13 @@ def basin_split_paths(profile: str) -> dict[str, Path]:
             "train": splits_dir / "drbc_holdout_train_broad.txt",
             "validation": splits_dir / "drbc_holdout_validation_broad.txt",
             "test": splits_dir / "drbc_holdout_test_drbc_quality.txt",
+        }
+    if profile == "broad_all_drbc":
+        # 154개 DRBC holdout 전체를 test set으로 포함
+        return {
+            "train": splits_dir / "drbc_holdout_train_broad.txt",
+            "validation": splits_dir / "drbc_holdout_validation_broad.txt",
+            "test": splits_dir / "drbc_holdout_test_drbc_all.txt",
         }
     return {
         "train": splits_dir / "drbc_holdout_train_natural.txt",
