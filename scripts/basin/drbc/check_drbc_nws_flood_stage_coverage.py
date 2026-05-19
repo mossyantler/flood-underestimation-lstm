@@ -14,14 +14,16 @@ import argparse
 import time
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import requests
+from scipy import stats
 
 ROOT = Path(__file__).resolve().parents[3]
 
 DEFAULT_DRBC_SELECTED = ROOT / "output/basin/drbc/basin_define/camelsh_drbc_selected.csv"
-DEFAULT_STATIC_ATTRS = ROOT / "data/CAMELSH_generic/drbc_holdout_broad/attributes/static_attributes.csv"
+DEFAULT_STATIC_ATTRS = ROOT / "output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_static_attributes_full.csv"
 DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/confirmed_flood/coverage"
 
 USGS_SITE_API = "https://waterservices.usgs.gov/nwis/site/"
@@ -30,7 +32,7 @@ USGS_RATINGS_API = "https://waterdata.usgs.gov/nwisweb/get_ratings"
 CFS_TO_CMS = 0.028316846592
 REQUEST_DELAY = 0.5
 
-BIAS_ATTRIBUTES = ["drain_sqkm_attr", "slope_mean", "aridity", "snow_fraction", "baseflow_index"]
+BIAS_ATTRIBUTES = ["drain_sqkm_attr", "SLOPE_PCT", "aridity_index", "frac_snow", "BFI_AVE"]
 
 
 def parse_args() -> argparse.Namespace:
@@ -141,6 +143,65 @@ def stage_to_discharge_cms(usgs_id: str, stage_ft: float | None, delay: float) -
         time.sleep(delay)
 
 
+def compute_coverage_bias(
+    coverage_df: pd.DataFrame,
+    static_attrs: pd.DataFrame,
+    attributes: list[str],
+) -> pd.DataFrame:
+    """covered(minor_discharge_cms 있음) vs missing basin의 static attribute KS-test 비교."""
+    covered_ids = coverage_df.loc[coverage_df["minor_discharge_cms"].notna(), "usgs_id"].tolist()
+    missing_ids = coverage_df.loc[coverage_df["minor_discharge_cms"].isna(), "usgs_id"].tolist()
+    records = []
+    for attr in attributes:
+        if attr not in static_attrs.columns:
+            continue
+        a = static_attrs.loc[static_attrs.index.isin(covered_ids), attr].dropna().values
+        b = static_attrs.loc[static_attrs.index.isin(missing_ids), attr].dropna().values
+        if len(a) == 0 or len(b) == 0:
+            continue
+        ks_stat, ks_pvalue = stats.ks_2samp(a, b)
+        records.append({
+            "attribute": attr,
+            "covered_n": int(len(a)),
+            "missing_n": int(len(b)),
+            "covered_median": float(np.median(a)),
+            "missing_median": float(np.median(b)),
+            "ks_stat": float(ks_stat),
+            "ks_pvalue": float(ks_pvalue),
+        })
+    return pd.DataFrame(records)
+
+
+def plot_coverage_bias(
+    coverage_df: pd.DataFrame,
+    static_attrs: pd.DataFrame,
+    attributes: list[str],
+    output_path: Path,
+) -> None:
+    """covered vs missing basin의 static attribute 분포 boxplot 저장."""
+    covered_ids = coverage_df.loc[coverage_df["minor_discharge_cms"].notna(), "usgs_id"].tolist()
+    missing_ids = coverage_df.loc[coverage_df["minor_discharge_cms"].isna(), "usgs_id"].tolist()
+
+    valid_attrs = [a for a in attributes if a in static_attrs.columns]
+    if not valid_attrs:
+        return
+
+    fig, axes = plt.subplots(1, len(valid_attrs), figsize=(4 * len(valid_attrs), 4))
+    if len(valid_attrs) == 1:
+        axes = [axes]
+    for ax, attr in zip(axes, valid_attrs):
+        a = static_attrs.loc[static_attrs.index.isin(covered_ids), attr].dropna().values
+        b = static_attrs.loc[static_attrs.index.isin(missing_ids), attr].dropna().values
+        ax.boxplot([a, b], tick_labels=["covered", "missing"])
+        ax.set_title(attr, fontsize=9)
+    fig.suptitle("NWS Coverage Bias: Covered vs Missing Basins", fontsize=11)
+    fig.tight_layout()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Wrote figure: {output_path}")
+
+
 def main() -> None:
     args = parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -197,8 +258,29 @@ def main() -> None:
     out_csv = args.output_dir / "nws_flood_stage_coverage.csv"
     result_df.to_csv(out_csv, index=False)
     print(f"\nWrote: {out_csv}")
-    print(f"Rows: {len(result_df)}")
+
+    n_covered = result_df["minor_discharge_cms"].notna().sum()
+    n_total = len(result_df)
+    print(f"Coverage: {n_covered}/{n_total} gauges have minor stage discharge")
     print(result_df["coverage_status"].value_counts().to_string())
+    if n_covered < 70:
+        print("WARNING: coverage < 70 — consider hybrid fallback (see spec)")
+
+    if not args.limit:
+        static_path = args.static_attrs
+        if static_path.exists():
+            static_attrs = pd.read_csv(static_path, index_col=0)
+            static_attrs.index = static_attrs.index.astype(str).str.zfill(8)
+            bias_df = compute_coverage_bias(result_df, static_attrs, BIAS_ATTRIBUTES)
+            bias_csv = args.output_dir / "coverage_bias_report.csv"
+            bias_df.to_csv(bias_csv, index=False)
+            print(f"Wrote: {bias_csv}")
+            plot_coverage_bias(
+                result_df, static_attrs, BIAS_ATTRIBUTES,
+                args.output_dir / "figures" / "coverage_bias_distributions.png",
+            )
+        else:
+            print(f"WARNING: static attrs not found at {static_path}, skipping bias analysis")
 
 
 if __name__ == "__main__":
