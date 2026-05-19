@@ -67,9 +67,22 @@
 
 ### 출력물
 
+**커버리지 테이블**
 `output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv`
 
 컬럼: `usgs_id`, `nws_location_id`, `minor_stage_ft`, `moderate_stage_ft`, `major_stage_ft`, `minor_discharge_cms`, `moderate_discharge_cms`, `major_discharge_cms`, `coverage_status`
+
+**누락 basin 속성 편향 분석**
+
+커버된 basin과 누락된 basin의 static attribute 분포를 비교해 선택 편향을 정량화한다.
+
+비교 대상 속성: `area`, `slope`, `aridity`, `snow_fraction`, `baseflow_index`
+
+출력물:
+- `output/model_analysis/confirmed_flood/coverage/coverage_bias_report.csv` — 속성별 covered/missing 그룹의 median, mean, KS-test p-value
+- `output/model_analysis/confirmed_flood/coverage/figures/coverage_bias_distributions.png` — 속성별 분포 비교 boxplot (covered vs. missing)
+
+이 figure를 보고 누락 basin이 소규모 headwater에 집중되어 있으면 논문에 "analysis is representative of mid-to-large basins; headwater flash-flood dynamics may be underrepresented" 문장을 limitation으로 추가한다.
 
 ---
 
