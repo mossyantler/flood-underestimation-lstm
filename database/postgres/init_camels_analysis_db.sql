@@ -476,6 +476,9 @@ CREATE INDEX IF NOT EXISTS drbc_confirmed_flood_performance_model_seed_idx
 CREATE INDEX IF NOT EXISTS drbc_confirmed_flood_performance_flood_tier_idx
     ON analysis.drbc_confirmed_flood_performance (flood_tier);
 
+CREATE INDEX IF NOT EXISTS drbc_confirmed_flood_performance_peak_time_idx
+    ON analysis.drbc_confirmed_flood_performance (peak_time);
+
 CREATE OR REPLACE VIEW analysis.primary_basin_metrics_with_cohort AS
 SELECT
     bm.*,
