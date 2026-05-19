@@ -415,6 +415,7 @@ CREATE TABLE IF NOT EXISTS analysis.nws_flood_stage_coverage (
     major_discharge_cms double precision,
     coverage_status text NOT NULL,
     source_path text NOT NULL,
+    source_row integer NOT NULL,
     imported_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -427,6 +428,7 @@ CREATE TABLE IF NOT EXISTS analysis.nws_coverage_bias (
     ks_stat double precision,
     ks_pvalue double precision,
     source_path text NOT NULL,
+    source_row integer NOT NULL,
     imported_at timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY (attribute)
 );
@@ -441,6 +443,7 @@ CREATE TABLE IF NOT EXISTS analysis.drbc_confirmed_flood_events (
     period text NOT NULL,
     forcing_coverage_min double precision,
     source_path text NOT NULL,
+    source_row integer NOT NULL,
     imported_at timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY (usgs_id, peak_time)
 );
@@ -466,6 +469,7 @@ CREATE TABLE IF NOT EXISTS analysis.drbc_confirmed_flood_performance (
     flood_tier text,
     noaa_corroborated boolean,
     source_path text NOT NULL,
+    source_row integer NOT NULL,
     imported_at timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY (usgs_id, peak_time, model, seed, quantile)
 );
