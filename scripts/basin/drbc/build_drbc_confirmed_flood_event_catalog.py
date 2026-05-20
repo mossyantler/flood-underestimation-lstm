@@ -36,6 +36,7 @@ ROOT = Path(__file__).resolve().parents[3]
 
 DEFAULT_COVERAGE_CSV = ROOT / "output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv"
 DEFAULT_DATA_DIR = ROOT / "data/CAMELSH_generic/drbc_holdout_broad/time_series"
+DEFAULT_RAW_DIR = ROOT / "basins/CAMELSH_data/hourly_observed/netcdf"
 DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/confirmed_flood/catalog"
 DEFAULT_NOAA_CACHE = ROOT / "output/model_analysis/confirmed_flood/noaa_cache"
 
@@ -59,6 +60,8 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--coverage-csv", type=Path, default=DEFAULT_COVERAGE_CSV)
     p.add_argument("--data-dir", type=Path, default=DEFAULT_DATA_DIR)
+    p.add_argument("--raw-dir", type=Path, default=DEFAULT_RAW_DIR,
+                   help="Raw hourly NC fallback (basins/CAMELSH_data/hourly_observed/netcdf)")
     p.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     p.add_argument("--limit-basins", type=int, default=None, help="Smoke test용 basin 수 제한")
     p.add_argument("--noaa-cache", type=Path, default=DEFAULT_NOAA_CACHE)
@@ -163,7 +166,9 @@ def annotate_noaa(
     noaa_df: pd.DataFrame,
 ) -> list[dict]:
     """각 event에 noaa_corroborated boolean 부여 (county FIPS + peak ±2일 매칭)."""
-    fips_map = coverage_df.set_index("usgs_id")["county_fips"].to_dict()
+    # county_fips를 5자리 zero-padded string으로 정규화
+    raw_fips = coverage_df.set_index("usgs_id")["county_fips"]
+    fips_map = {k: str(int(v)).zfill(5) if pd.notna(v) else None for k, v in raw_fips.items()}
     for ev in events:
         county_fips = fips_map.get(ev["usgs_id"])
         if county_fips is None or noaa_df.empty:
@@ -271,6 +276,82 @@ def extract_events_from_nc(
     return events
 
 
+def extract_events_from_raw_nc(
+    usgs_id: str,
+    raw_dir: Path,
+    minor_cms: float,
+    moderate_cms: float | None,
+    major_cms: float | None,
+) -> list[dict]:
+    """Raw hourly NC (streamflow only)에서 event 추출. forcing coverage 체크 없음."""
+    nc_path = raw_dir / f"{usgs_id}_hourly.nc"
+    if not nc_path.exists():
+        return []
+    try:
+        ds = xr.open_dataset(nc_path)
+    except Exception as e:
+        print(f"  [raw NC error] {usgs_id}: {e}")
+        return []
+    try:
+        time_idx = _get_time_index(ds)
+        # 변수명 탐색: streamflow / Streamflow
+        q_var = next((v for v in ("streamflow", "Streamflow") if v in ds), None)
+        if q_var is None:
+            return []
+        q_vals = ds[q_var].values.flatten()
+
+        mask_excl = (time_idx >= EXCLUDE_START) & (time_idx <= EXCLUDE_END)
+        mask_range = (time_idx >= DATA_START) & (time_idx <= DATA_END)
+        mask_valid = mask_range & ~mask_excl
+        time_valid = time_idx[mask_valid]
+        q_valid = q_vals[mask_valid]
+        if len(q_valid) == 0:
+            return []
+
+        ts_start = time_valid[0]
+        above = q_valid >= minor_cms
+        events: list[dict] = []
+        in_event = False
+        ev_start_idx = 0
+        last_above_idx = 0
+
+        for i, is_above in enumerate(above):
+            if is_above:
+                if not in_event:
+                    in_event = True
+                    ev_start_idx = i
+                last_above_idx = i
+            else:
+                if in_event:
+                    gap_h = (time_valid[i] - time_valid[last_above_idx]).total_seconds() / 3600
+                    if gap_h >= EVENT_GAP_HOURS:
+                        ev_q = q_valid[ev_start_idx:last_above_idx + 1]
+                        peak_rel = int(np.nanargmax(ev_q))
+                        peak_time = time_valid[ev_start_idx + peak_rel]
+                        peak_cms = float(ev_q[peak_rel])
+                        warmup_start = peak_time - pd.Timedelta(days=WARMUP_DAYS + 1)
+                        if warmup_start < ts_start:
+                            in_event = False
+                            continue
+                        tier = _assign_tier(peak_cms, moderate_cms, major_cms)
+                        period = "pre_2000" if peak_time < EXCLUDE_START else "post_2013"
+                        pt_naive = peak_time.tz_localize(None) if hasattr(peak_time, "tz_localize") else peak_time
+                        events.append({
+                            "usgs_id": usgs_id,
+                            "peak_time": pt_naive.isoformat(),
+                            "peak_discharge_cms": peak_cms,
+                            "flood_tier": tier,
+                            "tier_limited": moderate_cms is None,
+                            "noaa_corroborated": False,
+                            "period": period,
+                            "forcing_coverage_min": None,  # raw NC: forcing 미확인
+                        })
+                        in_event = False
+    finally:
+        ds.close()
+    return events
+
+
 def main() -> None:
     args = parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -296,13 +377,18 @@ def main() -> None:
         major_cms = float(row["major_discharge_cms"]) if pd.notna(row.get("major_discharge_cms")) else None
 
         nc_path = args.data_dir / f"{usgs_id}.nc"
-        if not nc_path.exists():
+        raw_path = args.raw_dir / f"{usgs_id}_hourly.nc"
+
+        if nc_path.exists():
+            print(f"  [{i}/{n_total}] {usgs_id}: NH NC 추출 중 ...")
+            events = extract_events_from_nc(usgs_id, nc_path, minor_cms, moderate_cms, major_cms)
+        elif raw_path.exists():
+            print(f"  [{i}/{n_total}] {usgs_id}: raw NC 추출 중 (forcing 미확인) ...")
+            events = extract_events_from_raw_nc(usgs_id, args.raw_dir, minor_cms, moderate_cms, major_cms)
+        else:
             print(f"  [{i}/{n_total}] {usgs_id}: NC 없음, 건너뜀")
             skipped += 1
             continue
-
-        print(f"  [{i}/{n_total}] {usgs_id}: 추출 중 ...")
-        events = extract_events_from_nc(usgs_id, nc_path, minor_cms, moderate_cms, major_cms)
         print(f"    → {len(events)} events")
         all_events.extend(events)
 
