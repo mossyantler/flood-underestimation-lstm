@@ -33,9 +33,25 @@ if str(VENDOR_NH) not in sys.path:
 import numpy as np
 import pandas as pd
 import torch
+from torch.utils.data._utils.collate import default_collate
 
 from neuralhydrology.evaluation import get_tester
 from neuralhydrology.utils.config import Config
+
+
+def _collate_fn(batch: list[dict]) -> dict:
+    """date 키(numpy.datetime64)를 numpy로 유지, 나머지는 기본 collate."""
+    result = {}
+    for key in batch[0]:
+        vals = [b[key] for b in batch]
+        if key.startswith("date"):
+            result[key] = np.stack(vals)
+        else:
+            try:
+                result[key] = default_collate(vals)
+            except Exception:
+                result[key] = vals
+    return result
 
 DEFAULT_CATALOG_CSV = ROOT / "output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv"
 DEFAULT_RUN_ROOT = ROOT / "runs/subset_comparison"
@@ -154,7 +170,7 @@ def infer_basin_events(
         if dataset is None or len(dataset) == 0:
             continue
 
-        loader = torch.utils.data.DataLoader(dataset, batch_size=len(dataset))
+        loader = torch.utils.data.DataLoader(dataset, batch_size=len(dataset), collate_fn=_collate_fn)
         obs_list, pred_list, q_lists = [], [], {q: [] for q in quantile_names}
         date_list: list[pd.Timestamp] = []
 
@@ -168,14 +184,19 @@ def infer_basin_events(
                 obs = obs_raw * scale + center
 
                 if model == "model1":
-                    pred_raw = predictions["y_hat"][:, -1, 0].cpu().numpy()
+                    pred_raw = predictions["y_hat"][:, -1, 0].detach().cpu().numpy()
                     pred = pred_raw * scale + center
                 else:
-                    # quantile: y_hat shape [batch, seq, n_quantiles]
-                    pred_raw = predictions["y_hat"][:, -1, :].cpu().numpy()
-                    pred = pred_raw[:, 0] * scale + center  # q50 as "pred"
-                    for qi, qname in enumerate(quantile_names):
-                        q_lists[qname].extend((pred_raw[:, qi] * scale + center).tolist())
+                    # model2: y_hat = q50, y_quantiles = [batch, seq, n_targets * n_quantiles]
+                    pred_raw = predictions["y_hat"][:, -1, 0].detach().cpu().numpy()
+                    pred = pred_raw * scale + center
+                    if "y_quantiles" in predictions and quantile_names:
+                        y_q = predictions["y_quantiles"][:, -1, :]
+                        # n_targets 자동 계산 (-1): shape [batch, n_targets, n_quantiles]
+                        y_q = y_q.reshape(y_q.shape[0], -1, len(quantile_names))
+                        y_q = y_q[:, 0, :].detach().cpu().numpy() * scale + center
+                        for qi, qname in enumerate(quantile_names):
+                            q_lists[qname].extend(y_q[:, qi].tolist())
 
                 obs_list.extend(obs.tolist())
                 pred_list.extend(pred.tolist())

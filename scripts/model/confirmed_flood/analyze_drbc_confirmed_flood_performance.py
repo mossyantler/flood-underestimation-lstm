@@ -62,7 +62,7 @@ def compute_tier_aggregate(df: pd.DataFrame) -> pd.DataFrame:
 def compute_paired_delta(df: pd.DataFrame) -> pd.DataFrame:
     """Model 2 quantile vs Model 1 paired delta (같은 seed × event 기준)."""
     m1 = df[df["model"] == "model1"][
-        ["usgs_id", "peak_time", "seed", "peak_under_deficit", "flood_tier", "noaa_corroborated"]
+        ["usgs_id", "peak_time", "seed", "peak_under_deficit"]
     ].rename(columns={"peak_under_deficit": "m1_under_deficit"})
     m2 = df[df["model"] == "model2"].copy()
     merged = m2.merge(m1, on=["usgs_id", "peak_time", "seed"])
