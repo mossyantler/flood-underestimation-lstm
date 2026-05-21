@@ -100,10 +100,10 @@ HEATMAP_GROUPS = {
 }
 
 DEFAULT_DRBC_ATTRS = REPO_ROOT / "output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_basin_analysis_table.csv"
-DEFAULT_BASIN_METRICS = REPO_ROOT / "output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv"
-DEFAULT_BASIN_DELTAS = REPO_ROOT / "output/model_analysis/overall_analysis/main_comparison/tables/primary_epoch_basin_deltas.csv"
-DEFAULT_SERIES_DIR = REPO_ROOT / "output/model_analysis/quantile_analysis/required_series"
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/overall_analysis/main_comparison/drbc_attribute_metric_correlations"
+DEFAULT_BASIN_METRICS = REPO_ROOT / "output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv"
+DEFAULT_BASIN_DELTAS = REPO_ROOT / "output/model_analysis/legacy/overall_analysis/main_comparison/tables/primary_epoch_basin_deltas.csv"
+DEFAULT_SERIES_DIR = REPO_ROOT / "output/model_analysis/legacy/quantile_analysis/required_series"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/legacy/overall_analysis/main_comparison/drbc_attribute_metric_correlations"
 
 
 def load_basin_features(path: Path, basin_ids: set[str] | None = None) -> pd.DataFrame:

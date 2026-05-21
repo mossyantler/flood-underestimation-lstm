@@ -11,13 +11,13 @@
 주요 산출물은 아래에 있다.
 
 ```text
-output/model_analysis/extreme_rain/primary/
+output/model_analysis/legacy/extreme_rain/primary/
 ```
 
 All-validation-epoch stress sensitivity는 별도 output root에 있다.
 
 ```text
-output/model_analysis/extreme_rain/all/
+output/model_analysis/legacy/extreme_rain/all/
 ```
 
 ## 분석 단위
@@ -50,7 +50,7 @@ Primary analysis에는 `Local Peak Quantile Bracket` diagnostic도 포함한다.
 Model prediction을 겹친 대표 flow graph diagnostic은 아래에 있다.
 
 ```text
-output/model_analysis/extreme_rain/primary/flow_graph_diagnostic/
+output/model_analysis/legacy/extreme_rain/primary/flow_graph_diagnostic/
 ```
 
 이 폴더에는 `figures/`, `tables/`, `metadata/`가 있으며, 각 figure는 같은 event를 seed `111 / 222 / 444` 패널로 나누어 observed flow, Model 1, Model 2 `q50 / q95 / q99`를 함께 보여준다. Sim-Q event plot은 seed panel title에 `obs peak bracket: q95-q99` 같은 짧은 annotation을 붙여, 해당 hydrograph의 관측 peak가 Model 2 quantile ladder 중 어느 구간에 놓이는지 바로 확인할 수 있게 했다. 따라서 aggregate table에서 보인 “upper quantile은 under-deficit을 줄이지만 false-positive tradeoff가 있다”는 해석을 실제 hydrograph 모양으로 확인할 수 있다.

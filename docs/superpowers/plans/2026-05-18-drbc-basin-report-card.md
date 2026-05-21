@@ -17,7 +17,7 @@ scripts/model/overall/
 ├── compute_drbc_basin_report_card_data.py   (신규)
 └── plot_drbc_basin_report_cards.py          (신규)
 
-output/model_analysis/overall_analysis/main_comparison/drbc_basin_report_cards/
+output/model_analysis/legacy/overall_analysis/main_comparison/drbc_basin_report_cards/
 ├── tables/
 │   ├── flow_regime_performance.csv
 │   ├── seasonal_performance.csv
@@ -46,10 +46,10 @@ output/model_analysis/overall_analysis/main_comparison/drbc_basin_report_cards/
 
 | 파일 | 내용 |
 |------|------|
-| `output/model_analysis/quantile_analysis/required_series/seed{s}/epoch{e}_required_series.csv` | columns: seed, basin, model1_epoch, model2_epoch, datetime, obs, model1, q50, q90, q95, q99 |
+| `output/model_analysis/legacy/quantile_analysis/required_series/seed{s}/epoch{e}_required_series.csv` | columns: seed, basin, model1_epoch, model2_epoch, datetime, obs, model1, q50, q90, q95, q99 |
 | `output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_basin_analysis_table.csv` | columns: gauge_id, gauge_name, drain_sqkm_attr, lat_gage, ... (154행, 38개만 사용) |
-| `output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv` | columns: basin, model, seed, epoch, NSE, KGE, ... (basin ID 추출용) |
-| `output/model_analysis/overall_analysis/main_comparison/drbc_attribute_metric_correlations/within_basin/tables/within_basin_rho_table.csv` | columns: basin, within_m1_bias_rho, ... (그림 제목용) |
+| `output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv` | columns: basin, model, seed, epoch, NSE, KGE, ... (basin ID 추출용) |
+| `output/model_analysis/legacy/overall_analysis/main_comparison/drbc_attribute_metric_correlations/within_basin/tables/within_basin_rho_table.csv` | columns: basin, within_m1_bias_rho, ... (그림 제목용) |
 
 Primary epochs: seed111→(m1:25, m2:5), seed222→(m1:10, m2:10), seed444→(m1:15, m2:10)
 
@@ -95,10 +95,10 @@ Q_BIN_LABELS = ["Q0-Q50", "Q50-Q90", "Q90-Q99", "Q99+"]
 SEASONS = {"DJF": [12, 1, 2], "MAM": [3, 4, 5],
            "JJA": [6, 7, 8], "SON": [9, 10, 11]}
 
-SERIES_ROOT  = Path("output/model_analysis/quantile_analysis/required_series")
+SERIES_ROOT  = Path("output/model_analysis/legacy/quantile_analysis/required_series")
 ATTR_FILE    = Path("output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_basin_analysis_table.csv")
-METRICS_FILE = Path("output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv")
-OUTPUT_ROOT  = Path("output/model_analysis/overall_analysis/main_comparison/drbc_basin_report_cards")
+METRICS_FILE = Path("output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv")
+OUTPUT_ROOT  = Path("output/model_analysis/legacy/overall_analysis/main_comparison/drbc_basin_report_cards")
 
 FEATURE_COLS = [
     "drain_sqkm_attr", "log10_area", "frac_snow", "p_seasonality",
@@ -812,7 +812,7 @@ tail -20 /tmp/compute_log.txt
 Expected: 에러 없이 완료, 7개 CSV 파일 생성 확인
 
 ```bash
-ls -lh output/model_analysis/overall_analysis/main_comparison/drbc_basin_report_cards/tables/
+ls -lh output/model_analysis/legacy/overall_analysis/main_comparison/drbc_basin_report_cards/tables/
 ```
 Expected: 7개 파일 모두 존재, 각각 > 1KB
 
@@ -857,12 +857,12 @@ import pandas as pd
 logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
 log = logging.getLogger(__name__)
 
-DATA_ROOT   = Path("output/model_analysis/overall_analysis/main_comparison/drbc_basin_report_cards")
-SERIES_ROOT = Path("output/model_analysis/quantile_analysis/required_series")
+DATA_ROOT   = Path("output/model_analysis/legacy/overall_analysis/main_comparison/drbc_basin_report_cards")
+SERIES_ROOT = Path("output/model_analysis/legacy/quantile_analysis/required_series")
 ATTR_FILE   = Path("output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_basin_analysis_table.csv")
-WITHIN_FILE = Path("output/model_analysis/overall_analysis/main_comparison"
+WITHIN_FILE = Path("output/model_analysis/legacy/overall_analysis/main_comparison"
                    "/drbc_attribute_metric_correlations/within_basin/tables/within_basin_rho_table.csv")
-METRICS_FILE= Path("output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv")
+METRICS_FILE= Path("output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv")
 
 Q_BIN_LABELS = ["Q0-Q50", "Q50-Q90", "Q90-Q99", "Q99+"]
 SEASON_ORDER = ["DJF", "MAM", "JJA", "SON"]
@@ -1208,7 +1208,7 @@ if __name__ == "__main__":
 ```bash
 export PATH="/opt/homebrew/bin:$PATH"
 uv run scripts/model/overall/plot_drbc_basin_report_cards.py 2>&1
-ls output/model_analysis/overall_analysis/main_comparison/drbc_basin_report_cards/figures/report_cards/
+ls output/model_analysis/legacy/overall_analysis/main_comparison/drbc_basin_report_cards/figures/report_cards/
 ```
 Expected: `{basin_id}_report_card.png` 1개 + panels/ 디렉토리에 8개 PNG
 
@@ -1411,9 +1411,9 @@ tail -10 /tmp/plot_log.txt
 Expected: 에러 없이 완료
 
 ```bash
-ls output/model_analysis/overall_analysis/main_comparison/drbc_basin_report_cards/figures/report_cards/ | wc -l
-ls output/model_analysis/overall_analysis/main_comparison/drbc_basin_report_cards/figures/report_cards/panels/ | wc -l
-ls output/model_analysis/overall_analysis/main_comparison/drbc_basin_report_cards/figures/cross_basin/
+ls output/model_analysis/legacy/overall_analysis/main_comparison/drbc_basin_report_cards/figures/report_cards/ | wc -l
+ls output/model_analysis/legacy/overall_analysis/main_comparison/drbc_basin_report_cards/figures/report_cards/panels/ | wc -l
+ls output/model_analysis/legacy/overall_analysis/main_comparison/drbc_basin_report_cards/figures/cross_basin/
 ```
 Expected: report_cards/ 38개, panels/ 304개(38×8), cross_basin/ 6개
 

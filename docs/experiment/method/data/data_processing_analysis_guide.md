@@ -427,7 +427,7 @@ bash scripts/runs/official/run_subset300_multiseed.sh
 
 # Model result analysis
 uv run scripts/model/overall/analyze_subset300_epoch_results.py
-uv run scripts/model/hydrograph/plot_subset300_hydrographs.py --epochs all --output-dir output/model_analysis/quantile_analysis
+uv run scripts/model/hydrograph/plot_subset300_hydrographs.py --epochs all --output-dir output/model_analysis/legacy/quantile_analysis
 uv run scripts/model/hydrograph/analyze_subset300_hydrograph_outputs.py
 uv run scripts/model/event_regime/analyze_subset300_event_regime_errors.py
 

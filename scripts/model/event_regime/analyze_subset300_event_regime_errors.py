@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 
 
-DEFAULT_INPUT_DIR = Path("output/model_analysis/quantile_analysis")
+DEFAULT_INPUT_DIR = Path("output/model_analysis/legacy/quantile_analysis")
 DEFAULT_EVENT_RESPONSE_CSV = Path("output/basin/all/analysis/event_response/tables/event_response_table.csv")
 DEFAULT_EVENT_LABELS_CSV = Path(
     "output/basin/all/analysis/event_regime/tables/selected_variant_event_labels.csv"

@@ -11,8 +11,8 @@
 주요 산출물은 아래에 있다.
 
 ```text
-output/model_analysis/quantile_analysis/event_regime_analysis/flood_relevance_tier_predictor_aggregate.csv
-output/model_analysis/quantile_analysis/event_regime_analysis/ml_event_regime_by_flood_tier_predictor_aggregate.csv
+output/model_analysis/legacy/quantile_analysis/event_regime_analysis/flood_relevance_tier_predictor_aggregate.csv
+output/model_analysis/legacy/quantile_analysis/event_regime_analysis/ml_event_regime_by_flood_tier_predictor_aggregate.csv
 ```
 
 ## Event 수

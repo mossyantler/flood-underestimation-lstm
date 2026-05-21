@@ -23,17 +23,17 @@ broad_non_natural_30
 기본 출력 위치는 아래다.
 
 ```text
-output/model_analysis/natural_broad_comparison/
+output/model_analysis/legacy/natural_broad_comparison/
 ```
 
 핵심 파일은 아래와 같다.
 
 ```text
-output/model_analysis/natural_broad_comparison/report/natural_broad_comparison_report.md
-output/model_analysis/natural_broad_comparison/tables/primary_overall_delta_by_cohort_aggregate.csv
-output/model_analysis/natural_broad_comparison/tables/primary_high_flow_predictor_by_cohort_aggregate.csv
-output/model_analysis/natural_broad_comparison/tables/event_regime_delta_by_cohort_aggregate.csv
-output/model_analysis/natural_broad_comparison/tables/extreme_rain_delta_by_cohort_aggregate.csv
+output/model_analysis/legacy/natural_broad_comparison/report/natural_broad_comparison_report.md
+output/model_analysis/legacy/natural_broad_comparison/tables/primary_overall_delta_by_cohort_aggregate.csv
+output/model_analysis/legacy/natural_broad_comparison/tables/primary_high_flow_predictor_by_cohort_aggregate.csv
+output/model_analysis/legacy/natural_broad_comparison/tables/event_regime_delta_by_cohort_aggregate.csv
+output/model_analysis/legacy/natural_broad_comparison/tables/extreme_rain_delta_by_cohort_aggregate.csv
 ```
 
 재현 스크립트는 아래다.

@@ -24,11 +24,11 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 
 DEFAULT_CORRELATION_DIR = (
     REPO_ROOT
-    / "output/model_analysis/overall_analysis/main_comparison/drbc_attribute_metric_correlations"
+    / "output/model_analysis/legacy/overall_analysis/main_comparison/drbc_attribute_metric_correlations"
 )
 DEFAULT_MEDIAN_DEVIATION_DIR = (
     REPO_ROOT
-    / "output/model_analysis/overall_analysis/main_comparison/attribute_correlations/median_deviation"
+    / "output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations/median_deviation"
 )
 DEFAULT_EVENT_RESPONSE_SUMMARY = (
     REPO_ROOT / "output/basin/drbc/analysis/event_response/tables/event_response_basin_summary.csv"
@@ -38,16 +38,16 @@ DEFAULT_EVENT_RESPONSE_TABLE = (
 )
 DEFAULT_STRESS_ERROR_TABLE = (
     REPO_ROOT
-    / "output/model_analysis/extreme_rain/primary/analysis/extreme_rain_stress_error_table_wide.csv"
+    / "output/model_analysis/legacy/extreme_rain/primary/analysis/extreme_rain_stress_error_table_wide.csv"
 )
 DEFAULT_STRESS_MANIFEST = (
-    REPO_ROOT / "output/model_analysis/extreme_rain/primary/event_simq_plots/event_simq_plot_manifest.csv"
+    REPO_ROOT / "output/model_analysis/legacy/extreme_rain/primary/event_simq_plots/event_simq_plot_manifest.csv"
 )
 DEFAULT_USGS_NOTE_DIR = REPO_ROOT / "docs/references/basin/usgs_station_notes"
-DEFAULT_BASIN_DISSECT_DIR = REPO_ROOT / "output/model_analysis/extreme_rain/primary/basin_dissect"
+DEFAULT_BASIN_DISSECT_DIR = REPO_ROOT / "output/model_analysis/legacy/extreme_rain/primary/basin_dissect"
 DEFAULT_OUTPUT_DIR = (
     REPO_ROOT
-    / "output/model_analysis/overall_analysis/main_comparison/individual_basin_diagnostics"
+    / "output/model_analysis/legacy/overall_analysis/main_comparison/individual_basin_diagnostics"
 )
 
 FEATURE_LABELS = {

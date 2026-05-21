@@ -14,7 +14,7 @@ import pandas as pd
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/paper_result_assets"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/legacy/paper_result_assets"
 PREDICTOR_ORDER = ["q50", "q90", "q95", "q99"]
 PREDICTOR_LABELS = {
     "q50": "Model 2 q50",
@@ -78,7 +78,7 @@ def _to_markdown(df: pd.DataFrame) -> str:
 
 
 def build_high_flow_compact_table(output_dir: Path) -> pd.DataFrame:
-    source = REPO_ROOT / "output/model_analysis/quantile_analysis/analysis/flow_strata_predictor_aggregate.csv"
+    source = REPO_ROOT / "output/model_analysis/legacy/quantile_analysis/analysis/flow_strata_predictor_aggregate.csv"
     df = pd.read_csv(source)
     keep_predictors = ["Model 1", "Model 2 q50", "Model 2 q95", "Model 2 q99"]
     table = df[
@@ -114,7 +114,7 @@ def build_high_flow_compact_table(output_dir: Path) -> pd.DataFrame:
 
 
 def save_event_regime_figure(output_dir: Path) -> pd.DataFrame:
-    source = REPO_ROOT / "output/model_analysis/quantile_analysis/event_regime_analysis/paired_delta_aggregate.csv"
+    source = REPO_ROOT / "output/model_analysis/legacy/quantile_analysis/event_regime_analysis/paired_delta_aggregate.csv"
     df = pd.read_csv(source)
     data = df[df["stratification"].eq("ml_event_regime") & df["predictor"].isin(PREDICTOR_ORDER)].copy()
     data["predictor"] = pd.Categorical(data["predictor"], categories=PREDICTOR_ORDER, ordered=True)
@@ -190,19 +190,19 @@ def _box_primary_panel(ax: plt.Axes, values: pd.Series, primary_value: float, ti
 
 
 def save_checkpoint_sensitivity_figure(output_dir: Path) -> pd.DataFrame:
-    flow = pd.read_csv(REPO_ROOT / "output/model_analysis/quantile_analysis/analysis/flow_strata_predictor_summary.csv")
-    gap = pd.read_csv(REPO_ROOT / "output/model_analysis/quantile_analysis/analysis/quantile_gap_summary.csv")
+    flow = pd.read_csv(REPO_ROOT / "output/model_analysis/legacy/quantile_analysis/analysis/flow_strata_predictor_summary.csv")
+    gap = pd.read_csv(REPO_ROOT / "output/model_analysis/legacy/quantile_analysis/analysis/quantile_gap_summary.csv")
     stress_delta_epoch = pd.read_csv(
-        REPO_ROOT / "output/model_analysis/extreme_rain/all/analysis/paired_delta_epoch_aggregate.csv"
+        REPO_ROOT / "output/model_analysis/legacy/extreme_rain/all/analysis/paired_delta_epoch_aggregate.csv"
     )
     stress_delta_primary = pd.read_csv(
-        REPO_ROOT / "output/model_analysis/extreme_rain/primary/analysis/paired_delta_aggregate.csv"
+        REPO_ROOT / "output/model_analysis/legacy/extreme_rain/primary/analysis/paired_delta_aggregate.csv"
     )
     stress_cohort_epoch = pd.read_csv(
-        REPO_ROOT / "output/model_analysis/extreme_rain/all/analysis/cohort_epoch_predictor_aggregate.csv"
+        REPO_ROOT / "output/model_analysis/legacy/extreme_rain/all/analysis/cohort_epoch_predictor_aggregate.csv"
     )
     stress_cohort_primary = pd.read_csv(
-        REPO_ROOT / "output/model_analysis/extreme_rain/primary/analysis/cohort_predictor_aggregate.csv"
+        REPO_ROOT / "output/model_analysis/legacy/extreme_rain/primary/analysis/cohort_predictor_aggregate.csv"
     )
 
     flow_same = flow[
@@ -302,10 +302,10 @@ def save_checkpoint_sensitivity_figure(output_dir: Path) -> pd.DataFrame:
 
 
 def select_representative_hydrograph_candidates(output_dir: Path) -> pd.DataFrame:
-    peaks = pd.read_csv(REPO_ROOT / "output/model_analysis/quantile_analysis/analysis/observed_peak_predictions.csv")
+    peaks = pd.read_csv(REPO_ROOT / "output/model_analysis/legacy/quantile_analysis/analysis/observed_peak_predictions.csv")
     peaks = peaks[peaks["comparison"].eq("primary")].copy()
     peaks["basin"] = peaks["basin"].astype(str).str.zfill(8)
-    manifest = pd.read_csv(REPO_ROOT / "output/model_analysis/quantile_analysis/hydrograph_plot_manifest.csv")
+    manifest = pd.read_csv(REPO_ROOT / "output/model_analysis/legacy/quantile_analysis/hydrograph_plot_manifest.csv")
     manifest["basin"] = manifest["basin"].astype(str).str.zfill(8)
     manifest = manifest[["seed", "basin", "model2_epoch", "plot_path"]].drop_duplicates()
     peaks = peaks.merge(manifest, on=["seed", "basin", "model2_epoch"], how="left")
@@ -425,13 +425,13 @@ def main() -> None:
     metadata = {
         "output_dir": _relative(output_dir),
         "sources": {
-            "flow_strata_predictor_aggregate": "output/model_analysis/quantile_analysis/analysis/flow_strata_predictor_aggregate.csv",
-            "flow_strata_predictor_summary": "output/model_analysis/quantile_analysis/analysis/flow_strata_predictor_summary.csv",
-            "quantile_gap_summary": "output/model_analysis/quantile_analysis/analysis/quantile_gap_summary.csv",
-            "event_regime_paired_delta": "output/model_analysis/quantile_analysis/event_regime_analysis/paired_delta_aggregate.csv",
-            "extreme_rain_all_delta_epoch": "output/model_analysis/extreme_rain/all/analysis/paired_delta_epoch_aggregate.csv",
-            "extreme_rain_primary_delta": "output/model_analysis/extreme_rain/primary/analysis/paired_delta_aggregate.csv",
-            "observed_peak_predictions": "output/model_analysis/quantile_analysis/analysis/observed_peak_predictions.csv",
+            "flow_strata_predictor_aggregate": "output/model_analysis/legacy/quantile_analysis/analysis/flow_strata_predictor_aggregate.csv",
+            "flow_strata_predictor_summary": "output/model_analysis/legacy/quantile_analysis/analysis/flow_strata_predictor_summary.csv",
+            "quantile_gap_summary": "output/model_analysis/legacy/quantile_analysis/analysis/quantile_gap_summary.csv",
+            "event_regime_paired_delta": "output/model_analysis/legacy/quantile_analysis/event_regime_analysis/paired_delta_aggregate.csv",
+            "extreme_rain_all_delta_epoch": "output/model_analysis/legacy/extreme_rain/all/analysis/paired_delta_epoch_aggregate.csv",
+            "extreme_rain_primary_delta": "output/model_analysis/legacy/extreme_rain/primary/analysis/paired_delta_aggregate.csv",
+            "observed_peak_predictions": "output/model_analysis/legacy/quantile_analysis/analysis/observed_peak_predictions.csv",
         },
         "outputs": {
             "high_flow_compact": _relative(output_dir / "tables/primary_high_flow_peak_compact.csv"),

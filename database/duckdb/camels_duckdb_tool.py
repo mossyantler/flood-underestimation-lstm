@@ -26,34 +26,34 @@ DEFAULT_ROOTS = [Path("output"), Path("configs"), Path("docs")]
 DEFAULT_PARQUET_ROOT = REPO_ROOT / "database/local/duckdb/parquet"
 
 CORE_VIEWS = {
-    "basin_metrics": Path("output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv"),
+    "basin_metrics": Path("output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv"),
     "primary_epoch_basin_deltas": Path(
-        "output/model_analysis/overall_analysis/main_comparison/tables/primary_epoch_basin_deltas.csv"
+        "output/model_analysis/legacy/overall_analysis/main_comparison/tables/primary_epoch_basin_deltas.csv"
     ),
     "expanded_drbc_primary_summary": Path(
-        "output/model_analysis/expanded_drbc_test/tables/primary_summary_by_seed.csv"
+        "output/model_analysis/expanded/expanded_drbc_test/tables/primary_summary_by_seed.csv"
     ),
     "expanded_drbc_manifest": Path("configs/basin_splits/drbc_expanded_observed_test/manifest.csv"),
-    "basin_membership": Path("output/model_analysis/natural_broad_comparison/tables/basin_membership.csv"),
+    "basin_membership": Path("output/model_analysis/legacy/natural_broad_comparison/tables/basin_membership.csv"),
     "extreme_rain_event_catalog": Path(
-        "output/model_analysis/extreme_rain/primary/exposure/extreme_rain_event_catalog.csv"
+        "output/model_analysis/legacy/extreme_rain/primary/exposure/extreme_rain_event_catalog.csv"
     ),
     "extreme_rain_stress_long_primary": Path(
-        "output/model_analysis/extreme_rain/primary/analysis/extreme_rain_stress_error_table_long.csv"
+        "output/model_analysis/legacy/extreme_rain/primary/analysis/extreme_rain_stress_error_table_long.csv"
     ),
-    "nws_flood_stage_coverage": Path("output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv"),
-    "nws_coverage_bias": Path("output/model_analysis/confirmed_flood/coverage/coverage_bias_report.csv"),
-    "drbc_confirmed_flood_events": Path("output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv"),
-    "drbc_confirmed_flood_performance": Path("output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv"),
+    "nws_flood_stage_coverage": Path("output/model_analysis/expanded/confirmed_flood/coverage/nws_flood_stage_coverage.csv"),
+    "nws_coverage_bias": Path("output/model_analysis/expanded/confirmed_flood/coverage/coverage_bias_report.csv"),
+    "drbc_confirmed_flood_events": Path("output/model_analysis/expanded/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv"),
+    "drbc_confirmed_flood_performance": Path("output/model_analysis/expanded/confirmed_flood/performance/drbc_confirmed_flood_performance.csv"),
     "drbc_confirmed_flood_hydrograph_manifest": Path(
-        "output/model_analysis/confirmed_flood/hydrographs/confirmed_flood_hydrograph_manifest.csv"
+        "output/model_analysis/expanded/confirmed_flood/hydrographs/confirmed_flood_hydrograph_manifest.csv"
     ),
 }
 
 RUN_TEST_METRICS_GLOB = "runs/subset_comparison/**/test/model_epoch*/test_metrics.csv"
 OBS_TIMESERIES_GLOB = "data/CAMELSH_generic/drbc_holdout_broad/time_series_csv/*.csv"
-QUANTILE_REQUIRED_SERIES_GLOB = "output/model_analysis/quantile_analysis/required_series/**/*.csv"
-QUANTILE_EXPORTS_GLOB = "output/model_analysis/quantile_analysis/quantile_exports/*.csv"
+QUANTILE_REQUIRED_SERIES_GLOB = "output/model_analysis/legacy/quantile_analysis/required_series/**/*.csv"
+QUANTILE_EXPORTS_GLOB = "output/model_analysis/legacy/quantile_analysis/quantile_exports/*.csv"
 GAGES_ATTRIBUTES_GLOB = "basins/CAMELSH_data/attributes/*.csv"
 
 

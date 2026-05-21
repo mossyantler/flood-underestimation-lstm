@@ -23,9 +23,9 @@ import numpy as np
 import pandas as pd
 
 
-DEFAULT_INPUT_DIR = Path("output/model_analysis/extreme_rain/primary/inference")
-DEFAULT_COHORT_CSV = Path("output/model_analysis/extreme_rain/primary/exposure/drbc_historical_stress_cohort.csv")
-DEFAULT_OUTPUT_DIR = Path("output/model_analysis/extreme_rain/primary/analysis")
+DEFAULT_INPUT_DIR = Path("output/model_analysis/legacy/extreme_rain/primary/inference")
+DEFAULT_COHORT_CSV = Path("output/model_analysis/legacy/extreme_rain/primary/exposure/drbc_historical_stress_cohort.csv")
+DEFAULT_OUTPUT_DIR = Path("output/model_analysis/legacy/extreme_rain/primary/analysis")
 
 PRIMARY_EPOCHS = {
     111: (25, 5),

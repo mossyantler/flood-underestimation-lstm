@@ -21,7 +21,7 @@ flowchart TD
 이번에 새로 만든 산출물은 아래 위치에 있다.
 
 ```text
-output/model_analysis/quantile_analysis/
+output/model_analysis/legacy/quantile_analysis/
 ```
 
 여기에는 모든 validation checkpoint `005 / 010 / 015 / 020 / 025 / 030`에 대한 hydrograph 그림과 `q50/q90/q95/q99` 시계열이 들어 있다.
@@ -98,7 +98,7 @@ Model 2의 장점은 q50 중앙선이 아니라 q95/q99 upper-tail 출력에서 
 이번 분석은 chart 3개를 만들었다.
 
 ```text
-output/model_analysis/quantile_analysis/analysis/charts/
+output/model_analysis/legacy/quantile_analysis/analysis/charts/
 ```
 
 `top1_underestimation_fraction_by_epoch.png`는 상위 1% 유량에서 모델이 얼마나 자주 낮게 예측했는지 보여준다. y축이 낮을수록 좋다. 이 그림에서 `q95/q99`가 Model 1보다 낮으면 upper quantile이 홍수 과소추정을 줄인다는 뜻이다.

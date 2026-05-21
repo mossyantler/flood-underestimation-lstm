@@ -20,17 +20,17 @@ import pandas as pd
 
 
 DEFAULT_EVENT_MANIFEST = Path(
-    "output/model_analysis/extreme_rain/primary/event_plots/event_plot_manifest.csv"
+    "output/model_analysis/legacy/extreme_rain/primary/event_plots/event_plot_manifest.csv"
 )
 DEFAULT_COHORT_CSV = Path(
-    "output/model_analysis/extreme_rain/primary/exposure/drbc_historical_stress_cohort.csv"
+    "output/model_analysis/legacy/extreme_rain/primary/exposure/drbc_historical_stress_cohort.csv"
 )
 DEFAULT_STRESS_LONG_CSV = Path(
-    "output/model_analysis/extreme_rain/primary/analysis/extreme_rain_stress_error_table_long.csv"
+    "output/model_analysis/legacy/extreme_rain/primary/analysis/extreme_rain_stress_error_table_long.csv"
 )
-DEFAULT_SERIES_DIR = Path("output/model_analysis/extreme_rain/primary/inference/required_series")
+DEFAULT_SERIES_DIR = Path("output/model_analysis/legacy/extreme_rain/primary/inference/required_series")
 DEFAULT_DATA_DIR = Path("data/CAMELSH_generic/drbc_holdout_broad/time_series")
-DEFAULT_OUTPUT_DIR = Path("output/model_analysis/extreme_rain/primary/event_simq_plots")
+DEFAULT_OUTPUT_DIR = Path("output/model_analysis/legacy/extreme_rain/primary/event_simq_plots")
 DEFAULT_SEEDS = [111, 222, 444]
 TIME_COLUMNS = [
     "rain_start",

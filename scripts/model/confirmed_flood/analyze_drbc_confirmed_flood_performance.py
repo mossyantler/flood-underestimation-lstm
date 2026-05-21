@@ -10,8 +10,8 @@
 
 inference CSV에서 tier-stratified 집계와 Model 1 vs Model 2 paired delta를 계산한다.
 
-입력: output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv
-출력: output/model_analysis/confirmed_flood/analysis/
+입력: output/model_analysis/expanded/confirmed_flood/performance/drbc_confirmed_flood_performance.csv
+출력: output/model_analysis/expanded/confirmed_flood/analysis/
 """
 from __future__ import annotations
 
@@ -25,8 +25,8 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_PERF_CSV = ROOT / "output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv"
-DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/confirmed_flood/analysis"
+DEFAULT_PERF_CSV = ROOT / "output/model_analysis/expanded/confirmed_flood/performance/drbc_confirmed_flood_performance.csv"
+DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/expanded/confirmed_flood/analysis"
 TIERS = ["minor", "moderate", "major"]
 QUANTILE_ORDER = ["det", "q50", "q90", "q95", "q99"]
 

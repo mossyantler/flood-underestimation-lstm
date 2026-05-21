@@ -25,10 +25,10 @@ import matplotlib.pyplot as plt
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_ATTRIBUTE_ROOT = (
-    REPO_ROOT / "output/model_analysis/overall_analysis/main_comparison/attribute_correlations"
+    REPO_ROOT / "output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations"
 )
 DEFAULT_OBS_STATS = (
-    REPO_ROOT / "output/model_analysis/overall_analysis/result_checks/outlier_checks/test_observed_streamflow_stats.csv"
+    REPO_ROOT / "output/model_analysis/legacy/overall_analysis/result_checks/outlier_checks/test_observed_streamflow_stats.csv"
 )
 DEFAULT_EVENT_RESPONSE_SUMMARY = (
     REPO_ROOT / "output/basin/drbc/analysis/event_response/tables/event_response_basin_summary.csv"

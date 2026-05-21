@@ -16,8 +16,8 @@ import pandas as pd
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_INPUT_DIR = REPO_ROOT / "output/model_analysis/quantile_analysis"
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/probabilistic_diagnostics"
+DEFAULT_INPUT_DIR = REPO_ROOT / "output/model_analysis/legacy/quantile_analysis"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/legacy/probabilistic_diagnostics"
 SERIES_RE = re.compile(r"seed(?P<seed>\d+)/epoch(?P<epoch>\d{3})_required_series\.csv$")
 PRIMARY_EPOCHS = {
     111: (25, 5),

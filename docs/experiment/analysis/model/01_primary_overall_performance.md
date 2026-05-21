@@ -13,7 +13,7 @@
 주요 산출물은 아래에 있다.
 
 ```text
-output/model_analysis/overall_analysis/main_comparison/
+output/model_analysis/legacy/overall_analysis/main_comparison/
 ```
 
 `epoch_sensitivity/`는 같은 전체 성능 계열이지만 primary 결론을 정하는 폴더가 아니다. Primary table과 figure는 `main_comparison/`, all-epoch 보조 분석은 `epoch_sensitivity/`에서 읽는다.
@@ -57,23 +57,23 @@ Epoch 번호가 서로 달라도 문제는 아니다. 두 모델 모두 test를 
 
 아래 chart들은 문서에서 직접 참조할 수 있다. 다만 모든 chart의 해석 지위가 같은 것은 아니다. `primary_epoch_basin_deltas.png`가 primary paired comparison을 가장 직접적으로 보여주고, 나머지는 training/checkpoint/sensitivity 맥락을 설명하는 보조 chart다.
 
-![Training loss by epoch](../../../../output/model_analysis/overall_analysis/epoch_sensitivity/figures/training_loss_by_epoch.png)
+![Training loss by epoch](../../../../output/model_analysis/legacy/overall_analysis/epoch_sensitivity/figures/training_loss_by_epoch.png)
 
 Figure 01a. `training_loss_by_epoch.png`는 seed와 model별 training loss 흐름을 확인하는 QA chart다. 이 그림은 모델이 학습 중 비정상적으로 튀었는지, 특정 seed가 다른 seed와 완전히 다른 loss trajectory를 보이는지 확인하는 데 쓴다. 논문 성능 주장의 직접 근거는 아니며, primary checkpoint 성능은 validation/test metric과 paired delta로 판단한다.
 
-![Validation epoch median metrics](../../../../output/model_analysis/overall_analysis/epoch_sensitivity/figures/validation_epoch_median_metrics.png)
+![Validation epoch median metrics](../../../../output/model_analysis/legacy/overall_analysis/epoch_sensitivity/figures/validation_epoch_median_metrics.png)
 
 Figure 01b. `validation_epoch_median_metrics.png`는 primary epoch가 test 결과가 아니라 validation metric을 기준으로 선택되었다는 점을 설명할 때 사용한다. 여기서 핵심은 validation median NSE를 기준으로 checkpoint를 잠갔다는 절차적 정당성이다. Validation chart를 보고 test 성능이 좋은 epoch를 새로 고르는 방식으로 해석하면 안 된다.
 
-![Test epoch median metrics](../../../../output/model_analysis/overall_analysis/epoch_sensitivity/figures/test_epoch_median_metrics.png)
+![Test epoch median metrics](../../../../output/model_analysis/legacy/overall_analysis/epoch_sensitivity/figures/test_epoch_median_metrics.png)
 
 Figure 01c. `test_epoch_median_metrics.png`는 test set에서 epoch별 median metric이 어떻게 움직이는지 보여주는 descriptive chart다. Primary epoch가 test metric 곡선의 최고점인지 확인하는 용도가 아니라, primary 결과가 test epoch sweep 안에서 극단적으로 특이한지 확인하는 보조 진단으로 읽는다. 이 chart에서 Model 2 `q50`의 NSE가 어느 정도 유지되어도, FHV나 Peak-MAPE가 같이 좋아졌다는 뜻은 아니다.
 
-![Test same-epoch delta summary](../../../../output/model_analysis/overall_analysis/epoch_sensitivity/figures/test_same_epoch_delta_summary.png)
+![Test same-epoch delta summary](../../../../output/model_analysis/legacy/overall_analysis/epoch_sensitivity/figures/test_same_epoch_delta_summary.png)
 
 Figure 01d. `test_same_epoch_delta_summary.png`는 같은 epoch 번호에서 Model 2 `q50`과 Model 1을 비교한 sensitivity chart다. 공식 primary comparison은 모델별 validation-best epoch를 쓰기 때문에 이 그림과 완전히 같은 비교 구조가 아니다. 따라서 이 chart는 “결론이 특정 primary checkpoint에만 의존하는가”를 보는 보조 근거로 사용하고, primary conclusion을 대체하지 않는다.
 
-![Primary epoch basin deltas](../../../../output/model_analysis/overall_analysis/main_comparison/figures/primary_epoch_basin_deltas.png)
+![Primary epoch basin deltas](../../../../output/model_analysis/legacy/overall_analysis/main_comparison/figures/primary_epoch_basin_deltas.png)
 
 Figure 01e. `primary_epoch_basin_deltas.png`가 이 문서에서 가장 중요한 comparison chart다. 각 metric의 basin-level paired delta 분포를 보여주므로, Model 2 `q50`이 같은 seed와 같은 basin에서 Model 1보다 어느 방향으로 움직였는지 확인할 수 있다. 다만 이 그림의 점들은 38개 DRBC basin이 3개 seed에 반복된 구조이므로, 114개 완전 독립 표본처럼 해석하지 않는다. 최종 문장은 seed별 `primary_epoch_delta_summary.csv`와 함께 읽어야 한다.
 

@@ -27,12 +27,12 @@ Model 2의 `q50`은 중앙예측선이다. Model 1과의 중앙예측 성능 비
 
 | 분석 | 주요 산출물 |
 | --- | --- |
-| Primary 전체 성능 / epoch metric box plot | `output/model_analysis/overall_analysis/main_comparison/`, `output/model_analysis/overall_analysis/epoch_sensitivity/figures/epoch_metric_boxplots/` (`metadata/epoch_metric_boxplots/`에 chart manifest) |
-| High-flow / peak | `output/model_analysis/quantile_analysis/analysis/` |
-| Event-regime | `output/model_analysis/quantile_analysis/event_regime_analysis/` |
-| Event-level surrogate SHAP | `output/model_analysis/quantile_analysis/event_surrogate_shap/` |
-| Extreme-rain stress | `output/model_analysis/extreme_rain/primary/` |
-| Extreme-rain all-epoch sensitivity | `output/model_analysis/extreme_rain/all/` |
+| Primary 전체 성능 / epoch metric box plot | `output/model_analysis/legacy/overall_analysis/main_comparison/`, `output/model_analysis/legacy/overall_analysis/epoch_sensitivity/figures/epoch_metric_boxplots/` (`metadata/epoch_metric_boxplots/`에 chart manifest) |
+| High-flow / peak | `output/model_analysis/legacy/quantile_analysis/analysis/` |
+| Event-regime | `output/model_analysis/legacy/quantile_analysis/event_regime_analysis/` |
+| Event-level surrogate SHAP | `output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/` |
+| Extreme-rain stress | `output/model_analysis/legacy/extreme_rain/primary/` |
+| Extreme-rain all-epoch sensitivity | `output/model_analysis/legacy/extreme_rain/all/` |
 | Event suppression / managed-flow diagnosis | `docs/experiment/analysis/model/09_event_suppression_diagnosis_protocol.md` |
-| Broad vs Natural robustness | `output/model_analysis/natural_broad_comparison/` |
-| Probabilistic calibration / pinball | `output/model_analysis/probabilistic_diagnostics/` |
+| Broad vs Natural robustness | `output/model_analysis/legacy/natural_broad_comparison/` |
+| Probabilistic calibration / pinball | `output/model_analysis/legacy/probabilistic_diagnostics/` |

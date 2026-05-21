@@ -2,7 +2,7 @@
 
 **날짜**: 2026-05-18  
 **스크립트**: `scripts/model/overall/analyze_drbc_basin_attribute_metric_correlations.py`  
-**출력 루트**: `output/model_analysis/overall_analysis/main_comparison/drbc_attribute_metric_correlations/`
+**출력 루트**: `output/model_analysis/legacy/overall_analysis/main_comparison/drbc_attribute_metric_correlations/`
 
 ---
 
@@ -17,10 +17,10 @@
 | 역할 | 파일 경로 |
 |------|----------|
 | 유역 특성 | `output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_basin_analysis_table.csv` |
-| 결정론적 지표 (절댓값) | `output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv` |
-| Paired delta (M2−M1) | `output/model_analysis/overall_analysis/main_comparison/tables/primary_epoch_basin_deltas.csv` |
-| Primary epoch 매핑 | `output/model_analysis/overall_analysis/main_comparison/tables/primary_epoch_summary.csv` |
-| Raw quantile series | `output/model_analysis/quantile_analysis/required_series/seed{s}/epoch{e}_required_series.csv` |
+| 결정론적 지표 (절댓값) | `output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv` |
+| Paired delta (M2−M1) | `output/model_analysis/legacy/overall_analysis/main_comparison/tables/primary_epoch_basin_deltas.csv` |
+| Primary epoch 매핑 | `output/model_analysis/legacy/overall_analysis/main_comparison/tables/primary_epoch_summary.csv` |
+| Raw quantile series | `output/model_analysis/legacy/quantile_analysis/required_series/seed{s}/epoch{e}_required_series.csv` |
 
 Primary epoch 매핑으로 올바른 seed × epoch 조합만 로딩한다 (seed 111→epoch 25/5, 222→10/10, 444→15/10).  
 공식 seeds: 111, 222, 444 (seed 333 제외).

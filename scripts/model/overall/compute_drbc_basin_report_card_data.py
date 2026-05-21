@@ -30,10 +30,10 @@ Q_BIN_LABELS = ["Q0-Q50", "Q50-Q90", "Q90-Q99", "Q99+"]
 SEASONS = {"DJF": [12, 1, 2], "MAM": [3, 4, 5],
            "JJA": [6, 7, 8], "SON": [9, 10, 11]}
 
-SERIES_ROOT  = Path("output/model_analysis/quantile_analysis/required_series")
+SERIES_ROOT  = Path("output/model_analysis/legacy/quantile_analysis/required_series")
 ATTR_FILE    = Path("output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_basin_analysis_table.csv")
-METRICS_FILE = Path("output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv")
-OUTPUT_ROOT  = Path("output/model_analysis/overall_analysis/main_comparison/drbc_basin_report_cards")
+METRICS_FILE = Path("output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv")
+OUTPUT_ROOT  = Path("output/model_analysis/legacy/overall_analysis/main_comparison/drbc_basin_report_cards")
 
 FEATURE_COLS = [
     "drain_sqkm_attr", "log10_area", "frac_snow", "p_seasonality",

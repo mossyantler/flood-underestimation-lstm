@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$ROOT_DIR"
 
 LOG_DIR="${LOG_DIR:-logs}"
-OUTPUT_DIR="${OUTPUT_DIR:-output/model_analysis/expanded_drbc_test}"
+OUTPUT_DIR="${OUTPUT_DIR:-output/model_analysis/expanded/expanded_drbc_test}"
 DATA_DIR="${DATA_DIR:-data/CAMELSH_generic/drbc_expanded_observed_test}"
 BASIN_FILE="${BASIN_FILE:-$DATA_DIR/splits/test.txt}"
 RUN_ROOT="${RUN_ROOT:-runs/subset_comparison}"

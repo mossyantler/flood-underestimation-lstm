@@ -25,7 +25,7 @@ import xarray as xr
 DEFAULT_DATA_DIR = Path("data/CAMELSH_generic/drbc_holdout_broad/time_series")
 DEFAULT_SPLIT_DIR = Path("configs/pilot/basin_splits/scaling_300")
 DEFAULT_RETURN_PERIOD_CSV = Path("output/basin/all/analysis/return_period/tables/return_period_reference_table.csv")
-DEFAULT_OUTPUT_DIR = Path("output/model_analysis/extreme_rain/primary/exposure")
+DEFAULT_OUTPUT_DIR = Path("output/model_analysis/legacy/extreme_rain/primary/exposure")
 
 PRECIP_DURATIONS = (1, 6, 24, 72)
 PRECIP_PERIODS = (25, 50, 100)

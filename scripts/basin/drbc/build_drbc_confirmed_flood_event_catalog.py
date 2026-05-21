@@ -34,11 +34,11 @@ import xarray as xr
 
 ROOT = Path(__file__).resolve().parents[3]
 
-DEFAULT_COVERAGE_CSV = ROOT / "output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv"
+DEFAULT_COVERAGE_CSV = ROOT / "output/model_analysis/expanded/confirmed_flood/coverage/nws_flood_stage_coverage.csv"
 DEFAULT_DATA_DIR = ROOT / "data/CAMELSH_generic/drbc_holdout_broad/time_series"
 DEFAULT_RAW_DIR = ROOT / "basins/CAMELSH_data/hourly_observed/netcdf"
-DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/confirmed_flood/catalog"
-DEFAULT_NOAA_CACHE = ROOT / "output/model_analysis/confirmed_flood/noaa_cache"
+DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/expanded/confirmed_flood/catalog"
+DEFAULT_NOAA_CACHE = ROOT / "output/model_analysis/expanded/confirmed_flood/noaa_cache"
 
 NOAA_BASE_URL = "https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/"
 NOAA_FLOOD_TYPES = {"Flood", "Flash Flood", "Coastal Flood"}

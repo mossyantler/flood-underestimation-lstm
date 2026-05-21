@@ -29,13 +29,13 @@ from shapely.validation import make_valid
 
 
 DEFAULT_EVENT_MANIFEST = Path(
-    "output/model_analysis/extreme_rain/primary/event_plots/event_plot_manifest.csv"
+    "output/model_analysis/legacy/extreme_rain/primary/event_plots/event_plot_manifest.csv"
 )
 DEFAULT_SIMQ_EVENT_MANIFEST = Path(
-    "output/model_analysis/extreme_rain/primary/event_simq_plots/event_simq_plot_manifest.csv"
+    "output/model_analysis/legacy/extreme_rain/primary/event_simq_plots/event_simq_plot_manifest.csv"
 )
 DEFAULT_TIER_PROFILE = Path(
-    "output/model_analysis/overall_analysis/main_comparison/"
+    "output/model_analysis/legacy/overall_analysis/main_comparison/"
     "attribute_correlations/median_deviation/tables/"
     "metric_median_deviation_basin_tier_profile.csv"
 )
@@ -43,7 +43,7 @@ DEFAULT_DRBC_SELECTED = Path("output/basin/drbc/basin_define/camelsh_drbc_select
 DEFAULT_CAMELSH_SHAPEFILE = Path("basins/CAMELSH_data/shapefiles/CAMELSH_shapefile.shp")
 DEFAULT_DRBC_BOUNDARY = Path("basins/drbc_boundary/drb_bnd_polygon.shp")
 DEFAULT_OUTPUT_HTML = Path(
-    "output/model_analysis/extreme_rain/primary/event_plot_median_map_index.html"
+    "output/model_analysis/legacy/extreme_rain/primary/event_plot_median_map_index.html"
 )
 MAP_CRS = "EPSG:5070"
 BASIN_FALLBACK_CRS = "EPSG:4326"

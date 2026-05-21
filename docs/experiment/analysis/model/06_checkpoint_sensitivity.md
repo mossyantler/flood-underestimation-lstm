@@ -9,17 +9,17 @@
 완료에 가깝다. 세 종류의 sensitivity 산출물이 있다.
 
 ```text
-output/model_analysis/overall_analysis/epoch_sensitivity/
-output/model_analysis/quantile_analysis/
-output/model_analysis/extreme_rain/all/
+output/model_analysis/legacy/overall_analysis/epoch_sensitivity/
+output/model_analysis/legacy/quantile_analysis/
+output/model_analysis/legacy/extreme_rain/all/
 ```
 
 추가로 primary result가 all-validation-epoch distribution 안에서 어디에 위치하는지 보여주는 compact table과 figure를 생성했다.
 
 ```text
-output/model_analysis/overall_analysis/epoch_sensitivity/tables/checkpoint_sensitivity_compact_metrics.csv
-output/model_analysis/overall_analysis/epoch_sensitivity/tables/checkpoint_sensitivity_compact_summary.csv
-output/model_analysis/overall_analysis/epoch_sensitivity/figures/checkpoint_compact/checkpoint_sensitivity_compact_summary.png
+output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/checkpoint_sensitivity_compact_metrics.csv
+output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/checkpoint_sensitivity_compact_summary.csv
+output/model_analysis/legacy/overall_analysis/epoch_sensitivity/figures/checkpoint_compact/checkpoint_sensitivity_compact_summary.png
 ```
 
 ## 분석 단위
@@ -35,12 +35,12 @@ Epoch metric sweep에는 `epoch_sensitivity/tables/test_same_epoch_delta_summary
 주요 chart는 아래에 있다.
 
 ```text
-output/model_analysis/overall_analysis/epoch_sensitivity/figures/test_same_epoch_delta_summary.png
-output/model_analysis/overall_analysis/epoch_sensitivity/figures/epoch_metric_boxplots/
-output/model_analysis/overall_analysis/epoch_sensitivity/metadata/epoch_metric_boxplots/
-output/model_analysis/quantile_analysis/analysis/charts/q99_exceedance_underestimation_fraction_by_epoch.png
-output/model_analysis/quantile_analysis/analysis/charts/q99_exceedance_q99_q50_gap_pct_obs_by_epoch.png
-output/model_analysis/overall_analysis/epoch_sensitivity/figures/checkpoint_compact/checkpoint_sensitivity_compact_summary.png
+output/model_analysis/legacy/overall_analysis/epoch_sensitivity/figures/test_same_epoch_delta_summary.png
+output/model_analysis/legacy/overall_analysis/epoch_sensitivity/figures/epoch_metric_boxplots/
+output/model_analysis/legacy/overall_analysis/epoch_sensitivity/metadata/epoch_metric_boxplots/
+output/model_analysis/legacy/quantile_analysis/analysis/charts/q99_exceedance_underestimation_fraction_by_epoch.png
+output/model_analysis/legacy/quantile_analysis/analysis/charts/q99_exceedance_q99_q50_gap_pct_obs_by_epoch.png
+output/model_analysis/legacy/overall_analysis/epoch_sensitivity/figures/checkpoint_compact/checkpoint_sensitivity_compact_summary.png
 ```
 
 ## 현재 해석

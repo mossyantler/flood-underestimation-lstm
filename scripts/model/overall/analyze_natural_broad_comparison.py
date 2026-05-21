@@ -886,32 +886,32 @@ def main() -> int:
     parser.add_argument(
         "--basin-metrics-csv",
         type=Path,
-        default=Path("output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv"),
+        default=Path("output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv"),
     )
     parser.add_argument(
         "--primary-delta-csv",
         type=Path,
-        default=Path("output/model_analysis/overall_analysis/main_comparison/tables/primary_epoch_basin_deltas.csv"),
+        default=Path("output/model_analysis/legacy/overall_analysis/main_comparison/tables/primary_epoch_basin_deltas.csv"),
     )
     parser.add_argument(
         "--required-series-dir",
         type=Path,
-        default=Path("output/model_analysis/quantile_analysis/required_series"),
+        default=Path("output/model_analysis/legacy/quantile_analysis/required_series"),
     )
     parser.add_argument(
         "--event-regime-long-csv",
         type=Path,
-        default=Path("output/model_analysis/quantile_analysis/event_regime_analysis/event_regime_error_table_long.csv"),
+        default=Path("output/model_analysis/legacy/quantile_analysis/event_regime_analysis/event_regime_error_table_long.csv"),
     )
     parser.add_argument(
         "--extreme-rain-long-csv",
         type=Path,
-        default=Path("output/model_analysis/extreme_rain/primary/analysis/extreme_rain_stress_error_table_long.csv"),
+        default=Path("output/model_analysis/legacy/extreme_rain/primary/analysis/extreme_rain_stress_error_table_long.csv"),
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("output/model_analysis/natural_broad_comparison"),
+        default=Path("output/model_analysis/legacy/natural_broad_comparison"),
     )
     args = parser.parse_args()
 

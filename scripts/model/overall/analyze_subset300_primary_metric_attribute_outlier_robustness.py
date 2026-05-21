@@ -22,11 +22,11 @@ from scipy import stats
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_INPUT_ROOT = (
-    REPO_ROOT / "output/model_analysis/overall_analysis/main_comparison/attribute_correlations"
+    REPO_ROOT / "output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations"
 )
 DEFAULT_OUTPUT_DIR = DEFAULT_INPUT_ROOT / "robustness"
 DEFAULT_EXISTING_OUTLIER_SUMMARY = (
-    REPO_ROOT / "output/model_analysis/overall_analysis/result_checks/outlier_checks/outlier_basin_summary.csv"
+    REPO_ROOT / "output/model_analysis/legacy/overall_analysis/result_checks/outlier_checks/outlier_basin_summary.csv"
 )
 DEFAULT_STREAMFLOW_QUALITY = (
     REPO_ROOT / "output/basin/drbc/screening/drbc_streamflow_quality_table.csv"

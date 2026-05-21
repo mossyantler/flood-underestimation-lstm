@@ -20,7 +20,7 @@ from matplotlib import patheffects
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
 
-DEFAULT_OUTPUT_DIR = Path("output/model_analysis/overall_analysis/main_comparison/figures/model_architecture")
+DEFAULT_OUTPUT_DIR = Path("output/model_analysis/legacy/overall_analysis/main_comparison/figures/model_architecture")
 
 COLORS = {
     "background": "#fbfbf8",

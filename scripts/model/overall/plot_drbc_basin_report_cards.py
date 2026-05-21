@@ -24,12 +24,12 @@ import pandas as pd
 logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
 log = logging.getLogger(__name__)
 
-DATA_ROOT    = Path("output/model_analysis/overall_analysis/main_comparison/drbc_basin_report_cards")
-SERIES_ROOT  = Path("output/model_analysis/quantile_analysis/required_series")
+DATA_ROOT    = Path("output/model_analysis/legacy/overall_analysis/main_comparison/drbc_basin_report_cards")
+SERIES_ROOT  = Path("output/model_analysis/legacy/quantile_analysis/required_series")
 ATTR_FILE    = Path("output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_basin_analysis_table.csv")
-WITHIN_FILE  = Path("output/model_analysis/overall_analysis/main_comparison"
+WITHIN_FILE  = Path("output/model_analysis/legacy/overall_analysis/main_comparison"
                     "/drbc_attribute_metric_correlations/within_basin/tables/within_basin_rho_table.csv")
-METRICS_FILE = Path("output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv")
+METRICS_FILE = Path("output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv")
 
 Q_BIN_LABELS  = ["Q0-Q50", "Q50-Q90", "Q90-Q99", "Q99+"]
 SEASON_ORDER  = ["DJF", "MAM", "JJA", "SON"]

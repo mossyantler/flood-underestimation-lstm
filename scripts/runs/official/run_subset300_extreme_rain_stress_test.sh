@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-OUTPUT_ROOT="${OUTPUT_ROOT:-output/model_analysis/extreme_rain/primary}"
+OUTPUT_ROOT="${OUTPUT_ROOT:-output/model_analysis/legacy/extreme_rain/primary}"
 LOG_DIR="${LOG_DIR:-logs}"
 DEVICE="${DEVICE:-cuda:0}"
 SEEDS="${SEEDS:-111 222 444}"

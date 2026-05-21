@@ -29,12 +29,12 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_EVENT_TABLE = (
     REPO_ROOT
-    / "output/model_analysis/quantile_analysis/event_regime_analysis/event_regime_error_table_wide.csv"
+    / "output/model_analysis/legacy/quantile_analysis/event_regime_analysis/event_regime_error_table_wide.csv"
 )
 DEFAULT_STATIC_ATTRIBUTES = (
     REPO_ROOT / "data/CAMELSH_generic/drbc_holdout_broad/attributes/static_attributes.csv"
 )
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/quantile_analysis/event_surrogate_shap"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/legacy/quantile_analysis/event_surrogate_shap"
 
 HYDROMET_FEATURES = [
     "recent_1d_ratio",

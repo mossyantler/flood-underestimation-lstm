@@ -30,9 +30,9 @@ import pandas as pd
 import xarray as xr
 
 
-DEFAULT_COHORT_CSV = Path("output/model_analysis/extreme_rain/primary/exposure/drbc_historical_stress_cohort.csv")
+DEFAULT_COHORT_CSV = Path("output/model_analysis/legacy/extreme_rain/primary/exposure/drbc_historical_stress_cohort.csv")
 DEFAULT_DATA_DIR = Path("data/CAMELSH_generic/drbc_holdout_broad/time_series")
-DEFAULT_OUTPUT_DIR = Path("output/model_analysis/extreme_rain/primary/event_plots")
+DEFAULT_OUTPUT_DIR = Path("output/model_analysis/legacy/extreme_rain/primary/event_plots")
 DEFAULT_RETURN_PERIOD_CSV = Path("output/basin/all/analysis/return_period/tables/return_period_reference_table.csv")
 DEFAULT_BASIN_SCREENING_CSV = Path("output/basin/drbc/screening/drbc_provisional_screening_table.csv")
 DEFAULT_STREAMFLOW_QUALITY_CSV = Path("output/basin/drbc/screening/drbc_streamflow_quality_table.csv")

@@ -13,7 +13,7 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/analysis_dashboard"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/legacy/analysis_dashboard"
 
 ANALYSIS_GROUPS: list[dict[str, Any]] = [
     {
@@ -396,7 +396,7 @@ def fmt_count(value: Any) -> str:
 
 
 def count_unique_basin_reports() -> int:
-    root = REPO_ROOT / "output/model_analysis/extreme_rain/primary/basin_dissect"
+    root = REPO_ROOT / "output/model_analysis/legacy/extreme_rain/primary/basin_dissect"
     if not root.exists():
         return 0
     basins: set[str] = set()
@@ -410,16 +410,16 @@ def count_unique_basin_reports() -> int:
 
 
 def build_stats() -> dict[str, Any]:
-    overall_meta = read_json("output/model_analysis/overall_analysis/run_records/analysis_metadata.json")
+    overall_meta = read_json("output/model_analysis/legacy/overall_analysis/run_records/analysis_metadata.json")
     primary = read_json(
-        "output/model_analysis/extreme_rain/primary/analysis/analysis_summary.json"
+        "output/model_analysis/legacy/extreme_rain/primary/analysis/analysis_summary.json"
     )
     primary_exposure = read_json(
-        "output/model_analysis/extreme_rain/primary/exposure/analysis_summary.json"
+        "output/model_analysis/legacy/extreme_rain/primary/exposure/analysis_summary.json"
     )
-    event_regime = read_json("output/model_analysis/quantile_analysis/event_regime_analysis/analysis_summary.json")
-    probabilistic = read_json("output/model_analysis/probabilistic_diagnostics/analysis_metadata.json")
-    natural = read_json("output/model_analysis/natural_broad_comparison/metadata/analysis_metadata.json")
+    event_regime = read_json("output/model_analysis/legacy/quantile_analysis/event_regime_analysis/analysis_summary.json")
+    probabilistic = read_json("output/model_analysis/legacy/probabilistic_diagnostics/analysis_metadata.json")
+    natural = read_json("output/model_analysis/legacy/natural_broad_comparison/metadata/analysis_metadata.json")
     scaling = read_json("configs/pilot/basin_splits/scaling_pilot_summary.json")
     drbc_boundary = read_json("output/basin/drbc/basin_define/drbc_boundary_summary.json")
     drbc_quality = read_json("output/basin/drbc/screening/drbc_streamflow_quality_summary.json")
@@ -427,7 +427,7 @@ def build_stats() -> dict[str, Any]:
     all_regime = read_json("output/basin/all/analysis/event_regime/metadata/selected_variant_visual_summary.json")
     timeseries = read_json("output/basin/timeseries/basin_timeseries_coverage_metadata.json")
 
-    hydrograph_root = REPO_ROOT / "output/model_analysis/extreme_rain/primary/analysis"
+    hydrograph_root = REPO_ROOT / "output/model_analysis/legacy/extreme_rain/primary/analysis"
     hydrograph_png_count = sum(1 for path in hydrograph_root.glob("*_hydrograph/*.png"))
     hydrograph_gallery_count = sum(1 for path in hydrograph_root.glob("*_hydrograph/index.html"))
 
@@ -448,27 +448,27 @@ def build_stats() -> dict[str, Any]:
         "hydrograph_gallery_count": hydrograph_gallery_count,
         "basin_report_count": count_unique_basin_reports(),
         "station_note_count": max(count_files("docs/references/basin/usgs_station_notes", "*.md") - 1, 0),
-        "overall_files": count_files("output/model_analysis/overall_analysis"),
-        "quantile_files": count_files("output/model_analysis/quantile_analysis"),
+        "overall_files": count_files("output/model_analysis/legacy/overall_analysis"),
+        "quantile_files": count_files("output/model_analysis/legacy/quantile_analysis"),
         "extreme_rain_files": count_files("output/model_analysis/extreme_rain"),
-        "probabilistic_files": count_files("output/model_analysis/probabilistic_diagnostics"),
-        "natural_files": count_files("output/model_analysis/natural_broad_comparison"),
-        "paper_files": count_files("output/model_analysis/paper_result_assets"),
+        "probabilistic_files": count_files("output/model_analysis/legacy/probabilistic_diagnostics"),
+        "natural_files": count_files("output/model_analysis/legacy/natural_broad_comparison"),
+        "paper_files": count_files("output/model_analysis/legacy/paper_result_assets"),
         "basin_output_files": count_files("output/basin"),
         "hydrograph_manifest_rows": count_csv_rows(
-            "output/model_analysis/quantile_analysis/hydrograph_plot_manifest.csv"
+            "output/model_analysis/legacy/quantile_analysis/hydrograph_plot_manifest.csv"
         ),
         "flow_summary_rows": count_csv_rows(
-            "output/model_analysis/quantile_analysis/analysis/flow_strata_predictor_summary.csv"
+            "output/model_analysis/legacy/quantile_analysis/analysis/flow_strata_predictor_summary.csv"
         ),
         "observed_peak_rows": count_csv_rows(
-            "output/model_analysis/quantile_analysis/analysis/observed_peak_predictions.csv"
+            "output/model_analysis/legacy/quantile_analysis/analysis/observed_peak_predictions.csv"
         ),
         "runoff_ratio_files": count_files(
-            "output/model_analysis/extreme_rain/primary/analysis/runoff_ratio_diagnostics"
+            "output/model_analysis/legacy/extreme_rain/primary/analysis/runoff_ratio_diagnostics"
         ),
         "source_counts": csv_col_counts(
-            "output/model_analysis/extreme_rain/primary/analysis/runoff_ratio_diagnostics/"
+            "output/model_analysis/legacy/extreme_rain/primary/analysis/runoff_ratio_diagnostics/"
             "primary_stress_runoff_ratio_iqr_tier_basin_mapping.csv",
             "dominant_distance_label",
         ),
@@ -692,9 +692,9 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
             ],
             "outputs": [
                 link_item("docs/experiment/analysis/model/01_primary_overall_performance.md", "canonical analysis doc"),
-                link_item("output/model_analysis/overall_analysis/main_comparison/report/overall_performance_conclusion_strategy.md", "conclusion strategy"),
-                link_item("output/model_analysis/overall_analysis/main_comparison/tables/primary_epoch_basin_deltas.csv", "paired basin deltas"),
-                link_item("output/model_analysis/overall_analysis/main_comparison/figures/overall_conclusion/overall_conclusion_high_flow_quantiles.png", "high-flow quantile conclusion chart"),
+                link_item("output/model_analysis/legacy/overall_analysis/main_comparison/report/overall_performance_conclusion_strategy.md", "conclusion strategy"),
+                link_item("output/model_analysis/legacy/overall_analysis/main_comparison/tables/primary_epoch_basin_deltas.csv", "paired basin deltas"),
+                link_item("output/model_analysis/legacy/overall_analysis/main_comparison/figures/overall_conclusion/overall_conclusion_high_flow_quantiles.png", "high-flow quantile conclusion chart"),
             ],
             "sources": [
                 link_item("scripts/model/overall/analyze_subset300_epoch_results.py", "overall analyzer"),
@@ -711,16 +711,16 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
             "purpose": "Q90/Q95/Q99/Q99.9 exceedance와 observed peak hour에서 Model 2 q90/q95/q99가 peak underestimation을 줄이는지 봅니다.",
             "use": "현재 논문의 핵심 가설인 output design 효과를 뒷받침하는 중심 분석입니다.",
             "stats": [
-                ["required-series files", count_files("output/model_analysis/quantile_analysis/required_series", "*.csv")],
+                ["required-series files", count_files("output/model_analysis/legacy/quantile_analysis/required_series", "*.csv")],
                 ["hydrograph plots", stats["hydrograph_manifest_rows"]],
                 ["flow summary rows", stats["flow_summary_rows"]],
             ],
             "outputs": [
                 link_item("docs/experiment/analysis/model/02_primary_high_flow_peak_performance.md", "canonical analysis doc"),
-                link_item("output/model_analysis/quantile_analysis/analysis/research_interpretation_summary.md", "analysis summary"),
-                link_item("output/model_analysis/quantile_analysis/analysis/flow_strata_predictor_aggregate.csv", "flow strata aggregate"),
-                link_item("output/model_analysis/quantile_analysis/analysis/charts/primary_q99_and_peak_quantile_zone_by_seed.png", "primary q99 and peak zone chart"),
-                link_item("output/model_analysis/quantile_analysis/analysis/charts/primary_peak_relative_bias_by_seed.png", "peak relative bias chart"),
+                link_item("output/model_analysis/legacy/quantile_analysis/analysis/research_interpretation_summary.md", "analysis summary"),
+                link_item("output/model_analysis/legacy/quantile_analysis/analysis/flow_strata_predictor_aggregate.csv", "flow strata aggregate"),
+                link_item("output/model_analysis/legacy/quantile_analysis/analysis/charts/primary_q99_and_peak_quantile_zone_by_seed.png", "primary q99 and peak zone chart"),
+                link_item("output/model_analysis/legacy/quantile_analysis/analysis/charts/primary_peak_relative_bias_by_seed.png", "peak relative bias chart"),
             ],
             "sources": [
                 link_item("scripts/model/hydrograph/analyze_subset300_hydrograph_outputs.py", "hydrograph analyzer"),
@@ -737,16 +737,16 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
             "purpose": "Model 2 q50/q90/q95/q99의 pinball/AQS, all-hour one-sided calibration, high-flow conditional tail hit-rate, upper-tail spread를 진단합니다.",
             "use": "q99를 calibrated 99% interval처럼 과장하지 않도록 caveat와 calibration evidence를 제공합니다.",
             "stats": [
-                ["quantiles", ", ".join(read_json("output/model_analysis/probabilistic_diagnostics/analysis_metadata.json").get("quantiles", {}).keys())],
+                ["quantiles", ", ".join(read_json("output/model_analysis/legacy/probabilistic_diagnostics/analysis_metadata.json").get("quantiles", {}).keys())],
                 ["files", stats["probabilistic_files"]],
-                ["figures", count_files("output/model_analysis/probabilistic_diagnostics/figures", "*.png")],
+                ["figures", count_files("output/model_analysis/legacy/probabilistic_diagnostics/figures", "*.png")],
             ],
             "outputs": [
                 link_item("docs/experiment/analysis/model/08_probabilistic_calibration_pinball.md", "canonical analysis doc"),
-                link_item("output/model_analysis/probabilistic_diagnostics/report/probabilistic_diagnostics_report.md", "diagnostics report"),
-                link_item("output/model_analysis/probabilistic_diagnostics/quantile_pinball_summary.csv", "pinball summary"),
-                link_item("output/model_analysis/probabilistic_diagnostics/figures/primary_all_quantile_calibration.png", "all-hour calibration chart"),
-                link_item("output/model_analysis/probabilistic_diagnostics/figures/primary_pinball_by_stratum.png", "pinball by stratum chart"),
+                link_item("output/model_analysis/legacy/probabilistic_diagnostics/report/probabilistic_diagnostics_report.md", "diagnostics report"),
+                link_item("output/model_analysis/legacy/probabilistic_diagnostics/quantile_pinball_summary.csv", "pinball summary"),
+                link_item("output/model_analysis/legacy/probabilistic_diagnostics/figures/primary_all_quantile_calibration.png", "all-hour calibration chart"),
+                link_item("output/model_analysis/legacy/probabilistic_diagnostics/figures/primary_pinball_by_stratum.png", "pinball by stratum chart"),
             ],
             "sources": [
                 link_item("scripts/model/hydrograph/analyze_subset300_probabilistic_diagnostics.py", "probabilistic diagnostics generator"),
@@ -768,8 +768,8 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
             ],
             "outputs": [
                 link_item("docs/experiment/analysis/model/03_event_regime_performance.md", "canonical analysis doc"),
-                link_item("output/model_analysis/quantile_analysis/event_regime_analysis/event_regime_model_error_report.md", "event-regime report"),
-                link_item("output/model_analysis/quantile_analysis/event_regime_analysis/paired_delta_aggregate.csv", "paired delta aggregate"),
+                link_item("output/model_analysis/legacy/quantile_analysis/event_regime_analysis/event_regime_model_error_report.md", "event-regime report"),
+                link_item("output/model_analysis/legacy/quantile_analysis/event_regime_analysis/paired_delta_aggregate.csv", "paired delta aggregate"),
             ],
             "sources": [
                 link_item("scripts/model/event_regime/analyze_subset300_event_regime_errors.py", "event-regime analyzer"),
@@ -792,7 +792,7 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
             ],
             "outputs": [
                 link_item("docs/experiment/analysis/model/04_extreme_flood_proxy_performance.md", "canonical analysis doc"),
-                link_item("output/model_analysis/quantile_analysis/event_regime_analysis/flood_relevance_tier_predictor_aggregate.csv", "flood-tier aggregate"),
+                link_item("output/model_analysis/legacy/quantile_analysis/event_regime_analysis/flood_relevance_tier_predictor_aggregate.csv", "flood-tier aggregate"),
             ],
             "sources": [
                 link_item("scripts/model/event_regime/analyze_subset300_event_regime_errors.py", "event analyzer"),
@@ -815,8 +815,8 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
             ],
             "outputs": [
                 link_item("docs/experiment/analysis/model/05_extreme_rain_stress_test.md", "canonical analysis doc"),
-                link_item("output/model_analysis/extreme_rain/primary/analysis/extreme_rain_stress_test_report.md", "primary stress report"),
-                link_item("output/model_analysis/extreme_rain/primary/event_plot_median_map_index.html", "interactive median-map explorer"),
+                link_item("output/model_analysis/legacy/extreme_rain/primary/analysis/extreme_rain_stress_test_report.md", "primary stress report"),
+                link_item("output/model_analysis/legacy/extreme_rain/primary/event_plot_median_map_index.html", "interactive median-map explorer"),
             ],
             "sources": [
                 link_item("scripts/model/extreme_rain/build_subset300_extreme_rain_event_catalog.py", "event catalog builder"),
@@ -839,9 +839,9 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
                 ["charts", primary.get("peak_quantile_bracket", {}).get("chart_count")],
             ],
             "outputs": [
-                link_item("output/model_analysis/extreme_rain/primary/analysis/peak_quantile_bracket_event_table.csv", "bracket event table"),
-                link_item("output/model_analysis/extreme_rain/primary/analysis/peak_quantile_bracket_summary.csv", "bracket summary"),
-                link_item("output/model_analysis/extreme_rain/primary/analysis/figures/peak_quantile_bracket", "bracket figures"),
+                link_item("output/model_analysis/legacy/extreme_rain/primary/analysis/peak_quantile_bracket_event_table.csv", "bracket event table"),
+                link_item("output/model_analysis/legacy/extreme_rain/primary/analysis/peak_quantile_bracket_summary.csv", "bracket summary"),
+                link_item("output/model_analysis/legacy/extreme_rain/primary/analysis/figures/peak_quantile_bracket", "bracket figures"),
             ],
             "sources": [
                 link_item("scripts/model/extreme_rain/analyze_subset300_extreme_rain_stress_test.py", "stress analyzer"),
@@ -863,8 +863,8 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
             ],
             "outputs": [
                 link_item("docs/experiment/analysis/model/06_checkpoint_sensitivity.md", "canonical analysis doc"),
-                link_item("output/model_analysis/overall_analysis/epoch_sensitivity/figures/test_same_epoch_delta_summary.png", "same-epoch delta chart"),
-                link_item("output/model_analysis/extreme_rain/all/analysis/extreme_rain_stress_test_report.md", "all-epoch stress report"),
+                link_item("output/model_analysis/legacy/overall_analysis/epoch_sensitivity/figures/test_same_epoch_delta_summary.png", "same-epoch delta chart"),
+                link_item("output/model_analysis/legacy/extreme_rain/all/analysis/extreme_rain_stress_test_report.md", "all-epoch stress report"),
             ],
             "sources": [
                 link_item("scripts/model/overall/analyze_subset300_epoch_results.py", "epoch analyzer"),
@@ -880,13 +880,13 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
             "purpose": "selected primary epoch가 DRBC test 성능을 보고 고른 것처럼 보이는지, validation loss와 test-oracle gap을 비교합니다.",
             "use": "all-epoch sweep을 주장 선택용으로 쓰지 않고 diagnostic으로만 제한하는 근거입니다.",
             "stats": [
-                ["files", count_files("output/model_analysis/overall_analysis/overfit_analysis")],
+                ["files", count_files("output/model_analysis/legacy/overall_analysis/overfit_analysis")],
                 ["official runs", 6],
                 ["primary loss overfit >=5%", "0/6"],
             ],
             "outputs": [
-                link_item("output/model_analysis/overall_analysis/overfit_analysis/report/overfit_analysis_report.md", "overfit report"),
-                link_item("output/model_analysis/overall_analysis/overfit_analysis/figures/overfit_quantile_inflation_tradeoff.png", "quantile inflation chart"),
+                link_item("output/model_analysis/legacy/overall_analysis/overfit_analysis/report/overfit_analysis_report.md", "overfit report"),
+                link_item("output/model_analysis/legacy/overall_analysis/overfit_analysis/figures/overfit_quantile_inflation_tradeoff.png", "quantile inflation chart"),
             ],
             "sources": [
                 link_item("scripts/model/overall/analyze_subset300_overfit.py", "overfit analyzer"),
@@ -904,12 +904,12 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
             "stats": [
                 ["records per basin max", 18],
                 ["basin reports input", stats["basin_report_count"]],
-                ["tier profiles", count_csv_rows("output/model_analysis/overall_analysis/main_comparison/attribute_correlations/median_deviation/tables/metric_median_deviation_basin_tier_profile.csv")],
+                ["tier profiles", count_csv_rows("output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations/median_deviation/tables/metric_median_deviation_basin_tier_profile.csv")],
             ],
             "outputs": [
-                link_item("output/model_analysis/overall_analysis/main_comparison/attribute_correlations/median_deviation/report/metric_median_deviation_regime_report_ko.md", "Korean regime report"),
-                link_item("output/model_analysis/overall_analysis/main_comparison/attribute_correlations/median_deviation/tables/metric_median_deviation_basin_tier_profile.csv", "basin tier profile"),
-                link_item("output/model_analysis/overall_analysis/main_comparison/attribute_correlations/median_deviation/figures/metric_median_deviation_all_basin_distance_tier_stacked_counts.png", "tier stacked counts"),
+                link_item("output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations/median_deviation/report/metric_median_deviation_regime_report_ko.md", "Korean regime report"),
+                link_item("output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations/median_deviation/tables/metric_median_deviation_basin_tier_profile.csv", "basin tier profile"),
+                link_item("output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations/median_deviation/figures/metric_median_deviation_all_basin_distance_tier_stacked_counts.png", "tier stacked counts"),
             ],
             "sources": [
                 link_item("scripts/model/overall/analyze_subset300_primary_metric_median_deviation_regimes.py", "median-deviation analyzer"),
@@ -925,14 +925,14 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
             "purpose": "반복 outlier basin을 static attributes, event response, hydromod proxies, extreme-rain stress behavior와 결합해 원인 후보를 분리합니다.",
             "use": "small basin, low observed variance, hydromodification, event response를 한 덩어리로 말하지 않고 mechanism별로 설명할 때 씁니다.",
             "stats": [
-                ["outlier audit rows", count_csv_rows("output/model_analysis/overall_analysis/main_comparison/attribute_correlations/robustness/tables/primary_metric_attribute_iqr_outlier_audit.csv")],
-                ["basin characteristics rows", count_csv_rows("output/model_analysis/overall_analysis/main_comparison/attribute_correlations/robustness/tables/primary_metric_attribute_outlier_basin_characteristics.csv")],
-                ["reports", count_files("output/model_analysis/overall_analysis/main_comparison/attribute_correlations/robustness", "*report*.md")],
+                ["outlier audit rows", count_csv_rows("output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations/robustness/tables/primary_metric_attribute_iqr_outlier_audit.csv")],
+                ["basin characteristics rows", count_csv_rows("output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations/robustness/tables/primary_metric_attribute_outlier_basin_characteristics.csv")],
+                ["reports", count_files("output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations/robustness", "*report*.md")],
             ],
             "outputs": [
-                link_item("output/model_analysis/overall_analysis/main_comparison/attribute_correlations/robustness/primary_metric_attribute_outlier_static_attributes_report_ko.md", "static attribute report"),
-                link_item("output/model_analysis/overall_analysis/main_comparison/attribute_correlations/robustness/primary_metric_attribute_outlier_event_response_report_ko.md", "event-response report"),
-                link_item("output/model_analysis/overall_analysis/main_comparison/attribute_correlations/robustness/tables/primary_metric_attribute_outlier_basin_characteristics.csv", "basin characteristics"),
+                link_item("output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations/robustness/primary_metric_attribute_outlier_static_attributes_report_ko.md", "static attribute report"),
+                link_item("output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations/robustness/primary_metric_attribute_outlier_event_response_report_ko.md", "event-response report"),
+                link_item("output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations/robustness/tables/primary_metric_attribute_outlier_basin_characteristics.csv", "basin characteristics"),
             ],
             "sources": [
                 link_item("scripts/model/overall/analyze_subset300_primary_metric_attribute_outlier_robustness.py", "outlier robustness analyzer"),
@@ -954,8 +954,8 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
             ],
             "outputs": [
                 link_item("docs/experiment/analysis/model/07_broad_vs_natural_robustness.md", "canonical analysis doc"),
-                link_item("output/model_analysis/natural_broad_comparison/report/natural_broad_comparison_report.md", "cohort report"),
-                link_item("output/model_analysis/natural_broad_comparison/report/natural_outlier_characteristics_report.md", "natural outlier report"),
+                link_item("output/model_analysis/legacy/natural_broad_comparison/report/natural_broad_comparison_report.md", "cohort report"),
+                link_item("output/model_analysis/legacy/natural_broad_comparison/report/natural_outlier_characteristics_report.md", "natural outlier report"),
             ],
             "sources": [
                 link_item("scripts/model/overall/analyze_natural_broad_comparison.py", "cohort analyzer"),
@@ -972,12 +972,12 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
             "use": "extreme-rain case에서 유역별 observed/simulated response가 물리적으로 과하거나 약한지 tier별로 해석할 때 씁니다.",
             "stats": [
                 ["files", stats["runoff_ratio_files"]],
-                ["basin mapping rows", count_csv_rows("output/model_analysis/extreme_rain/primary/analysis/runoff_ratio_diagnostics/primary_stress_runoff_ratio_iqr_tier_basin_mapping.csv")],
-                ["figure checks", count_csv_rows("output/model_analysis/extreme_rain/primary/analysis/runoff_ratio_diagnostics/primary_stress_runoff_ratio_iqr_tier_figure_verify.csv")],
+                ["basin mapping rows", count_csv_rows("output/model_analysis/legacy/extreme_rain/primary/analysis/runoff_ratio_diagnostics/primary_stress_runoff_ratio_iqr_tier_basin_mapping.csv")],
+                ["figure checks", count_csv_rows("output/model_analysis/legacy/extreme_rain/primary/analysis/runoff_ratio_diagnostics/primary_stress_runoff_ratio_iqr_tier_figure_verify.csv")],
             ],
             "outputs": [
-                link_item("output/model_analysis/extreme_rain/primary/analysis/runoff_ratio_diagnostics/primary_stress_runoff_ratio_iqr_tier_summary.csv", "tier summary"),
-                link_item("output/model_analysis/extreme_rain/primary/analysis/runoff_ratio_diagnostics/figures/primary_stress_runoff_ratio_boxplot_by_iqr_tier_source_excess_linear_y.png", "linear-y excess boxplot"),
+                link_item("output/model_analysis/legacy/extreme_rain/primary/analysis/runoff_ratio_diagnostics/primary_stress_runoff_ratio_iqr_tier_summary.csv", "tier summary"),
+                link_item("output/model_analysis/legacy/extreme_rain/primary/analysis/runoff_ratio_diagnostics/figures/primary_stress_runoff_ratio_boxplot_by_iqr_tier_source_excess_linear_y.png", "linear-y excess boxplot"),
             ],
             "sources": [
                 link_item("scripts/model/extreme_rain/analyze_subset300_extreme_rain_stress_test.py", "stress analyzer source"),
@@ -998,9 +998,9 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
                 ["station notes", stats["station_note_count"]],
             ],
             "outputs": [
-                link_item("output/model_analysis/extreme_rain/primary/observed_q99_hydrograph_gallery_index.html", "gallery explorer"),
-                link_item("output/model_analysis/extreme_rain/primary/analysis/01480400_hydrograph/index.html", "example basin gallery"),
-                link_item("output/model_analysis/extreme_rain/primary/event_plot_median_map_index.html", "event median map"),
+                link_item("output/model_analysis/legacy/extreme_rain/primary/observed_q99_hydrograph_gallery_index.html", "gallery explorer"),
+                link_item("output/model_analysis/legacy/extreme_rain/primary/analysis/01480400_hydrograph/index.html", "example basin gallery"),
+                link_item("output/model_analysis/legacy/extreme_rain/primary/event_plot_median_map_index.html", "event median map"),
             ],
             "sources": [
                 link_item("scripts/model/extreme_rain/plot_observed_q99_hydrograph_gallery.py", "gallery generator"),
@@ -1021,8 +1021,8 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
                 ["station notes", stats["station_note_count"]],
             ],
             "outputs": [
-                link_item("output/model_analysis/extreme_rain/primary/basin_dissect/README.md", "basin dissect README"),
-                link_item("output/model_analysis/extreme_rain/primary/basin_dissect/extreme_ge_3_iqr/01480400.md", "example report"),
+                link_item("output/model_analysis/legacy/extreme_rain/primary/basin_dissect/README.md", "basin dissect README"),
+                link_item("output/model_analysis/legacy/extreme_rain/primary/basin_dissect/extreme_ge_3_iqr/01480400.md", "example report"),
                 link_item("docs/references/basin/usgs_station_notes/README.md", "station notes README"),
             ],
             "sources": [
@@ -1048,8 +1048,8 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
                 link_item("docs/references/basin/usgs_station_notes/01480685_marsh_creek_near_downingtown_pa.md", "example station note"),
             ],
             "sources": [
-                link_item("output/model_analysis/extreme_rain/primary/analysis/extreme_rain_stress_error_table_wide.csv", "stress error table"),
-                link_item("output/model_analysis/extreme_rain/primary/event_simq_plots/event_simq_plot_manifest.csv", "simQ plot manifest"),
+                link_item("output/model_analysis/legacy/extreme_rain/primary/analysis/extreme_rain_stress_error_table_wide.csv", "stress error table"),
+                link_item("output/model_analysis/legacy/extreme_rain/primary/event_simq_plots/event_simq_plot_manifest.csv", "simQ plot manifest"),
             ],
             "tags": ["managed flow", "suppression", "protocol"],
         },
@@ -1066,9 +1066,9 @@ def build_analyses(stats: dict[str, Any]) -> list[dict[str, Any]]:
                 ["candidates each", 5],
             ],
             "outputs": [
-                link_item("output/model_analysis/paper_result_assets/report/paper_result_assets_report.md", "paper assets report"),
-                link_item("output/model_analysis/paper_result_assets/tables/primary_high_flow_peak_compact.csv", "high-flow compact table"),
-                link_item("output/model_analysis/paper_result_assets/tables/representative_hydrograph_candidates.md", "representative candidates"),
+                link_item("output/model_analysis/legacy/paper_result_assets/report/paper_result_assets_report.md", "paper assets report"),
+                link_item("output/model_analysis/legacy/paper_result_assets/tables/primary_high_flow_peak_compact.csv", "high-flow compact table"),
+                link_item("output/model_analysis/legacy/paper_result_assets/tables/representative_hydrograph_candidates.md", "representative candidates"),
             ],
             "sources": [
                 link_item("scripts/model/overall/build_subset300_paper_result_assets.py", "paper asset builder"),
@@ -1087,31 +1087,31 @@ def build_previews() -> list[dict[str, str]]:
         },
         {
             "title": "Overall high-flow conclusion",
-            "path": "output/model_analysis/overall_analysis/main_comparison/figures/overall_conclusion/overall_conclusion_high_flow_quantiles.png",
+            "path": "output/model_analysis/legacy/overall_analysis/main_comparison/figures/overall_conclusion/overall_conclusion_high_flow_quantiles.png",
         },
         {
             "title": "Primary quantile zones",
-            "path": "output/model_analysis/quantile_analysis/analysis/charts/primary_q99_and_peak_quantile_zone_by_seed.png",
+            "path": "output/model_analysis/legacy/quantile_analysis/analysis/charts/primary_q99_and_peak_quantile_zone_by_seed.png",
         },
         {
             "title": "Probabilistic calibration",
-            "path": "output/model_analysis/probabilistic_diagnostics/figures/primary_all_quantile_calibration.png",
+            "path": "output/model_analysis/legacy/probabilistic_diagnostics/figures/primary_all_quantile_calibration.png",
         },
         {
             "title": "Natural/Broad high-flow",
-            "path": "output/model_analysis/natural_broad_comparison/figures/primary_top1_underestimation_by_cohort.png",
+            "path": "output/model_analysis/legacy/natural_broad_comparison/figures/primary_top1_underestimation_by_cohort.png",
         },
         {
             "title": "Overfit / q99 tradeoff",
-            "path": "output/model_analysis/overall_analysis/overfit_analysis/figures/overfit_quantile_inflation_tradeoff.png",
+            "path": "output/model_analysis/legacy/overall_analysis/overfit_analysis/figures/overfit_quantile_inflation_tradeoff.png",
         },
         {
             "title": "Median-deviation tiers",
-            "path": "output/model_analysis/overall_analysis/main_comparison/attribute_correlations/median_deviation/figures/metric_median_deviation_all_basin_distance_tier_stacked_counts.png",
+            "path": "output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations/median_deviation/figures/metric_median_deviation_all_basin_distance_tier_stacked_counts.png",
         },
         {
             "title": "Runoff ratio by tier",
-            "path": "output/model_analysis/extreme_rain/primary/analysis/runoff_ratio_diagnostics/figures/primary_stress_runoff_ratio_boxplot_by_iqr_tier_source_excess_linear_y.png",
+            "path": "output/model_analysis/legacy/extreme_rain/primary/analysis/runoff_ratio_diagnostics/figures/primary_stress_runoff_ratio_boxplot_by_iqr_tier_source_excess_linear_y.png",
         },
     ]
 
@@ -2918,7 +2918,7 @@ def render_html(output_dir: Path, payload: dict[str, Any]) -> str:
         {secondary_preview_html}
       </section>
     </section>
-    <footer>Generated by scripts/model/overall/build_analysis_inventory_site.py. Output root: {html.escape(payload.get('output_root', 'output/model_analysis/analysis_dashboard'))}.</footer>
+    <footer>Generated by scripts/model/overall/build_analysis_inventory_site.py. Output root: {html.escape(payload.get('output_root', 'output/model_analysis/legacy/analysis_dashboard'))}.</footer>
   </div>
   <script id="inventory-data" type="application/json">{payload_for_page}</script>
   <script>

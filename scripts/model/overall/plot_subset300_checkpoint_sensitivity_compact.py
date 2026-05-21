@@ -14,10 +14,10 @@ import pandas as pd
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_QUANTILE_ANALYSIS = REPO_ROOT / "output/model_analysis/quantile_analysis/analysis"
-DEFAULT_STRESS_PRIMARY = REPO_ROOT / "output/model_analysis/extreme_rain/primary/analysis"
-DEFAULT_STRESS_ALL = REPO_ROOT / "output/model_analysis/extreme_rain/all/analysis"
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/overall_analysis/epoch_sensitivity"
+DEFAULT_QUANTILE_ANALYSIS = REPO_ROOT / "output/model_analysis/legacy/quantile_analysis/analysis"
+DEFAULT_STRESS_PRIMARY = REPO_ROOT / "output/model_analysis/legacy/extreme_rain/primary/analysis"
+DEFAULT_STRESS_ALL = REPO_ROOT / "output/model_analysis/legacy/extreme_rain/all/analysis"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/legacy/overall_analysis/epoch_sensitivity"
 EPOCHS = [5, 10, 15, 20, 25, 30]
 POSITIVE_RESPONSE_CLASSES = ["flood_response_ge25", "flood_response_ge2_to_lt25"]
 NEGATIVE_CONTROL_CLASS = "low_response_below_q99"

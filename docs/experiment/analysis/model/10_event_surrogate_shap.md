@@ -11,7 +11,7 @@
 주요 산출물은 아래에 있다.
 
 ```text
-output/model_analysis/quantile_analysis/event_surrogate_shap/
+output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/
 ```
 
 ## 분석 단위
@@ -35,29 +35,29 @@ Surrogate target은 아래 다섯 개다.
 주요 표는 아래와 같다.
 
 ```text
-output/model_analysis/quantile_analysis/event_surrogate_shap/tables/event_surrogate_table.csv
-output/model_analysis/quantile_analysis/event_surrogate_shap/tables/surrogate_target_diagnostics.csv
-output/model_analysis/quantile_analysis/event_surrogate_shap/tables/surrogate_fold_diagnostics.csv
-output/model_analysis/quantile_analysis/event_surrogate_shap/tables/global_feature_importance.csv
-output/model_analysis/quantile_analysis/event_surrogate_shap/tables/local_top_event_explanations.csv
+output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/tables/event_surrogate_table.csv
+output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/tables/surrogate_target_diagnostics.csv
+output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/tables/surrogate_fold_diagnostics.csv
+output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/tables/global_feature_importance.csv
+output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/tables/local_top_event_explanations.csv
 ```
 
 주요 figure는 아래와 같다.
 
 ```text
-output/model_analysis/quantile_analysis/event_surrogate_shap/figures/combined_mean_abs_shap_summary.png
-output/model_analysis/quantile_analysis/event_surrogate_shap/figures/model1_under_deficit_pct_mean_abs_shap.png
-output/model_analysis/quantile_analysis/event_surrogate_shap/figures/q95_under_deficit_reduction_pct_mean_abs_shap.png
-output/model_analysis/quantile_analysis/event_surrogate_shap/figures/q99_under_deficit_reduction_pct_mean_abs_shap.png
-output/model_analysis/quantile_analysis/event_surrogate_shap/figures/q99_nrmse_tradeoff_pct_mean_abs_shap.png
-output/model_analysis/quantile_analysis/event_surrogate_shap/figures/q99_overprediction_pct_mean_abs_shap.png
+output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/figures/combined_mean_abs_shap_summary.png
+output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/figures/model1_under_deficit_pct_mean_abs_shap.png
+output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/figures/q95_under_deficit_reduction_pct_mean_abs_shap.png
+output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/figures/q99_under_deficit_reduction_pct_mean_abs_shap.png
+output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/figures/q99_nrmse_tradeoff_pct_mean_abs_shap.png
+output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/figures/q99_overprediction_pct_mean_abs_shap.png
 ```
 
 요약 report와 metadata는 아래에 둔다.
 
 ```text
-output/model_analysis/quantile_analysis/event_surrogate_shap/report/event_surrogate_shap_report.md
-output/model_analysis/quantile_analysis/event_surrogate_shap/metadata/event_surrogate_shap_metadata.json
+output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/report/event_surrogate_shap_report.md
+output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/metadata/event_surrogate_shap_metadata.json
 ```
 
 ## 현재 해석

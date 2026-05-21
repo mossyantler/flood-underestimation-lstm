@@ -30,13 +30,13 @@ import pandas as pd
 import xarray as xr
 
 
-DEFAULT_EVENT_WINDOWS = Path("output/model_analysis/confirmed_flood/inference/confirmed_flood_event_windows_used.csv")
-DEFAULT_CATALOG_CSV = Path("output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv")
-DEFAULT_COVERAGE_CSV = Path("output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv")
-DEFAULT_SERIES_DIR = Path("output/model_analysis/confirmed_flood/inference/required_series")
+DEFAULT_EVENT_WINDOWS = Path("output/model_analysis/expanded/confirmed_flood/inference/confirmed_flood_event_windows_used.csv")
+DEFAULT_CATALOG_CSV = Path("output/model_analysis/expanded/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv")
+DEFAULT_COVERAGE_CSV = Path("output/model_analysis/expanded/confirmed_flood/coverage/nws_flood_stage_coverage.csv")
+DEFAULT_SERIES_DIR = Path("output/model_analysis/expanded/confirmed_flood/inference/required_series")
 DEFAULT_DATA_DIR = Path("data/CAMELSH_generic/drbc_holdout_confirmed_flood_events/time_series")
-DEFAULT_NOAA_CACHE = Path("output/model_analysis/confirmed_flood/noaa_cache")
-DEFAULT_OUTPUT_DIR = Path("output/model_analysis/confirmed_flood/hydrographs")
+DEFAULT_NOAA_CACHE = Path("output/model_analysis/expanded/confirmed_flood/noaa_cache")
+DEFAULT_OUTPUT_DIR = Path("output/model_analysis/expanded/confirmed_flood/hydrographs")
 DEFAULT_SEEDS = [111, 222, 444]
 
 PREDICTORS = [

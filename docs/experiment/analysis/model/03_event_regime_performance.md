@@ -11,7 +11,7 @@
 주요 산출물은 아래에 있다.
 
 ```text
-output/model_analysis/quantile_analysis/event_regime_analysis/
+output/model_analysis/legacy/quantile_analysis/event_regime_analysis/
 ```
 
 ## 분석 단위
@@ -27,8 +27,8 @@ Primary stratification은 `hydromet_only_7 + KMeans(k=3)`으로 만든 ML event-
 논문용 compact table과 chart는 아래에 있다.
 
 ```text
-output/model_analysis/quantile_analysis/event_regime_analysis/event_regime_paired_delta_compact.csv
-output/model_analysis/quantile_analysis/event_regime_analysis/figures/event_regime_paired_delta_summary.png
+output/model_analysis/legacy/quantile_analysis/event_regime_analysis/event_regime_paired_delta_compact.csv
+output/model_analysis/legacy/quantile_analysis/event_regime_analysis/figures/event_regime_paired_delta_summary.png
 ```
 
 이 figure는 regime별 paired under-deficit reduction, threshold recall delta, normalized event RMSE delta를 같은 화면에서 비교한다. Under-deficit reduction과 recall delta는 양수가 Model 2 quantile에 유리하고, event NRMSE delta는 양수면 hydrograph shape/magnitude tradeoff가 커졌다는 뜻이다.

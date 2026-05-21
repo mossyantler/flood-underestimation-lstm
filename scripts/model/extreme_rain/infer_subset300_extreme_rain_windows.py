@@ -33,9 +33,9 @@ from neuralhydrology.utils.config import Config
 from neuralhydrology.utils.errors import NoEvaluationDataError
 
 
-DEFAULT_BLOCKS_CSV = Path("output/model_analysis/extreme_rain/primary/exposure/inference_blocks.csv")
+DEFAULT_BLOCKS_CSV = Path("output/model_analysis/legacy/extreme_rain/primary/exposure/inference_blocks.csv")
 DEFAULT_RUN_ROOT = Path("runs/subset_comparison")
-DEFAULT_OUTPUT_DIR = Path("output/model_analysis/extreme_rain/primary/inference")
+DEFAULT_OUTPUT_DIR = Path("output/model_analysis/legacy/extreme_rain/primary/inference")
 DEFAULT_VALIDATION_EPOCHS = [5, 10, 15, 20, 25, 30]
 
 RUN_RE = re.compile(r"camelsh_hourly_(model[12])_drbc_holdout_subset300_seed(\d+)_")

@@ -877,7 +877,7 @@ def _write_markdown(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Analyze subset300 hydrograph required-series outputs.")
-    parser.add_argument("--input-dir", type=Path, default=Path("output/model_analysis/quantile_analysis"))
+    parser.add_argument("--input-dir", type=Path, default=Path("output/model_analysis/legacy/quantile_analysis"))
     parser.add_argument("--output-dir", type=Path, default=None)
     args = parser.parse_args()
 

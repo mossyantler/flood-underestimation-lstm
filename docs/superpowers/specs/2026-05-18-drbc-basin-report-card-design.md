@@ -4,7 +4,7 @@
 **스크립트**:
 - `scripts/model/overall/compute_drbc_basin_report_card_data.py`
 - `scripts/model/overall/plot_drbc_basin_report_cards.py`
-**출력 루트**: `output/model_analysis/overall_analysis/main_comparison/drbc_basin_report_cards/`
+**출력 루트**: `output/model_analysis/legacy/overall_analysis/main_comparison/drbc_basin_report_cards/`
 
 ---
 
@@ -20,9 +20,9 @@
 
 | 역할 | 파일 경로 |
 |------|----------|
-| Raw quantile series | `output/model_analysis/quantile_analysis/required_series/seed{s}/epoch{e}_required_series.csv` |
+| Raw quantile series | `output/model_analysis/legacy/quantile_analysis/required_series/seed{s}/epoch{e}_required_series.csv` |
 | 유역 특성 | `output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_basin_analysis_table.csv` |
-| Basin metrics (ID 추출용) | `output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv` |
+| Basin metrics (ID 추출용) | `output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv` |
 | Obs 기반 특성 (CV, FDC slope 등) | 기존 `within_basin/tables/within_basin_rho_table.csv` 참조 가능 |
 
 Primary epochs: 111→(m1:25, m2:5), 222→(m1:10, m2:10), 444→(m1:15, m2:10)

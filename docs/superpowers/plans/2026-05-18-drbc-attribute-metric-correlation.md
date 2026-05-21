@@ -16,10 +16,10 @@
 |------|------|
 | 신규 생성 | `scripts/model/overall/analyze_drbc_basin_attribute_metric_correlations.py` |
 | 읽기 전용 | `output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_basin_analysis_table.csv` |
-| 읽기 전용 | `output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv` |
-| 읽기 전용 | `output/model_analysis/overall_analysis/main_comparison/tables/primary_epoch_basin_deltas.csv` |
-| 읽기 전용 | `output/model_analysis/quantile_analysis/required_series/seed{s}/epoch{e}_required_series.csv` |
-| 출력 루트 | `output/model_analysis/overall_analysis/main_comparison/drbc_attribute_metric_correlations/` |
+| 읽기 전용 | `output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv` |
+| 읽기 전용 | `output/model_analysis/legacy/overall_analysis/main_comparison/tables/primary_epoch_basin_deltas.csv` |
+| 읽기 전용 | `output/model_analysis/legacy/quantile_analysis/required_series/seed{s}/epoch{e}_required_series.csv` |
+| 출력 루트 | `output/model_analysis/legacy/overall_analysis/main_comparison/drbc_attribute_metric_correlations/` |
 
 ---
 
@@ -138,10 +138,10 @@ HEATMAP_GROUPS = {
 }
 
 DEFAULT_DRBC_ATTRS = REPO_ROOT / "output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_basin_analysis_table.csv"
-DEFAULT_BASIN_METRICS = REPO_ROOT / "output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv"
-DEFAULT_BASIN_DELTAS = REPO_ROOT / "output/model_analysis/overall_analysis/main_comparison/tables/primary_epoch_basin_deltas.csv"
-DEFAULT_SERIES_DIR = REPO_ROOT / "output/model_analysis/quantile_analysis/required_series"
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/overall_analysis/main_comparison/drbc_attribute_metric_correlations"
+DEFAULT_BASIN_METRICS = REPO_ROOT / "output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv"
+DEFAULT_BASIN_DELTAS = REPO_ROOT / "output/model_analysis/legacy/overall_analysis/main_comparison/tables/primary_epoch_basin_deltas.csv"
+DEFAULT_SERIES_DIR = REPO_ROOT / "output/model_analysis/legacy/quantile_analysis/required_series"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/legacy/overall_analysis/main_comparison/drbc_attribute_metric_correlations"
 ```
 
 - [ ] **Step 3: argparse 작성**
@@ -653,7 +653,7 @@ table_paths = write_tables(master, corr, obs_features, args.output_dir, args.top
 
 ```bash
 uv run scripts/model/overall/analyze_drbc_basin_attribute_metric_correlations.py
-ls output/model_analysis/overall_analysis/main_comparison/drbc_attribute_metric_correlations/tables/
+ls output/model_analysis/legacy/overall_analysis/main_comparison/drbc_attribute_metric_correlations/tables/
 ```
 
 Expected: 4개 CSV 파일 존재.
@@ -737,7 +737,7 @@ heatmap_paths = write_heatmaps(corr, args.output_dir)
 
 ```bash
 uv run scripts/model/overall/analyze_drbc_basin_attribute_metric_correlations.py
-ls output/model_analysis/overall_analysis/main_comparison/drbc_attribute_metric_correlations/figures/
+ls output/model_analysis/legacy/overall_analysis/main_comparison/drbc_attribute_metric_correlations/figures/
 ```
 
 Expected: `heatmap_model1.png`, `heatmap_model2_q50.png`, `heatmap_delta.png`, `heatmap_model2_prob.png` 존재.
@@ -805,7 +805,7 @@ scatter_paths = write_scatters(master, corr, args.output_dir)
 
 ```bash
 uv run scripts/model/overall/analyze_drbc_basin_attribute_metric_correlations.py
-ls output/model_analysis/overall_analysis/main_comparison/drbc_attribute_metric_correlations/figures/scatter/ | wc -l
+ls output/model_analysis/legacy/overall_analysis/main_comparison/drbc_attribute_metric_correlations/figures/scatter/ | wc -l
 ```
 
 Expected: BH-significant 쌍 수와 동일한 파일 수 출력.
@@ -911,7 +911,7 @@ report_path = write_report(corr, heatmap_paths, args.output_dir, args.seeds, arg
 
 ```bash
 uv run scripts/model/overall/analyze_drbc_basin_attribute_metric_correlations.py
-head -40 output/model_analysis/overall_analysis/main_comparison/drbc_attribute_metric_correlations/report/drbc_attribute_metric_correlation_report.md
+head -40 output/model_analysis/legacy/overall_analysis/main_comparison/drbc_attribute_metric_correlations/report/drbc_attribute_metric_correlation_report.md
 ```
 
 Expected: 헤더, 개요 표, Top 상관 쌍 표 출력.
@@ -1028,7 +1028,7 @@ Done. Output: .../drbc_attribute_metric_correlations
 - [ ] **Step 4: 출력 파일 구조 최종 검증**
 
 ```bash
-find output/model_analysis/overall_analysis/main_comparison/drbc_attribute_metric_correlations -type f | sort
+find output/model_analysis/legacy/overall_analysis/main_comparison/drbc_attribute_metric_correlations -type f | sort
 ```
 
 Expected 파일 목록:
@@ -1051,7 +1051,7 @@ Expected 파일 목록:
 ```bash
 python3 -c "
 import pandas as pd
-df = pd.read_csv('output/model_analysis/overall_analysis/main_comparison/drbc_attribute_metric_correlations/tables/spearman_correlations.csv')
+df = pd.read_csv('output/model_analysis/legacy/overall_analysis/main_comparison/drbc_attribute_metric_correlations/tables/spearman_correlations.csv')
 print(df.head(5)[['feature','metric','rho','pval_bh','significant']])
 "
 ```

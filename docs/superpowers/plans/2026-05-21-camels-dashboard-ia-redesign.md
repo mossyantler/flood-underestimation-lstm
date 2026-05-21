@@ -368,7 +368,7 @@ export const overviewStatusKpis: StatusKpi[] = [
     value: "ready",
     note: "NWS flood-stage event layer",
     status: "ready",
-    source: "output/model_analysis/confirmed_flood/",
+    source: "output/model_analysis/expanded/confirmed_flood/",
   },
 ];
 
@@ -907,19 +907,19 @@ In `getDetailContent`, include cases for each new route, reusing existing detail
 
 ```tsx
 case "analysis/main-result":
-  return simpleDetail("Main result", "Q99 exceedance와 observed peak hour에서 Model 2 q99가 peak underestimation을 줄였는지 검토한다.", "output/model_analysis/overall_analysis/main_comparison/");
+  return simpleDetail("Main result", "Q99 exceedance와 observed peak hour에서 Model 2 q99가 peak underestimation을 줄였는지 검토한다.", "output/model_analysis/legacy/overall_analysis/main_comparison/");
 case "analysis/hydrograph":
-  return simpleDetail("Hydrograph", "기존 hydrograph gallery 구조를 dashboard 안으로 가져와 basin/event/predictor별 visual evidence를 본다.", "output/model_analysis/extreme_rain/primary/observed_q99_hydrograph_gallery_index.html");
+  return simpleDetail("Hydrograph", "기존 hydrograph gallery 구조를 dashboard 안으로 가져와 basin/event/predictor별 visual evidence를 본다.", "output/model_analysis/legacy/extreme_rain/primary/observed_q99_hydrograph_gallery_index.html");
 case "analysis/stress":
-  return simpleDetail("Stress test", "Historical stress는 primary claim이 아니라 benefit과 false-positive tradeoff를 점검하는 보조 분석이다.", "output/model_analysis/extreme_rain/primary/");
+  return simpleDetail("Stress test", "Historical stress는 primary claim이 아니라 benefit과 false-positive tradeoff를 점검하는 보조 분석이다.", "output/model_analysis/legacy/extreme_rain/primary/");
 case "analysis/confirmed-flood":
-  return simpleDetail("Confirmed flood", "NWS flood-stage confirmed event layer를 기준으로 event audit과 hydrograph evidence를 본다.", "output/model_analysis/confirmed_flood/");
+  return simpleDetail("Confirmed flood", "NWS flood-stage confirmed event layer를 기준으로 event audit과 hydrograph evidence를 본다.", "output/model_analysis/expanded/confirmed_flood/");
 case "analysis/event-regime":
-  return simpleDetail("Event regime", "Event regime별 q99 effect, recall, under-deficit reduction을 비교한다.", "output/model_analysis/paper_result_assets/");
+  return simpleDetail("Event regime", "Event regime별 q99 effect, recall, under-deficit reduction을 비교한다.", "output/model_analysis/legacy/paper_result_assets/");
 case "analysis/attribute":
-  return simpleDetail("Attribute analysis", "Basin attribute별로 model effect와 failure mode를 sorting한다.", "output/model_analysis/overall_analysis/main_comparison/drbc_attribute_metric_correlations/");
+  return simpleDetail("Attribute analysis", "Basin attribute별로 model effect와 failure mode를 sorting한다.", "output/model_analysis/legacy/overall_analysis/main_comparison/drbc_attribute_metric_correlations/");
 case "analysis/calibration":
-  return simpleDetail("Calibration", "Coverage, pinball, q99 caveat를 함께 검토한다.", "output/model_analysis/probabilistic_diagnostics/");
+  return simpleDetail("Calibration", "Coverage, pinball, q99 caveat를 함께 검토한다.", "output/model_analysis/legacy/probabilistic_diagnostics/");
 ```
 
 - [ ] **Step 4: Run route checks**

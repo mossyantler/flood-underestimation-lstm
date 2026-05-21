@@ -109,19 +109,19 @@ epoch005, epoch010, epoch015, epoch020, epoch025, epoch030
 Wet-footprint primary checkpoint 결과는 아래에 둔다.
 
 ```text
-output/model_analysis/extreme_rain/primary/
+output/model_analysis/legacy/extreme_rain/primary/
 ```
 
 대표 event에서 실제 flow graph가 어떻게 생겼는지는 아래 diagnostic에서 본다. 같은 event 하나를 seed `111 / 222 / 444` 패널로 나누고, observed flow, Model 1, Model 2 `q50/q95/q99`를 함께 그려 둔 것이다.
 
 ```text
-output/model_analysis/extreme_rain/primary/flow_graph_diagnostic/
+output/model_analysis/legacy/extreme_rain/primary/flow_graph_diagnostic/
 ```
 
 모든 validation checkpoint sensitivity 결과는 아래에 둔다.
 
 ```text
-output/model_analysis/extreme_rain/all/
+output/model_analysis/legacy/extreme_rain/all/
 ```
 
 둘을 섞어 읽으면 안 된다. Primary 결과는 대표 결과이고, all-validation 결과는 checkpoint sensitivity 진단이다.

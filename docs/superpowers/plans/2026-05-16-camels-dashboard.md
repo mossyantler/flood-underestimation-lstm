@@ -293,7 +293,7 @@ export const evidenceRows: EvidenceRow[] = [
 ];
 
 // q99 분위 비교 라인차트 포인트 (Model 1 vs Model 2 DRBC 38 basin 중앙값)
-// 출처: output/model_analysis/quantile_analysis/
+// 출처: output/model_analysis/legacy/quantile_analysis/
 export const q99ChartPoints: { m1: ChartPoint[]; m2: ChartPoint[] } = {
   m1: [
     { x: 0, y: 72.6 }, { x: 1, y: 71.2 }, { x: 2, y: 74.1 },

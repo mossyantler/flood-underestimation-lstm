@@ -56,7 +56,7 @@ ORDER BY exclusive_cohort;
 
 ```bash
 uv run --script database/postgres/import_camels_csvs.py --store-raw \
-  output/model_analysis/probabilistic_diagnostics/quantile_pinball_summary.csv
+  output/model_analysis/legacy/probabilistic_diagnostics/quantile_pinball_summary.csv
 ```
 
 `--store-raw`를 빼면 `analysis.csv_files` metadata만 갱신되고, 대응 typed importer가 있는 CSV는 typed table까지 갱신된다.

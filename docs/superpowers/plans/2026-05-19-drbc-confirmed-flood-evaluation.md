@@ -170,7 +170,7 @@ ROOT = Path(__file__).resolve().parents[3]
 
 DEFAULT_DRBC_SELECTED = ROOT / "output/basin/drbc/basin_define/camelsh_drbc_selected.csv"
 DEFAULT_STATIC_ATTRS = ROOT / "data/CAMELSH_generic/drbc_holdout_broad/attributes/static_attributes.csv"
-DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/confirmed_flood/coverage"
+DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/expanded/confirmed_flood/coverage"
 
 USGS_SITE_API = "https://waterservices.usgs.gov/nwis/site/"
 NWPS_API = "https://api.water.noaa.gov/nwps/v1/gauges/{lid}"
@@ -296,7 +296,7 @@ import sys; sys.path.insert(0, 'scripts/basin/drbc')
 uv run scripts/basin/drbc/check_drbc_nws_flood_stage_coverage.py --limit 3
 ```
 
-Expected: `output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv` 생성, 3개 row.
+Expected: `output/model_analysis/expanded/confirmed_flood/coverage/nws_flood_stage_coverage.csv` 생성, 3개 row.
 
 - [ ] **Step 6: 커밋 (WIP)**
 
@@ -449,9 +449,9 @@ uv run scripts/basin/drbc/check_drbc_nws_flood_stage_coverage.py
 ```
 
 Expected:
-- `output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv` — 154 rows
-- `output/model_analysis/confirmed_flood/coverage/coverage_bias_report.csv` — 5 rows (attribute별)
-- `output/model_analysis/confirmed_flood/coverage/figures/coverage_bias_distributions.png`
+- `output/model_analysis/expanded/confirmed_flood/coverage/nws_flood_stage_coverage.csv` — 154 rows
+- `output/model_analysis/expanded/confirmed_flood/coverage/coverage_bias_report.csv` — 5 rows (attribute별)
+- `output/model_analysis/expanded/confirmed_flood/coverage/figures/coverage_bias_distributions.png`
 - 콘솔에 커버리지 count 출력
 
 - [ ] **Step 5: 커버리지 count 확인 및 hybrid 여부 결정**
@@ -459,7 +459,7 @@ Expected:
 ```bash
 python3 -c "
 import pandas as pd
-df = pd.read_csv('output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv')
+df = pd.read_csv('output/model_analysis/expanded/confirmed_flood/coverage/nws_flood_stage_coverage.csv')
 print(df['coverage_status'].value_counts())
 print(f'Covered: {(df.coverage_status == \"covered\").sum()} / {len(df)}')
 "
@@ -487,10 +487,10 @@ git commit -m "feat: complete NWS flood stage coverage check with bias analysis"
 파일 상단 기존 경로 상수들 아래에 추가:
 
 ```python
-NWS_FLOOD_STAGE_COVERAGE = Path("output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv")
-NWS_COVERAGE_BIAS = Path("output/model_analysis/confirmed_flood/coverage/coverage_bias_report.csv")
-DRBC_CONFIRMED_FLOOD_EVENTS = Path("output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv")
-DRBC_CONFIRMED_FLOOD_PERFORMANCE = Path("output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv")
+NWS_FLOOD_STAGE_COVERAGE = Path("output/model_analysis/expanded/confirmed_flood/coverage/nws_flood_stage_coverage.csv")
+NWS_COVERAGE_BIAS = Path("output/model_analysis/expanded/confirmed_flood/coverage/coverage_bias_report.csv")
+DRBC_CONFIRMED_FLOOD_EVENTS = Path("output/model_analysis/expanded/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv")
+DRBC_CONFIRMED_FLOOD_PERFORMANCE = Path("output/model_analysis/expanded/confirmed_flood/performance/drbc_confirmed_flood_performance.csv")
 ```
 
 기존 `DEFAULT_CSVS` 리스트에도 4개 추가:
@@ -582,10 +582,10 @@ def import_nws_coverage_bias(database: str, relative_path: Path, rows: list[dict
 ```python
 CORE_VIEWS = {
     # ... 기존 항목들 ...
-    "nws_flood_stage_coverage": "output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv",
-    "nws_coverage_bias": "output/model_analysis/confirmed_flood/coverage/coverage_bias_report.csv",
-    "drbc_confirmed_flood_events": "output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv",
-    "drbc_confirmed_flood_performance": "output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv",
+    "nws_flood_stage_coverage": "output/model_analysis/expanded/confirmed_flood/coverage/nws_flood_stage_coverage.csv",
+    "nws_coverage_bias": "output/model_analysis/expanded/confirmed_flood/coverage/coverage_bias_report.csv",
+    "drbc_confirmed_flood_events": "output/model_analysis/expanded/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv",
+    "drbc_confirmed_flood_performance": "output/model_analysis/expanded/confirmed_flood/performance/drbc_confirmed_flood_performance.csv",
 }
 ```
 
@@ -593,8 +593,8 @@ CORE_VIEWS = {
 
 ```bash
 uv run database/postgres/import_camels_csvs.py \
-  output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv \
-  output/model_analysis/confirmed_flood/coverage/coverage_bias_report.csv
+  output/model_analysis/expanded/confirmed_flood/coverage/nws_flood_stage_coverage.csv \
+  output/model_analysis/expanded/confirmed_flood/coverage/coverage_bias_report.csv
 ```
 
 ```bash
@@ -645,10 +645,10 @@ import xarray as xr
 
 ROOT = Path(__file__).resolve().parents[3]
 
-DEFAULT_COVERAGE_CSV = ROOT / "output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv"
+DEFAULT_COVERAGE_CSV = ROOT / "output/model_analysis/expanded/confirmed_flood/coverage/nws_flood_stage_coverage.csv"
 DEFAULT_DATA_DIR = ROOT / "data/CAMELSH_generic/drbc_holdout_broad/time_series"
-DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/confirmed_flood/catalog"
-DEFAULT_NOAA_CACHE = ROOT / "output/model_analysis/confirmed_flood/noaa_cache"
+DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/expanded/confirmed_flood/catalog"
+DEFAULT_NOAA_CACHE = ROOT / "output/model_analysis/expanded/confirmed_flood/noaa_cache"
 
 EXCLUDE_START = pd.Timestamp("2000-01-01")
 EXCLUDE_END = pd.Timestamp("2013-12-31")
@@ -779,7 +779,7 @@ uv run scripts/basin/drbc/build_drbc_confirmed_flood_event_catalog.py --limit-ba
 ```
 
 Expected:
-- `output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv` 생성
+- `output/model_analysis/expanded/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv` 생성
 - 최소 1개 이상의 event row (covered basin에 flood event가 없을 수도 있으므로 0도 OK)
 - 모든 row의 `flood_tier`가 minor/moderate/major 중 하나
 
@@ -922,7 +922,7 @@ uv run scripts/basin/drbc/build_drbc_confirmed_flood_event_catalog.py
 ```
 
 Expected:
-- `output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv`
+- `output/model_analysis/expanded/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv`
 - 콘솔에 tier별 event 수 출력 (minor/moderate/major 분포)
 - NOAA corroborated 비율 출력
 
@@ -931,7 +931,7 @@ Expected:
 ```bash
 python3 -c "
 import pandas as pd
-df = pd.read_csv('output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv')
+df = pd.read_csv('output/model_analysis/expanded/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv')
 print(f'Total events: {len(df)}')
 print(df['flood_tier'].value_counts())
 print(f'NOAA corroborated: {df.noaa_corroborated.sum()} ({100*df.noaa_corroborated.mean():.1f}%)')
@@ -946,7 +946,7 @@ print('All checks passed.')
 
 ```bash
 uv run database/postgres/import_camels_csvs.py \
-  output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv
+  output/model_analysis/expanded/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv
 psql -d camels -c "SELECT flood_tier, count(*) FROM analysis.drbc_confirmed_flood_events GROUP BY 1;"
 ```
 
@@ -997,9 +997,9 @@ import torch
 from neuralhydrology.evaluation import get_tester
 from neuralhydrology.utils.config import Config
 
-DEFAULT_CATALOG_CSV = ROOT / "output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv"
+DEFAULT_CATALOG_CSV = ROOT / "output/model_analysis/expanded/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv"
 DEFAULT_RUN_ROOT = ROOT / "runs/subset_comparison"
-DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/confirmed_flood/inference"
+DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/expanded/confirmed_flood/inference"
 
 RUN_RE = re.compile(r"camelsh_hourly_(model[12])_drbc_holdout_subset300_seed(\d+)_")
 PRIMARY_EPOCHS = {
@@ -1184,7 +1184,7 @@ uv run scripts/model/confirmed_flood/infer_drbc_confirmed_flood_events.py \
   --limit-events 5 --device cpu
 ```
 
-Expected: `output/model_analysis/confirmed_flood/inference/drbc_confirmed_flood_performance.csv` 생성, `obs_peak_cms` 값이 `None`이 아님.
+Expected: `output/model_analysis/expanded/confirmed_flood/inference/drbc_confirmed_flood_performance.csv` 생성, `obs_peak_cms` 값이 `None`이 아님.
 
 - [ ] **Step 7: 커밋**
 
@@ -1221,8 +1221,8 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_PERF_CSV = ROOT / "output/model_analysis/confirmed_flood/inference/drbc_confirmed_flood_performance.csv"
-DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/confirmed_flood/analysis"
+DEFAULT_PERF_CSV = ROOT / "output/model_analysis/expanded/confirmed_flood/inference/drbc_confirmed_flood_performance.csv"
+DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/expanded/confirmed_flood/analysis"
 QUANTILE_ORDER = ["det", "q50", "q90", "q95", "q99"]
 
 
@@ -1330,9 +1330,9 @@ uv run scripts/model/confirmed_flood/analyze_drbc_confirmed_flood_performance.py
 ```
 
 Expected:
-- `output/model_analysis/confirmed_flood/analysis/confirmed_flood_tier_aggregate.csv`
-- `output/model_analysis/confirmed_flood/analysis/confirmed_flood_paired_delta.csv`
-- `output/model_analysis/confirmed_flood/analysis/figures/confirmed_flood_tier_comparison.png`
+- `output/model_analysis/expanded/confirmed_flood/analysis/confirmed_flood_tier_aggregate.csv`
+- `output/model_analysis/expanded/confirmed_flood/analysis/confirmed_flood_paired_delta.csv`
+- `output/model_analysis/expanded/confirmed_flood/analysis/figures/confirmed_flood_tier_comparison.png`
 
 - [ ] **Step 6: 커밋**
 
@@ -1435,8 +1435,8 @@ def import_drbc_confirmed_flood_performance(database: str, relative_path: Path, 
 
 ```bash
 uv run database/postgres/import_camels_csvs.py \
-  output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv \
-  output/model_analysis/confirmed_flood/inference/drbc_confirmed_flood_performance.csv
+  output/model_analysis/expanded/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv \
+  output/model_analysis/expanded/confirmed_flood/inference/drbc_confirmed_flood_performance.csv
 ```
 
 ```bash
@@ -1489,8 +1489,8 @@ uv run scripts/model/confirmed_flood/analyze_drbc_confirmed_flood_performance.py
 
 # 6. DB import
 uv run database/postgres/import_camels_csvs.py \
-  output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv \
-  output/model_analysis/confirmed_flood/coverage/coverage_bias_report.csv \
-  output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv \
-  output/model_analysis/confirmed_flood/inference/drbc_confirmed_flood_performance.csv
+  output/model_analysis/expanded/confirmed_flood/coverage/nws_flood_stage_coverage.csv \
+  output/model_analysis/expanded/confirmed_flood/coverage/coverage_bias_report.csv \
+  output/model_analysis/expanded/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv \
+  output/model_analysis/expanded/confirmed_flood/inference/drbc_confirmed_flood_performance.csv
 ```

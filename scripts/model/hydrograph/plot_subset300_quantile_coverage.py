@@ -16,11 +16,11 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_INPUT = (
     REPO_ROOT
-    / "output/model_analysis/quantile_analysis/analysis/flow_strata_predictor_summary.csv"
+    / "output/model_analysis/legacy/quantile_analysis/analysis/flow_strata_predictor_summary.csv"
 )
 DEFAULT_OUTPUT_DIR = (
     REPO_ROOT
-    / "output/model_analysis/quantile_analysis/analysis/quantile_coverage"
+    / "output/model_analysis/legacy/quantile_analysis/analysis/quantile_coverage"
 )
 Q_RE = re.compile(r"q(?P<level>\d+)")
 STRATUM_LABELS = {

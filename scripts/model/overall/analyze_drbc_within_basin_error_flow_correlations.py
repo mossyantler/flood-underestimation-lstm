@@ -40,19 +40,19 @@ log = logging.getLogger(__name__)
 
 # ── paths ────────────────────────────────────────────────────────────────────
 
-SERIES_ROOT = Path("output/model_analysis/quantile_analysis/required_series")
+SERIES_ROOT = Path("output/model_analysis/legacy/quantile_analysis/required_series")
 BASIN_ATTR_FILE = Path(
     "output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_basin_analysis_table.csv"
 )
 BASIN_METRICS_FILE = Path(
-    "output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv"
+    "output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv"
 )
 OUTPUT_ROOT = Path(
-    "output/model_analysis/overall_analysis/main_comparison"
+    "output/model_analysis/legacy/overall_analysis/main_comparison"
     "/drbc_attribute_metric_correlations/within_basin"
 )
 REPORT_FILE = Path(
-    "output/model_analysis/overall_analysis/main_comparison"
+    "output/model_analysis/legacy/overall_analysis/main_comparison"
     "/drbc_attribute_metric_correlations/report"
     "/drbc_attribute_metric_correlation_report.md"
 )

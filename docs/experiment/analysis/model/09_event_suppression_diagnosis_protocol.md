@@ -4,7 +4,7 @@
 
 이 문서는 extreme-rain stress event에서 강수 forcing은 강한데 관측 유량 response가 낮거나, 반대로 강수 forcing은 약한데 관측 유량만 큰 pulse/plateau를 보이는 case를 어떻게 진단할지 정리한다. 목표는 `01480685_rain_drbc_historical_stress_0005`에서 수행한 case-level 분석을 다른 DRBC 유역과 event에도 같은 순서로 반복 적용하는 것이다.
 
-이 문서는 새 metric이나 공식 screening rule이 아니다. `output/model_analysis/extreme_rain/primary/`에 이미 만들어진 event catalog, model prediction, basin metadata를 읽고, 특정 event가 왜 "눌려 보이는지" 또는 왜 precipitation-driven model이 만들기 어려운 extra-flow signal을 보이는지 post-hoc으로 해석하는 절차다.
+이 문서는 새 metric이나 공식 screening rule이 아니다. `output/model_analysis/legacy/extreme_rain/primary/`에 이미 만들어진 event catalog, model prediction, basin metadata를 읽고, 특정 event가 왜 "눌려 보이는지" 또는 왜 precipitation-driven model이 만들기 어려운 extra-flow signal을 보이는지 post-hoc으로 해석하는 절차다.
 
 ## 사용 시점
 
@@ -21,9 +21,9 @@
 
 | 목적 | 파일 | 핵심 컬럼 |
 | --- | --- | --- |
-| event severity와 observed response | `output/model_analysis/extreme_rain/primary/exposure/extreme_rain_event_catalog.csv` | `event_id`, `gauge_id`, `rain_start`, `rain_peak`, `rain_end`, `wet_cluster_total_rain`, `wet_cluster_peak_rainf`, `max_prec_ari*_ratio`, `dominant_duration_for_ari100h`, `observed_response_peak`, `observed_response_peak_time`, `response_lag_from_rain_peak_h`, `streamflow_q99_threshold`, `flood_ari*`, `obs_peak_to_flood_ari*`, `response_class` |
-| plot과 basin context | `output/model_analysis/extreme_rain/primary/event_simq_plots/event_simq_plot_manifest.csv` | `plot_path`, `gauge_name`, `drain_sqkm_attr`, `hydromod_risk`, `forest_pct`, `developed_pct`, `wetland_pct`, `NDAMS_2009`, `MAJ_NDAMS_2009`, `STOR_NOR_2009`, `CANALS_PCT`, `FRESHW_WITHDRAWAL` |
-| model false-positive 또는 under-response | `output/model_analysis/extreme_rain/primary/analysis/extreme_rain_stress_error_table_wide.csv` | `seed`, `model1_window_peak`, `model1_window_peak_time`, `model1_window_peak_rel_error_pct`, `model1_signed_peak_timing_error_hours`, `q50_window_peak`, `q95_window_peak`, `q99_window_peak`, `q99_window_peak_time`, `q99_window_peak_rel_error_pct`, `q99_signed_peak_timing_error_hours` |
+| event severity와 observed response | `output/model_analysis/legacy/extreme_rain/primary/exposure/extreme_rain_event_catalog.csv` | `event_id`, `gauge_id`, `rain_start`, `rain_peak`, `rain_end`, `wet_cluster_total_rain`, `wet_cluster_peak_rainf`, `max_prec_ari*_ratio`, `dominant_duration_for_ari100h`, `observed_response_peak`, `observed_response_peak_time`, `response_lag_from_rain_peak_h`, `streamflow_q99_threshold`, `flood_ari*`, `obs_peak_to_flood_ari*`, `response_class` |
+| plot과 basin context | `output/model_analysis/legacy/extreme_rain/primary/event_simq_plots/event_simq_plot_manifest.csv` | `plot_path`, `gauge_name`, `drain_sqkm_attr`, `hydromod_risk`, `forest_pct`, `developed_pct`, `wetland_pct`, `NDAMS_2009`, `MAJ_NDAMS_2009`, `STOR_NOR_2009`, `CANALS_PCT`, `FRESHW_WITHDRAWAL` |
+| model false-positive 또는 under-response | `output/model_analysis/legacy/extreme_rain/primary/analysis/extreme_rain_stress_error_table_wide.csv` | `seed`, `model1_window_peak`, `model1_window_peak_time`, `model1_window_peak_rel_error_pct`, `model1_signed_peak_timing_error_hours`, `q50_window_peak`, `q95_window_peak`, `q99_window_peak`, `q99_window_peak_time`, `q99_window_peak_rel_error_pct`, `q99_signed_peak_timing_error_hours` |
 | observed forcing/flow 시계열 | `data/CAMELSH_generic/drbc_holdout_broad/time_series/{gauge_id}.nc` | `Rainf`, `Streamflow` |
 | DRBC static attributes | `output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_static_attributes_full.csv` | `drain_sqkm_attr`, `overlap_ratio_of_basin`, `SLOPE_PCT`, `BFI_AVE`, `DEVNLCD06`, `FORESTNLCD06`, `WATERNLCD06`, `WOODYWETNLCD06`, `EMERGWETNLCD06` |
 | hydromod proxy | `basins/CAMELSH_data/attributes/attributes_gageii_HydroMod_Dams.csv` | `NDAMS_2009`, `MAJ_NDAMS_2009`, `STOR_NOR_2009`, `STOR_NID_2009`, `RAW_DIS_NEAREST_DAM`, `RAW_DIS_NEAREST_MAJ_DAM` |
@@ -56,7 +56,7 @@ import pandas as pd
 
 event_id = "01480685_rain_drbc_historical_stress_0005"
 catalog = pd.read_csv(
-    "output/model_analysis/extreme_rain/primary/exposure/extreme_rain_event_catalog.csv"
+    "output/model_analysis/legacy/extreme_rain/primary/exposure/extreme_rain_event_catalog.csv"
 )
 row = catalog.loc[catalog["event_id"].eq(event_id)].iloc[0]
 
@@ -106,7 +106,7 @@ import pandas as pd
 
 event_id = "01480685_rain_drbc_historical_stress_0005"
 wide = pd.read_csv(
-    "output/model_analysis/extreme_rain/primary/analysis/extreme_rain_stress_error_table_wide.csv"
+    "output/model_analysis/legacy/extreme_rain/primary/analysis/extreme_rain_stress_error_table_wide.csv"
 )
 rows = wide.loc[wide["event_id"].eq(event_id)]
 
@@ -153,7 +153,7 @@ import pandas as pd
 
 gauge_id = "01480685"
 manifest = pd.read_csv(
-    "output/model_analysis/extreme_rain/primary/event_simq_plots/event_simq_plot_manifest.csv",
+    "output/model_analysis/legacy/extreme_rain/primary/event_simq_plots/event_simq_plot_manifest.csv",
     dtype={"gauge_id": str},
 )
 event = manifest.loc[

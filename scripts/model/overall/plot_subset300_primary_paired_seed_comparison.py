@@ -16,11 +16,11 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DELTAS = (
     REPO_ROOT
-    / "output/model_analysis/overall_analysis/main_comparison/tables/primary_epoch_basin_deltas.csv"
+    / "output/model_analysis/legacy/overall_analysis/main_comparison/tables/primary_epoch_basin_deltas.csv"
 )
 DEFAULT_OUTPUT_DIR = (
     REPO_ROOT
-    / "output/model_analysis/overall_analysis/main_comparison/figures/paired_seed_comparison"
+    / "output/model_analysis/legacy/overall_analysis/main_comparison/figures/paired_seed_comparison"
 )
 
 BOX_METRICS = [

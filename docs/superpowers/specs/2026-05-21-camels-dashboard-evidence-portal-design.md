@@ -160,7 +160,7 @@ q99는 peak underestimation을 줄이는 방향이 보인다.
 다만 calibration과 false-positive tradeoff는 별도 module에서 확인한다.
 
 근거 경로
-output/model_analysis/overall_analysis/main_comparison/
+output/model_analysis/legacy/overall_analysis/main_comparison/
 docs/experiment/analysis/model/02_primary_high_flow_peak_performance.md
 ```
 

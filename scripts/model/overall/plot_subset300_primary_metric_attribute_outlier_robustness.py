@@ -24,11 +24,11 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_INPUT_DIR = (
     REPO_ROOT
-    / "output/model_analysis/overall_analysis/main_comparison/attribute_correlations/robustness/tables"
+    / "output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations/robustness/tables"
 )
 DEFAULT_OUTPUT_DIR = (
     REPO_ROOT
-    / "output/model_analysis/overall_analysis/main_comparison/attribute_correlations/robustness/figures"
+    / "output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations/robustness/figures"
 )
 
 SCENARIOS = [

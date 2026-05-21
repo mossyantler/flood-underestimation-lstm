@@ -11,7 +11,7 @@
 주요 산출물은 아래에 있다.
 
 ```text
-output/model_analysis/quantile_analysis/analysis/
+output/model_analysis/legacy/quantile_analysis/analysis/
 ```
 
 ## 분석 단위
@@ -27,10 +27,10 @@ Flow stratum은 `all`, `basin_top10`, `basin_top5`, `basin_top1`, `basin_top0_1`
 생성된 chart는 아래 네 개다.
 
 ```text
-output/model_analysis/quantile_analysis/analysis/charts/q99_exceedance_underestimation_fraction_by_epoch.png
-output/model_analysis/quantile_analysis/analysis/charts/primary_peak_relative_bias_by_seed.png
-output/model_analysis/quantile_analysis/analysis/charts/primary_q99_and_peak_quantile_zone_by_seed.png
-output/model_analysis/quantile_analysis/analysis/charts/q99_exceedance_q99_q50_gap_pct_obs_by_epoch.png
+output/model_analysis/legacy/quantile_analysis/analysis/charts/q99_exceedance_underestimation_fraction_by_epoch.png
+output/model_analysis/legacy/quantile_analysis/analysis/charts/primary_peak_relative_bias_by_seed.png
+output/model_analysis/legacy/quantile_analysis/analysis/charts/primary_q99_and_peak_quantile_zone_by_seed.png
+output/model_analysis/legacy/quantile_analysis/analysis/charts/q99_exceedance_q99_q50_gap_pct_obs_by_epoch.png
 ```
 
 Hydrograph plot은 `primary_seed_basin/` 아래에 684개가 생성되어 있다. 이 plot들은 본문용 대표 사례와 supplement용 사례 후보로 쓸 수 있다.
@@ -38,8 +38,8 @@ Hydrograph plot은 `primary_seed_basin/` 아래에 684개가 생성되어 있다
 본문용 compact table과 대표 hydrograph 후보 목록은 아래에 따로 생성했다.
 
 ```text
-output/model_analysis/paper_result_assets/tables/primary_high_flow_peak_compact.csv
-output/model_analysis/paper_result_assets/tables/representative_hydrograph_candidates.csv
+output/model_analysis/legacy/paper_result_assets/tables/primary_high_flow_peak_compact.csv
+output/model_analysis/legacy/paper_result_assets/tables/representative_hydrograph_candidates.csv
 ```
 
 ## 현재 해석
@@ -52,7 +52,7 @@ Observed peak hour에서도 같은 방향이 나온다. Model 1은 peak hour의 
 
 Quantile-zone diagnostic은 observed high-flow가 실제로 어느 구간에 포함되는지를 직접 보여준다. Primary basin-specific Q99 exceedance 전체 27,978개 row 중 `>q99`가 12,574개, 즉 44.9%였고, `q95-q99`는 4,748개, `q90-q95`는 2,130개, `q50-q90`는 4,566개, `<=q50`는 3,960개였다. Peak 한 시점만 보면 114개 basin-seed peak 중 `>q99`가 57개, `q95-q99`가 14개, `q90-q95`가 7개, `q50-q90`가 16개, `<=q50`가 20개다.
 
-![Primary quantile-zone share by seed](../../../../output/model_analysis/quantile_analysis/analysis/charts/primary_q99_and_peak_quantile_zone_by_seed.png)
+![Primary quantile-zone share by seed](../../../../output/model_analysis/legacy/quantile_analysis/analysis/charts/primary_q99_and_peak_quantile_zone_by_seed.png)
 
 Quantile gap도 high-flow에서 커진다. Primary Q99 exceedance(`basin_top1`)에서 평균 median `q99-q50` gap은 `20.9`이고, 관측값 대비 약 `74.1%`다. 이는 Model 2가 high-flow 상황에서 중앙선 위로 upper-tail margin을 열어 둔다는 의미다.
 

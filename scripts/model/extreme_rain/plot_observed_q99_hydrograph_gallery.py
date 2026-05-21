@@ -18,7 +18,7 @@ DEFAULT_EVENT_RESPONSE_TABLE = Path(
     "output/basin/drbc/analysis/event_response/tables/event_response_table.csv"
 )
 DEFAULT_TIMESERIES_DIR = Path("data/CAMELSH_generic/drbc_holdout_broad/time_series")
-DEFAULT_OUTPUT_ROOT = Path("output/model_analysis/extreme_rain/primary/analysis")
+DEFAULT_OUTPUT_ROOT = Path("output/model_analysis/legacy/extreme_rain/primary/analysis")
 
 
 def parse_args() -> argparse.Namespace:

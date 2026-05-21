@@ -25,9 +25,9 @@ import pandas as pd
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_MAIN = REPO_ROOT / "output/model_analysis/overall_analysis/main_comparison"
-DEFAULT_QUANTILE = REPO_ROOT / "output/model_analysis/quantile_analysis"
-DEFAULT_STRESS = REPO_ROOT / "output/model_analysis/extreme_rain/primary/analysis"
+DEFAULT_MAIN = REPO_ROOT / "output/model_analysis/legacy/overall_analysis/main_comparison"
+DEFAULT_QUANTILE = REPO_ROOT / "output/model_analysis/legacy/quantile_analysis"
+DEFAULT_STRESS = REPO_ROOT / "output/model_analysis/legacy/extreme_rain/primary/analysis"
 DEFAULT_OUTPUT_DIR = DEFAULT_MAIN
 
 POSITIVE_BETTER = {

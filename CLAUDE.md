@@ -146,8 +146,8 @@ DEVICE=cuda:0 bash scripts/runs/official/run_subset300_extreme_rain_stress_test.
 
 - 분석 결과 → `output/model_analysis/`
 - Basin-side 결과 → `output/basin/`
-- extreme-rain primary (wet-footprint 시간축) → `output/model_analysis/extreme_rain/primary/`
-- epoch sweep → `output/model_analysis/extreme_rain/all/`
+- extreme-rain primary (wet-footprint 시간축) → `output/model_analysis/legacy/extreme_rain/primary/`
+- epoch sweep → `output/model_analysis/legacy/extreme_rain/all/`
 
 ---
 

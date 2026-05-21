@@ -45,7 +45,7 @@
 | 4 | `scripts/model/confirmed_flood/infer_drbc_confirmed_flood_events.py` | Model 1/2 inference |
 | 5 | `scripts/model/confirmed_flood/analyze_drbc_confirmed_flood_performance.py` | Model 1 vs 2 비교 분석 |
 
-산출물 경로: `output/model_analysis/confirmed_flood/`
+산출물 경로: `output/model_analysis/expanded/confirmed_flood/`
 
 ---
 
@@ -69,7 +69,7 @@
 ### 출력물
 
 **커버리지 테이블**
-`output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv`
+`output/model_analysis/expanded/confirmed_flood/coverage/nws_flood_stage_coverage.csv`
 
 컬럼: `usgs_id`, `nws_location_id`, `minor_stage_ft`, `moderate_stage_ft`, `major_stage_ft`, `minor_discharge_cms`, `moderate_discharge_cms`, `major_discharge_cms`, `coverage_status`
 
@@ -80,8 +80,8 @@
 비교 대상 속성: `area`, `slope`, `aridity`, `snow_fraction`, `baseflow_index`
 
 출력물:
-- `output/model_analysis/confirmed_flood/coverage/coverage_bias_report.csv` — 속성별 covered/missing 그룹의 median, mean, KS-test p-value
-- `output/model_analysis/confirmed_flood/coverage/figures/coverage_bias_distributions.png` — 속성별 분포 비교 boxplot (covered vs. missing)
+- `output/model_analysis/expanded/confirmed_flood/coverage/coverage_bias_report.csv` — 속성별 covered/missing 그룹의 median, mean, KS-test p-value
+- `output/model_analysis/expanded/confirmed_flood/coverage/figures/coverage_bias_distributions.png` — 속성별 분포 비교 boxplot (covered vs. missing)
 
 이 figure를 보고 누락 basin이 소규모 headwater에 집중되어 있으면 논문에 "analysis is representative of mid-to-large basins; headwater flash-flood dynamics may be underrepresented" 문장을 limitation으로 추가한다.
 
@@ -127,7 +127,7 @@ gauge가 속한 county FIPS + event peak 날짜 ±2일 기준으로 NOAA NCEI St
 
 ### 출력물
 
-`output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv`
+`output/model_analysis/expanded/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv`
 
 컬럼: `usgs_id`, `peak_time`, `peak_discharge_cms`, `flood_tier`, `tier_limited`, `noaa_corroborated`, `period` (pre_2000 / post_2013), `forcing_coverage_min`
 

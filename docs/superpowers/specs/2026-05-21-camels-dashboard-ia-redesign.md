@@ -201,9 +201,9 @@ Analysis는 결과와 분석을 다루는 drilldown workspace다. Type마다 다
 
 Hydrograph는 기존 HTML 산출물 구조를 참고한다.
 
-- `output/model_analysis/extreme_rain/primary/observed_q99_hydrograph_gallery_index.html`
-- `output/model_analysis/extreme_rain/primary/event_plot_median_map_index.html`
-- `output/model_analysis/analysis_dashboard/index.html`
+- `output/model_analysis/legacy/extreme_rain/primary/observed_q99_hydrograph_gallery_index.html`
+- `output/model_analysis/legacy/extreme_rain/primary/event_plot_median_map_index.html`
+- `output/model_analysis/legacy/analysis_dashboard/index.html`
 
 ### 4.5 Reference
 

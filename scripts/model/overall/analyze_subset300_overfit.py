@@ -26,7 +26,7 @@ import pandas as pd
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_OVERALL = REPO_ROOT / "output/model_analysis/overall_analysis"
+DEFAULT_OVERALL = REPO_ROOT / "output/model_analysis/legacy/overall_analysis"
 DEFAULT_MAIN = DEFAULT_OVERALL / "main_comparison"
 DEFAULT_EPOCH_SUMMARY = DEFAULT_OVERALL / "epoch_sensitivity/tables/epoch_metric_summary.csv"
 DEFAULT_MANIFEST = DEFAULT_OVERALL / "run_records/metric_file_manifest.csv"

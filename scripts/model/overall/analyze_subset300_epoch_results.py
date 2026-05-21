@@ -766,7 +766,7 @@ def main() -> int:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("output/model_analysis/overall_analysis"),
+        default=Path("output/model_analysis/legacy/overall_analysis"),
         help="Directory for aggregate CSVs, charts, and markdown summary.",
     )
     args = parser.parse_args()

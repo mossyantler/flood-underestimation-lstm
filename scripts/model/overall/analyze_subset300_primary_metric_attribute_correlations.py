@@ -29,10 +29,10 @@ from scipy import stats
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_METRICS = (
-    REPO_ROOT / "output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv"
+    REPO_ROOT / "output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv"
 )
 DEFAULT_PRIMARY_SUMMARY = (
-    REPO_ROOT / "output/model_analysis/overall_analysis/main_comparison/tables/primary_epoch_summary.csv"
+    REPO_ROOT / "output/model_analysis/legacy/overall_analysis/main_comparison/tables/primary_epoch_summary.csv"
 )
 DEFAULT_STATIC_ATTRIBUTES = (
     REPO_ROOT / "data/CAMELSH_generic/drbc_holdout_broad/attributes/static_attributes.csv"
@@ -42,7 +42,7 @@ DEFAULT_DRBC_ATTRIBUTES = (
 )
 DEFAULT_BASIN_SHAPEFILE = REPO_ROOT / "basins/CAMELSH_data/shapefiles/CAMELSH_shapefile.shp"
 DEFAULT_OUTPUT_DIR = (
-    REPO_ROOT / "output/model_analysis/overall_analysis/main_comparison/attribute_correlations"
+    REPO_ROOT / "output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations"
 )
 
 OFFICIAL_SEEDS = [111, 222, 444]

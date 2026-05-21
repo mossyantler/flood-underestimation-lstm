@@ -11,7 +11,7 @@
 주요 산출물은 아래에 있다.
 
 ```text
-output/model_analysis/probabilistic_diagnostics/
+output/model_analysis/legacy/probabilistic_diagnostics/
 ```
 
 ## 생성된 표와 그림
@@ -19,16 +19,16 @@ output/model_analysis/probabilistic_diagnostics/
 주요 CSV는 `quantile_pinball_summary.csv`, `quantile_pinball_by_stratum.csv`, `quantile_calibration_summary.csv`, `quantile_calibration_by_stratum.csv`, `upper_tail_spread_summary.csv`, `upper_tail_spread_by_stratum.csv`, `input_manifest.csv`, `chart_manifest.csv`다. 요약 report는 아래에 있다.
 
 ```text
-output/model_analysis/probabilistic_diagnostics/report/probabilistic_diagnostics_report.md
+output/model_analysis/legacy/probabilistic_diagnostics/report/probabilistic_diagnostics_report.md
 ```
 
 생성된 주요 그림은 아래 네 개다.
 
 ```text
-output/model_analysis/probabilistic_diagnostics/figures/primary_all_quantile_calibration.png
-output/model_analysis/probabilistic_diagnostics/figures/primary_pinball_by_stratum.png
-output/model_analysis/probabilistic_diagnostics/figures/primary_q99_q50_spread_by_stratum.png
-output/model_analysis/probabilistic_diagnostics/figures/same_epoch_all_calibration_error.png
+output/model_analysis/legacy/probabilistic_diagnostics/figures/primary_all_quantile_calibration.png
+output/model_analysis/legacy/probabilistic_diagnostics/figures/primary_pinball_by_stratum.png
+output/model_analysis/legacy/probabilistic_diagnostics/figures/primary_q99_q50_spread_by_stratum.png
+output/model_analysis/legacy/probabilistic_diagnostics/figures/same_epoch_all_calibration_error.png
 ```
 
 ## 해석 기준

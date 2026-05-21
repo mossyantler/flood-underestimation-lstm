@@ -32,7 +32,7 @@
 
 **Files:**
 - Create: `scripts/model/join_event_m2_peaks.py`
-- Output: `output/model_analysis/overall_analysis/main_comparison/drbc_basin_report_cards/tables/event_peak_errors_with_m2.csv`
+- Output: `output/model_analysis/legacy/overall_analysis/main_comparison/drbc_basin_report_cards/tables/event_peak_errors_with_m2.csv`
 
 **Step 1: 스크립트 작성**
 
@@ -47,9 +47,9 @@ import pandas as pd
 from pathlib import Path
 
 ROOT = Path(__file__).parents[2]
-EP_PATH = ROOT / "output/model_analysis/overall_analysis/main_comparison/drbc_basin_report_cards/tables/event_peak_errors.csv"
-Q_DIR = ROOT / "output/model_analysis/quantile_analysis/quantile_exports"
-OUT_PATH = ROOT / "output/model_analysis/overall_analysis/main_comparison/drbc_basin_report_cards/tables/event_peak_errors_with_m2.csv"
+EP_PATH = ROOT / "output/model_analysis/legacy/overall_analysis/main_comparison/drbc_basin_report_cards/tables/event_peak_errors.csv"
+Q_DIR = ROOT / "output/model_analysis/legacy/quantile_analysis/quantile_exports"
+OUT_PATH = ROOT / "output/model_analysis/legacy/overall_analysis/main_comparison/drbc_basin_report_cards/tables/event_peak_errors_with_m2.csv"
 
 # primary epoch: seed → epoch 매핑 (checkpoint sensitivity 결과 기반)
 SEED_EPOCH = {"111": "025", "222": "025", "444": "025"}
@@ -103,7 +103,7 @@ uv run python scripts/model/join_event_m2_peaks.py
 ```bash
 uv run python3 -c "
 import pandas as pd
-df = pd.read_csv('output/model_analysis/overall_analysis/main_comparison/drbc_basin_report_cards/tables/event_peak_errors_with_m2.csv')
+df = pd.read_csv('output/model_analysis/legacy/overall_analysis/main_comparison/drbc_basin_report_cards/tables/event_peak_errors_with_m2.csv')
 print('컬럼:', list(df.columns))
 print('join 성공률:', df['m2_q50'].notna().mean().round(3))
 print('m1_peak_ratio 통계:', df['m1_peak_ratio'].describe().round(3).to_string())
@@ -119,7 +119,7 @@ print('m2_q50_peak_ratio 통계:', df['m2_q50_peak_ratio'].describe().round(3).t
 
 **Files:**
 - Create: `scripts/model/plot_q1_m1_underestimation.py`
-- Output dir: `output/model_analysis/paper_result_assets/figures/q1_m1_underestimation/`
+- Output dir: `output/model_analysis/legacy/paper_result_assets/figures/q1_m1_underestimation/`
 
 **Step 1: Figure A — 유역별 median M1 peak ratio 분포**
 
@@ -133,7 +133,7 @@ print('m2_q50_peak_ratio 통계:', df['m2_q50_peak_ratio'].describe().round(3).t
 # plot_q1_m1_underestimation.py (발췌)
 import pandas as pd, matplotlib.pyplot as plt
 
-basin_df = pd.read_csv("output/model_analysis/overall_analysis/main_comparison/"
+basin_df = pd.read_csv("output/model_analysis/legacy/overall_analysis/main_comparison/"
                         "drbc_basin_report_cards/tables/event_summary_per_basin.csv")
 
 fig, ax = plt.subplots(figsize=(8, 10))
@@ -155,7 +155,7 @@ plt.savefig(out_dir / "fig_q1a_basin_peak_ratio.pdf", dpi=150)
 
 ```bash
 uv run python scripts/model/plot_q1_m1_underestimation.py
-ls output/model_analysis/paper_result_assets/figures/q1_m1_underestimation/
+ls output/model_analysis/legacy/paper_result_assets/figures/q1_m1_underestimation/
 ```
 
 기대 출력: `fig_q1a_basin_peak_ratio.pdf`, `fig_q1b_q99_mape.pdf`
@@ -168,7 +168,7 @@ ls output/model_analysis/paper_result_assets/figures/q1_m1_underestimation/
 
 **Files:**
 - Create: `scripts/model/plot_q2_m1_vs_m2q50.py`
-- Output dir: `output/model_analysis/paper_result_assets/figures/q2_m1_vs_m2q50/`
+- Output dir: `output/model_analysis/legacy/paper_result_assets/figures/q2_m1_vs_m2q50/`
 
 **Step 1: Figure A — Scatter: M1 peak ratio vs M2 q50 peak ratio (사건별)**
 
@@ -212,7 +212,7 @@ uv run python scripts/model/plot_q2_m1_vs_m2q50.py
 
 **Files:**
 - Create: `scripts/model/plot_q3_reliability_diagram.py`
-- Output dir: `output/model_analysis/paper_result_assets/figures/q3_m2_coverage/`
+- Output dir: `output/model_analysis/legacy/paper_result_assets/figures/q3_m2_coverage/`
 
 **Step 1: Reliability Diagram 시각화**
 
@@ -220,7 +220,7 @@ uv run python scripts/model/plot_q2_m1_vs_m2q50.py
 import pandas as pd, matplotlib.pyplot as plt
 import numpy as np
 
-df = pd.read_csv("output/model_analysis/probabilistic_diagnostics/quantile_calibration_by_stratum.csv")
+df = pd.read_csv("output/model_analysis/legacy/probabilistic_diagnostics/quantile_calibration_by_stratum.csv")
 
 fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
@@ -330,8 +330,8 @@ uv run python scripts/model/plot_q3_event_coverage.py
 **목적:** 위 그림들을 뒷받침하는 논문용 숫자 테이블 업데이트.
 
 **Files:**
-- Modify: `output/model_analysis/paper_result_assets/tables/primary_high_flow_peak_compact.csv`에 M2 q50 컬럼 추가
-- Create: `output/model_analysis/paper_result_assets/tables/q3_capture_rate_by_magnitude.csv`
+- Modify: `output/model_analysis/legacy/paper_result_assets/tables/primary_high_flow_peak_compact.csv`에 M2 q50 컬럼 추가
+- Create: `output/model_analysis/legacy/paper_result_assets/tables/q3_capture_rate_by_magnitude.csv`
 
 **Step 1: M1 vs M2 q50 compact table**
 

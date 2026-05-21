@@ -15,19 +15,19 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_INPUT = (
     REPO_ROOT
-    / "output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv"
+    / "output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv"
 )
 DEFAULT_OUTPUT_DIR = (
     REPO_ROOT
-    / "output/model_analysis/overall_analysis/epoch_sensitivity/figures/epoch_metric_boxplots"
+    / "output/model_analysis/legacy/overall_analysis/epoch_sensitivity/figures/epoch_metric_boxplots"
 )
 DEFAULT_METADATA_DIR = (
     REPO_ROOT
-    / "output/model_analysis/overall_analysis/epoch_sensitivity/metadata/epoch_metric_boxplots"
+    / "output/model_analysis/legacy/overall_analysis/epoch_sensitivity/metadata/epoch_metric_boxplots"
 )
 DEFAULT_PRIMARY_SUMMARY = (
     REPO_ROOT
-    / "output/model_analysis/overall_analysis/main_comparison/tables/primary_epoch_summary.csv"
+    / "output/model_analysis/legacy/overall_analysis/main_comparison/tables/primary_epoch_summary.csv"
 )
 OFFICIAL_SEEDS = [111, 222, 444]
 MODEL_LABELS = {"model1": "Model 1", "model2": "Model 2"}

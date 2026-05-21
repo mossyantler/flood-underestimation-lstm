@@ -27,22 +27,22 @@ uv run --script database/duckdb/camels_duckdb_tool.py views
 
 ```bash
 uv run --script database/duckdb/camels_duckdb_tool.py inspect \
-  output/model_analysis/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv
+  output/model_analysis/legacy/overall_analysis/epoch_sensitivity/tables/basin_metrics.csv
 ```
 
 명시한 CSV를 Parquet로 변환하려면:
 
 ```bash
 uv run --script database/duckdb/camels_duckdb_tool.py to-parquet \
-  output/model_analysis/quantile_analysis/required_series/seed111/epoch005_required_series.csv
+  output/model_analysis/legacy/quantile_analysis/required_series/seed111/epoch005_required_series.csv
 ```
 
 기본 출력은 `database/local/duckdb/parquet/` 아래에 원래 상대 경로를 유지한 `.parquet` 파일이다. `required_series`나 `quantile_exports`처럼 100MB 이상인 시간 단위 series는 PostgreSQL typed table보다 이 방식이 더 적합하다. 디렉터리나 glob도 입력으로 줄 수 있다.
 
 ```bash
 uv run --script database/duckdb/camels_duckdb_tool.py to-parquet \
-  output/model_analysis/quantile_analysis/required_series \
-  output/model_analysis/quantile_analysis/quantile_exports
+  output/model_analysis/legacy/quantile_analysis/required_series \
+  output/model_analysis/legacy/quantile_analysis/quantile_exports
 ```
 
 DuckDB database에 만든 inventory를 SQL로 보려면:

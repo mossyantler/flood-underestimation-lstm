@@ -2,14 +2,14 @@
 
 ## 서술 목적
 
-이 문서는 `subset300` Model 1 / Model 2 all-validation-epoch hydrograph 산출물을 연구 질문에 맞게 해석하는 방법을 정리한다. 자세한 raw artifact 설명은 `output/model_analysis/quantile_analysis/analysis/analysis_outputs_guide.md`에 두고, 이 문서는 논문 메시지와 분석 방법의 기준을 남긴다.
+이 문서는 `subset300` Model 1 / Model 2 all-validation-epoch hydrograph 산출물을 연구 질문에 맞게 해석하는 방법을 정리한다. 자세한 raw artifact 설명은 `output/model_analysis/legacy/quantile_analysis/analysis/analysis_outputs_guide.md`에 두고, 이 문서는 논문 메시지와 분석 방법의 기준을 남긴다.
 
 ## 분석 대상
 
 분석 입력은 아래 디렉터리다.
 
 ```text
-output/model_analysis/quantile_analysis/
+output/model_analysis/legacy/quantile_analysis/
 ```
 
 이 디렉터리는 `seed 111 / 222 / 444`, validation checkpoint `005 / 010 / 015 / 020 / 025 / 030`, DRBC test basin 38개에 대한 hydrograph plot과 required-series CSV를 담는다. 모델 비교는 `Model 1` deterministic prediction과 `Model 2`의 `q50/q90/q95/q99`를 대상으로 한다.
@@ -23,7 +23,7 @@ uv run scripts/model/hydrograph/analyze_subset300_hydrograph_outputs.py
 생성 위치는 아래다.
 
 ```text
-output/model_analysis/quantile_analysis/analysis/
+output/model_analysis/legacy/quantile_analysis/analysis/
 ```
 
 ## 데이터 품질 확인
@@ -79,7 +79,7 @@ Observed peak hour에서도 같은 결론이 나온다. Model 1은 peak hour의 
 
 Observed high-flow가 Model 2 quantile ladder의 어느 구간에 들어가는지도 별도 표로 확인한다. Primary basin-specific Q99 exceedance 전체 27,978개 row 중 `>q99`는 12,574개, 즉 44.9%였다. Peak 한 시점만 보면 114개 basin-seed peak 중 `>q99`는 57개, `q95-q99`는 14개, `q90-q95`는 7개, `q50-q90`는 16개, `<=q50`는 20개다. 즉 q99는 calibrated coverage claim에는 부족하지만, Q99 exceedance와 peak 양쪽 모두에서 q50-q99 ladder 안에 들어오는 사례도 함께 확인된다.
 
-![Primary quantile-zone share by seed](../../../../output/model_analysis/quantile_analysis/analysis/charts/primary_q99_and_peak_quantile_zone_by_seed.png)
+![Primary quantile-zone share by seed](../../../../output/model_analysis/legacy/quantile_analysis/analysis/charts/primary_q99_and_peak_quantile_zone_by_seed.png)
 
 따라서 현재 결과는 `q50` 중앙선 개선이 아니라 upper-tail output의 가치를 보여준다. 논문 메시지는 “probabilistic head가 median prediction을 개선했다”가 아니라 “같은 LSTM backbone이라도 upper quantile head가 extreme flood underestimation을 줄일 수 있다”로 잡아야 한다.
 
@@ -119,4 +119,4 @@ Hourly Q99 exceedance 분석은 큰 유량 시간이 여러 시간 이어지는 
 
 event-level analysis는 `event_regime_analysis/` 산출물로 1차 구현했지만, 이 event set은 streamflow Q99 candidate에서 출발하기 때문에 대부분 `high_flow_below_2yr_proxy`다. 따라서 hourly `Rainf`에서 ARI25/50/100급 극한호우 event를 직접 뽑아 train/validation exposure와 DRBC historical stress response를 분리해 확인한다.
 
-이 보조 분석의 primary-checkpoint 결과는 `output/model_analysis/extreme_rain/primary/` 아래에 둔다. `exposure` 단계는 “모델이 극한호우 forcing을 배웠는가”를 답하고, `inference/analysis` 단계는 positive-response event에서 peak tracking을, low-response event에서 upper quantile false-positive를 평가한다. 같은 cohort에 대해 validation checkpoint `005 / 010 / 015 / 020 / 025 / 030` 전체를 돌린 sensitivity 결과는 `output/model_analysis/extreme_rain/all/` 아래에 따로 둔다. 이 all-epoch stress result는 primary checkpoint를 다시 고르는 용도가 아니라, upper-tail effect와 false-positive tradeoff가 checkpoint 선택에 얼마나 민감한지 확인하는 보조 진단이다. 이후 basin별 q99 exceedance case와 post-hoc calibration은 이 stress-test 결과를 본 뒤 좁혀서 검토한다.
+이 보조 분석의 primary-checkpoint 결과는 `output/model_analysis/legacy/extreme_rain/primary/` 아래에 둔다. `exposure` 단계는 “모델이 극한호우 forcing을 배웠는가”를 답하고, `inference/analysis` 단계는 positive-response event에서 peak tracking을, low-response event에서 upper quantile false-positive를 평가한다. 같은 cohort에 대해 validation checkpoint `005 / 010 / 015 / 020 / 025 / 030` 전체를 돌린 sensitivity 결과는 `output/model_analysis/legacy/extreme_rain/all/` 아래에 따로 둔다. 이 all-epoch stress result는 primary checkpoint를 다시 고르는 용도가 아니라, upper-tail effect와 false-positive tradeoff가 checkpoint 선택에 얼마나 민감한지 확인하는 보조 진단이다. 이후 basin별 q99 exceedance case와 post-hoc calibration은 이 stress-test 결과를 본 뒤 좁혀서 검토한다.

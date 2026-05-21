@@ -28,7 +28,7 @@ from scipy import stats
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_ATTRIBUTE_ROOT = (
-    REPO_ROOT / "output/model_analysis/overall_analysis/main_comparison/attribute_correlations"
+    REPO_ROOT / "output/model_analysis/legacy/overall_analysis/main_comparison/attribute_correlations"
 )
 DEFAULT_OUTLIER_AUDIT = (
     DEFAULT_ATTRIBUTE_ROOT / "robustness/tables/primary_metric_attribute_iqr_outlier_audit.csv"
@@ -37,7 +37,7 @@ DEFAULT_EVENT_RESPONSE = (
     REPO_ROOT / "output/basin/drbc/analysis/event_response/tables/event_response_basin_summary.csv"
 )
 DEFAULT_OBS_STATS = (
-    REPO_ROOT / "output/model_analysis/overall_analysis/result_checks/outlier_checks/test_observed_streamflow_stats.csv"
+    REPO_ROOT / "output/model_analysis/legacy/overall_analysis/result_checks/outlier_checks/test_observed_streamflow_stats.csv"
 )
 DEFAULT_STREAMFLOW_QUALITY = (
     REPO_ROOT / "output/basin/drbc/screening/drbc_streamflow_quality_table.csv"

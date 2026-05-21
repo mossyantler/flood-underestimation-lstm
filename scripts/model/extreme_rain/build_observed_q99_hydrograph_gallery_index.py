@@ -37,16 +37,16 @@ from build_extreme_rain_median_map_index import (
 
 
 DEFAULT_HYDROGRAPH_ROOT = Path(
-    "output/model_analysis/extreme_rain/primary/analysis"
+    "output/model_analysis/legacy/extreme_rain/primary/analysis"
 )
 DEFAULT_EVENT_RESPONSE_TABLE = Path(
     "output/basin/drbc/analysis/event_response/tables/event_response_table.csv"
 )
 DEFAULT_METADATA_MANIFEST = Path(
-    "output/model_analysis/extreme_rain/primary/event_simq_plots/event_simq_plot_manifest.csv"
+    "output/model_analysis/legacy/extreme_rain/primary/event_simq_plots/event_simq_plot_manifest.csv"
 )
 DEFAULT_TIER_PROFILE = Path(
-    "output/model_analysis/overall_analysis/main_comparison/"
+    "output/model_analysis/legacy/overall_analysis/main_comparison/"
     "attribute_correlations/median_deviation/tables/"
     "metric_median_deviation_basin_tier_profile.csv"
 )
@@ -54,7 +54,7 @@ DEFAULT_DRBC_SELECTED = Path("output/basin/drbc/basin_define/camelsh_drbc_select
 DEFAULT_CAMELSH_SHAPEFILE = Path("basins/CAMELSH_data/shapefiles/CAMELSH_shapefile.shp")
 DEFAULT_DRBC_BOUNDARY = Path("basins/drbc_boundary/drb_bnd_polygon.shp")
 DEFAULT_OUTPUT_HTML = Path(
-    "output/model_analysis/extreme_rain/primary/"
+    "output/model_analysis/legacy/extreme_rain/primary/"
     "observed_q99_hydrograph_gallery_index.html"
 )
 

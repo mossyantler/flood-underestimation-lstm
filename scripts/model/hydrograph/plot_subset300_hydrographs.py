@@ -303,7 +303,7 @@ def main() -> int:
         description="Plot subset300 primary test hydrographs with Model 1, Model 2 q50, and Model 2 upper quantiles."
     )
     parser.add_argument("--run-root", type=Path, default=Path("runs/subset_comparison"))
-    parser.add_argument("--output-dir", type=Path, default=Path("output/model_analysis/quantile_analysis"))
+    parser.add_argument("--output-dir", type=Path, default=Path("output/model_analysis/legacy/quantile_analysis"))
     parser.add_argument("--seeds", type=int, nargs="+", default=[111, 222, 444])
     parser.add_argument("--basins", nargs="+", default=["all"], help="Basin ids or 'all'.")
     parser.add_argument(
