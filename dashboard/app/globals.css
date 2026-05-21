@@ -25,13 +25,15 @@
 
   /* Section accents */
   --accent-O: #6bb4ff;
+  --accent-E: #f7b955;
+  --accent-F: #50e3c2;
+  --accent-A: #ff6b8a;
+  --accent-R: #b69bff;
   --accent-H: #67d4ff;
   --accent-D: #50e3c2;
   --accent-M: #b69bff;
-  --accent-R: #f7b955;
-  --accent-A: #b8c0cc;
   --accent-S: #ff6b8a;
-  --accent-F: #ff8a5b;
+  --accent-confirmed: #ff8a5b;
 
   /* Radius */
   --r-sm:  6px;
@@ -1161,9 +1163,221 @@ h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: 0; }
 
 .confirmed-table-link {
   padding: 0;
-  color: var(--accent-F);
+  color: var(--accent-confirmed);
   font-family: var(--font-geist-mono), monospace;
   font-size: 10px;
+}
+
+/* ── New IA section panels ── */
+.workflow-step-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.workflow-step {
+  min-height: 176px;
+}
+
+.workflow-step .panel-sub {
+  color: var(--accent-E);
+}
+
+.workflow-checkpoint-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.foundation-shell {
+  gap: 14px;
+}
+
+.foundation-tabbar {
+  align-items: center;
+  background: var(--panel-deep);
+  border: 1px solid var(--hairline-tbl);
+  border-radius: var(--r-md);
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  width: fit-content;
+}
+
+.foundation-tab {
+  border-radius: 6px;
+  color: var(--ink-muted);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 10px;
+  font-weight: 650;
+  min-height: 28px;
+  padding: 0 12px;
+}
+
+.foundation-tab[data-active="true"] {
+  background: var(--accent-F);
+  color: var(--bg);
+}
+
+.foundation-tab-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.foundation-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 10px;
+}
+
+.foundation-card {
+  background: var(--panel-inner);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.foundation-card strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.foundation-card p {
+  color: var(--ink-body);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.foundation-card code {
+  color: var(--ink-muted);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+
+.analysis-module-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.analysis-module-card {
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  color: inherit;
+  display: grid;
+  gap: 7px;
+  min-height: 172px;
+  padding: 14px;
+  text-decoration: none;
+}
+
+.analysis-module-card:hover {
+  background: var(--panel-deep);
+  border-color: var(--hairline-hi);
+}
+
+.analysis-module-card span {
+  color: var(--ink-dim);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 10px;
+}
+
+.analysis-module-card strong {
+  color: var(--ink);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 26px;
+  line-height: 1.1;
+}
+
+.analysis-module-card p {
+  color: var(--ink-muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.analysis-module-card code {
+  color: var(--ink-dim);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 8px;
+  margin-top: auto;
+  overflow-wrap: anywhere;
+}
+
+.analysis-module-card[data-tone="main"] { border-color: color-mix(in srgb, #50e3c2 38%, var(--hairline)); }
+.analysis-module-card[data-tone="warn"] { border-color: color-mix(in srgb, #f7b955 38%, var(--hairline)); }
+.analysis-module-card[data-tone="flood"] { border-color: color-mix(in srgb, var(--accent-confirmed) 42%, var(--hairline)); }
+.analysis-module-card[data-tone="calibration"] { border-color: color-mix(in srgb, #6bb4ff 35%, var(--hairline)); }
+
+.reference-map {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.reference-node {
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  color: inherit;
+  display: grid;
+  gap: 9px;
+  min-height: 196px;
+  min-width: 0;
+  padding: 14px;
+  text-decoration: none;
+}
+
+.reference-node:hover {
+  background: var(--panel-deep);
+  border-color: var(--accent-R);
+}
+
+.reference-node-top {
+  align-items: flex-start;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.reference-node strong {
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.reference-node em {
+  border: 1px solid var(--hairline-tbl);
+  border-radius: 999px;
+  color: var(--ink-dim);
+  flex-shrink: 0;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 8px;
+  font-style: normal;
+  padding: 2px 6px;
+}
+
+.reference-node p {
+  color: var(--ink-muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.reference-source-list {
+  display: grid;
+  gap: 5px;
+  margin-top: auto;
+}
+
+.reference-source-list code {
+  color: var(--ink-dim);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 8px;
+  overflow-wrap: anywhere;
 }
 
 .confirmed-event-table {
@@ -1190,6 +1404,10 @@ h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: 0; }
   .kpi-strip { grid-template-columns: 1fr; }
   .hero-row { grid-template-columns: 1fr; }
   .panel-grid { grid-template-columns: 1fr; }
+  .workflow-step-grid,
+  .analysis-module-grid,
+  .reference-map { grid-template-columns: 1fr; }
+  .foundation-grid { grid-template-columns: 1fr; }
   .figure-grid,
   .figure-grid.compact { grid-template-columns: 1fr; }
   .confirmed-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1213,10 +1431,24 @@ h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: 0; }
   .kpi-strip,
   .hero-row,
   .panel-grid,
+  .workflow-step-grid,
+  .analysis-module-grid,
+  .reference-map,
   .section-lede,
   .grid-note {
     margin-left: 14px;
     margin-right: 14px;
+  }
+  .foundation-shell {
+    margin-left: 14px;
+    margin-right: 14px;
+  }
+  .foundation-tabbar {
+    width: 100%;
+  }
+  .foundation-tab {
+    flex: 1;
+    padding: 0 8px;
   }
   .panel { padding: 14px; }
   .fact-grid { grid-template-columns: 1fr; }
