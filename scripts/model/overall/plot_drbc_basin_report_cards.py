@@ -226,7 +226,9 @@ def plot_p6_event_peak(ax: plt.Axes, basin: str, event_df: pd.DataFrame) -> None
     ax.set_xlabel("Obs peak (m³/s)", fontsize=7)
     ax.set_ylabel("M1 peak / obs peak", fontsize=7)
     ax.set_title("Event peak ratio", fontsize=8, fontweight="bold")
-    ax.legend(fontsize=5, ncol=2); ax.tick_params(labelsize=6)
+    ax.legend(fontsize=5, ncol=2)
+    ax.tick_params(axis="both", which="both", labelsize=6)
+    ax.xaxis.get_offset_text().set_fontsize(6)
 
 
 def plot_p7_antecedent(ax: plt.Axes, basin: str, ante_df: pd.DataFrame) -> None:

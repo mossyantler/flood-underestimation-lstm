@@ -13,6 +13,7 @@ RUN_CATALOG="${RUN_CATALOG:-1}"
 RUN_INFERENCE="${RUN_INFERENCE:-1}"
 RUN_ANALYSIS="${RUN_ANALYSIS:-1}"
 FORCE_INFERENCE="${FORCE_INFERENCE:-0}"
+EVENT_TIME_MODE="${EVENT_TIME_MODE:-wet_footprint}"
 
 mkdir -p "$LOG_DIR" "$OUTPUT_ROOT"
 
@@ -32,6 +33,7 @@ if [[ "$RUN_CATALOG" == "1" ]]; then
   catalog_cmd=(
     uv run scripts/model/extreme_rain/build_subset300_extreme_rain_event_catalog.py
     --output-dir "$OUTPUT_ROOT/exposure"
+    --event-time-mode "$EVENT_TIME_MODE"
   )
 
   if [[ -n "${CATALOG_LIMIT_BASINS:-}" ]]; then

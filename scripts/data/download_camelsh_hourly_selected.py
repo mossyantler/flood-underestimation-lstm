@@ -81,7 +81,7 @@ def extract_selected_members(zip_path: Path, target_dir: Path, selected_ids: set
             if member.is_dir():
                 continue
             member_name = Path(member.filename).name
-            stem = Path(member_name).stem
+            stem = Path(member_name).stem.replace("_hourly", "")
             if stem not in selected_ids:
                 continue
             output_path = target_dir / member_name

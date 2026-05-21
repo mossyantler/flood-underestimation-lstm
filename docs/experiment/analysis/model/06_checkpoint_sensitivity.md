@@ -14,6 +14,14 @@ output/model_analysis/quantile_analysis/
 output/model_analysis/extreme_rain/all/
 ```
 
+추가로 primary result가 all-validation-epoch distribution 안에서 어디에 위치하는지 보여주는 compact table과 figure를 생성했다.
+
+```text
+output/model_analysis/overall_analysis/epoch_sensitivity/tables/checkpoint_sensitivity_compact_metrics.csv
+output/model_analysis/overall_analysis/epoch_sensitivity/tables/checkpoint_sensitivity_compact_summary.csv
+output/model_analysis/overall_analysis/epoch_sensitivity/figures/checkpoint_compact/checkpoint_sensitivity_compact_summary.png
+```
+
 ## 분석 단위
 
 Validation checkpoint grid는 epoch `005 / 010 / 015 / 020 / 025 / 030`이다. Seed는 `111 / 222 / 444`를 공식 paired comparison으로 사용한다. Seed `333`은 Model 2 NaN loss 때문에 공식 chart와 aggregate CSV 생성 단계에서 제외한다.
@@ -32,6 +40,7 @@ output/model_analysis/overall_analysis/epoch_sensitivity/figures/epoch_metric_bo
 output/model_analysis/overall_analysis/epoch_sensitivity/metadata/epoch_metric_boxplots/
 output/model_analysis/quantile_analysis/analysis/charts/q99_exceedance_underestimation_fraction_by_epoch.png
 output/model_analysis/quantile_analysis/analysis/charts/q99_exceedance_q99_q50_gap_pct_obs_by_epoch.png
+output/model_analysis/overall_analysis/epoch_sensitivity/figures/checkpoint_compact/checkpoint_sensitivity_compact_summary.png
 ```
 
 ## 현재 해석
@@ -42,10 +51,14 @@ Hydrograph all-epoch 분석에서는 q95/q99의 upper-tail 효과가 반복적�
 
 Extreme-rain all-validation-epoch sensitivity는 18개 seed-epoch 조합을 포함한다. 각 조합은 236개 stress event와 38개 basin을 사용한다. 이 결과는 primary stress result가 특정 checkpoint 하나의 우연인지 확인하는 데 쓸 수 있다.
 
+Compact sensitivity figure 기준으로는 primary Q99-exceedance `q99` underestimation fraction median이 `0.440`이고, same-epoch grid median은 `0.451`이다. 즉 primary high-flow tail result는 all-epoch 분포 안에서 특별히 유리한 outlier로 보이지 않는다. Primary Q99-exceedance `q99-q50` spread median은 `74.6% obs`이고 same-epoch grid median은 `67.3% obs`라, primary는 upper-tail margin이 약간 큰 편이다.
+
+Extreme-rain stress에서는 더 조심해야 한다. Positive-response q99 under-deficit reduction은 primary compact value가 `22.1%p`이고 same-epoch grid median은 `38.5%p`다. 반대로 negative-control q99 predicted peak / ARI100은 primary `1.249`, same-epoch median `1.200`으로, primary가 false-positive proxy 측면에서 특별히 안전한 checkpoint라고 보기도 어렵다.
+
 ## 논문에서의 위치
 
 이 분석은 main result 뒤의 sensitivity section으로 둔다. 핵심 문장은 “primary checkpoint는 validation 기준으로 고정했고, all-epoch sweep은 upper-tail underestimation mitigation이 특정 checkpoint 하나에만 의존하는지 확인하는 diagnostic이다”가 되어야 한다.
 
 ## 남은 작업
 
-논문용으로는 primary result가 all-epoch distribution의 어디에 위치하는지 보여주는 compact figure가 필요하다. 예를 들어 `Q99-exceedance underestimation fraction`, `q99-q50 spread`, `positive-response under-deficit reduction`, `negative-control false-positive proxy`를 한 figure에 요약할 수 있다.
+본문에는 compact sensitivity figure를 두고, 상세 all-epoch boxplot과 stress epoch table은 supplement로 보내는 편이 좋다. 해석 문장은 “high-flow upper-tail result는 primary checkpoint 하나의 유리한 우연으로 보이지 않지만, extreme-rain stress magnitude는 checkpoint에 민감하므로 supporting diagnostic으로 제한한다”가 안전하다.

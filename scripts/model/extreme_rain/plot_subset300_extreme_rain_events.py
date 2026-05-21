@@ -649,12 +649,12 @@ def write_html_index(output_dir: Path, manifest: pd.DataFrame) -> Path:
     mode_values = manifest["event_time_mode"].dropna().astype(str).unique().tolist() if "event_time_mode" in manifest else []
     is_wet_footprint = mode_values == ["wet_footprint"]
     page_title = (
-        "Subset300 time-aligned extreme-rain event plots"
+        "Subset300 wet-footprint primary extreme-rain event plots"
         if is_wet_footprint
         else "Subset300 extreme-rain event plots"
     )
     time_axis_note = (
-        "이 v2 index는 primary event plot index와 같은 구조를 쓰되, rolling exceedance endpoint 대신 "
+        "이 primary index는 rolling exceedance endpoint 대신 "
         "wet-footprint 기준 rain_start / rain_peak / rain_end를 사용합니다."
         if is_wet_footprint
         else "이 index는 후보 진입 이유인 rainfall severity 기준으로 먼저 묶고, 그 안에서 observed streamflow response class를 나눕니다."
@@ -1047,7 +1047,7 @@ observed_response_peak < Q99
 
 ## plot 읽는 방법
 
-각 PNG의 위쪽 panel은 hourly `Rainf`다. 파란 막대가 시간별 강수량이고, 진한 파란 음영은 rain event 본 구간, 옅은 파란 음영은 rain event 주변 padding이다. 파란 실선은 `rain_start`/`rain_end`, 파란 점선은 `rain_peak`, 파란 가로 점선은 v2 wet-footprint를 잡을 때 쓴 `wet_rain_threshold_mm_h`다. 녹색/청록/보라 계열 가로선은 event별 dominant duration에 맞춘 `prec_ari25/50/100` 누적 강수량을 시간당 평균강도(mm/h)로 바꾼 참고선이다. Plot 바깥 오른쪽의 단일 legend 박스에서 **Rain** 아래에 표시 의미와 관련 index 값을 세로로 정리했다.
+각 PNG의 위쪽 panel은 hourly `Rainf`다. 파란 막대가 시간별 강수량이고, 진한 파란 음영은 rain event 본 구간, 옅은 파란 음영은 rain event 주변 padding이다. 파란 실선은 `rain_start`/`rain_end`, 파란 점선은 `rain_peak`, 파란 가로 점선은 wet-footprint를 잡을 때 쓴 `wet_rain_threshold_mm_h`다. 녹색/청록/보라 계열 가로선은 event별 dominant duration에 맞춘 `prec_ari25/50/100` 누적 강수량을 시간당 평균강도(mm/h)로 바꾼 참고선이다. Plot 바깥 오른쪽의 단일 legend 박스에서 **Rain** 아래에 표시 의미와 관련 index 값을 세로로 정리했다.
 
 아래쪽 panel은 observed `Streamflow`다. 검은 선이 관측 유량이고, 빨간 점이 response window 안에서 찾은 observed peak다. 연한 주황색 음영은 response window다. 회색 점선은 `Q99`, 주황 점선은 `flood_ari2`, 빨간 점선은 `flood_ari25`, 짙은 적갈색 점선은 `flood_ari100`이다. 같은 바깥 legend 박스에서 **Streamflow** 아래에 표시 의미와 관련 index 값을 세로로 정리했다. 남는 legend 공간에는 **Basin** 섹션을 넣어 유역명, 면적, forest/developed 비율, hydromod proxy, dam/storage/canal/water use 같은 human-impact proxy를 짧게 표시한다. `storage` 값은 `STOR_NOR_2009`이며 단위는 `ML/km2`이고, `water use` 값은 `FRESHW_WITHDRAWAL`이며 단위는 `ML/yr/km2`다. 이 섹션은 `broad`/`natural` 라벨을 그대로 쓰지 않고, 실제 판단 근거가 되는 속성만 보여준다.
 

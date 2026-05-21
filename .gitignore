@@ -5,6 +5,12 @@ __pycache__/
 .pytest_cache/
 .codex_tasks/
 .playwright-cli/
+.antigravitycli/
+.claude/
+.lazyweb/
+.playwright-mcp/
+.superpowers/
+skills/
 docs/**/CLAUDE.md
 docs/undergrad_explainer/
 docs/references/flood_generation_typing_literature/
@@ -26,5 +32,6 @@ basins/drbc_boundary/*.zip
 basins/huc8_delware/*.qgz
 data/CAMELSH_generic/
 data/CAMELS_US/
+database/local/
 *.pem
 *.pdf

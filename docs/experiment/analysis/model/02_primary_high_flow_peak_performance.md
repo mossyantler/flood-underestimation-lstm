@@ -35,6 +35,13 @@ output/model_analysis/quantile_analysis/analysis/charts/q99_exceedance_q99_q50_g
 
 Hydrograph plot은 `primary_seed_basin/` 아래에 684개가 생성되어 있다. 이 plot들은 본문용 대표 사례와 supplement용 사례 후보로 쓸 수 있다.
 
+본문용 compact table과 대표 hydrograph 후보 목록은 아래에 따로 생성했다.
+
+```text
+output/model_analysis/paper_result_assets/tables/primary_high_flow_peak_compact.csv
+output/model_analysis/paper_result_assets/tables/representative_hydrograph_candidates.csv
+```
+
 ## 현재 해석
 
 Primary epoch의 basin-specific Q99 exceedance에서 Model 1은 71.5%의 시간에서 관측값을 과소추정했고 median relative bias는 `-47.7%`였다. Model 2 `q50`은 85.8% 과소추정, median relative bias `-67.2%`로 더 나빴다. 따라서 Model 2의 중앙선이 high-flow를 개선했다는 주장은 성립하기 어렵다.
@@ -57,4 +64,4 @@ Quantile gap도 high-flow에서 커진다. Primary Q99 exceedance(`basin_top1`)�
 
 ## 남은 작업
 
-본문용으로는 Q99 exceedance(`basin_top1`), Q99.9 exceedance(`basin_top0_1`), `observed_peak_hour`만 남기고 표를 줄이는 것이 좋다. 또한 684개 hydrograph plot 중 대표 성공 사례, q99도 실패한 사례, q99가 과도하게 높은 사례를 각각 골라 Figure 5 후보로 정리해야 한다.
+본문용 compact table과 대표 후보 CSV는 만들어졌다. 남은 일은 `representative_hydrograph_candidates.csv`에 연결된 PNG를 직접 보고, 본문 Figure 5에 성공 사례와 tradeoff 사례를 몇 개 넣을지 최종 선택하는 것이다.

@@ -93,7 +93,7 @@ Model 2는 probabilistic model이므로 coverage, calibration, pinball loss도 �
 
 현재는 여기에 두 가지 보조 분석이 더 붙었다. 하나는 DRBC test 전체 기간의 hydrograph를 모든 validation checkpoint에서 다시 보는 분석이고, 다른 하나는 hourly `Rainf`에서 극한호우 event를 직접 뽑아 historical stress test를 하는 분석이다. 첫 번째는 "큰 유량 시간대에서 q95/q99가 도움이 되는가"를 보고, 두 번째는 "100년급에 가까운 비가 실제로 왔을 때 모델이 유량 첨두를 따라가는가"를 본다.
 
-극한호우 stress test는 primary 결과와 all-validation-epoch sensitivity 결과를 나누어 저장한다. Primary 결과는 `output/model_analysis/extreme_rain/primary/`이고, validation checkpoint grid 전체 결과는 `output/model_analysis/extreme_rain/all/`다. 두 번째 결과는 대표 epoch를 다시 고르기 위한 것이 아니라, 결론이 특정 checkpoint에만 의존하는지 확인하기 위한 것이다.
+극한호우 stress test는 wet-footprint primary 결과와 all-validation-epoch sensitivity 결과를 나누어 저장한다. Primary 결과는 `output/model_analysis/extreme_rain/primary/`이고, validation checkpoint grid 전체 결과는 `output/model_analysis/extreme_rain/all/`다. 두 번째 결과는 대표 epoch를 다시 고르기 위한 것이 아니라, 결론이 특정 checkpoint에만 의존하는지 확인하기 위한 것이다.
 
 ## 9단계: 해석과 후속 연구
 

@@ -538,7 +538,7 @@ function getDetailContent(section: string, detail: string): DetailContent | null
         panels: (
           <>
             <section className="panel research-panel">
-              <div className="panel-sub">Stress cohort · primary primary</div>
+              <div className="panel-sub">Stress cohort · wet-footprint primary</div>
               <div className="panel-title">Cohort별 Under-deficit 비교</div>
               <div className="data-block" style={{marginTop:12}}>
                 <table className="data-table">

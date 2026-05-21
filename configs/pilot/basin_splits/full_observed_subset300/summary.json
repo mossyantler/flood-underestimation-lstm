@@ -1,0 +1,106 @@
+{
+  "split_name": "full_observed_subset300",
+  "description": "Retraining split built from Hourly2 observed streamflow and both CAMELSH forcing archives. Train, validation, and test eligibility use period-specific Streamflow coverage.",
+  "seed": 20260520,
+  "stratify_col": "camelsh_huc02",
+  "train_count": 269,
+  "validation_count": 31,
+  "test_count": 89,
+  "non_drbc_total_train_validation_count": 300,
+  "min_period_coverage": 0.8,
+  "periods": {
+    "train": {
+      "start": "2000-01-01 00:00:00",
+      "end": "2010-12-31 23:00:00",
+      "start_idx": 175320,
+      "end_exclusive": 271752,
+      "expected_hours": 96432
+    },
+    "validation": {
+      "start": "2011-01-01 00:00:00",
+      "end": "2013-12-31 23:00:00",
+      "start_idx": 271752,
+      "end_exclusive": 298056,
+      "expected_hours": 26304
+    },
+    "test": {
+      "start": "2014-01-01 00:00:00",
+      "end": "2016-12-31 23:00:00",
+      "start_idx": 298056,
+      "end_exclusive": 324360,
+      "expected_hours": 26304
+    }
+  },
+  "source_files": {
+    "hourly2_zip": "basins/CAMELSH_data/hourly_observed/Hourly2.zip",
+    "timeseries_archive": "basins/CAMELSH_download/timeseries.7z",
+    "timeseries_nonobs_archive": "basins/CAMELSH_download/timeseries_nonobs.7z",
+    "mapping_csv": "output/basin/drbc/basin_define/camelsh_drbc_mapping.csv",
+    "drbc_all_file": "configs/basin_splits/drbc_holdout_test_drbc_all.txt",
+    "coverage_cache": "configs/pilot/basin_splits/full_observed_subset300/hourly2_period_coverage.csv"
+  },
+  "source_counts": {
+    "forcing_file1_count": 3166,
+    "forcing_file2_count": 5842,
+    "hourly2_observed_count": 5767,
+    "forcing_and_hourly2_overlap_count": 5767,
+    "non_drbc_train_period_eligible_count": 2738,
+    "non_drbc_validation_period_eligible_count": 3238,
+    "drbc_full_candidate_count": 154,
+    "drbc_test_period_eligible_count": 89
+  },
+  "huc02_counts": {
+    "train": {
+      "01": 13,
+      "02": 26,
+      "03": 22,
+      "04": 14,
+      "05": 26,
+      "06": 7,
+      "07": 20,
+      "08": 5,
+      "09": 1,
+      "10L": 13,
+      "10U": 6,
+      "11": 21,
+      "12": 17,
+      "13": 4,
+      "14": 4,
+      "15": 7,
+      "16": 7,
+      "17": 36,
+      "18": 20
+    },
+    "validation": {
+      "01": 2,
+      "02": 2,
+      "03": 2,
+      "04": 2,
+      "05": 2,
+      "06": 1,
+      "07": 2,
+      "08": 1,
+      "09": 1,
+      "10L": 2,
+      "10U": 1,
+      "11": 2,
+      "12": 2,
+      "13": 1,
+      "14": 1,
+      "15": 1,
+      "16": 1,
+      "17": 3,
+      "18": 2
+    },
+    "test": {
+      "02": 89
+    }
+  },
+  "output_files": {
+    "train": "configs/pilot/basin_splits/full_observed_subset300/train.txt",
+    "validation": "configs/pilot/basin_splits/full_observed_subset300/validation.txt",
+    "test": "configs/pilot/basin_splits/full_observed_subset300/test.txt",
+    "manifest": "configs/pilot/basin_splits/full_observed_subset300/manifest.csv",
+    "eligible_pool_manifest": "configs/pilot/basin_splits/full_observed_subset300/eligible_pool_manifest.csv"
+  }
+}

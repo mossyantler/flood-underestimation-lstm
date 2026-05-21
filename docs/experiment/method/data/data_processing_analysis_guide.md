@@ -329,9 +329,24 @@ Snow branch가 아니면 recent precipitation과 antecedent precipitation을 본
 
 ## 12. Extreme-rain stress test는 왜 따로 있나
 
-Observed high-flow event table은 streamflow에서 출발한다. 즉 유량이 실제로 오른 event를 중심으로 본다. 그런데 연구 질문에는 또 다른 질문이 있다. 모델이 극한호우 forcing을 학습 중에 본 적이 있는가, 그리고 DRBC historical extreme-rain event에서 관측 유량 response가 있을 때 peak를 따라가는가다.
+Observed high-flow event table은 streamflow에서 출발한다. 즉 유량이 실제로 오른 event를 중심으로 본다. 그런데 연구 질문에는 또 다른 질문이 있다. 모델이 극한호우 forcing을 학습 중에 본 적이 있는가, 그리고 DRBC historical extreme-rain event에서 관측 유량 response가 있을 때 peak를 따라가는가다. 그래서 extreme-rain stress test는 **유량 event catalog가 아니라 강우 forcing에서 먼저 출발하는 별도 보조 분석**으로 둔다.
 
-이를 위해 `scripts/model/extreme_rain/build_subset300_extreme_rain_event_catalog.py`는 hourly `Rainf` rolling sum에서 직접 rain-event catalog를 만든다. 기준은 `prec_ari25/50/100`과 near-ARI100이다. Active rain hour 사이 gap이 `72h` 이하면 같은 storm으로 병합한다.
+과정은 아래 순서다.
+
+첫째, `scripts/model/extreme_rain/build_subset300_extreme_rain_event_catalog.py`가 hourly `.nc`의 `Rainf`에서 rain-event candidate를 직접 만든다. `event_response_table.csv`처럼 streamflow peak에서 시작하지 않는다. `1h / 6h / 24h / 72h` rolling precipitation sum을 만들고, basin별 CAMELSH annual-maxima proxy인 `prec_ari25/50/100_{duration}h`와 비교한다. 이 중 하나라도 ARI25 이상이거나, ARI25는 넘지 못해도 ARI100의 `80%` 이상이면 near-ARI100 후보로 남긴다.
+
+둘째, active rain hour를 storm 단위로 병합한다. 같은 basin에서 threshold를 넘는 active rain hour 사이 gap이 `72h` 이하면 하나의 storm으로 묶는다. 그 뒤 wet-footprint 기준으로 실제 비가 집중된 구간을 다시 잡아 `rain_start`, `rain_peak`, `rain_end`를 정한다. 그래서 plot에서 보이는 rain event 본 구간은 단순 rolling-window envelope가 아니라 wet footprint에 더 가깝다.
+
+셋째, event-level quality gate를 적용한다. Detection period의 `Rainf` finite coverage가 `95%` 미만이면 rain-event detection에서 제외한다. Response window의 `Streamflow` finite coverage가 `90%` 미만이면 유량 response를 평가하지 않고 `response_unrated_coverage`로 남긴다. 이 event는 강우 exposure 확인에는 참고할 수 있지만, 모델이 peak를 맞혔는지 틀렸는지 판단하는 response metric에는 넣지 않는다.
+
+넷째, 강우 severity인 `rain_cohort`를 붙인다. 이 label은 event가 stress 후보가 된 이유를 설명하는 축이지, positive/negative response를 결정하는 축은 아니다.
+
+| `rain_cohort` | 기준 |
+| --- | --- |
+| `prec_ge100` | `1h / 6h / 24h / 72h` 중 하나 이상에서 `max_prec_ari100_ratio >= 1.0` |
+| `prec_ge50` | ARI100은 못 넘었지만 `max_prec_ari50_ratio >= 1.0` |
+| `prec_ge25` | ARI50은 못 넘었지만 `max_prec_ari25_ratio >= 1.0` |
+| `near_prec100` | ARI25는 못 넘었지만 `max_prec_ari100_ratio >= 0.80` |
 
 이 catalog는 네 split을 본다.
 
@@ -342,9 +357,23 @@ Observed high-flow event table은 streamflow에서 출발한다. 즉 유량이 �
 | `official_test` | DRBC test basin | `2014-2016` | primary test 기간 내 극한호우 확인 |
 | `drbc_historical_stress` | DRBC test basin | `1980-2024` | historical stress response 진단 |
 
-Response window는 `[rain_start - 24h, rain_end + 168h]`다. LSTM inference block은 warmup을 위해 `[rain_start - 21d, rain_end + 8d]`로 넓게 잡는다.
+다섯째, 강우 뒤 observed streamflow response를 분류한다. 현재 `primary` wet-footprint 기준 response window는 `[rain_start, rain_end + 168h]`다. 이전 `rolling_endpoint` catalog에서는 trigger window 앞쪽 padding을 보존하기 위해 `[event_start - 24h, rain_end + 168h]`를 썼다. 이 구간에서 observed `Streamflow` peak를 찾고, basin별 `flood_ari2`, `flood_ari25`, `Q99`와 비교한다.
 
-분석은 positive response와 negative control을 나눈다. 극한호우가 왔어도 streamflow가 flood-like하게 오르지 않을 수 있기 때문이다. Positive response에서는 peak magnitude와 timing을 본다. Negative control에서는 Model 2 upper quantile이 불필요하게 flood threshold를 넘는 false-positive risk를 본다.
+| `response_class` | 큰 그룹 | 기준 | 해석 |
+| --- | --- | --- | --- |
+| `flood_response_ge25` | positive response | observed peak가 `flood_ari25` 이상 | 강한 flood-like response가 있었던 stress event |
+| `flood_response_ge2_to_lt25` | positive response | observed peak가 `flood_ari2` 이상, `flood_ari25` 미만 | flood-like response는 있지만 25년급 proxy에는 못 미친 event |
+| `high_flow_non_flood_q99_only` | negative control | observed peak가 `Q99` 이상, `flood_ari2` 미만 | high-flow response는 있지만 flood proxy는 넘지 않은 event |
+| `low_response_below_q99` | negative control | observed peak가 `Q99` 미만 | 극한호우 후보였지만 유량 response는 낮았던 event |
+| `response_unrated_coverage` | unrated | response window coverage 부족 또는 finite observed peak 없음 | response metric에서 제외 |
+
+여기서 중요한 점은 강우 severity와 유량 response가 다른 축이라는 것이다. 예를 들어 `rain_cohort = prec_ge100`이어도 observed streamflow가 `Q99` 아래면 `low_response_below_q99`가 된다. 반대로 이 event를 모델 실패로 바로 해석하면 안 된다. 큰 비가 왔어도 antecedent condition, storm footprint, basin response, regulation/human-impact proxy 때문에 flood-like streamflow response가 없을 수 있기 때문이다.
+
+여섯째, response를 평가할 수 있는 `drbc_historical_stress` event에 대해 LSTM inference block을 만든다. LSTM warmup을 확보하기 위해 inference block은 `[rain_start - 21d, rain_end + 8d]`로 response window보다 넓게 잡는다. Block끼리 가까우면 하나로 합쳐 중복 inference를 줄인다. Inference는 재학습 없이 subset300 primary checkpoint를 그대로 사용하며, Model 1은 deterministic prediction, Model 2는 `q50/q90/q95/q99`를 낸다.
+
+마지막으로 분석은 positive response와 negative control을 나눠 읽는다. Positive response에서는 observed peak magnitude, peak timing, threshold exceedance recall, Model 2 upper quantile의 underestimation 완화 여부를 본다. Negative control에서는 Model 2 upper quantile이 observed response가 낮은 event에서 불필요하게 `flood_ari2`나 `flood_ari25`를 넘는 false-positive risk를 본다.
+
+산출물도 이 구분을 따른다. Observed-only plot은 `event_plots/positive_response`와 `event_plots/negative_control`로 나뉘고, Sim-Q plot은 inference가 가능한 event만 `event_simq_plots/`에 만들어진다. Event id는 catalog를 만든 뒤 다시 촘촘하게 renumbering하지 않으므로, coverage 부족이나 inference 제외 event가 있으면 index에서 `0001`이 비고 `0002` 또는 `0003`부터 보일 수 있다. 이것은 렌더링 오류가 아니라 catalog id를 유지한 결과다.
 
 이 stress test는 primary DRBC `2014-2016` test를 대체하지 않는다. `drbc_historical_stress`는 train/validation 기간과 겹칠 수 있으므로 temporal independence claim에는 쓰지 않는다. basin holdout 조건은 유지되지만, 시간 독립성은 primary test보다 약하다.
 

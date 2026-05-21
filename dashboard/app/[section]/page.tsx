@@ -83,7 +83,7 @@ function HydrographSection() {
     <>
       <p className="section-lede">
         DRBC test basin 38개, seed별 primary epoch 대표 수문곡선과 peak timing 분석.
-        figure PNG는 <code>output/model_analysis/quantile_analysis/analysis/primary_seed_basin/</code> (684개)에 있다.
+        figure PNG는 <code>output/model_analysis/quantile_analysis/primary_seed_basin/</code> (684개)에 있다.
       </p>
       <div className="panel-grid">
         <section className="panel research-panel">

@@ -13,8 +13,9 @@
 | 5 | [`05_extreme_rain_stress_test.md`](05_extreme_rain_stress_test.md) | 완료에 가까움 | hourly `Rainf` 기반 historical stress event에서 upper quantile output의 peak tracking과 false-positive tradeoff를 보고, 대표 flow graph diagnostic으로 실제 event 모양을 확인한다. |
 | 6 | [`06_checkpoint_sensitivity.md`](06_checkpoint_sensitivity.md) | 완료에 가까움 | primary conclusion이 validation-best checkpoint 하나에만 의존하는지 all-validation-epoch sweep으로 확인한다. |
 | 7 | [`07_broad_vs_natural_robustness.md`](07_broad_vs_natural_robustness.md) | 완료에 가까움 | Broad 38개 test basin을 Natural 8개와 broad non-natural 30개로 다시 나누어 upper-tail 결론 방향이 유지되는지 본다. |
-| 8 | [`08_probabilistic_calibration_pinball.md`](08_probabilistic_calibration_pinball.md) | 예정 | one-sided coverage와 quantile gap은 있으나, quantile별 pinball/AQS와 formal calibration table은 아직 고정하지 않았다. |
+| 8 | [`08_probabilistic_calibration_pinball.md`](08_probabilistic_calibration_pinball.md) | 완료에 가까움 | Model 2 quantile별 pinball/AQS, all-hour one-sided calibration, high-flow tail hit-rate, upper-tail spread를 진단한다. |
 | 9 | [`09_event_suppression_diagnosis_protocol.md`](09_event_suppression_diagnosis_protocol.md) | 완료 | extreme-rain event에서 observed flow가 눌리거나, 약한 강수 조건에서 managed-flow pulse/plateau가 생기는 case를 유역별로 진단한다. |
+| 10 | [`10_event_surrogate_shap.md`](10_event_surrogate_shap.md) | 초기 분석 완료 | event-level surrogate SHAP으로 q95/q99 under-deficit reduction과 q99 tradeoff가 어떤 hydromet/static 조건에서 커지는지 본다. |
 
 ## 해석 원칙
 
@@ -29,7 +30,9 @@ Model 2의 `q50`은 중앙예측선이다. Model 1과의 중앙예측 성능 비
 | Primary 전체 성능 / epoch metric box plot | `output/model_analysis/overall_analysis/main_comparison/`, `output/model_analysis/overall_analysis/epoch_sensitivity/figures/epoch_metric_boxplots/` (`metadata/epoch_metric_boxplots/`에 chart manifest) |
 | High-flow / peak | `output/model_analysis/quantile_analysis/analysis/` |
 | Event-regime | `output/model_analysis/quantile_analysis/event_regime_analysis/` |
+| Event-level surrogate SHAP | `output/model_analysis/quantile_analysis/event_surrogate_shap/` |
 | Extreme-rain stress | `output/model_analysis/extreme_rain/primary/` |
 | Extreme-rain all-epoch sensitivity | `output/model_analysis/extreme_rain/all/` |
 | Event suppression / managed-flow diagnosis | `docs/experiment/analysis/model/09_event_suppression_diagnosis_protocol.md` |
 | Broad vs Natural robustness | `output/model_analysis/natural_broad_comparison/` |
+| Probabilistic calibration / pinball | `output/model_analysis/probabilistic_diagnostics/` |

@@ -6,7 +6,7 @@
 
 ## 상태
 
-표 분석은 완료에 가깝고, 논문용 그림은 아직 보강이 필요하다. `scripts/model/event_regime/analyze_subset300_event_regime_errors.py`가 실행되어 event-level long/wide table, ML event-regime aggregate, flood relevance tier sensitivity, rule-label sensitivity가 생성되어 있다.
+완료에 가깝다. `scripts/model/event_regime/analyze_subset300_event_regime_errors.py`가 실행되어 event-level long/wide table, ML event-regime aggregate, flood relevance tier sensitivity, rule-label sensitivity가 생성되어 있다. 추가로 `scripts/model/event_regime/plot_subset300_event_regime_summary.py`가 실행되어 논문용 compact table과 paired-delta summary figure가 생성되어 있다.
 
 주요 산출물은 아래에 있다.
 
@@ -24,7 +24,14 @@ Primary stratification은 `hydromet_only_7 + KMeans(k=3)`으로 만든 ML event-
 
 주요 CSV는 `event_regime_error_table_long.csv`, `event_regime_error_table_wide.csv`, `ml_event_regime_predictor_aggregate.csv`, `paired_delta_aggregate.csv`, `rule_label_predictor_aggregate.csv`, `flood_relevance_tier_predictor_aggregate.csv`, `event_regime_feature_sanity.csv`다.
 
-현재 별도 논문용 event-regime chart는 아직 부족하다. 본문에는 regime별 paired under-deficit reduction과 threshold recall delta를 한 장의 point/interval plot으로 만드는 것이 좋다.
+논문용 compact table과 chart는 아래에 있다.
+
+```text
+output/model_analysis/quantile_analysis/event_regime_analysis/event_regime_paired_delta_compact.csv
+output/model_analysis/quantile_analysis/event_regime_analysis/figures/event_regime_paired_delta_summary.png
+```
+
+이 figure는 regime별 paired under-deficit reduction, threshold recall delta, normalized event RMSE delta를 같은 화면에서 비교한다. Under-deficit reduction과 recall delta는 양수가 Model 2 quantile에 유리하고, event NRMSE delta는 양수면 hydrograph shape/magnitude tradeoff가 커졌다는 뜻이다.
 
 ## 현재 해석
 
@@ -48,4 +55,4 @@ Upper quantile은 일관되게 under-deficit을 줄인다. `Recent rainfall`에�
 
 ## 남은 작업
 
-`paired_delta_aggregate.csv`를 이용해 regime별 `q50/q90/q95/q99`의 under-deficit reduction, threshold recall delta, normalized event RMSE delta를 한 장의 figure로 만들어야 한다. 또한 small tier와 rule-label sensitivity는 supplement로 분리하는 편이 좋다.
+Small tier와 rule-label sensitivity는 supplement로 분리하는 편이 좋다. 본문에는 ML event-regime 기준 compact figure를 두고, rule-label 결과는 “same direction under sensitivity labels” 정도의 보조 문장으로 제한하는 것이 안전하다.

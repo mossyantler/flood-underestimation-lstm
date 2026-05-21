@@ -4,7 +4,7 @@
 
 이 문서는 extreme-rain stress event에서 강수 forcing은 강한데 관측 유량 response가 낮거나, 반대로 강수 forcing은 약한데 관측 유량만 큰 pulse/plateau를 보이는 case를 어떻게 진단할지 정리한다. 목표는 `01480685_rain_drbc_historical_stress_0005`에서 수행한 case-level 분석을 다른 DRBC 유역과 event에도 같은 순서로 반복 적용하는 것이다.
 
-이 문서는 새 metric이나 공식 screening rule이 아니다. `output/model_analysis/extreme_rain/primary_time_aligned/`에 이미 만들어진 event catalog, model prediction, basin metadata를 읽고, 특정 event가 왜 "눌려 보이는지" 또는 왜 precipitation-driven model이 만들기 어려운 extra-flow signal을 보이는지 post-hoc으로 해석하는 절차다.
+이 문서는 새 metric이나 공식 screening rule이 아니다. `output/model_analysis/extreme_rain/primary/`에 이미 만들어진 event catalog, model prediction, basin metadata를 읽고, 특정 event가 왜 "눌려 보이는지" 또는 왜 precipitation-driven model이 만들기 어려운 extra-flow signal을 보이는지 post-hoc으로 해석하는 절차다.
 
 ## 사용 시점
 
@@ -17,13 +17,13 @@
 
 ## 입력 파일
 
-기본은 `primary_time_aligned` 산출물을 사용한다. 이 버전은 rain event 시간을 rolling exceedance endpoint가 아니라 wet footprint 기준으로 다시 맞춘 diagnostic이라, case-level hydrograph 해석에 더 안전하다. 원본 `primary` 결과를 덮어쓰지 않는 보조 진단이라는 점은 유지한다.
+기본은 `primary` 산출물을 사용한다. 이 버전은 rain event 시간을 rolling exceedance endpoint가 아니라 wet footprint 기준으로 맞춘 primary diagnostic이라, case-level hydrograph 해석에 더 안전하다.
 
 | 목적 | 파일 | 핵심 컬럼 |
 | --- | --- | --- |
-| event severity와 observed response | `output/model_analysis/extreme_rain/primary_time_aligned/exposure/extreme_rain_event_catalog.csv` | `event_id`, `gauge_id`, `rain_start`, `rain_peak`, `rain_end`, `wet_cluster_total_rain`, `wet_cluster_peak_rainf`, `max_prec_ari*_ratio`, `dominant_duration_for_ari100h`, `observed_response_peak`, `observed_response_peak_time`, `response_lag_from_rain_peak_h`, `streamflow_q99_threshold`, `flood_ari*`, `obs_peak_to_flood_ari*`, `response_class` |
-| plot과 basin context | `output/model_analysis/extreme_rain/primary_time_aligned/event_simq_plots/event_simq_plot_manifest.csv` | `plot_path`, `gauge_name`, `drain_sqkm_attr`, `hydromod_risk`, `forest_pct`, `developed_pct`, `wetland_pct`, `NDAMS_2009`, `MAJ_NDAMS_2009`, `STOR_NOR_2009`, `CANALS_PCT`, `FRESHW_WITHDRAWAL` |
-| model false-positive 또는 under-response | `output/model_analysis/extreme_rain/primary_time_aligned/analysis/extreme_rain_stress_error_table_wide.csv` | `seed`, `model1_window_peak`, `model1_window_peak_time`, `model1_window_peak_rel_error_pct`, `model1_signed_peak_timing_error_hours`, `q50_window_peak`, `q95_window_peak`, `q99_window_peak`, `q99_window_peak_time`, `q99_window_peak_rel_error_pct`, `q99_signed_peak_timing_error_hours` |
+| event severity와 observed response | `output/model_analysis/extreme_rain/primary/exposure/extreme_rain_event_catalog.csv` | `event_id`, `gauge_id`, `rain_start`, `rain_peak`, `rain_end`, `wet_cluster_total_rain`, `wet_cluster_peak_rainf`, `max_prec_ari*_ratio`, `dominant_duration_for_ari100h`, `observed_response_peak`, `observed_response_peak_time`, `response_lag_from_rain_peak_h`, `streamflow_q99_threshold`, `flood_ari*`, `obs_peak_to_flood_ari*`, `response_class` |
+| plot과 basin context | `output/model_analysis/extreme_rain/primary/event_simq_plots/event_simq_plot_manifest.csv` | `plot_path`, `gauge_name`, `drain_sqkm_attr`, `hydromod_risk`, `forest_pct`, `developed_pct`, `wetland_pct`, `NDAMS_2009`, `MAJ_NDAMS_2009`, `STOR_NOR_2009`, `CANALS_PCT`, `FRESHW_WITHDRAWAL` |
+| model false-positive 또는 under-response | `output/model_analysis/extreme_rain/primary/analysis/extreme_rain_stress_error_table_wide.csv` | `seed`, `model1_window_peak`, `model1_window_peak_time`, `model1_window_peak_rel_error_pct`, `model1_signed_peak_timing_error_hours`, `q50_window_peak`, `q95_window_peak`, `q99_window_peak`, `q99_window_peak_time`, `q99_window_peak_rel_error_pct`, `q99_signed_peak_timing_error_hours` |
 | observed forcing/flow 시계열 | `data/CAMELSH_generic/drbc_holdout_broad/time_series/{gauge_id}.nc` | `Rainf`, `Streamflow` |
 | DRBC static attributes | `output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_static_attributes_full.csv` | `drain_sqkm_attr`, `overlap_ratio_of_basin`, `SLOPE_PCT`, `BFI_AVE`, `DEVNLCD06`, `FORESTNLCD06`, `WATERNLCD06`, `WOODYWETNLCD06`, `EMERGWETNLCD06` |
 | hydromod proxy | `basins/CAMELSH_data/attributes/attributes_gageii_HydroMod_Dams.csv` | `NDAMS_2009`, `MAJ_NDAMS_2009`, `STOR_NOR_2009`, `STOR_NID_2009`, `RAW_DIS_NEAREST_DAM`, `RAW_DIS_NEAREST_MAJ_DAM` |
@@ -56,7 +56,7 @@ import pandas as pd
 
 event_id = "01480685_rain_drbc_historical_stress_0005"
 catalog = pd.read_csv(
-    "output/model_analysis/extreme_rain/primary_time_aligned/exposure/extreme_rain_event_catalog.csv"
+    "output/model_analysis/extreme_rain/primary/exposure/extreme_rain_event_catalog.csv"
 )
 row = catalog.loc[catalog["event_id"].eq(event_id)].iloc[0]
 
@@ -106,7 +106,7 @@ import pandas as pd
 
 event_id = "01480685_rain_drbc_historical_stress_0005"
 wide = pd.read_csv(
-    "output/model_analysis/extreme_rain/primary_time_aligned/analysis/extreme_rain_stress_error_table_wide.csv"
+    "output/model_analysis/extreme_rain/primary/analysis/extreme_rain_stress_error_table_wide.csv"
 )
 rows = wide.loc[wide["event_id"].eq(event_id)]
 
@@ -153,7 +153,7 @@ import pandas as pd
 
 gauge_id = "01480685"
 manifest = pd.read_csv(
-    "output/model_analysis/extreme_rain/primary_time_aligned/event_simq_plots/event_simq_plot_manifest.csv",
+    "output/model_analysis/extreme_rain/primary/event_simq_plots/event_simq_plot_manifest.csv",
     dtype={"gauge_id": str},
 )
 event = manifest.loc[
@@ -228,7 +228,7 @@ PY
 
 대상 event는 `01480685_rain_drbc_historical_stress_0005`이고, 유역은 `Marsh Creek near Downingtown, PA`다. 결론은 water use 단독보다 Marsh Creek Reservoir/Dam regulation이 주원인인 high-confidence attenuation case로 보는 것이 안전하다.
 
-Rain severity는 짧은 burst형이다. Time-aligned catalog 기준 `rain_start = 2020-08-04 11:00`, `rain_peak = 2020-08-04 16:00`, `rain_end = 2020-08-04 17:00`이고, `wet_cluster_total_rain = 124.06 mm`, `wet_cluster_peak_rainf = 48.06 mm/h`다. `max_prec_ari100_ratio = 1.15`이고 `dominant_duration_for_ari100h = 1`이라, ARI100 초과 신호는 1h 강수에서 주로 나온다.
+Rain severity는 짧은 burst형이다. Primary wet-footprint catalog 기준 `rain_start = 2020-08-04 11:00`, `rain_peak = 2020-08-04 16:00`, `rain_end = 2020-08-04 17:00`이고, `wet_cluster_total_rain = 124.06 mm`, `wet_cluster_peak_rainf = 48.06 mm/h`다. `max_prec_ari100_ratio = 1.15`이고 `dominant_duration_for_ari100h = 1`이라, ARI100 초과 신호는 1h 강수에서 주로 나온다.
 
 Observed response는 flood-like하지 않다. `observed_response_peak = 5.14 m3/s`이고 peak time은 `2020-08-06 18:00`이다. 이는 `rain_peak` 이후 50시간 뒤다. `streamflow_q99_threshold = 4.84 m3/s`는 넘지만 `flood_ari2 = 10.45 m3/s`의 절반 정도라 `obs_peak_to_flood_ari2 = 0.49`다. 따라서 이 event는 `high_flow_non_flood_q99_only`로 보는 것이 맞다.
 
@@ -250,7 +250,7 @@ Upstream/downstream comparison도 regulation 쪽이다. 같은 2020-08-04 16:00 
 
 Station note는 regulation 해석을 먼저 열어 둬야 함을 보여준다. USGS page와 historic water-data report PDF는 이 station의 flow가 Still Creek Reservoir, Blue Marsh Lake, Lake Ontelaunee의 영향을 받는다고 설명한다. 다만 이 source는 station-level context이지, 2010-09-30 event의 실제 reservoir operation record는 아니다. 따라서 confidence는 `medium`으로 두고, primary cause를 `regulated/storage context`로 쓰되 specific operation claim은 하지 않는다.
 
-Rain severity는 장시간 누적형이다. Time-aligned catalog 기준 `rain_start = 2010-09-30 09:00`, `rain_peak = 2010-09-30 14:00`, `rain_end = 2010-10-01 09:00`이고, `wet_cluster_total_rain = 144.98 mm`, `wet_cluster_peak_rainf = 12.10 mm/h`다. `max_prec_ari100_ratio = 1.01`이고 `dominant_duration_for_ari100h = 24`라, `01480685-0005`처럼 1h burst가 아니라 24h 누적 강수가 stress signal을 만든 event다.
+Rain severity는 장시간 누적형이다. Primary wet-footprint catalog 기준 `rain_start = 2010-09-30 09:00`, `rain_peak = 2010-09-30 14:00`, `rain_end = 2010-10-01 09:00`이고, `wet_cluster_total_rain = 144.98 mm`, `wet_cluster_peak_rainf = 12.10 mm/h`다. `max_prec_ari100_ratio = 1.01`이고 `dominant_duration_for_ari100h = 24`라, `01480685-0005`처럼 1h burst가 아니라 24h 누적 강수가 stress signal을 만든 event다.
 
 Observed response는 high-flow non-flood다. `observed_response_peak = 431.83 m3/s`이고 peak time은 `2010-10-01 17:00`이다. 이는 `rain_peak` 이후 27시간 뒤다. `streamflow_q99_threshold = 249.61 m3/s`는 넘지만 `flood_ari2 = 482.01 m3/s`에는 못 미쳐 `obs_peak_to_flood_ari2 = 0.90`이다. 따라서 이 event는 flood miss라기보다 ARI2 바로 아래에서 멈춘 `high_flow_non_flood_q99_only` case로 정리한다.
 

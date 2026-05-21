@@ -71,7 +71,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--event-time-mode",
         choices=["rolling_endpoint", "wet_footprint"],
-        default="rolling_endpoint",
+        default="wet_footprint",
         help=(
             "rolling_endpoint keeps the original rolling-exceedance endpoint event time. "
             "wet_footprint maps rolling exceedance windows back to covered hours and uses the largest wet cluster."

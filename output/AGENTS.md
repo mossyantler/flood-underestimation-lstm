@@ -46,8 +46,7 @@ output/
 │   │   ├── quantile_exports/
 │   │   └── required_series/
 │   └── extreme_rain/             # extreme-rain stress test 산출물
-│       ├── primary/              # primary checkpoint (exposure/, inference/, analysis/, event_plots/)
-│       ├── primary_time_aligned/ # wet-footprint time-aligned v2 diagnostic
+│       ├── primary/              # wet-footprint primary stress test (exposure/, inference/, analysis/, event_plots/)
 │       └── all/                  # validation epoch grid sensitivity (inference/, analysis/)
 │
 └── presentation/                 # 발표·논문용 프레젠테이션/자료/figure 모음
@@ -87,8 +86,7 @@ output/
 
 - 폴더 이름에는 `subset300_` prefix를 붙이지 않는다. 일부 실행 스크립트 이름에는 실험 식별용으로 남아 있으나, 산출물 경로는 prefix 없이 유지한다.
 - **`overall_analysis/main_comparison/`**: Model 1/2 공식 비교 결과만 둔다. 실험 세팅이나 epoch 그리드가 달라지면 `epoch_sensitivity/`나 `result_checks/`를 사용한다.
-- **`extreme_rain/primary/`**: validation 기준 primary checkpoint 하나만 사용한 stress-test 결과. `exposure/`, `inference/`, `analysis/`, `event_plots/` 하위 폴더를 유지한다.
-- **`extreme_rain/primary_time_aligned/`**: 기존 primary 결과를 덮어쓰지 않고 rain event 시간축을 wet-footprint 기준으로 보정한 v2 diagnostic 결과. `analysis/`에는 peak quantile-bracket CSV/figure를 함께 둘 수 있다.
+- **`extreme_rain/primary/`**: validation 기준 primary checkpoint 하나를 사용하되, rain event 시간축은 wet-footprint 기준으로 맞춘 primary stress-test 결과. `exposure/`, `inference/`, `analysis/`, `event_plots/`, `event_simq_plots/`, `basin_dissect/` 하위 폴더를 유지한다.
 - **`extreme_rain/all/`**: epoch grid(`005 / 010 / 015 / 020 / 025 / 030`) sensitivity sweep. primary checkpoint를 재선정하는 용도가 아니라 checkpoint robustness 진단용이다.
 
 ### `presentation/`

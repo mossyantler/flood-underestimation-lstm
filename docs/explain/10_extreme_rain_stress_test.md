@@ -106,7 +106,7 @@ epoch005, epoch010, epoch015, epoch020, epoch025, epoch030
 
 ## 출력 위치
 
-Primary checkpoint 결과는 아래에 둔다.
+Wet-footprint primary checkpoint 결과는 아래에 둔다.
 
 ```text
 output/model_analysis/extreme_rain/primary/

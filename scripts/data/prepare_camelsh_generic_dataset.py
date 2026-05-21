@@ -36,9 +36,15 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--profile",
-        choices=["broad", "natural", "broad_all_drbc"],
+        choices=["broad", "natural", "broad_all_drbc", "confirmed_flood_events"],
         default="broad",
         help="Which DRBC holdout profile to prepare.",
+    )
+    parser.add_argument(
+        "--confirmed-flood-catalog",
+        type=Path,
+        default=Path("output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv"),
+        help="Confirmed flood catalog used when --profile confirmed_flood_events.",
     )
     parser.add_argument(
         "--archive-path",
@@ -134,6 +140,16 @@ def load_split_basins(paths: dict[str, Path]) -> dict[str, list[str]]:
     for split, path in paths.items():
         split_basins[split] = [line.strip() for line in path.read_text().splitlines() if line.strip()]
     return split_basins
+
+
+def load_profile_split_basins(args: argparse.Namespace) -> tuple[dict[str, list[str]], dict[str, str]]:
+    if args.profile == "confirmed_flood_events":
+        catalog = pd.read_csv(args.confirmed_flood_catalog, dtype={"usgs_id": str})
+        basins = sorted(catalog["usgs_id"].dropna().map(lambda value: str(value).strip().zfill(8)).unique())
+        return {"test": basins}, {"test": str(args.confirmed_flood_catalog)}
+
+    split_paths = basin_split_paths(args.profile)
+    return load_split_basins(split_paths), {key: str(value) for key, value in split_paths.items()}
 
 
 def flatten_split_basins(split_basins: dict[str, list[str]]) -> set[str]:
@@ -627,8 +643,7 @@ def build_static_attributes(output_dir: Path, basin_ids: set[str]) -> Path:
 
 def main() -> None:
     args = parse_args()
-    split_paths = basin_split_paths(args.profile)
-    split_basins = load_split_basins(split_paths)
+    split_basins, split_sources = load_profile_split_basins(args)
     split_periods = parse_split_periods(args)
     split_min_valid_counts = parse_split_min_valid_counts(args)
     usable_year_lookup = build_usable_year_lookup(args.info_csv, min_annual_coverage=args.min_annual_coverage)
@@ -668,7 +683,7 @@ def main() -> None:
         "timeseries_dir": str(time_series_dir),
         "attributes_path": str(attributes_path),
         "missing_in_archive": not_found,
-        "requested_split_files": {k: str(v) for k, v in split_paths.items()},
+        "requested_split_files": split_sources,
         "prepared_split_files": {k: str(v) for k, v in filtered_split_paths.items()},
         "split_manifest_path": str(split_manifest_path),
         "prepared_split_counts": {k: sum(1 for _ in v.read_text().splitlines() if _) for k, v in filtered_split_paths.items()},
