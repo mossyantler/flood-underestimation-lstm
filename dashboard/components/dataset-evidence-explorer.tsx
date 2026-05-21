@@ -127,11 +127,13 @@ function ContextItem({ label, value }: { label: string; value: string }) {
 }
 
 function ArtifactViewer({ artifact }: { artifact: DatasetArtifact }) {
+  if (artifact.viewer === "db") return <DbPresetShell artifact={artifact} />;
+
   if (!artifact.metadata.exists) {
     return (
       <div className="dataset-empty-state">
         <strong>Source missing</strong>
-        <p>{artifact.metadata.error ?? "현재 checkout에서 source artifact를 찾지 못했다."}</p>
+        <p>Source artifact not found in this checkout.</p>
       </div>
     );
   }
@@ -139,7 +141,6 @@ function ArtifactViewer({ artifact }: { artifact: DatasetArtifact }) {
   if (artifact.viewer === "markdown") return <MarkdownViewer blocks={artifact.markdown} />;
   if (artifact.viewer === "csv") return <CsvPreview artifact={artifact} />;
   if (artifact.viewer === "image") return <ImageViewer artifact={artifact} />;
-  return <DbPresetShell artifact={artifact} />;
 }
 
 function MarkdownViewer({ blocks }: { blocks: MarkdownBlock[] }) {
