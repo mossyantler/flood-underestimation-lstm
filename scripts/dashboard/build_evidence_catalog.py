@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import re
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -43,6 +43,42 @@ REQUIRED_CURATION_COLUMNS = [
     "status",
     "notes",
 ]
+REQUIRED_MODULE_KEYS = [
+    "moduleId",
+    "section",
+    "module",
+    "title",
+    "analysisPurpose",
+    "background",
+    "coreData",
+    "interpretationMethod",
+    "currentJudgment",
+    "status",
+]
+REQUIRED_CURATION_VALUES = [
+    "id",
+    "title",
+    "section",
+    "module",
+    "kind",
+    "role",
+    "priority",
+    "show_in_dashboard",
+    "source_path",
+    "status",
+]
+PATH_COLUMNS = [
+    "source_path",
+    "generator_path",
+    "doc_path",
+    "chart_path",
+    "table_path",
+    "gallery_path",
+]
+SECTION_VALUES = {"overview", "experiment", "foundation", "analysis", "reference"}
+KIND_VALUES = {"doc", "report", "chart", "table", "gallery", "script", "data"}
+ROLE_VALUES = {"canonical", "supporting", "archive"}
+STATUS_VALUES = {"ready", "needs-rerun", "planned", "stale", "archive"}
 
 
 def extract_analysis_copy(path: Path) -> list[dict[str, Any]]:
@@ -56,14 +92,29 @@ def extract_analysis_copy(path: Path) -> list[dict[str, Any]]:
 
 
 def validate_analysis_modules(rows: list[dict[str, Any]]) -> None:
+    if not isinstance(rows, list):
+        raise ValueError("analysisModuleCopy must be a list")
     seen: set[str] = set()
-    for row in rows:
+    for index, row in enumerate(rows, start=1):
+        if not isinstance(row, dict):
+            raise ValueError(f"analysis module row {index} must be an object")
+        missing = [key for key in REQUIRED_MODULE_KEYS if key not in row]
+        if missing:
+            raise ValueError(f"analysis module row {index} missing required keys: {', '.join(missing)}")
+        for key in REQUIRED_MODULE_KEYS:
+            if not isinstance(row[key], str) or not row[key].strip():
+                raise ValueError(f"analysis module row {index} has empty required key: {key}")
+
         module_id = row["moduleId"]
         expected = f"{row['section']}/{row['module']}"
         if module_id != expected:
             raise ValueError(f"moduleId mismatch: {module_id!r} != {expected!r}")
         if module_id in seen:
             raise ValueError(f"duplicate moduleId: {module_id}")
+        if row["section"] not in SECTION_VALUES:
+            raise ValueError(f"invalid section for module {module_id}: {row['section']!r}")
+        if row["status"] not in STATUS_VALUES:
+            raise ValueError(f"invalid status for module {module_id}: {row['status']!r}")
         seen.add(module_id)
 
 
@@ -83,6 +134,38 @@ def parse_priority(value: str) -> int:
     return priority
 
 
+def validate_curation_row(row: dict[str, str], row_number: int) -> None:
+    missing = [key for key in REQUIRED_CURATION_VALUES if not (row.get(key) or "").strip()]
+    if missing:
+        raise ValueError(f"curation row {row_number} missing required values: {', '.join(missing)}")
+    evidence_id = row["id"]
+    if row["section"] not in SECTION_VALUES:
+        raise ValueError(f"invalid section for evidence {evidence_id}: {row['section']!r}")
+    if row["kind"] not in KIND_VALUES:
+        raise ValueError(f"invalid kind for evidence {evidence_id}: {row['kind']!r}")
+    if row["role"] not in ROLE_VALUES:
+        raise ValueError(f"invalid role for evidence {evidence_id}: {row['role']!r}")
+    if row["status"] not in STATUS_VALUES:
+        raise ValueError(f"invalid status for evidence {evidence_id}: {row['status']!r}")
+
+
+def validate_repo_path(repo_root: Path, value: str, column: str, evidence_id: str) -> str | None:
+    clean_value = value.strip()
+    if not clean_value:
+        return None
+    candidate = Path(clean_value)
+    if candidate.is_absolute():
+        raise ValueError(f"{column} for {evidence_id} must be relative: {clean_value}")
+    resolved = (repo_root / candidate).resolve()
+    try:
+        resolved.relative_to(repo_root)
+    except ValueError as exc:
+        raise ValueError(f"{column} for {evidence_id} escapes repo root: {clean_value}") from exc
+    if not resolved.exists():
+        raise FileNotFoundError(f"{column} for {evidence_id} does not exist: {clean_value}")
+    return clean_value
+
+
 def read_curation(repo_root: Path, path: Path) -> list[dict[str, Any]]:
     repo_root = repo_root.resolve()
     rows: list[dict[str, Any]] = []
@@ -91,15 +174,17 @@ def read_curation(repo_root: Path, path: Path) -> list[dict[str, Any]]:
         reader = csv.DictReader(handle)
         if reader.fieldnames != REQUIRED_CURATION_COLUMNS:
             raise ValueError(f"unexpected curation columns in {path}: {reader.fieldnames}")
-        for row in reader:
+        for row_number, row in enumerate(reader, start=2):
+            validate_curation_row(row, row_number)
             evidence_id = row["id"]
             if evidence_id in seen_ids:
                 raise ValueError(f"duplicate evidence id: {evidence_id}")
             seen_ids.add(evidence_id)
 
-            source = repo_root / row["source_path"]
-            if not source.exists():
-                raise FileNotFoundError(row["source_path"])
+            paths = {
+                column: validate_repo_path(repo_root, row[column], column, evidence_id)
+                for column in PATH_COLUMNS
+            }
 
             rows.append({
                 "id": evidence_id,
@@ -111,12 +196,12 @@ def read_curation(repo_root: Path, path: Path) -> list[dict[str, Any]]:
                 "role": row["role"],
                 "priority": parse_priority(row["priority"]),
                 "showInDashboard": parse_bool(row["show_in_dashboard"]),
-                "sourcePath": row["source_path"],
-                "generatorPath": row["generator_path"] or None,
-                "docPath": row["doc_path"] or None,
-                "chartPath": row["chart_path"] or None,
-                "tablePath": row["table_path"] or None,
-                "galleryPath": row["gallery_path"] or None,
+                "sourcePath": paths["source_path"],
+                "generatorPath": paths["generator_path"],
+                "docPath": paths["doc_path"],
+                "chartPath": paths["chart_path"],
+                "tablePath": paths["table_path"],
+                "galleryPath": paths["gallery_path"],
                 "analysisPurpose": row["analysis_purpose"] or None,
                 "shortDescription": row["short_description"] or None,
                 "tags": [tag for tag in row["tags"].split(";") if tag],
@@ -124,6 +209,14 @@ def read_curation(repo_root: Path, path: Path) -> list[dict[str, Any]]:
                 "notes": row["notes"] or None,
             })
     return sorted(rows, key=lambda item: (item["section"], item["module"], item["priority"], item["title"]))
+
+
+def validate_catalog_links(modules: list[dict[str, Any]], items: list[dict[str, Any]]) -> None:
+    module_ids = {module["moduleId"] for module in modules}
+    for item in items:
+        module_id = item["moduleId"]
+        if module_id not in module_ids:
+            raise ValueError(f"orphan evidence moduleId: {module_id} for item {item['id']}")
 
 
 def _strip_none(value: Any) -> Any:
@@ -134,12 +227,22 @@ def _strip_none(value: Any) -> Any:
     return value
 
 
+def catalog_input_hash(modules: list[dict[str, Any]], items: list[dict[str, Any]]) -> str:
+    payload = json.dumps(
+        {"modules": _strip_none(modules), "items": _strip_none(items)},
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
 def write_typescript(modules: list[dict[str, Any]], items: list[dict[str, Any]], output: Path) -> None:
-    generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    input_hash = catalog_input_hash(modules, items)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
         "import type { AnalysisModuleCopy, EvidenceItem } from \"./evidence-types\";\n\n"
-        f"export const evidenceCatalogGeneratedAt = {json.dumps(generated_at)};\n\n"
+        f"export const evidenceCatalogInputHash = {json.dumps(input_hash)};\n\n"
         "export const evidenceModules = "
         + json.dumps(_strip_none(modules), ensure_ascii=False, indent=2)
         + " as const satisfies readonly AnalysisModuleCopy[];\n\n"
@@ -250,6 +353,7 @@ def main() -> None:
 
     modules = extract_analysis_copy(args.analysis_copy)
     items = read_curation(args.repo_root, args.curation)
+    validate_catalog_links(modules, items)
     write_typescript(modules, items, args.output_ts)
     write_normalized_csvs(modules, items, args.modules_output, args.items_output)
     print(f"wrote {output_label(args.output_ts, args.repo_root)} items={len(items)} modules={len(modules)}")

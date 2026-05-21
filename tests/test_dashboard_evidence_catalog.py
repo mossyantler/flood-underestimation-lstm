@@ -5,11 +5,68 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
 from scripts.dashboard import evidence_common as common
 from scripts.dashboard import scan_evidence_candidates as scanner
+
+
+CURATION_FIELDNAMES = [
+    "id", "title", "section", "module", "kind", "role", "priority",
+    "show_in_dashboard", "source_path", "generator_path", "doc_path",
+    "chart_path", "table_path", "gallery_path", "analysis_purpose",
+    "short_description", "tags", "status", "notes",
+]
+
+
+def write_curation(path: Path, rows: list[dict[str, str]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=CURATION_FIELDNAMES, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def curation_row(**overrides: str) -> dict[str, str]:
+    row = {
+        "id": "primary-high-flow-md",
+        "title": "Primary high-flow peak performance",
+        "section": "analysis",
+        "module": "main-result",
+        "kind": "doc",
+        "role": "canonical",
+        "priority": "1",
+        "show_in_dashboard": "true",
+        "source_path": "docs/example.md",
+        "generator_path": "",
+        "doc_path": "",
+        "chart_path": "",
+        "table_path": "",
+        "gallery_path": "",
+        "analysis_purpose": "Purpose",
+        "short_description": "Description",
+        "tags": "analysis;main-result",
+        "status": "ready",
+        "notes": "",
+    }
+    row.update(overrides)
+    return row
+
+
+def analysis_copy_text(*modules: str) -> str:
+    if not modules:
+        modules = ("main-result",)
+    rows = []
+    for module in modules:
+        rows.append(
+            '{"moduleId":"analysis/%s","section":"analysis","module":"%s",'
+            '"title":"Module","analysisPurpose":"purpose","background":"bg",'
+            '"coreData":"data","interpretationMethod":"method",'
+            '"currentJudgment":"judgment","status":"ready"}' % (module, module)
+        )
+    return "export const analysisModuleCopy = [%s] as const;" % ",".join(rows)
 
 
 class DashboardEvidenceCatalogTests(unittest.TestCase):
@@ -215,3 +272,114 @@ class DashboardEvidenceCatalogTests(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "duplicate evidence id"):
                 builder.read_curation(root, curation)
+
+    def test_build_catalog_rejects_orphan_item_module(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "docs/example.md"
+            source.parent.mkdir(parents=True)
+            source.write_text("# Example\n", encoding="utf-8")
+            curation = root / "dashboard/data/evidence_curation.csv"
+            write_curation(curation, [curation_row(module="calibration")])
+            analysis_copy = root / "dashboard/lib/analysis-copy.ts"
+            analysis_copy.parent.mkdir(parents=True)
+            analysis_copy.write_text(analysis_copy_text("main-result"), encoding="utf-8")
+            script = Path("scripts/dashboard/build_evidence_catalog.py").resolve()
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "--repo-root",
+                    str(root),
+                    "--curation",
+                    str(curation),
+                    "--analysis-copy",
+                    str(analysis_copy),
+                    "--output-ts",
+                    str(root / "dashboard/lib/evidence-catalog.ts"),
+                    "--modules-output",
+                    str(root / "dashboard/data/evidence_catalog_modules.csv"),
+                    "--items-output",
+                    str(root / "dashboard/data/evidence_catalog_items.csv"),
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("orphan evidence moduleId", result.stderr)
+
+    def test_build_catalog_rejects_path_outside_repo_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "repo"
+            root.mkdir()
+            outside = Path(tmp) / "outside.md"
+            outside.write_text("# Outside\n", encoding="utf-8")
+            curation = root / "dashboard/data/evidence_curation.csv"
+            write_curation(curation, [curation_row(source_path="../outside.md")])
+            from scripts.dashboard import build_evidence_catalog as builder
+
+            with self.assertRaisesRegex(ValueError, "escapes repo root"):
+                builder.read_curation(root, curation)
+
+    def test_build_catalog_rejects_missing_optional_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "docs/example.md"
+            source.parent.mkdir(parents=True)
+            source.write_text("# Example\n", encoding="utf-8")
+            curation = root / "dashboard/data/evidence_curation.csv"
+            write_curation(curation, [curation_row(doc_path="docs/missing.md")])
+            from scripts.dashboard import build_evidence_catalog as builder
+
+            with self.assertRaisesRegex(FileNotFoundError, "doc_path"):
+                builder.read_curation(root, curation)
+
+    def test_build_catalog_repeated_run_leaves_outputs_unchanged(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "docs/example.md"
+            source.parent.mkdir(parents=True)
+            source.write_text("# Example\n", encoding="utf-8")
+            curation = root / "dashboard/data/evidence_curation.csv"
+            write_curation(curation, [curation_row()])
+            analysis_copy = root / "dashboard/lib/analysis-copy.ts"
+            analysis_copy.parent.mkdir(parents=True)
+            analysis_copy.write_text(analysis_copy_text("main-result"), encoding="utf-8")
+            output_ts = root / "dashboard/lib/evidence-catalog.ts"
+            modules_output = root / "dashboard/data/evidence_catalog_modules.csv"
+            items_output = root / "dashboard/data/evidence_catalog_items.csv"
+            script = Path("scripts/dashboard/build_evidence_catalog.py").resolve()
+            command = [
+                sys.executable,
+                str(script),
+                "--repo-root",
+                str(root),
+                "--curation",
+                str(curation),
+                "--analysis-copy",
+                str(analysis_copy),
+                "--output-ts",
+                str(output_ts),
+                "--modules-output",
+                str(modules_output),
+                "--items-output",
+                str(items_output),
+            ]
+
+            first = subprocess.run(command, check=False, capture_output=True, text=True)
+            self.assertEqual(first.returncode, 0, first.stderr)
+            first_bytes = {
+                path: path.read_bytes()
+                for path in [output_ts, modules_output, items_output]
+            }
+            time.sleep(1.1)
+            second = subprocess.run(command, check=False, capture_output=True, text=True)
+            self.assertEqual(second.returncode, 0, second.stderr)
+
+            self.assertEqual(first_bytes, {
+                path: path.read_bytes()
+                for path in [output_ts, modules_output, items_output]
+            })
