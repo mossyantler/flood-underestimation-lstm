@@ -11,6 +11,7 @@ import {
   type SectionSlug,
 } from "@/lib/sections";
 import { DashboardShell } from "@/components/dashboard-shell";
+import { DatasetEvidenceExplorer } from "@/components/dataset-evidence-explorer";
 import { SectionHeader } from "@/components/section-header";
 import { EvidenceBlock } from "@/components/evidence-block";
 import {
@@ -24,6 +25,7 @@ import {
   stressRows,
 } from "@/lib/dashboard-data";
 import { confirmedFloodSnapshot } from "@/lib/confirmed-flood-data";
+import { getDatasetExplorerData } from "@/lib/dataset-explorer";
 import { evaluationTestsSnapshot } from "@/lib/evaluation-tests-data";
 import { getCopyForModule, getEvidenceForModule } from "@/lib/evidence-catalog";
 import { NSE_DELTA_CSV, PEAK_HOUR_CSV, SECTION_CSV } from "@/lib/export";
@@ -63,6 +65,7 @@ export default async function DetailPage({ params }: Props) {
   const copy = getCopyForModule(moduleId);
   const evidence = getEvidenceForModule(moduleId);
   const csvInfo = SECTION_CSV[section] ?? { csv: "", filename: "data.csv" };
+  const datasetExplorerData = moduleId === "foundation/dataset" ? await getDatasetExplorerData() : undefined;
 
   return (
     <DashboardShell slug={section} activeEntrySlug={detail}>
@@ -83,11 +86,16 @@ export default async function DetailPage({ params }: Props) {
 
       <p className="section-lede">{content.lede}</p>
 
-      {copy && <EvidenceBlock copy={copy} items={evidence} />}
+      {copy && datasetExplorerData && (
+        <DatasetEvidenceExplorer copy={copy} data={datasetExplorerData} />
+      )}
+      {copy && !datasetExplorerData && <EvidenceBlock copy={copy} items={evidence} />}
 
-      <div className="panel-grid">
-        {content.panels}
-      </div>
+      {!datasetExplorerData && (
+        <div className="panel-grid">
+          {content.panels}
+        </div>
+      )}
 
       <div className="grid-note">
         {content.sourcePath}
