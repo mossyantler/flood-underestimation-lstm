@@ -39,6 +39,6 @@ export const analysisModuleCopy = [
   }
 ] as const satisfies readonly AnalysisModuleCopy[];
 
-export function getAnalysisModuleCopy(moduleId: string) {
+export function getAnalysisModuleCopy(moduleId: string): AnalysisModuleCopy | undefined {
   return analysisModuleCopy.find((item) => item.moduleId === moduleId);
 }
