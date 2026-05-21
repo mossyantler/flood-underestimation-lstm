@@ -84,7 +84,7 @@ uv run --script scripts/model/confirmed_flood/export_confirmed_flood_dashboard_s
 
 ## Dataset Evidence Explorer
 
-`/foundation/dataset`은 Dataset viewer prototype입니다. 이 화면은 `docs/`, `configs/`, `output/`, `database/local/`의 allowlisted artifact를 읽어 Markdown renderer, CSV preview grid, chart viewer, DB preset shell로 보여줍니다.
+`/foundation/dataset`은 Dataset viewer prototype입니다. 이 화면은 `docs/`, `configs/`, `output/`, `database/local/`, `dashboard/data/`의 allowlisted artifact를 읽어 Markdown renderer, CSV preview grid, image/chart preview, DB preset shell로 보여줍니다.
 
 CSV는 브라우저에 전체를 싣지 않고 server-side preview로 header, first 50 rows, row count, column count, file size를 표시합니다. DB preset shell은 read-only query aid의 위치를 보여주는 UI이며, 자유 SQL 실행기는 아닙니다.
 
