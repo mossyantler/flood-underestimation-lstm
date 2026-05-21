@@ -7,6 +7,10 @@ import { KpiStrip } from "@/components/kpi-card";
 import { ChartCard } from "@/components/chart-card";
 import { SectionTable } from "@/components/section-table";
 import { CheckpointCard } from "@/components/checkpoint-card";
+import { ConfirmedFloodDashboard } from "@/components/confirmed-flood-dashboard";
+import { EvaluationTestMatrix } from "@/components/evaluation-test-matrix";
+import { FigurePreviewGrid } from "@/components/figure-preview-grid";
+import { StatusBoard } from "@/components/status-board";
 import {
   overviewKpis, sectionIndexRows, checkpointRows,
   resultsKpis, stressKpis,
@@ -15,6 +19,12 @@ import {
   eventRegimeRows, calibrationRows,
   stressRows, datasetRows,
 } from "@/lib/dashboard-data";
+import {
+  analysisFigureDeck,
+  overviewFigureDeck,
+  resultFigureDeck,
+  stressFigureDeck,
+} from "@/lib/figure-assets";
 import { SECTION_CSV, NSE_DELTA_CSV, PEAK_HOUR_CSV } from "@/lib/export";
 
 interface Props { params: Promise<{ section: string }> }
@@ -42,6 +52,7 @@ export default async function SectionPage({ params }: Props) {
       {id === "R" && <ResultsSection />}
       {id === "A" && <AnalysisSection />}
       {id === "S" && <StressSection />}
+      {id === "F" && <ConfirmedFloodSection />}
 
       <div className="grid-note">
         CAMELS Dashboard · DRBC holdout · subset300 · seed 111/222/444
@@ -63,16 +74,10 @@ function DetailLink({ href }: { href: string }) {
 function OverviewSection() {
   return (
     <>
-      <KpiStrip items={overviewKpis} />
       <p className="section-lede">
-        Non-DRBC basin으로 학습한 global multi-basin LSTM의 DRBC holdout 일반화 성능을 평가한다.
-        Deterministic baseline(Model 1)과 probabilistic quantile head(Model 2)를 paired seed 구조로 비교한다.
+        CAMELS dashboard는 연구 claim의 상태와 근거를 관리하고, headline indicator에서 raw hydrologic evidence까지 내려가는 실험 검토 workbench다.
       </p>
-      <div className="hero-row">
-        <ChartCard />
-        <CheckpointCard rows={checkpointRows} />
-      </div>
-      <SectionTable rows={sectionIndexRows} />
+      <StatusBoard />
     </>
   );
 }
@@ -248,6 +253,7 @@ function ResultsSection() {
         Upper quantile head(q90/q95/q99)가 Q99 exceedance stratum과 observed peak hour에서
         deterministic Model 1의 peak underestimation을 얼마나 줄이는지 확인한다. 이 분석이 연구 가설의 핵심이다.
       </p>
+      <FigurePreviewGrid figures={resultFigureDeck} />
       <div className="panel-grid">
         <section className="panel research-panel">
           <div className="panel-sub">top 1% flow stratum (basin Q99 exceedance)</div>
@@ -329,6 +335,7 @@ function AnalysisSection() {
         570개 observed high-flow event를 ML event-regime(KMeans k=3)으로 분류해 상위 분위 효과를 검증하고,
         Model 2 calibration(pinball/AQS, coverage)을 진단한다.
       </p>
+      <FigurePreviewGrid figures={analysisFigureDeck} />
       <div className="panel-grid">
         <section className="panel research-panel">
           <div className="panel-sub">ML event-regime · q99 paired delta vs Model 1</div>
@@ -400,6 +407,7 @@ function StressSection() {
         upper quantile의 peak tracking과 false-positive tradeoff를 점검한다.
         <strong> drbc_historical_stress는 temporal independence claim에 사용하지 않는다.</strong>
       </p>
+      <FigurePreviewGrid figures={stressFigureDeck} />
       <div className="panel-grid">
         <section className="panel research-panel">
           <div className="panel-sub">stress cohort · q99 under-deficit</div>
@@ -439,6 +447,20 @@ function StressSection() {
           <DetailLink href="/stress/checkpoint" />
         </section>
       </div>
+    </>
+  );
+}
+
+/* ── 확정홍수(F) ─────────────────────────────────────────────── */
+function ConfirmedFloodSection() {
+  return (
+    <>
+      <p className="section-lede">
+        Confirmed flood dashboard는 NWS flood-stage discharge 초과 event만 대상으로 한다.
+        성능 구분은 Model 1 peak under-deficit과 Model 2 q99 peak under-deficit의 paired-seed median 차이를 기준으로 보며,
+        NOAA Storm Events annotation은 event type 보조 정보로만 사용한다.
+      </p>
+      <ConfirmedFloodDashboard />
     </>
   );
 }
