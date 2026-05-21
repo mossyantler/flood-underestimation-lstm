@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import os
 import subprocess
 import sys
@@ -110,3 +111,107 @@ class DashboardEvidenceCatalogTests(unittest.TestCase):
             self.assertIn("rows=1", result.stdout)
             self.assertTrue(output.exists())
             self.assertNotIn(b"\r\n", output.read_bytes())
+
+    def test_extract_analysis_copy_from_ts(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ts = root / "dashboard/lib/analysis-copy.ts"
+            ts.parent.mkdir(parents=True)
+            ts.write_text(
+                'export const analysisModuleCopy = [{"moduleId":"analysis/main-result","section":"analysis","module":"main-result","title":"Main","analysisPurpose":"purpose","background":"bg","coreData":"data","interpretationMethod":"method","currentJudgment":"judgment","status":"ready"}] as const;',
+                encoding="utf-8",
+            )
+            from scripts.dashboard import build_evidence_catalog as builder
+
+            rows = builder.extract_analysis_copy(ts)
+
+            self.assertEqual(rows[0]["moduleId"], "analysis/main-result")
+
+    def test_extract_analysis_copy_rejects_mismatched_module_id(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ts = root / "dashboard/lib/analysis-copy.ts"
+            ts.parent.mkdir(parents=True)
+            ts.write_text(
+                'export const analysisModuleCopy = [{"moduleId":"analysis/wrong","section":"analysis","module":"main-result","title":"Main","analysisPurpose":"purpose","background":"bg","coreData":"data","interpretationMethod":"method","currentJudgment":"judgment","status":"ready"}] as const;',
+                encoding="utf-8",
+            )
+            from scripts.dashboard import build_evidence_catalog as builder
+
+            with self.assertRaisesRegex(ValueError, "moduleId"):
+                builder.extract_analysis_copy(ts)
+
+    def test_extract_analysis_copy_rejects_duplicate_module_id(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ts = root / "dashboard/lib/analysis-copy.ts"
+            ts.parent.mkdir(parents=True)
+            module = '{"moduleId":"analysis/main-result","section":"analysis","module":"main-result","title":"Main","analysisPurpose":"purpose","background":"bg","coreData":"data","interpretationMethod":"method","currentJudgment":"judgment","status":"ready"}'
+            ts.write_text(
+                f"export const analysisModuleCopy = [{module},{module}] as const;",
+                encoding="utf-8",
+            )
+            from scripts.dashboard import build_evidence_catalog as builder
+
+            with self.assertRaisesRegex(ValueError, "duplicate moduleId"):
+                builder.extract_analysis_copy(ts)
+
+    def test_build_catalog_rejects_missing_source_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            curation = root / "dashboard/data/evidence_curation.csv"
+            curation.parent.mkdir(parents=True)
+            with curation.open("w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(handle, fieldnames=[
+                    "id", "title", "section", "module", "kind", "role", "priority",
+                    "show_in_dashboard", "source_path", "generator_path", "doc_path",
+                    "chart_path", "table_path", "gallery_path", "analysis_purpose",
+                    "short_description", "tags", "status", "notes",
+                ])
+                writer.writeheader()
+                writer.writerow({
+                    "id": "missing", "title": "Missing", "section": "analysis",
+                    "module": "main-result", "kind": "doc", "role": "canonical",
+                    "priority": "1", "show_in_dashboard": "true",
+                    "source_path": "docs/missing.md", "generator_path": "",
+                    "doc_path": "", "chart_path": "", "table_path": "", "gallery_path": "",
+                    "analysis_purpose": "", "short_description": "", "tags": "analysis",
+                    "status": "ready", "notes": "",
+                })
+            from scripts.dashboard import build_evidence_catalog as builder
+
+            with self.assertRaises(FileNotFoundError):
+                builder.read_curation(root, curation)
+
+    def test_build_catalog_rejects_duplicate_item_id(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "docs/example.md"
+            source.parent.mkdir(parents=True)
+            source.write_text("# Example\n", encoding="utf-8")
+            curation = root / "dashboard/data/evidence_curation.csv"
+            curation.parent.mkdir(parents=True)
+            fieldnames = [
+                "id", "title", "section", "module", "kind", "role", "priority",
+                "show_in_dashboard", "source_path", "generator_path", "doc_path",
+                "chart_path", "table_path", "gallery_path", "analysis_purpose",
+                "short_description", "tags", "status", "notes",
+            ]
+            row = {
+                "id": "duplicate", "title": "Example", "section": "analysis",
+                "module": "main-result", "kind": "doc", "role": "canonical",
+                "priority": "1", "show_in_dashboard": "true",
+                "source_path": "docs/example.md", "generator_path": "",
+                "doc_path": "", "chart_path": "", "table_path": "", "gallery_path": "",
+                "analysis_purpose": "", "short_description": "", "tags": "analysis",
+                "status": "ready", "notes": "",
+            }
+            with curation.open("w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(handle, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerow(row)
+                writer.writerow(row)
+            from scripts.dashboard import build_evidence_catalog as builder
+
+            with self.assertRaisesRegex(ValueError, "duplicate evidence id"):
+                builder.read_curation(root, curation)

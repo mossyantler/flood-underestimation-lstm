@@ -1,0 +1,11 @@
+evidence_id,module_id,title,kind,role,priority,source_path,generator_path,tags,status,show_in_dashboard
+calibration-report,analysis/calibration,Probabilistic diagnostics report,report,canonical,1,output/model_analysis/probabilistic_diagnostics/report/probabilistic_diagnostics_report.md,,analysis;calibration,ready,true
+confirmed-flood-performance,analysis/confirmed-flood,Confirmed flood performance table,table,canonical,1,output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv,scripts/model/confirmed_flood/export_confirmed_flood_dashboard_snapshot.py,analysis;confirmed-flood,ready,true
+hydrograph-candidates,analysis/hydrograph,Representative hydrograph candidates,table,canonical,1,output/model_analysis/paper_result_assets/tables/representative_hydrograph_candidates.csv,,analysis;hydrograph,ready,true
+high-flow-chart,analysis/main-result,High-flow quantile comparison,chart,canonical,1,output/model_analysis/overall_analysis/main_comparison/figures/overall_conclusion/overall_conclusion_high_flow_quantiles.png,,analysis;chart;q99,ready,true
+primary-high-flow-md,analysis/main-result,Primary high-flow peak performance,doc,canonical,1,docs/experiment/analysis/model/02_primary_high_flow_peak_performance.md,,analysis;main-result;q99,ready,true
+dataset-guide,foundation/dataset,Data processing guide,doc,canonical,1,docs/experiment/method/data/data_processing_analysis_guide.md,,foundation;dataset;data,ready,true
+input-coverage-overview,foundation/dataset,Input coverage overview,chart,supporting,2,output/basin/timeseries/input_coverage/figures/overview.png,,foundation;dataset;coverage,ready,true
+architecture-md,foundation/model,Model architecture,doc,canonical,1,docs/experiment/method/model/architecture.md,,model;architecture;canonical,ready,true
+paper-assets-report,overview/status,Paper result assets report,report,canonical,1,output/model_analysis/paper_result_assets/report/paper_result_assets_report.md,,overview;paper-assets,ready,true
+reference-related-papers,reference/analysis,Related papers map,doc,supporting,2,docs/references/related_papers.md,,reference;papers,ready,true
