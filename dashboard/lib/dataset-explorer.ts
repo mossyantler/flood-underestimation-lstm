@@ -44,7 +44,7 @@ const ARTIFACT_CONFIGS: ArtifactConfig[] = [
     title: "scaling_300 manifest",
     subtitle: "Fixed subset300 basin manifest",
     sourcePath: "configs/pilot/basin_splits/scaling_300/manifest.csv",
-    generatorPath: "scripts/pilot/build_scaling_pilot_splits.py",
+    generatorPath: "scripts/scaling/build_scaling_pilot_splits.py",
     interpretation:
       "Model 1/2 paired-seed 실험에서 쓰는 고정 basin universe와 split metadata를 확인한다.",
   },
@@ -84,7 +84,7 @@ const ARTIFACT_CONFIGS: ArtifactConfig[] = [
     title: "Dashboard evidence catalog",
     subtitle: "Artifacts currently exposed by the dashboard",
     sourcePath: "dashboard/data/evidence_catalog_items.csv",
-    generatorPath: "scripts/model/overall/build_dashboard_evidence_catalog.py",
+    generatorPath: "scripts/dashboard/build_evidence_catalog.py",
     interpretation:
       "dashboard가 어떤 docs/output artifact를 노출 대상으로 삼는지 확인한다.",
   },
