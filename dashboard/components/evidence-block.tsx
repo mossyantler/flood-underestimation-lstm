@@ -43,8 +43,33 @@ function displaySourcePath(path: string) {
   return isLocalAbsolutePath(path) ? "local source path" : path;
 }
 
+function coreDataItems(coreData: string) {
+  return coreData
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function interpretationNodes(copy: AnalysisModuleCopy) {
+  if (copy.moduleId === "foundation/dataset") {
+    return [
+      { label: "Input", text: "CAMELSH source와 screening logic" },
+      { label: "Result", text: "model inference와 raw metric output" },
+      { label: "Analysis", text: "chart/table로 가공한 해석 layer" },
+    ];
+  }
+
+  return [
+    { label: "Source", text: copy.coreData },
+    { label: "Read", text: copy.interpretationMethod },
+    { label: "Judge", text: copy.currentJudgment },
+  ];
+}
+
 export function EvidenceBlock({ copy, items }: EvidenceBlockProps) {
   const visibleItems = [...items].sort((a, b) => a.priority - b.priority || a.title.localeCompare(b.title));
+  const dataItems = coreDataItems(copy.coreData);
+  const interpretation = interpretationNodes(copy);
 
   return (
     <section className="evidence-block">
@@ -54,16 +79,26 @@ export function EvidenceBlock({ copy, items }: EvidenceBlockProps) {
           <p>{copy.analysisPurpose}</p>
         </article>
         <article className="evidence-copy-card">
-          <span>배경 설명</span>
-          <p>{copy.background}</p>
-        </article>
-        <article className="evidence-copy-card">
           <span>핵심 데이터</span>
-          <p>{copy.coreData}</p>
+          <ul className="evidence-data-list">
+            {dataItems.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
         </article>
-        <article className="evidence-copy-card">
+        <article className="evidence-copy-card evidence-copy-card-wide">
           <span>해석 방법</span>
-          <p>{copy.interpretationMethod}</p>
+          <div className="evidence-flow" aria-label={`${copy.title} 해석 구조`}>
+            {interpretation.map((step, index) => (
+              <div className="evidence-flow-step" key={step.label}>
+                <div>
+                  <strong>{step.label}</strong>
+                  <p>{step.text}</p>
+                </div>
+                {index < interpretation.length - 1 && <i aria-hidden="true">→</i>}
+              </div>
+            ))}
+          </div>
         </article>
         <article className="evidence-copy-card evidence-copy-card-wide">
           <span>현재 판단</span>
@@ -91,7 +126,10 @@ function EvidenceRow({ item }: { item: EvidenceItem }) {
         <strong>{item.title}</strong>
         {item.shortDescription && <p>{item.shortDescription}</p>}
       </div>
-      <code>{displaySourcePath(item.sourcePath)}</code>
+      <div className="evidence-source">
+        <span>Source path</span>
+        <code>{displaySourcePath(item.sourcePath)}</code>
+      </div>
       {canOpen ? (
         <Link href={path} className="panel-detail-link">열기</Link>
       ) : (

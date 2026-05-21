@@ -626,6 +626,66 @@ h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: 0; }
   margin: 0;
 }
 
+.evidence-data-list {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.evidence-data-list li {
+  align-items: start;
+  color: var(--ink-body);
+  display: grid;
+  font-size: 12px;
+  gap: 7px;
+  grid-template-columns: 6px minmax(0, 1fr);
+  line-height: 1.45;
+}
+
+.evidence-data-list li::before {
+  background: var(--ink-dim);
+  border-radius: 999px;
+  content: "";
+  height: 4px;
+  margin-top: 8px;
+  width: 4px;
+}
+
+.evidence-flow {
+  align-items: stretch;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.evidence-flow-step {
+  align-items: center;
+  background: var(--panel-inner);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-width: 0;
+  padding: 10px;
+}
+
+.evidence-flow-step strong {
+  color: var(--ink);
+  display: block;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 10px;
+  margin-bottom: 5px;
+}
+
+.evidence-flow-step i {
+  color: var(--ink-dim);
+  font-family: var(--font-geist-mono), monospace;
+  font-style: normal;
+}
+
 .evidence-list {
   display: grid;
   gap: 8px;
@@ -653,10 +713,28 @@ h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: 0; }
   margin-top: 4px;
 }
 
-.evidence-row code {
+.evidence-source {
+  background: color-mix(in srgb, var(--panel-deep) 72%, transparent);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-sm);
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 8px;
+}
+
+.evidence-source span {
   color: var(--ink-dim);
   font-family: var(--font-geist-mono), monospace;
-  font-size: 9px;
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.evidence-source code {
+  color: var(--ink-dim);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 10px;
+  line-height: 1.45;
   overflow-wrap: anywhere;
 }
 
@@ -1489,7 +1567,10 @@ h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: 0; }
   .source-row { grid-template-columns: 1fr; }
   .chart-footnote { flex-direction: column; }
   .evidence-copy-grid,
+  .evidence-flow,
   .evidence-row { grid-template-columns: 1fr; }
+  .evidence-flow-step { grid-template-columns: 1fr; }
+  .evidence-flow-step i { display: none; }
 }
 
 @media (max-width: 480px) {
