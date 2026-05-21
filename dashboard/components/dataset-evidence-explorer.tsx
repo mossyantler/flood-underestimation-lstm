@@ -24,7 +24,8 @@ export function DatasetEvidenceExplorer({ copy, data }: DatasetEvidenceExplorerP
     () => data.artifacts.filter((artifact) => artifact.layer === activeLayer),
     [activeLayer, data.artifacts],
   );
-  const selected = data.artifacts.find((artifact) => artifact.id === selectedId) ?? visibleArtifacts[0] ?? data.artifacts[0];
+  const selected = visibleArtifacts.find((artifact) => artifact.id === selectedId) ?? visibleArtifacts[0];
+  const activePanelId = `dataset-layer-panel-${activeLayer.toLowerCase()}`;
 
   function selectLayer(layer: DatasetArtifactLayer) {
     setActiveLayer(layer);
@@ -45,9 +46,12 @@ export function DatasetEvidenceExplorer({ copy, data }: DatasetEvidenceExplorerP
           <div className="dataset-layer-tabs" role="tablist" aria-label="Dataset layers">
             {LAYERS.map((layer) => (
               <button
+                aria-controls={`dataset-layer-panel-${layer.toLowerCase()}`}
+                aria-selected={layer === activeLayer}
                 className={layer === activeLayer ? "active" : ""}
                 key={layer}
                 onClick={() => selectLayer(layer)}
+                role="tab"
                 type="button"
               >
                 {layer}
@@ -77,7 +81,7 @@ export function DatasetEvidenceExplorer({ copy, data }: DatasetEvidenceExplorerP
           </div>
         </aside>
 
-        <div className="dataset-viewer-canvas">
+        <div className="dataset-viewer-canvas" id={activePanelId} role="tabpanel">
           {selected ? (
             <>
               <div className="dataset-viewer-heading">
@@ -94,7 +98,7 @@ export function DatasetEvidenceExplorer({ copy, data }: DatasetEvidenceExplorerP
           ) : (
             <div className="dataset-empty-state">
               <strong>No dataset evidence</strong>
-              <p>Dataset explorer data가 아직 준비되지 않았다.</p>
+              <p>{activeLayer} layer에 표시할 dataset artifact가 없다.</p>
             </div>
           )}
         </div>
@@ -192,8 +196,8 @@ function CsvPreview({ artifact }: { artifact: Extract<DatasetArtifact, { viewer:
         <table className="data-table">
           <thead>
             <tr>
-              {artifact.csv.columns.map((column) => (
-                <th key={column}>{column}</th>
+              {artifact.csv.columns.map((column, columnIndex) => (
+                <th key={`${column}-${columnIndex}`}>{column}</th>
               ))}
             </tr>
           </thead>
