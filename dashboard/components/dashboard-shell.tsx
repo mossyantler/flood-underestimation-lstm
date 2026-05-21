@@ -1,17 +1,18 @@
 "use client";
 import { useState } from "react";
-import { SLUG_TO_ID, type SectionId } from "@/lib/sections";
+import { SLUG_TO_ID, type SectionId, type SectionSlug } from "@/lib/sections";
 import { IconRail } from "./icon-rail";
 import { ContextSidebar } from "./context-sidebar";
 import { MobileTopBar } from "./mobile-topbar";
 
 interface DashboardShellProps {
   slug: string;
+  activeEntrySlug?: string;
   children: React.ReactNode;
 }
 
-export function DashboardShell({ slug, children }: DashboardShellProps) {
-  const activeId: SectionId = SLUG_TO_ID[slug] ?? "O";
+export function DashboardShell({ slug, activeEntrySlug, children }: DashboardShellProps) {
+  const activeId: SectionId = SLUG_TO_ID[slug as SectionSlug] ?? "O";
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
@@ -21,7 +22,7 @@ export function DashboardShell({ slug, children }: DashboardShellProps) {
         sidebarOpen={sidebarOpen}
         onToggleSidebar={() => setSidebarOpen((v) => !v)}
       />
-      <ContextSidebar activeId={activeId} />
+      <ContextSidebar activeId={activeId} activeEntrySlug={activeEntrySlug} />
       <div>
         <MobileTopBar activeId={activeId} />
         <main className="canvas" aria-label="분석 대시보드">

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { SLUG_TO_ID, SECTION_LABEL, SECTION_ACCENT } from "@/lib/sections";
+import { SLUG_TO_ID, SECTION_LABEL, SECTION_ACCENT, type SectionSlug } from "@/lib/sections";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { SectionHeader } from "@/components/section-header";
 import {
@@ -9,6 +9,7 @@ import {
   eventRegimeRows, calibrationRows,
   stressRows, datasetRows,
 } from "@/lib/dashboard-data";
+import { evaluationTestsSnapshot } from "@/lib/evaluation-tests-data";
 import { SECTION_CSV, NSE_DELTA_CSV, PEAK_HOUR_CSV } from "@/lib/export";
 
 interface Props { params: Promise<{ section: string; detail: string }> }
@@ -16,23 +17,36 @@ interface Props { params: Promise<{ section: string; detail: string }> }
 // 전체 static params (section + detail 조합)
 export function generateStaticParams() {
   return [
-    { section: "overview",    detail: "chart" },
-    { section: "results",     detail: "q99-exceedance" },
-    { section: "results",     detail: "peak-hour" },
-    { section: "model",       detail: "performance" },
-    { section: "model",       detail: "nse-delta" },
+    { section: "overview",    detail: "status" },
+    { section: "overview",    detail: "roadmap" },
+    { section: "overview",    detail: "quick-results" },
+    { section: "overview",    detail: "next-actions" },
+    { section: "experiment",  detail: "comparison" },
+    { section: "experiment",  detail: "split-policy" },
+    { section: "experiment",  detail: "seed-checkpoint" },
+    { section: "experiment",  detail: "test-matrix" },
+    { section: "experiment",  detail: "workflow" },
+    { section: "foundation",  detail: "dataset" },
+    { section: "foundation",  detail: "model" },
+    { section: "foundation",  detail: "basin" },
+    { section: "analysis",    detail: "main-result" },
+    { section: "analysis",    detail: "hydrograph" },
+    { section: "analysis",    detail: "stress" },
+    { section: "analysis",    detail: "confirmed-flood" },
     { section: "analysis",    detail: "event-regime" },
+    { section: "analysis",    detail: "attribute" },
     { section: "analysis",    detail: "calibration" },
-    { section: "stress",      detail: "cohort" },
-    { section: "stress",      detail: "checkpoint" },
-    { section: "dataset",     detail: "split" },
-    { section: "hydrograph",  detail: "quantile-zone" },
+    { section: "reference",   detail: "experiment" },
+    { section: "reference",   detail: "dataset" },
+    { section: "reference",   detail: "model" },
+    { section: "reference",   detail: "basin" },
+    { section: "reference",   detail: "analysis" },
   ];
 }
 
 export default async function DetailPage({ params }: Props) {
   const { section, detail } = await params;
-  const id = SLUG_TO_ID[section];
+  const id = SLUG_TO_ID[section as SectionSlug];
   if (!id) notFound();
 
   const accent = SECTION_ACCENT[id];
@@ -43,7 +57,7 @@ export default async function DetailPage({ params }: Props) {
   if (!content) notFound();
 
   return (
-    <DashboardShell slug={section}>
+    <DashboardShell slug={section} activeEntrySlug={detail}>
       <SectionHeader
         title={content.title}
         route={`/${section}/${detail}`}
@@ -84,10 +98,70 @@ interface DetailContent {
   csvFilename?: string;
 }
 
+function simpleDetail(title: string, lede: string, sourcePath: string): DetailContent {
+  return {
+    title,
+    lede,
+    sourcePath,
+    panels: (
+      <section className="panel research-panel">
+        <div className="panel-sub">Detail page</div>
+        <div className="panel-title">{title}</div>
+        <p className="panel-body">{lede}</p>
+        <div className="source-path">{sourcePath}</div>
+      </section>
+    ),
+  };
+}
+
 function getDetailContent(section: string, detail: string): DetailContent | null {
   const key = `${section}/${detail}`;
 
   switch (key) {
+    case "overview/status":
+      return simpleDetail("Overview status", "프로젝트 진행 상태, 완료/진행중/준비중/rerun 필요 항목을 한 곳에서 본다.", "dashboard/lib/evaluation-tests-data.ts");
+    case "overview/roadmap":
+      return simpleDetail("Analysis roadmap", "논문 목적을 위해 어떤 분석을 먼저 확인해야 하는지 roadmap으로 정리한다.", "docs/superpowers/specs/2026-05-21-camels-dashboard-ia-redesign.md");
+    case "overview/quick-results":
+      return simpleDetail("Quick results", "현재 claim에 쓸 수 있는 간단한 결과와 caveat를 빠르게 확인한다.", "output/model_analysis/overall_analysis/main_comparison/");
+    case "overview/next-actions":
+      return simpleDetail("Next actions", "expanded rerun과 후속 검증 queue를 관리한다.", "dashboard/lib/evaluation-tests-data.ts");
+    case "experiment/comparison":
+      return simpleDetail("Official comparison", "Model 1 deterministic LSTM과 Model 2 quantile head 비교축을 고정한다.", "docs/experiment/method/model/architecture.md");
+    case "experiment/split-policy":
+      return simpleDetail("Split policy", "subset300, DRBC holdout, expanded basin universe의 경계를 설명한다.", "configs/basin_splits/");
+    case "experiment/seed-checkpoint":
+      return simpleDetail("Seed & checkpoint", "paired seed와 primary epoch 선택 기준을 설명한다.", "output/model_analysis/overall_analysis/main_comparison/tables/primary_epoch_summary.csv");
+    case "experiment/test-matrix":
+      return simpleDetail("Test matrix", "first, extreme, confirmed flood test의 준비 상태와 rerun 필요 여부를 본다.", "dashboard/lib/evaluation-tests-data.ts");
+    case "experiment/workflow":
+      return simpleDetail("Workflow", "split, train, inference, analysis로 이어지는 재현 workflow와 command를 정리한다.", "scripts/model/");
+    case "foundation/dataset":
+      return simpleDetail("Dataset", "input data, result data, analysis data를 분리해 source와 성격을 설명한다.", "basins/ · data/ · output/model_analysis/");
+    case "foundation/model":
+      return simpleDetail("Model", "LSTM 구조, Model 1/2 head 차이, loss function, hyperparameter를 설명한다.", "configs/ · docs/experiment/method/model/");
+    case "foundation/basin":
+      return simpleDetail("Basin", "DRBC holdout, training pool, expanded universe, basin attributes를 설명한다.", "basins/drbc_boundary/ · output/basin/drbc/analysis/");
+    case "analysis/main-result":
+      return simpleDetail("Main result", "Q99 exceedance와 observed peak hour에서 Model 2 q99가 peak underestimation을 줄였는지 검토한다.", "output/model_analysis/overall_analysis/main_comparison/");
+    case "analysis/hydrograph":
+      return simpleDetail("Hydrograph", "기존 hydrograph gallery 구조로 basin/event/predictor별 visual evidence를 본다.", "output/model_analysis/extreme_rain/primary/observed_q99_hydrograph_gallery_index.html");
+    case "analysis/stress":
+      return simpleDetail("Stress test", "Historical stress에서 benefit과 false-positive tradeoff를 보조 분석으로 점검한다.", "output/model_analysis/extreme_rain/primary/");
+    case "analysis/confirmed-flood":
+      return simpleDetail("Confirmed flood", "NWS flood-stage event layer를 기준으로 event audit과 hydrograph evidence를 본다.", "output/model_analysis/confirmed_flood/");
+    case "analysis/attribute":
+      return simpleDetail("Attribute analysis", "Basin attribute별로 model effect와 failure mode를 sorting한다.", "output/model_analysis/overall_analysis/main_comparison/drbc_attribute_metric_correlations/");
+    case "reference/experiment":
+      return simpleDetail("Experiment references", "PUB/PUR, split, fairness 관련 선행연구를 묶는다.", "docs/references/");
+    case "reference/dataset":
+      return simpleDetail("Dataset references", "CAMELS, CAMELSH, forcing, basin attribute 관련 문헌을 묶는다.", "docs/references/");
+    case "reference/model":
+      return simpleDetail("Model references", "LSTM hydrology, quantile regression, pinball loss 문헌을 묶는다.", "docs/references/");
+    case "reference/basin":
+      return simpleDetail("Basin references", "DRBC, flood hydrology, hydromodification 관련 문헌을 묶는다.", "docs/references/");
+    case "reference/analysis":
+      return simpleDetail("Analysis references", "flood typing, event regime, SHAP, stress testing 관련 문헌을 묶는다.", "docs/references/");
 
     /* ── overview/chart ──────────────────────────────────────── */
     case "overview/chart":
@@ -206,6 +280,69 @@ function getDetailContent(section: string, detail: string): DetailContent | null
           </>
         ),
       };
+
+    case "results/expanded-first": {
+      const first = evaluationTestsSnapshot.tests[0];
+      const firstStatus: string = first.status;
+      return {
+        title: "Expanded First Test 상태",
+        lede: "First test는 기존 38 basin primary summary가 아니라 expanded DRBC observed test split 기준으로 다시 평가한 산출을 공식값으로 써야 한다.",
+        sourcePath: `${first.primarySource} · runner: ${first.runner}`,
+        csvFilename: "camels_expanded_first_test_status.csv",
+        csvContent: [
+          ["model", "seed", "epoch", "n_basins", "median_NSE", "median_KGE", "median_FHV", "median_Peak_MAPE"].join(","),
+          ...first.rows.map((row) => [
+            row.model,
+            row.seed,
+            row.epoch,
+            row.n_basins,
+            row.median_NSE,
+            row.median_KGE,
+            row.median_FHV,
+            row.median_Peak_MAPE,
+          ].join(",")),
+        ].join("\n"),
+        panels: (
+          <>
+            <section className="panel research-panel">
+              <div className="panel-sub">Expanded first test</div>
+              <div className="panel-title">현재 평가 커버리지</div>
+              <p className="panel-body">{first.interpretation}</p>
+              <div className="fact-grid">
+                <div className="fact-row"><span className="fact-label">status</span><strong style={{color:firstStatus === "ready" ? "#50e3c2" : "#f7b955"}}>{first.status}</strong><span>{first.basis}</span></div>
+                <div className="fact-row"><span className="fact-label">coverage</span><strong>{first.coverage}</strong><span>evaluated / expanded selected</span></div>
+                <div className="fact-row"><span className="fact-label">seeds</span><strong>{first.summary.seeds.join(" / ") || "none"}</strong><span>expected 111 / 222 / 444</span></div>
+                <div className="fact-row"><span className="fact-label">models</span><strong>{first.summary.models.join(" / ") || "none"}</strong><span>expected model1 / model2</span></div>
+              </div>
+            </section>
+            <section className="panel research-panel">
+              <div className="panel-sub">Available rows</div>
+              <div className="panel-title">현재 산출 요약</div>
+              <div className="data-block" style={{marginTop:12}}>
+                <table className="data-table">
+                  <thead>
+                    <tr><th>Model</th><th>Seed</th><th style={{textAlign:"right"}}>Basins</th><th style={{textAlign:"right"}}>NSE</th><th style={{textAlign:"right"}}>KGE</th><th style={{textAlign:"right"}}>Peak MAPE</th></tr>
+                  </thead>
+                  <tbody>
+                    {first.rows.map((row) => (
+                      <tr key={`${row.model}-${row.seed}`}>
+                        <td style={{fontFamily:"var(--font-geist-mono)", fontWeight:700}}>{row.model}</td>
+                        <td style={{fontFamily:"var(--font-geist-mono)"}}>{row.seed}</td>
+                        <td style={{textAlign:"right", fontFamily:"var(--font-geist-mono)"}}>{row.n_basins}</td>
+                        <td style={{textAlign:"right", fontFamily:"var(--font-geist-mono)", color: Number(row.median_NSE) < 0 ? "#ff6b8a" : "#50e3c2"}}>{Number(row.median_NSE).toFixed(3)}</td>
+                        <td style={{textAlign:"right", fontFamily:"var(--font-geist-mono)"}}>{Number(row.median_KGE).toFixed(3)}</td>
+                        <td style={{textAlign:"right", fontFamily:"var(--font-geist-mono)"}}>{Number(row.median_Peak_MAPE).toFixed(1)}%</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="source-path">{first.primarySource}</div>
+              </div>
+            </section>
+          </>
+        ),
+      };
+    }
 
     /* ── results/peak-hour ───────────────────────────────────── */
     case "results/peak-hour":
@@ -583,6 +720,41 @@ function getDetailContent(section: string, detail: string): DetailContent | null
           </>
         ),
       };
+
+    case "stress/expanded-extreme": {
+      const extreme = evaluationTestsSnapshot.tests[1];
+      const extremeStatus: string = extreme.status;
+      return {
+        title: "Expanded Extreme Test 상태",
+        lede: "Extreme-rain stress test는 first test와 같은 expanded DRBC basin universe로 다시 만들어야 dashboard 공식 stress 축과 basin coverage가 일치한다.",
+        sourcePath: `${extreme.primarySource} · runner: ${extreme.runner}`,
+        panels: (
+          <>
+            <section className="panel research-panel">
+              <div className="panel-sub">Expanded extreme test</div>
+              <div className="panel-title">현재 산출 상태</div>
+              <p className="panel-body">{extreme.interpretation}</p>
+              <div className="fact-grid">
+                <div className="fact-row"><span className="fact-label">status</span><strong style={{color:extremeStatus === "ready" ? "#50e3c2" : "#f7b955"}}>{extreme.status}</strong><span>{extreme.basis}</span></div>
+                <div className="fact-row"><span className="fact-label">coverage</span><strong>{extreme.coverage}</strong><span>current / expanded selected</span></div>
+                <div className="fact-row"><span className="fact-label">events</span><strong>{extreme.summary.events}</strong><span>current stress table</span></div>
+                <div className="fact-row"><span className="fact-label">seeds</span><strong>{extreme.summary.seeds.join(" / ") || "none"}</strong><span>expected 111 / 222 / 444</span></div>
+              </div>
+            </section>
+            <section className="panel research-panel">
+              <div className="panel-sub">해석 경계</div>
+              <div className="panel-title">왜 expanded rerun이 먼저인가</div>
+              <p className="panel-body">
+                기존 extreme-rain stress 결과는 primary 38 basin 해석을 보조하는 진단으로 만들어졌다.
+                이제 dashboard의 main test frame을 expanded basin 기준으로 바꾸면, stress event catalog와 model inference도 같은 basin universe에서 다시 만들어야 한다.
+                그래야 first test, extreme test, confirmed flood test를 같은 화면에서 비교할 때 coverage 차이가 결론처럼 섞이지 않는다.
+              </p>
+              <div className="source-path">{extreme.runner}</div>
+            </section>
+          </>
+        ),
+      };
+    }
 
     /* ── stress/checkpoint ───────────────────────────────────── */
     case "stress/checkpoint":
