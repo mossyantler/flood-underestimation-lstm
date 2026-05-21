@@ -148,6 +148,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--batch-size", type=int, default=None)
+    parser.add_argument(
+        "--event-windows-csv",
+        type=Path,
+        default=None,
+        help="Prepared event windows CSV. Defaults to data-dir/splits/event_windows.csv when present.",
+    )
     parser.add_argument("--limit-events", type=int, default=None, help="Smoke test용 event 수 제한")
     parser.add_argument("--limit-basins", type=int, default=None, help="Smoke test용 basin 수 제한")
     parser.add_argument("--force", action="store_true")
@@ -239,6 +245,47 @@ def build_event_windows(
         "forcing_coverage_min",
     ]
     return events[[column for column in keep_columns if column in events.columns]].reset_index(drop=True)
+
+
+def load_prepared_event_windows(
+    event_windows_csv: Path,
+    *,
+    available_basins: set[str] | None = None,
+    limit_events: int | None = None,
+    limit_basins: int | None = None,
+) -> pd.DataFrame:
+    events = pd.read_csv(event_windows_csv, dtype={"basin": str, "usgs_id": str})
+    if events.empty:
+        return events
+    if "basin" not in events.columns:
+        if "usgs_id" not in events.columns:
+            raise ValueError(f"Missing basin/usgs_id column in prepared event windows: {event_windows_csv}")
+        events["basin"] = events["usgs_id"]
+    events["basin"] = events["basin"].map(normalize_gauge_id)
+    for column in ("peak_time", "window_start", "window_end", "eval_start", "eval_end"):
+        if column not in events.columns:
+            raise ValueError(f"Missing {column} column in prepared event windows: {event_windows_csv}")
+        events[column] = pd.to_datetime(events[column])
+    if "event_id" not in events.columns:
+        base_ids = events.apply(
+            lambda row: f"{row['basin']}_{pd.Timestamp(row['peak_time']).strftime('%Y%m%dT%H%M%S')}",
+            axis=1,
+        )
+        duplicate_seq = base_ids.groupby(base_ids).cumcount()
+        duplicate_counts = base_ids.map(base_ids.value_counts())
+        events["event_id"] = [
+            base if count == 1 else f"{base}_{seq + 1:02d}"
+            for base, seq, count in zip(base_ids, duplicate_seq, duplicate_counts, strict=True)
+        ]
+    if available_basins is not None:
+        events = events[events["basin"].isin(available_basins)].copy()
+    if limit_basins is not None:
+        selected = sorted(events["basin"].dropna().unique())[:limit_basins]
+        events = events[events["basin"].isin(selected)].copy()
+    events = events.sort_values(["basin", "peak_time", "event_id"]).reset_index(drop=True)
+    if limit_events is not None:
+        events = events.head(limit_events).copy()
+    return events
 
 
 def available_data_basins(data_dir: Path = DEFAULT_DATA_DIR) -> set[str]:
@@ -602,12 +649,24 @@ def main() -> int:
     catalog = pd.read_csv(args.catalog_csv, dtype={"usgs_id": str})
     catalog_basins = set(catalog["usgs_id"].map(normalize_gauge_id))
     ready_basins = available_data_basins(args.data_dir)
-    events = build_event_windows(
-        catalog,
-        available_basins=ready_basins,
-        limit_events=args.limit_events,
-        limit_basins=args.limit_basins,
-    )
+    default_event_windows = args.data_dir / "splits" / "event_windows.csv"
+    event_windows_csv = args.event_windows_csv or (default_event_windows if default_event_windows.exists() else None)
+    if event_windows_csv is not None:
+        events = load_prepared_event_windows(
+            event_windows_csv,
+            available_basins=ready_basins,
+            limit_events=args.limit_events,
+            limit_basins=args.limit_basins,
+        )
+        event_window_source = str(event_windows_csv)
+    else:
+        events = build_event_windows(
+            catalog,
+            available_basins=ready_basins,
+            limit_events=args.limit_events,
+            limit_basins=args.limit_basins,
+        )
+        event_window_source = "catalog"
     if events.empty:
         print("Prepared data와 매칭되는 confirmed flood event가 없습니다.")
         return 0
@@ -712,6 +771,7 @@ def main() -> int:
 
     summary = {
         "catalog_csv": str(args.catalog_csv),
+        "event_window_source": event_window_source,
         "output_dir": str(args.output_dir),
         "data_dir": str(args.data_dir),
         "performance_csv": str(performance_csv),

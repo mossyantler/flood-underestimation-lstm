@@ -1,7 +1,7 @@
 // Source: output/model_analysis/ 산출물 snapshot.
 // canonical source-of-truth: output/, docs/experiment/analysis/, configs/
 
-export type SectionId = "O" | "H" | "D" | "M" | "R" | "A" | "S";
+export type SectionId = "O" | "H" | "D" | "M" | "R" | "A" | "S" | "F";
 export type QuantileId = "q50" | "q90" | "q95" | "q99";
 
 export type KpiItem = {
@@ -71,6 +71,7 @@ export const sectionIndexRows: SectionIndexRow[] = [
   { section: "결과", role: "Q99 exceedance & peak hour", data: "seed 111/222/444", status: "완료", statusAccent: "#50e3c2" },
   { section: "분석", role: "event-regime + calibration", data: "570 events · 38 basins", status: "완료", statusAccent: "#50e3c2" },
   { section: "스트레스", role: "historical extreme-rain", data: "1980–2024 DRBC", status: "보조", statusAccent: "#6bb4ff" },
+  { section: "확정홍수", role: "NWS flood-stage confirmed events", data: "623 events · 48 basins", status: "완료", statusAccent: "#50e3c2" },
 ];
 
 export const checkpointRows: CheckpointRow[] = [

@@ -38,7 +38,7 @@ def parse_args() -> argparse.Namespace:
         "--profile",
         choices=["broad", "natural", "broad_all_drbc", "confirmed_flood_events"],
         default="broad",
-        help="Which DRBC holdout profile to prepare.",
+        help="Which DRBC holdout profile to prepare. confirmed_flood_events is deprecated; use prepare_drbc_confirmed_flood_event_dataset.py.",
     )
     parser.add_argument(
         "--confirmed-flood-catalog",
@@ -643,6 +643,11 @@ def build_static_attributes(output_dir: Path, basin_ids: set[str]) -> Path:
 
 def main() -> None:
     args = parse_args()
+    if args.profile == "confirmed_flood_events":
+        raise SystemExit(
+            "`--profile confirmed_flood_events`는 더 이상 이 broad-style extractor에서 준비하지 않습니다.\n"
+            "`uv run scripts/data/prepare_drbc_confirmed_flood_event_dataset.py`를 사용하세요."
+        )
     split_basins, split_sources = load_profile_split_basins(args)
     split_periods = parse_split_periods(args)
     split_min_valid_counts = parse_split_min_valid_counts(args)

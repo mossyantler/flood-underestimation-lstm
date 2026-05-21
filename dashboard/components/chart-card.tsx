@@ -29,7 +29,7 @@ export function ChartCard() {
     <div className="panel">
       <div className="panel-header">
         <div>
-          <div className="panel-title">Q99 exceedance 과소추정률</div>
+          <div className="panel-title">Quantile 과소추정률</div>
           <div className="panel-sub">DRBC 38 · top 1% flow stratum · {active}</div>
         </div>
         <div className="seg-ctrl">
@@ -47,7 +47,7 @@ export function ChartCard() {
         </div>
       </div>
 
-      <div className="bar-ladder" aria-label="Q99 exceedance 과소추정률 비교">
+      <div className="bar-ladder" aria-label="Quantile 과소추정률 비교">
         {bars.map((bar) => (
           <div className="bar-row" key={bar.label}>
             <div className="bar-label">

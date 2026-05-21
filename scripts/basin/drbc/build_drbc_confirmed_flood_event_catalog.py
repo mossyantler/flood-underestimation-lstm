@@ -42,6 +42,7 @@ DEFAULT_NOAA_CACHE = ROOT / "output/model_analysis/confirmed_flood/noaa_cache"
 
 NOAA_BASE_URL = "https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/"
 NOAA_FLOOD_TYPES = {"Flood", "Flash Flood", "Coastal Flood"}
+NOAA_CACHE_COLUMNS = ["county_fips", "begin_date", "end_date", "event_type", "event_id"]
 
 EXCLUDE_START = pd.Timestamp("2000-01-01", tz="UTC")
 EXCLUDE_END = pd.Timestamp("2013-12-31 23:59:59", tz="UTC")
@@ -118,8 +119,11 @@ def load_noaa_storm_events(years: list[int], cache_dir: Path) -> pd.DataFrame:
     for year in years:
         cache_path = cache_dir / f"storm_events_{year}.parquet"
         if cache_path.exists():
-            frames.append(pd.read_parquet(cache_path))
-            continue
+            cached = pd.read_parquet(cache_path)
+            if set(NOAA_CACHE_COLUMNS).issubset(cached.columns):
+                frames.append(cached[NOAA_CACHE_COLUMNS])
+                continue
+            cache_path.unlink()
         if index_html is None:
             resp = requests.get(NOAA_BASE_URL, timeout=30)
             resp.raise_for_status()
@@ -137,7 +141,7 @@ def load_noaa_storm_events(years: list[int], cache_dir: Path) -> pd.DataFrame:
         df = pd.read_csv(
             io.StringIO(gzip.decompress(gz_resp.content).decode("latin-1")),
             usecols=["BEGIN_YEARMONTH", "BEGIN_DAY", "END_YEARMONTH", "END_DAY",
-                     "STATE_FIPS", "CZ_FIPS", "EVENT_TYPE"],
+                     "STATE_FIPS", "CZ_FIPS", "EVENT_TYPE", "EVENT_ID"],
             dtype=str,
             low_memory=False,
         )
@@ -151,13 +155,30 @@ def load_noaa_storm_events(years: list[int], cache_dir: Path) -> pd.DataFrame:
             df["END_YEARMONTH"].str[:4] + "-" + df["END_YEARMONTH"].str[4:] + "-" + df["END_DAY"].str.zfill(2),
             errors="coerce",
         )
-        df = df[["county_fips", "begin_date", "end_date"]].dropna()
+        df["event_type"] = df["EVENT_TYPE"]
+        df["event_id"] = df["EVENT_ID"]
+        df = df[NOAA_CACHE_COLUMNS].dropna(subset=["county_fips", "begin_date", "end_date", "event_type"])
         df.to_parquet(cache_path, index=False)
         frames.append(df)
 
     return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(
-        columns=["county_fips", "begin_date", "end_date"]
+        columns=NOAA_CACHE_COLUMNS
     )
+
+
+def format_noaa_annotation(match: pd.DataFrame) -> str:
+    """NOAA match rows를 compact annotation 문자열로 변환."""
+    if match.empty:
+        return "-"
+    parts = []
+    for _, row in match.sort_values(["begin_date", "end_date", "event_type"]).iterrows():
+        begin = pd.Timestamp(row["begin_date"]).strftime("%Y-%m-%d")
+        end = pd.Timestamp(row["end_date"]).strftime("%Y-%m-%d")
+        event_id = str(row.get("event_id") or "").strip()
+        event_type = str(row.get("event_type") or "Flood").strip()
+        label = f"{event_type}#{event_id}" if event_id else event_type
+        parts.append(f"{label}({begin}..{end})")
+    return "; ".join(parts)
 
 
 def annotate_noaa(
@@ -173,6 +194,7 @@ def annotate_noaa(
         county_fips = fips_map.get(ev["usgs_id"])
         if county_fips is None or noaa_df.empty:
             ev["noaa_corroborated"] = False
+            ev["noaa_annotation"] = "-"
             continue
         peak = pd.Timestamp(ev["peak_time"])
         window_start = peak - pd.Timedelta(days=2)
@@ -183,6 +205,7 @@ def annotate_noaa(
             (noaa_df["end_date"] >= window_start)
         ]
         ev["noaa_corroborated"] = len(match) > 0
+        ev["noaa_annotation"] = format_noaa_annotation(match)
     return events
 
 
@@ -266,6 +289,7 @@ def extract_events_from_nc(
                             "flood_tier": tier,
                             "tier_limited": moderate_cms is None,
                             "noaa_corroborated": False,
+                            "noaa_annotation": "-",
                             "period": period,
                             "forcing_coverage_min": round(ev_cover, 4),
                         })
@@ -343,6 +367,7 @@ def extract_events_from_raw_nc(
                             "flood_tier": tier,
                             "tier_limited": moderate_cms is None,
                             "noaa_corroborated": False,
+                            "noaa_annotation": "-",
                             "period": period,
                             "forcing_coverage_min": None,  # raw NC: forcing 미확인
                         })
@@ -402,7 +427,7 @@ def main() -> None:
 
     df = pd.DataFrame(all_events) if all_events else pd.DataFrame(columns=[
         "usgs_id", "peak_time", "peak_discharge_cms", "flood_tier",
-        "tier_limited", "noaa_corroborated", "period", "forcing_coverage_min",
+        "tier_limited", "noaa_corroborated", "noaa_annotation", "period", "forcing_coverage_min",
     ])
     out_csv = args.output_dir / "drbc_confirmed_flood_event_catalog.csv"
     df.to_csv(out_csv, index=False)

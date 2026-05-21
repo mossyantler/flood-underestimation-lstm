@@ -483,6 +483,173 @@ CREATE INDEX IF NOT EXISTS drbc_confirmed_flood_performance_flood_tier_idx
 CREATE INDEX IF NOT EXISTS drbc_confirmed_flood_performance_peak_time_idx
     ON analysis.drbc_confirmed_flood_performance (peak_time);
 
+CREATE TABLE IF NOT EXISTS analysis.confirmed_flood_timeseries (
+    event_id text NOT NULL,
+    seed integer NOT NULL,
+    basin text NOT NULL,
+    model1_epoch integer,
+    model2_epoch integer,
+    peak_time timestamptz,
+    datetime timestamptz NOT NULL,
+    in_eval_window boolean,
+    obs double precision,
+    model1 double precision,
+    model2_q50_result double precision,
+    q50 double precision,
+    q90 double precision,
+    q95 double precision,
+    q99 double precision,
+    q90_minus_q50 double precision,
+    q95_minus_q90 double precision,
+    q99_minus_q95 double precision,
+    q99_minus_q50 double precision,
+    model2_q50_minus_model1 double precision,
+    flood_tier text,
+    noaa_corroborated boolean,
+    period text,
+    source_path text NOT NULL,
+    source_row integer NOT NULL,
+    imported_at timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (event_id, seed, datetime)
+);
+
+CREATE INDEX IF NOT EXISTS confirmed_flood_timeseries_event_id_idx
+    ON analysis.confirmed_flood_timeseries (event_id);
+
+CREATE INDEX IF NOT EXISTS confirmed_flood_timeseries_basin_seed_idx
+    ON analysis.confirmed_flood_timeseries (basin, seed);
+
+CREATE INDEX IF NOT EXISTS confirmed_flood_timeseries_in_eval_window_idx
+    ON analysis.confirmed_flood_timeseries (in_eval_window);
+
+-- ── Expanded DRBC Test Timeseries ────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS analysis.expanded_drbc_timeseries (
+    seed integer NOT NULL,
+    basin text NOT NULL,
+    model1_epoch integer,
+    model2_epoch integer,
+    datetime timestamptz NOT NULL,
+    obs double precision,
+    model1 double precision,
+    model2_q50_result double precision,
+    q50 double precision,
+    q90 double precision,
+    q95 double precision,
+    q99 double precision,
+    q90_minus_q50 double precision,
+    q95_minus_q90 double precision,
+    q99_minus_q95 double precision,
+    q99_minus_q50 double precision,
+    model2_q50_minus_model1 double precision,
+    source_path text NOT NULL,
+    source_row integer NOT NULL,
+    imported_at timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (seed, basin, datetime)
+);
+
+CREATE INDEX IF NOT EXISTS expanded_drbc_timeseries_basin_seed_idx
+    ON analysis.expanded_drbc_timeseries (basin, seed);
+
+-- ── Return Period References ──────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS analysis.return_period_references (
+    gauge_id text PRIMARY KEY,
+    gauge_name text,
+    state text,
+    huc02 text,
+    area double precision,
+    drain_sqkm_attr double precision,
+    snow_fraction double precision,
+    return_period_method text,
+    min_annual_coverage double precision,
+    flood_ari_source text,
+    prec_ari_source text,
+    flood_record_years double precision,
+    return_period_record_years double precision,
+    return_period_confidence_flag text,
+    flood_ari2 double precision,
+    flood_ari5 double precision,
+    flood_ari10 double precision,
+    flood_ari25 double precision,
+    flood_ari50 double precision,
+    flood_ari100 double precision,
+    prec_record_years_1h double precision,
+    prec_ari2_1h double precision, prec_ari5_1h double precision, prec_ari10_1h double precision,
+    prec_ari25_1h double precision, prec_ari50_1h double precision, prec_ari100_1h double precision,
+    prec_record_years_6h double precision,
+    prec_ari2_6h double precision, prec_ari5_6h double precision, prec_ari10_6h double precision,
+    prec_ari25_6h double precision, prec_ari50_6h double precision, prec_ari100_6h double precision,
+    prec_record_years_24h double precision,
+    prec_ari2_24h double precision, prec_ari5_24h double precision, prec_ari10_24h double precision,
+    prec_ari25_24h double precision, prec_ari50_24h double precision, prec_ari100_24h double precision,
+    prec_record_years_72h double precision,
+    prec_ari2_72h double precision, prec_ari5_72h double precision, prec_ari10_72h double precision,
+    prec_ari25_72h double precision, prec_ari50_72h double precision, prec_ari100_72h double precision,
+    source_path text NOT NULL,
+    source_row integer NOT NULL,
+    imported_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- ── Extreme Rain Stress Analysis ──────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS analysis.extreme_rain_cohort_predictor_summary (
+    comparison text NOT NULL,
+    stress_group text NOT NULL,
+    response_class text NOT NULL,
+    seed integer NOT NULL,
+    epoch_label text NOT NULL,
+    model1_epoch integer,
+    model2_epoch integer,
+    predictor text NOT NULL,
+    predictor_label text,
+    n_events integer,
+    n_basins integer,
+    median_observed_peak double precision,
+    underestimation_fraction_at_observed_peak double precision,
+    mean_obs_peak_rel_error_pct double precision,
+    median_obs_peak_rel_error_pct double precision,
+    mean_obs_peak_under_deficit_pct double precision,
+    median_obs_peak_under_deficit_pct double precision,
+    mean_event_nrmse_pct double precision,
+    median_event_nrmse_pct double precision,
+    mean_threshold_exceedance_recall double precision,
+    median_threshold_exceedance_recall double precision,
+    median_pred_window_peak_to_flood_ari25 double precision,
+    median_pred_window_peak_to_flood_ari50 double precision,
+    median_pred_window_peak_to_flood_ari100 double precision,
+    fraction_pred_crosses_flood_ari25 double precision,
+    fraction_pred_crosses_flood_ari50 double precision,
+    fraction_pred_crosses_flood_ari100 double precision,
+    source_path text NOT NULL,
+    source_row integer NOT NULL,
+    imported_at timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (comparison, stress_group, response_class, seed, epoch_label, predictor)
+);
+
+CREATE TABLE IF NOT EXISTS analysis.extreme_rain_paired_delta_summary (
+    seed integer NOT NULL,
+    epoch_label text NOT NULL,
+    model1_epoch integer,
+    model2_epoch integer,
+    stratification text NOT NULL,
+    stratum text NOT NULL,
+    predictor text NOT NULL,
+    predictor_label text,
+    n_events integer,
+    n_basins integer,
+    median_delta_nse double precision,
+    mean_delta_nse double precision,
+    median_delta_kge double precision,
+    mean_delta_kge double precision,
+    median_delta_fhv double precision,
+    mean_delta_fhv double precision,
+    source_path text NOT NULL,
+    source_row integer NOT NULL,
+    imported_at timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (seed, epoch_label, stratification, stratum, predictor)
+);
+
 CREATE OR REPLACE VIEW analysis.primary_basin_metrics_with_cohort AS
 SELECT
     bm.*,

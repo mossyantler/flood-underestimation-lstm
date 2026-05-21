@@ -36,6 +36,18 @@ NWS_FLOOD_STAGE_COVERAGE = Path("output/model_analysis/confirmed_flood/coverage/
 NWS_COVERAGE_BIAS = Path("output/model_analysis/confirmed_flood/coverage/coverage_bias_report.csv")
 DRBC_CONFIRMED_FLOOD_EVENTS = Path("output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv")
 DRBC_CONFIRMED_FLOOD_PERFORMANCE = Path("output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv")
+CONFIRMED_FLOOD_TIMESERIES_SEED111 = Path("output/model_analysis/confirmed_flood/inference/required_series/seed111/primary_required_series.csv")
+CONFIRMED_FLOOD_TIMESERIES_SEED222 = Path("output/model_analysis/confirmed_flood/inference/required_series/seed222/primary_required_series.csv")
+CONFIRMED_FLOOD_TIMESERIES_SEED444 = Path("output/model_analysis/confirmed_flood/inference/required_series/seed444/primary_required_series.csv")
+
+EXPANDED_DRBC_BASIN_METRICS = Path("output/model_analysis/expanded_drbc_test/tables/basin_metrics.csv")
+EXPANDED_DRBC_EXTREME_RAIN_EVENTS = Path("output/model_analysis/extreme_rain/expanded_drbc/exposure/extreme_rain_event_catalog.csv")
+EXPANDED_DRBC_TIMESERIES_SEED111 = Path("output/model_analysis/expanded_drbc_test/required_series/seed111/primary_required_series.csv")
+EXPANDED_DRBC_TIMESERIES_SEED222 = Path("output/model_analysis/expanded_drbc_test/required_series/seed222/primary_required_series.csv")
+EXPANDED_DRBC_TIMESERIES_SEED444 = Path("output/model_analysis/expanded_drbc_test/required_series/seed444/primary_required_series.csv")
+RETURN_PERIOD_REFERENCES = Path("output/basin/all/analysis/return_period/tables/return_period_reference_table_with_drbc_expanded85.csv")
+EXTREME_RAIN_COHORT_PREDICTOR_SUMMARY_EXPANDED = Path("output/model_analysis/extreme_rain/expanded_drbc/analysis/cohort_predictor_summary.csv")
+EXTREME_RAIN_PAIRED_DELTA_SUMMARY_EXPANDED = Path("output/model_analysis/extreme_rain/expanded_drbc/analysis/paired_delta_seed_summary.csv")
 
 DEFAULT_CSVS = [
     BASIN_METRICS,
@@ -53,6 +65,17 @@ DEFAULT_CSVS = [
     NWS_COVERAGE_BIAS,
     DRBC_CONFIRMED_FLOOD_EVENTS,
     DRBC_CONFIRMED_FLOOD_PERFORMANCE,
+    CONFIRMED_FLOOD_TIMESERIES_SEED111,
+    CONFIRMED_FLOOD_TIMESERIES_SEED222,
+    CONFIRMED_FLOOD_TIMESERIES_SEED444,
+    EXPANDED_DRBC_BASIN_METRICS,
+    EXPANDED_DRBC_EXTREME_RAIN_EVENTS,
+    EXPANDED_DRBC_TIMESERIES_SEED111,
+    EXPANDED_DRBC_TIMESERIES_SEED222,
+    EXPANDED_DRBC_TIMESERIES_SEED444,
+    RETURN_PERIOD_REFERENCES,
+    EXTREME_RAIN_COHORT_PREDICTOR_SUMMARY_EXPANDED,
+    EXTREME_RAIN_PAIRED_DELTA_SUMMARY_EXPANDED,
 ]
 
 IMPORTER = "database/postgres/import_camels_csvs.py"
@@ -931,6 +954,177 @@ def import_drbc_confirmed_flood_performance(database: str, relative_path: Path, 
     )
 
 
+def import_confirmed_flood_timeseries(database: str, relative_path: Path, rows: list[dict[str, str]]) -> None:
+    import_mapped_table(
+        database,
+        relative_path,
+        rows,
+        table="analysis.confirmed_flood_timeseries",
+        conflict_columns=["event_id", "seed", "datetime"],
+        mapping=[
+            ("event_id", "event_id", to_text),
+            ("seed", "seed", to_int),
+            ("basin", "basin", to_text),
+            ("model1_epoch", "model1_epoch", to_int),
+            ("model2_epoch", "model2_epoch", to_int),
+            ("peak_time", "peak_time", to_text),
+            ("datetime", "datetime", to_text),
+            ("in_eval_window", "in_eval_window", to_bool),
+            ("obs", "obs", to_float),
+            ("model1", "model1", to_float),
+            ("model2_q50_result", "model2_q50_result", to_float),
+            ("q50", "q50", to_float),
+            ("q90", "q90", to_float),
+            ("q95", "q95", to_float),
+            ("q99", "q99", to_float),
+            ("q90_minus_q50", "q90_minus_q50", to_float),
+            ("q95_minus_q90", "q95_minus_q90", to_float),
+            ("q99_minus_q95", "q99_minus_q95", to_float),
+            ("q99_minus_q50", "q99_minus_q50", to_float),
+            ("model2_q50_minus_model1", "model2_q50_minus_model1", to_float),
+            ("flood_tier", "flood_tier", to_text),
+            ("noaa_corroborated", "noaa_corroborated", to_bool),
+            ("period", "period", to_text),
+        ],
+    )
+
+
+def import_expanded_drbc_timeseries(database: str, relative_path: Path, rows: list[dict[str, str]]) -> None:
+    import_mapped_table(
+        database, relative_path, rows,
+        table="analysis.expanded_drbc_timeseries",
+        conflict_columns=["seed", "basin", "datetime"],
+        mapping=[
+            ("seed", "seed", to_int),
+            ("basin", "basin", to_text),
+            ("model1_epoch", "model1_epoch", to_int),
+            ("model2_epoch", "model2_epoch", to_int),
+            ("datetime", "datetime", to_text),
+            ("obs", "obs", to_float),
+            ("model1", "model1", to_float),
+            ("model2_q50_result", "model2_q50_result", to_float),
+            ("q50", "q50", to_float),
+            ("q90", "q90", to_float),
+            ("q95", "q95", to_float),
+            ("q99", "q99", to_float),
+            ("q90_minus_q50", "q90_minus_q50", to_float),
+            ("q95_minus_q90", "q95_minus_q90", to_float),
+            ("q99_minus_q95", "q99_minus_q95", to_float),
+            ("q99_minus_q50", "q99_minus_q50", to_float),
+            ("model2_q50_minus_model1", "model2_q50_minus_model1", to_float),
+        ],
+    )
+
+
+def import_return_period_references(database: str, relative_path: Path, rows: list[dict[str, str]]) -> None:
+    import_mapped_table(
+        database, relative_path, rows,
+        table="analysis.return_period_references",
+        conflict_columns=["gauge_id"],
+        mapping=[
+            ("gauge_id", "gauge_id", to_text),
+            ("gauge_name", "gauge_name", to_text),
+            ("state", "state", to_text),
+            ("huc02", "huc02", to_text),
+            ("area", "area", to_float),
+            ("drain_sqkm_attr", "drain_sqkm_attr", to_float),
+            ("snow_fraction", "snow_fraction", to_float),
+            ("return_period_method", "return_period_method", to_text),
+            ("min_annual_coverage", "min_annual_coverage", to_float),
+            ("flood_ari_source", "flood_ari_source", to_text),
+            ("prec_ari_source", "prec_ari_source", to_text),
+            ("flood_record_years", "flood_record_years", to_float),
+            ("return_period_record_years", "return_period_record_years", to_float),
+            ("return_period_confidence_flag", "return_period_confidence_flag", to_text),
+            ("flood_ari2", "flood_ari2", to_float),
+            ("flood_ari5", "flood_ari5", to_float),
+            ("flood_ari10", "flood_ari10", to_float),
+            ("flood_ari25", "flood_ari25", to_float),
+            ("flood_ari50", "flood_ari50", to_float),
+            ("flood_ari100", "flood_ari100", to_float),
+            ("prec_record_years_1h", "prec_record_years_1h", to_float),
+            ("prec_ari2_1h", "prec_ari2_1h", to_float), ("prec_ari5_1h", "prec_ari5_1h", to_float),
+            ("prec_ari10_1h", "prec_ari10_1h", to_float), ("prec_ari25_1h", "prec_ari25_1h", to_float),
+            ("prec_ari50_1h", "prec_ari50_1h", to_float), ("prec_ari100_1h", "prec_ari100_1h", to_float),
+            ("prec_record_years_6h", "prec_record_years_6h", to_float),
+            ("prec_ari2_6h", "prec_ari2_6h", to_float), ("prec_ari5_6h", "prec_ari5_6h", to_float),
+            ("prec_ari10_6h", "prec_ari10_6h", to_float), ("prec_ari25_6h", "prec_ari25_6h", to_float),
+            ("prec_ari50_6h", "prec_ari50_6h", to_float), ("prec_ari100_6h", "prec_ari100_6h", to_float),
+            ("prec_record_years_24h", "prec_record_years_24h", to_float),
+            ("prec_ari2_24h", "prec_ari2_24h", to_float), ("prec_ari5_24h", "prec_ari5_24h", to_float),
+            ("prec_ari10_24h", "prec_ari10_24h", to_float), ("prec_ari25_24h", "prec_ari25_24h", to_float),
+            ("prec_ari50_24h", "prec_ari50_24h", to_float), ("prec_ari100_24h", "prec_ari100_24h", to_float),
+            ("prec_record_years_72h", "prec_record_years_72h", to_float),
+            ("prec_ari2_72h", "prec_ari2_72h", to_float), ("prec_ari5_72h", "prec_ari5_72h", to_float),
+            ("prec_ari10_72h", "prec_ari10_72h", to_float), ("prec_ari25_72h", "prec_ari25_72h", to_float),
+            ("prec_ari50_72h", "prec_ari50_72h", to_float), ("prec_ari100_72h", "prec_ari100_72h", to_float),
+        ],
+    )
+
+
+def import_extreme_rain_cohort_predictor_summary(database: str, relative_path: Path, rows: list[dict[str, str]]) -> None:
+    import_mapped_table(
+        database, relative_path, rows,
+        table="analysis.extreme_rain_cohort_predictor_summary",
+        conflict_columns=["comparison", "stress_group", "response_class", "seed", "epoch_label", "predictor"],
+        mapping=[
+            ("comparison", "comparison", to_text),
+            ("stress_group", "stress_group", to_text),
+            ("response_class", "response_class", to_text),
+            ("seed", "seed", to_int),
+            ("epoch_label", "epoch_label", to_text),
+            ("model1_epoch", "model1_epoch", to_int),
+            ("model2_epoch", "model2_epoch", to_int),
+            ("predictor", "predictor", to_text),
+            ("predictor_label", "predictor_label", to_text),
+            ("n_events", "n_events", to_int),
+            ("n_basins", "n_basins", to_int),
+            ("median_observed_peak", "median_observed_peak", to_float),
+            ("underestimation_fraction_at_observed_peak", "underestimation_fraction_at_observed_peak", to_float),
+            ("mean_obs_peak_rel_error_pct", "mean_obs_peak_rel_error_pct", to_float),
+            ("median_obs_peak_rel_error_pct", "median_obs_peak_rel_error_pct", to_float),
+            ("mean_obs_peak_under_deficit_pct", "mean_obs_peak_under_deficit_pct", to_float),
+            ("median_obs_peak_under_deficit_pct", "median_obs_peak_under_deficit_pct", to_float),
+            ("mean_event_nrmse_pct", "mean_event_nrmse_pct", to_float),
+            ("median_event_nrmse_pct", "median_event_nrmse_pct", to_float),
+            ("mean_threshold_exceedance_recall", "mean_threshold_exceedance_recall", to_float),
+            ("median_threshold_exceedance_recall", "median_threshold_exceedance_recall", to_float),
+            ("median_pred_window_peak_to_flood_ari25", "median_pred_window_peak_to_flood_ari25", to_float),
+            ("median_pred_window_peak_to_flood_ari50", "median_pred_window_peak_to_flood_ari50", to_float),
+            ("median_pred_window_peak_to_flood_ari100", "median_pred_window_peak_to_flood_ari100", to_float),
+            ("fraction_pred_crosses_flood_ari25", "fraction_pred_crosses_flood_ari25", to_float),
+            ("fraction_pred_crosses_flood_ari50", "fraction_pred_crosses_flood_ari50", to_float),
+            ("fraction_pred_crosses_flood_ari100", "fraction_pred_crosses_flood_ari100", to_float),
+        ],
+    )
+
+
+def import_extreme_rain_paired_delta_summary(database: str, relative_path: Path, rows: list[dict[str, str]]) -> None:
+    import_mapped_table(
+        database, relative_path, rows,
+        table="analysis.extreme_rain_paired_delta_summary",
+        conflict_columns=["seed", "epoch_label", "stratification", "stratum", "predictor"],
+        mapping=[
+            ("seed", "seed", to_int),
+            ("epoch_label", "epoch_label", to_text),
+            ("model1_epoch", "model1_epoch", to_int),
+            ("model2_epoch", "model2_epoch", to_int),
+            ("stratification", "stratification", to_text),
+            ("stratum", "stratum", to_text),
+            ("predictor", "predictor", to_text),
+            ("predictor_label", "predictor_label", to_text),
+            ("n_events", "n_events", to_int),
+            ("n_basins", "n_basins", to_int),
+            ("median_delta_NSE", "median_delta_nse", to_float),
+            ("mean_delta_NSE", "mean_delta_nse", to_float),
+            ("median_delta_KGE", "median_delta_kge", to_float),
+            ("mean_delta_KGE", "mean_delta_kge", to_float),
+            ("median_delta_FHV", "median_delta_fhv", to_float),
+            ("mean_delta_FHV", "mean_delta_fhv", to_float),
+        ],
+    )
+
+
 def import_csv(database: str, relative_path: Path, *, store_raw: bool = False) -> None:
     absolute_path = REPO_ROOT / relative_path
     if not absolute_path.exists():
@@ -973,6 +1167,28 @@ def import_csv(database: str, relative_path: Path, *, store_raw: bool = False) -
         import_drbc_confirmed_flood_events(database, relative_path, rows)
     elif relative_path == DRBC_CONFIRMED_FLOOD_PERFORMANCE:
         import_drbc_confirmed_flood_performance(database, relative_path, rows)
+    elif relative_path in (
+        CONFIRMED_FLOOD_TIMESERIES_SEED111,
+        CONFIRMED_FLOOD_TIMESERIES_SEED222,
+        CONFIRMED_FLOOD_TIMESERIES_SEED444,
+    ):
+        import_confirmed_flood_timeseries(database, relative_path, rows)
+    elif relative_path == EXPANDED_DRBC_BASIN_METRICS:
+        import_basin_metrics(database, relative_path, rows)
+    elif relative_path == EXPANDED_DRBC_EXTREME_RAIN_EVENTS:
+        import_extreme_rain_events(database, relative_path, rows)
+    elif relative_path in (
+        EXPANDED_DRBC_TIMESERIES_SEED111,
+        EXPANDED_DRBC_TIMESERIES_SEED222,
+        EXPANDED_DRBC_TIMESERIES_SEED444,
+    ):
+        import_expanded_drbc_timeseries(database, relative_path, rows)
+    elif relative_path == RETURN_PERIOD_REFERENCES:
+        import_return_period_references(database, relative_path, rows)
+    elif relative_path == EXTREME_RAIN_COHORT_PREDICTOR_SUMMARY_EXPANDED:
+        import_extreme_rain_cohort_predictor_summary(database, relative_path, rows)
+    elif relative_path == EXTREME_RAIN_PAIRED_DELTA_SUMMARY_EXPANDED:
+        import_extreme_rain_paired_delta_summary(database, relative_path, rows)
 
 
 def parse_args() -> argparse.Namespace:

@@ -334,6 +334,24 @@ Primary 출력은 `output/model_analysis/extreme_rain/primary/` 아래에 생성
 
 Confirmed flood inference도 primary hydrograph와 같은 lean time-series 계약을 따른다. 아래 명령은 NWS flood-stage catalog를 읽어 `output/model_analysis/confirmed_flood/inference/raw_model_exports/`에 모델별 raw prediction CSV를, `inference/required_series/seed*/primary_required_series.csv`에 `obs / model1 / q50 / q90 / q95 / q99`를 inner-join한 event-window 시계열을 쓴다. `required_series`에는 LSTM warmup을 포함한 전체 inference window가 저장되고, metric 계산은 `in_eval_window == True`인 `[peak_time - 24h, peak_time + 168h]` 구간만 사용해 `output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv`를 다시 만든다.
 
+Confirmed flood는 expanded observed test dataset을 그대로 쓰지 않는다. 먼저 confirmed flood catalog를 만든 뒤, catalog event만 대상으로 별도 GenericDataset을 준비한다. 이 준비 단계는 `timeseries.7z`와 `timeseries_nonobs.7z`에서 forcing을 찾고, 필요하면 `Hourly2.zip`의 observed streamflow를 붙여 `data/CAMELSH_generic/drbc_holdout_confirmed_flood_events/` 아래에 `time_series/`, `attributes/static_attributes.csv`, `splits/test.txt`, `splits/event_windows.csv`, `splits/event_window_manifest.csv`를 쓴다. Inference script는 이 `splits/event_windows.csv`가 있으면 catalog에서 window를 다시 만들지 않고 prepared event window를 우선 사용한다.
+
+```bash
+uv run scripts/data/prepare_drbc_confirmed_flood_event_dataset.py
+```
+
 ```bash
 uv run scripts/model/confirmed_flood/infer_drbc_confirmed_flood_events.py --device cpu
+```
+
+Confirmed flood event별 hydrograph는 아래 script로 만든다. Layout은 extreme-rain sim-Q hydrograph와 같이 상단 Rainf panel, 아래 seed별 streamflow panel 구조를 쓴다. Flow 기준선은 임의 ARI가 아니라 NWS `minor/moderate/major` flood-stage discharge를 쓰고, NOAA Storm Events와 매칭된 event는 flow panel에 NOAA 기록 날짜 vertical marker와 event type label을 표시한다.
+
+```bash
+uv run scripts/model/confirmed_flood/plot_drbc_confirmed_flood_hydrographs.py
+```
+
+React dashboard의 confirmed flood 화면은 canonical output CSV를 직접 runtime dependency로 물지 않고, 작은 typed snapshot으로 갱신한다. 성능 구분은 Model 1 `det` peak under-deficit과 Model 2 `q99` peak under-deficit의 paired-seed median 차이를 기준으로 하며, flood 유형은 NWS `minor/moderate/major`, event type은 NOAA Storm Events annotation에서 가져온다. 지도 geometry는 `basins/drbc_boundary/drb_bnd_polygon.shp`와 `basins/CAMELSH_data/shapefiles/CAMELSH_shapefile.shp`에서 SVG path로 추출하고, gauge 점은 같은 크기의 위치 marker로만 표시한다.
+
+```bash
+uv run scripts/model/confirmed_flood/export_confirmed_flood_dashboard_snapshot.py
 ```

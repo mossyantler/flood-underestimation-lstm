@@ -95,6 +95,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--limit-events", type=int, default=None, help="Limit blocks for smoke tests.")
     parser.add_argument("--limit-basins", type=int, default=None, help="Limit basins for smoke tests.")
     parser.add_argument("--force", action="store_true", help="Regenerate existing seed exports.")
+    parser.add_argument(
+        "--data-root",
+        type=Path,
+        default=None,
+        help="GenericDataset root dir. Defaults to data/CAMELSH_generic/drbc_holdout_broad.",
+    )
+    parser.add_argument(
+        "--test-basin-file",
+        type=Path,
+        default=None,
+        help="Test basin file. Defaults to configs/pilot/basin_splits/scaling_300/test.txt.",
+    )
     return parser.parse_args()
 
 
@@ -139,16 +151,20 @@ def patch_config(
     start: pd.Timestamp,
     end: pd.Timestamp,
     batch_size: int | None,
+    data_dir: Path | None = None,
+    test_basin_file: Path | None = None,
 ) -> Config:
     split_dir = root / "configs" / "pilot" / "basin_splits" / "scaling_300"
+    resolved_data_dir = data_dir if data_dir is not None else root / "data" / "CAMELSH_generic" / "drbc_holdout_broad"
+    resolved_test_basin_file = test_basin_file if test_basin_file is not None else split_dir / "test.txt"
     update = {
         "run_dir": str(run_dir),
         "train_dir": str(run_dir / "train_data"),
         "img_log_dir": str(run_dir / "img_log"),
-        "data_dir": str(root / "data" / "CAMELSH_generic" / "drbc_holdout_broad"),
+        "data_dir": str(resolved_data_dir),
         "train_basin_file": str(split_dir / "train.txt"),
         "validation_basin_file": str(split_dir / "validation.txt"),
-        "test_basin_file": str(split_dir / "test.txt"),
+        "test_basin_file": str(resolved_test_basin_file),
         "test_start_date": start.strftime("%d/%m/%Y"),
         "test_end_date": end.strftime("%d/%m/%Y"),
         "device": device,
@@ -194,6 +210,8 @@ def export_predictions_for_model(
     output_csv: Path,
     device: str,
     batch_size: int | None,
+    data_dir: Path | None = None,
+    test_basin_file: Path | None = None,
 ) -> Path:
     if output_csv.exists():
         output_csv.unlink()
@@ -206,6 +224,8 @@ def export_predictions_for_model(
         root=root,
         run_dir=run_dir,
         device=device,
+        data_dir=data_dir,
+        test_basin_file=test_basin_file,
         start=global_start,
         end=global_end,
         batch_size=batch_size,
@@ -412,6 +432,8 @@ def main() -> int:
                     output_csv=model1_csv,
                     device=args.device,
                     batch_size=args.batch_size,
+                    data_dir=args.data_root,
+                    test_basin_file=args.test_basin_file,
                 )
             if args.force or not model2_csv.exists():
                 export_predictions_for_model(
@@ -423,6 +445,8 @@ def main() -> int:
                     output_csv=model2_csv,
                     device=args.device,
                     batch_size=args.batch_size,
+                    data_dir=args.data_root,
+                    test_basin_file=args.test_basin_file,
                 )
             if args.force or not series_csv.exists():
                 merge_seed_series(

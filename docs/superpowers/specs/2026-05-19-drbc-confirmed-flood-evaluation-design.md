@@ -41,8 +41,9 @@
 |------|---------|------|
 | 1 | `scripts/basin/drbc/check_drbc_nws_flood_stage_coverage.py` | 154개 gauge NWS flood stage 커버리지 확인 |
 | 2 | `scripts/basin/drbc/build_drbc_confirmed_flood_event_catalog.py` | stage 초과 event 추출 + NOAA annotation |
-| 3 | `scripts/model/confirmed_flood/infer_drbc_confirmed_flood_events.py` | Model 1/2 inference |
-| 4 | `scripts/model/confirmed_flood/analyze_drbc_confirmed_flood_performance.py` | Model 1 vs 2 비교 분석 |
+| 3 | `scripts/data/prepare_drbc_confirmed_flood_event_dataset.py` | confirmed flood catalog 기준 event-level GenericDataset 준비 |
+| 4 | `scripts/model/confirmed_flood/infer_drbc_confirmed_flood_events.py` | Model 1/2 inference |
+| 5 | `scripts/model/confirmed_flood/analyze_drbc_confirmed_flood_performance.py` | Model 1 vs 2 비교 분석 |
 
 산출물 경로: `output/model_analysis/confirmed_flood/`
 
@@ -133,6 +134,12 @@ gauge가 속한 county FIPS + event peak 날짜 ±2일 기준으로 NOAA NCEI St
 ---
 
 ## Section 3: Model Inference
+
+### Event-level GenericDataset 준비
+
+Inference는 expanded observed test dataset을 그대로 쓰지 않는다. `drbc_confirmed_flood_event_catalog.csv`를 입력으로 받아 `data/CAMELSH_generic/drbc_holdout_confirmed_flood_events/`를 별도로 만든다. 이 dataset은 catalog event가 있는 basin만 포함하고, `splits/event_windows.csv`에 `event_id`, `peak_time`, `window_start`, `window_end`, `eval_start`, `eval_end`, forcing/target coverage와 source provenance를 기록한다.
+
+Forcing은 `timeseries.7z`와 `timeseries_nonobs.7z`에서 찾고, target `Streamflow`는 forcing archive 안의 observed streamflow 또는 `Hourly2.zip`의 `hourly2_streamflow` 중 event evaluation window coverage가 더 좋은 쪽을 사용한다. Ready event 기준은 warmup+evaluation window의 11개 forcing coverage `>= 0.90`, evaluation window의 observed target coverage `>= 0.90`이다. Inference script는 `data_dir/splits/event_windows.csv`가 있으면 이 prepared event window를 우선 사용한다.
 
 ### Inference 윈도우
 

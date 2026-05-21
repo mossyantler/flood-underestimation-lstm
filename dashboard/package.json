@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "snapshot:tests": "cd .. && uv run scripts/model/overall/export_evaluation_tests_dashboard_snapshot.py",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

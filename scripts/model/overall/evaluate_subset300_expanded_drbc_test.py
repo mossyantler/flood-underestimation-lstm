@@ -187,7 +187,7 @@ def evaluate_one(
     )
     print(f"Evaluating {model} seed {seed} epoch {epoch:03d} on {basin_file}", flush=True)
     tester = get_tester(cfg=cfg, run_dir=run_dir, period="test", init_model=True)
-    results = tester.evaluate(epoch=epoch, save_results=False, save_all_output=False, metrics=cfg.metrics)
+    results = tester.evaluate(epoch=epoch, save_results=True, save_all_output=True, metrics=cfg.metrics)
     df = metric_rows_from_results(results, model=model, seed=seed, epoch=epoch, run_dir=run_dir)
     output_csv.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(output_csv, index=False)
