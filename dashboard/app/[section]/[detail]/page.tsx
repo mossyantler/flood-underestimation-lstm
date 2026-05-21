@@ -12,6 +12,7 @@ import {
 } from "@/lib/sections";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { SectionHeader } from "@/components/section-header";
+import { EvidenceBlock } from "@/components/evidence-block";
 import {
   calibrationRows,
   datasetRows,
@@ -24,6 +25,7 @@ import {
 } from "@/lib/dashboard-data";
 import { confirmedFloodSnapshot } from "@/lib/confirmed-flood-data";
 import { evaluationTestsSnapshot } from "@/lib/evaluation-tests-data";
+import { getCopyForModule, getEvidenceForModule } from "@/lib/evidence-catalog";
 import { NSE_DELTA_CSV, PEAK_HOUR_CSV, SECTION_CSV } from "@/lib/export";
 
 interface Props { params: Promise<{ section: string; detail: string }> }
@@ -57,6 +59,9 @@ export default async function DetailPage({ params }: Props) {
   const content = DETAIL_CONTENT[`${section}/${detail}`];
   if (!content) notFound();
 
+  const moduleId = `${section}/${detail}`;
+  const copy = getCopyForModule(moduleId);
+  const evidence = getEvidenceForModule(moduleId);
   const csvInfo = SECTION_CSV[section] ?? { csv: "", filename: "data.csv" };
 
   return (
@@ -77,6 +82,8 @@ export default async function DetailPage({ params }: Props) {
       </div>
 
       <p className="section-lede">{content.lede}</p>
+
+      {copy && <EvidenceBlock copy={copy} items={evidence} />}
 
       <div className="panel-grid">
         {content.panels}

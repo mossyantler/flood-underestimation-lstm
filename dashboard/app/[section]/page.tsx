@@ -7,7 +7,9 @@ import { WorkflowPanel } from "@/components/workflow-panel";
 import { FoundationTabs } from "@/components/foundation-tabs";
 import { AnalysisModuleIndex } from "@/components/analysis-module-index";
 import { ReferenceMap } from "@/components/reference-map";
+import { EvidenceBlock } from "@/components/evidence-block";
 import { SECTION_CSV } from "@/lib/export";
+import { getCopyForModule, getEvidenceForModule } from "@/lib/evidence-catalog";
 
 interface Props { params: Promise<{ section: string }> }
 
@@ -41,12 +43,16 @@ export default async function SectionPage({ params }: Props) {
 }
 
 function OverviewSection() {
+  const copy = getCopyForModule("overview/status");
+  const evidence = getEvidenceForModule("overview/status");
+
   return (
     <>
       <p className="section-lede">
         CAMELS dashboard는 연구 claim의 상태와 근거를 관리하고, headline indicator에서 raw hydrologic evidence까지 내려가는 실험 검토 workbench다.
       </p>
       <StatusBoard />
+      {copy && <EvidenceBlock copy={copy} items={evidence} />}
     </>
   );
 }
