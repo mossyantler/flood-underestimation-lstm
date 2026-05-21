@@ -20,6 +20,7 @@
   여러 script가 import하는 공용 helper만 둔다. 현재는 `camelsh_flood_analysis_utils.py`가 여기에 있다.
 - `scripts/runs/official/`:
   official shell runner를 둔다. `run_broad_multiseed.sh`는 broad reference run, `run_subset300_multiseed.sh`는 fixed `scaling_300` subset의 Model 1 / Model 2 seed `111 / 222 / 444` main comparison을 실행한다.
+  `run_expanded_drbc_test_evaluation.sh`는 기존 subset300 checkpoint를 그대로 두고 expanded observed DRBC test split에서 재평가한다. 이 runner는 재학습을 수행하지 않는다.
   모델 학습이 아니라 official observed basin analysis를 실행하는 `run_camelsh_flood_analysis.sh`도 여기에 둔다. `.nc` rsync 이후 return-period reference, event response, `degree_day_v2` QA/baseline typing을 한 번에 실행한다.
 - `scripts/model/overall/`:
   subset300 primary/epoch metric 집계, outlier check, paired-seed comparison, Model 1/2 architecture figure처럼 전체 성능과 논문 main comparison에 붙는 분석을 둔다.
@@ -119,6 +120,13 @@ subset300 Model 1/2 seed/epoch sweep 결과를 다시 집계하고 chart를 만�
 
 ```bash
 uv run scripts/model/overall/analyze_subset300_epoch_results.py
+```
+
+기존 subset300 Model 1/2 checkpoint를 expanded observed DRBC test split에서 다시 평가할 때는 아래 runner를 사용한다. 기본값은 DRBC 154개 후보에서 quality gate와 2014-2016 target coverage 80%를 통과한 85개 basin을 만들고, `data/CAMELSH_generic/drbc_expanded_observed_test`를 준비한 뒤 seed `111 / 222 / 444`의 validation-selected primary epoch를 `cuda:0`에서 평가한다. 이미 split과 prepared dataset을 서버에 복사해 둔 경우에는 `RUN_SPLIT=0 RUN_PREPARE=0`으로 평가만 다시 돌릴 수 있다.
+
+```bash
+DEVICE=cuda:0 \
+bash scripts/runs/official/run_expanded_drbc_test_evaluation.sh
 ```
 
 Model 1 deterministic LSTM과 Model 2 quantile LSTM의 구조 비교도를 발표용 image로 만들 때는 아래 script를 사용한다. `h_{b,t}`, `\hat{Q}_{b,t}`, quantile outputs는 matplotlib mathtext로 렌더링하며, PNG/SVG/PDF를 `output/model_analysis/overall_analysis/main_comparison/figures/model_architecture/` 아래에 쓴다.

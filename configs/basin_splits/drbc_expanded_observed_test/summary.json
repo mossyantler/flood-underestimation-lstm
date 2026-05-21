@@ -1,0 +1,70 @@
+{
+  "split_name": "drbc_expanded_observed_test",
+  "description": "Test-only expanded DRBC evaluation set for existing subset300 models. It starts from the 154 DRBC holdout candidates and keeps basins that pass metadata quality gates plus 2014-2016 target coverage >= 80%.",
+  "period": {
+    "start": "2014-01-01 00:00:00",
+    "end": "2016-12-31 23:00:00",
+    "start_idx": 298056,
+    "end_exclusive": 324360,
+    "expected_hours": 26304,
+    "years": [
+      2014,
+      2015,
+      2016
+    ]
+  },
+  "min_test_coverage": 0.8,
+  "source_files": {
+    "drbc_all_file": "configs/basin_splits/drbc_holdout_test_drbc_all.txt",
+    "timeseries_archive": "basins/CAMELSH_download/timeseries.7z",
+    "timeseries_nonobs_archive": "basins/CAMELSH_download/timeseries_nonobs.7z",
+    "hourly2_zip": "basins/CAMELSH_data/hourly_observed/Hourly2.zip",
+    "hourly2_coverage_cache": "configs/basin_splits/drbc_expanded_observed_test/hourly2_period_coverage.csv",
+    "info_csv": "basins/CAMELSH_data/hourly_observed/info.csv",
+    "mapping_csv": "output/basin/drbc/basin_define/camelsh_drbc_mapping.csv"
+  },
+  "target_source_policy": {
+    "timeseries_forcing": "Use timeseries.Streamflow when 2014-2016 coverage meets the threshold; otherwise use Hourly2.streamflow if it meets the threshold.",
+    "timeseries_nonobs_forcing": "Use Hourly2.streamflow when 2014-2016 coverage meets the threshold.",
+    "timestamp_level_mixing": false,
+    "selection_scope": "per basin for this test split"
+  },
+  "quality_policy": {
+    "test_target_coverage_gate": "selected target coverage >= 0.8",
+    "basin_level_estimated_flow_gate": "FLOW_PCT_EST_VALUES <= 15.0",
+    "basin_level_boundary_gate": "BASIN_BOUNDARY_CONFIDENCE >= 7.0"
+  },
+  "counts": {
+    "drbc_candidate_count": 154,
+    "selected_count": 85,
+    "old_quality_test_count": 38,
+    "scaling_300_test_count": 38,
+    "overlap_with_old_quality_test_count": 36,
+    "new_vs_old_quality_test_count": 49
+  },
+  "forcing_source_counts": {
+    "timeseries": 36,
+    "timeseries_nonobs": 49
+  },
+  "target_source_counts": {
+    "hourly2_streamflow": 49,
+    "timeseries_streamflow": 36
+  },
+  "huc02_counts": {
+    "02": 85
+  },
+  "exclusion_reason_counts": {
+    "BASIN_BOUNDARY_CONFIDENCE_lt_7": 5,
+    "FLOW_PCT_EST_VALUES_gt_15": 9,
+    "pass": 85,
+    "target_coverage_lt_80pct": 55
+  },
+  "output_files": {
+    "test": "configs/basin_splits/drbc_expanded_observed_test/test.txt",
+    "flat_basin_file": "configs/basin_splits/drbc_holdout_test_drbc_expanded_observed.txt",
+    "manifest": "configs/basin_splits/drbc_expanded_observed_test/manifest.csv",
+    "candidate_manifest": "configs/basin_splits/drbc_expanded_observed_test/candidate_manifest.csv",
+    "target_coverage": "configs/basin_splits/drbc_expanded_observed_test/target_coverage.csv",
+    "summary": "configs/basin_splits/drbc_expanded_observed_test/summary.json"
+  }
+}

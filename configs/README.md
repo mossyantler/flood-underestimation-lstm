@@ -8,6 +8,7 @@
   deterministic scaling pilot 전용 config, basin split, prepared pool manifest, static/observed-flow distribution diagnostics, random same-size subset benchmark, diagnostics plot을 둔다. 이 경로는 원래 최종 basin 수를 정하기 위한 운영 결정용 pilot이었고, 현재는 선택 결과가 `300`으로 닫힌 상태에서 adopted subset manifest와 representativeness audit 근거를 같이 보관한다.
 - `configs/basin_splits/`:
   raw basin membership file을 둔다. usability gate 적용 전 단계의 split membership을 기록한다.
+  `drbc_expanded_observed_test/`와 `drbc_holdout_test_drbc_expanded_observed.txt`는 기존 subset300 model checkpoint를 재학습 없이 더 넓은 observed DRBC test universe에서 평가하기 위한 test-only split이다.
 - `configs/dev/`:
   local sanity 같은 개발용 설정을 둔다. 공식 결과표나 논문 baseline count는 이 경로를 기준으로 읽지 않는다.
 
