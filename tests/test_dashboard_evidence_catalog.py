@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import tempfile
+import os
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -69,3 +70,43 @@ class DashboardEvidenceCatalogTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("rows=1", result.stdout)
             self.assertTrue(output.exists())
+
+    def test_scanner_preserves_markdown_h1_when_cwd_differs_from_repo_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as cwd_tmp:
+            root = Path(tmp)
+            doc = root / "docs/experiment/analysis/model/fixture.md"
+            doc.parent.mkdir(parents=True, exist_ok=True)
+            doc.write_text("# Fixture Title\n\nBody\n", encoding="utf-8")
+            original_cwd = Path.cwd()
+
+            try:
+                os.chdir(cwd_tmp)
+                candidates = scanner.scan_paths(root)
+            finally:
+                os.chdir(original_cwd)
+
+            self.assertEqual(len(candidates), 1)
+            self.assertEqual(candidates[0].title, "Fixture Title")
+            self.assertEqual(candidates[0].source_path, "docs/experiment/analysis/model/fixture.md")
+
+    def test_scanner_script_accepts_output_outside_repo_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as out_tmp:
+            root = Path(tmp)
+            doc = root / "docs/experiment/analysis/model/fixture.md"
+            output = Path(out_tmp) / "evidence_candidates.csv"
+            doc.parent.mkdir(parents=True, exist_ok=True)
+            doc.write_text("# Fixture Title\n", encoding="utf-8")
+            script = Path("scripts/dashboard/scan_evidence_candidates.py").resolve()
+
+            result = subprocess.run(
+                [sys.executable, str(script), "--repo-root", str(root), "--output", str(output)],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn(str(output), result.stdout)
+            self.assertIn("rows=1", result.stdout)
+            self.assertTrue(output.exists())
+            self.assertNotIn(b"\r\n", output.read_bytes())

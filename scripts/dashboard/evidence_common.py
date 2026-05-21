@@ -61,7 +61,7 @@ def kind_for(path: Path) -> str:
     return "data"
 
 
-def classify_path(relative_path: Path) -> Candidate:
+def classify_path(relative_path: Path, title_path: Path | None = None) -> Candidate:
     text = str(relative_path).replace("\\", "/")
     lower = text.lower()
     section = "analysis"
@@ -106,7 +106,7 @@ def classify_path(relative_path: Path) -> Candidate:
     kind = kind_for(relative_path)
     return Candidate(
         id=stable_id(text),
-        title=title_from_path(relative_path),
+        title=title_from_path(title_path or relative_path),
         section=section,
         module=module,
         kind=kind,
@@ -122,7 +122,7 @@ def write_candidates_csv(path: Path, rows: list[Candidate]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = list(Candidate.__dataclass_fields__.keys())
     with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         for row in rows:
             writer.writerow(row.__dict__)
