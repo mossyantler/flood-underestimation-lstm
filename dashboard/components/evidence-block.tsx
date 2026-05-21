@@ -75,11 +75,11 @@ export function EvidenceBlock({ copy, items }: EvidenceBlockProps) {
     <section className="evidence-block">
       <div className="evidence-copy-grid">
         <article className="evidence-copy-card">
-          <span>분석 목적</span>
+          <h3 className="evidence-copy-title">분석 목적</h3>
           <p>{copy.analysisPurpose}</p>
         </article>
         <article className="evidence-copy-card">
-          <span>핵심 데이터</span>
+          <h3 className="evidence-copy-title">핵심 데이터</h3>
           <ul className="evidence-data-list">
             {dataItems.map((item) => (
               <li key={item}>{item}</li>
@@ -87,7 +87,7 @@ export function EvidenceBlock({ copy, items }: EvidenceBlockProps) {
           </ul>
         </article>
         <article className="evidence-copy-card evidence-copy-card-wide">
-          <span>해석 방법</span>
+          <h3 className="evidence-copy-title">해석 방법</h3>
           <div className="evidence-flow" aria-label={`${copy.title} 해석 구조`}>
             {interpretation.map((step, index) => (
               <div className="evidence-flow-step" key={step.label}>
@@ -101,7 +101,7 @@ export function EvidenceBlock({ copy, items }: EvidenceBlockProps) {
           </div>
         </article>
         <article className="evidence-copy-card evidence-copy-card-wide">
-          <span>현재 판단</span>
+          <h3 className="evidence-copy-title">현재 판단</h3>
           <p>{copy.currentJudgment}</p>
         </article>
       </div>
