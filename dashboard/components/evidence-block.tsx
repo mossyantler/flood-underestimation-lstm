@@ -12,11 +12,35 @@ const ROLE_LABEL: Record<EvidenceItem["role"], string> = {
   archive: "보관",
 };
 
-const LOCAL_ABSOLUTE_PATH = /^\/(?:Users|Volumes|private|tmp|var|opt|home)\//;
+const APP_ROUTE_PREFIXES = ["/overview", "/experiment", "/foundation", "/analysis", "/reference"] as const;
+
+function isHttpUrl(path: string) {
+  try {
+    const url = new URL(path);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function isAppRoute(path: string) {
+  return APP_ROUTE_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+}
+
+function isPublicAsset(path: string) {
+  return path === "/favicon.svg" || path.startsWith("/figures/");
+}
+
+function isLocalAbsolutePath(path: string) {
+  return path.startsWith("/") && !path.startsWith("//") && !isAppRoute(path) && !isPublicAsset(path);
+}
 
 function isLinkablePath(path: string) {
-  if (/^https?:\/\//.test(path)) return true;
-  return path.startsWith("/") && !path.startsWith("//") && !LOCAL_ABSOLUTE_PATH.test(path);
+  return isHttpUrl(path) || isAppRoute(path) || isPublicAsset(path);
+}
+
+function displaySourcePath(path: string) {
+  return isLocalAbsolutePath(path) ? "local source path" : path;
 }
 
 export function EvidenceBlock({ copy, items }: EvidenceBlockProps) {
@@ -58,6 +82,7 @@ export function EvidenceBlock({ copy, items }: EvidenceBlockProps) {
 function EvidenceRow({ item }: { item: EvidenceItem }) {
   const path = item.chartPath ?? item.galleryPath ?? item.docPath ?? item.tablePath ?? item.sourcePath;
   const canOpen = isLinkablePath(path);
+  const disabledLabel = isLocalAbsolutePath(path) ? "local source path" : "source";
 
   return (
     <article className="evidence-row" data-role={item.role}>
@@ -66,11 +91,11 @@ function EvidenceRow({ item }: { item: EvidenceItem }) {
         <strong>{item.title}</strong>
         {item.shortDescription && <p>{item.shortDescription}</p>}
       </div>
-      <code>{item.sourcePath}</code>
+      <code>{displaySourcePath(item.sourcePath)}</code>
       {canOpen ? (
         <Link href={path} className="panel-detail-link">열기</Link>
       ) : (
-        <span className="panel-detail-link" aria-label="local source path">source</span>
+        <span className="panel-detail-link" aria-label={disabledLabel}>{disabledLabel}</span>
       )}
     </article>
   );

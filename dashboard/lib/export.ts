@@ -4,6 +4,7 @@ import {
   eventRegimeRows, calibrationRows,
   stressRows, datasetRows,
 } from "./dashboard-data";
+import { confirmedFloodSnapshot } from "./confirmed-flood-data";
 
 function toCsv(headers: string[], rows: (string | number)[][]): string {
   const escape = (v: string | number) => {
@@ -78,6 +79,19 @@ export const SECTION_CSV: Record<string, { csv: string; filename: string }> = {
         ["q50–q90", 4566, 16.3, ""],
         ["≤ q50", 3960, 14.2, "still underestimated"],
       ]
+    ),
+  },
+  "confirmed-flood": {
+    filename: "camels_confirmed_flood_event_snapshot.csv",
+    csv: toCsv(
+      [
+        "event_id", "usgs_id", "peak_time", "flood_tier", "period", "noaa_type",
+        "performance_type", "m1_under_deficit", "q99_under_deficit", "q99_reduction",
+      ],
+      confirmedFloodSnapshot.events.map((r) => [
+        r.eventId, r.usgsId, r.peakTime, r.floodTier, r.period, r.noaaType,
+        r.performanceType, r.m1Under ?? "", r.q99Under ?? "", r.q99Reduction ?? "",
+      ])
     ),
   },
 };
