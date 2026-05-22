@@ -41,3 +41,18 @@ STRATUM_QUANTILE: dict[str, float] = {
     "obs_q95_plus": 0.95,
     "obs_q99_plus": 0.99,
 }
+
+
+def load_required_series(
+    seeds: list[int] = OFFICIAL_SEEDS,
+    base_dir: Path = REQUIRED_SERIES_DIR,
+) -> pd.DataFrame:
+    """Load and concatenate required_series CSVs for given seeds."""
+    dfs: list[pd.DataFrame] = []
+    for seed in seeds:
+        path = base_dir / f"seed{seed}" / "primary_required_series.csv"
+        df = pd.read_csv(path, parse_dates=["datetime"])
+        dfs.append(df)
+    combined = pd.concat(dfs, ignore_index=True)
+    keep = ["seed", "basin", "datetime", "obs"] + PRED_COLS
+    return combined[keep]
