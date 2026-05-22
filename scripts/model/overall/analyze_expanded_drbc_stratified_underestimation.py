@@ -156,3 +156,63 @@ def aggregate_to_final_summary(seed_summary: pd.DataFrame) -> pd.DataFrame:
     result = pd.DataFrame(records)
     result["_order"] = result["stratum"].map(order)
     return result.sort_values("_order").drop(columns=["_order"]).reset_index(drop=True)
+
+
+def write_outputs(
+    seed_summary: pd.DataFrame,
+    final_summary: pd.DataFrame,
+    output_dir: Path = OUTPUT_TABLES_DIR,
+) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    by_seed_path = output_dir / "stratified_underestimation_by_seed.csv"
+    summary_path = output_dir / "stratified_underestimation_summary.csv"
+    seed_summary.to_csv(by_seed_path, index=False)
+    final_summary.to_csv(summary_path, index=False)
+    print(f"Wrote {by_seed_path}")
+    print(f"Wrote {summary_path}")
+
+
+def main(argv: list[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--seeds",
+        nargs="+",
+        type=int,
+        default=OFFICIAL_SEEDS,
+        help="Seeds to process (default: 111 222 444)",
+    )
+    parser.add_argument(
+        "--required-series-dir",
+        type=Path,
+        default=REQUIRED_SERIES_DIR,
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=OUTPUT_TABLES_DIR,
+    )
+    args = parser.parse_args(argv)
+
+    print(f"Loading required_series for seeds {args.seeds} ...")
+    df = load_required_series(args.seeds, base_dir=args.required_series_dir)
+    print(f"  Loaded {len(df):,} rows, {df['basin'].nunique()} basins")
+
+    print("Computing basin-specific Q90/Q95/Q99 thresholds ...")
+    thresholds = compute_basin_thresholds(df)
+
+    print("Assigning strata ...")
+    long_df = assign_strata(df, thresholds)
+
+    print("Computing per-basin metrics ...")
+    basin_metrics = compute_basin_metrics(long_df)
+
+    print("Aggregating ...")
+    seed_summary = aggregate_to_seed_summary(basin_metrics)
+    final_summary = aggregate_to_final_summary(seed_summary)
+
+    write_outputs(seed_summary, final_summary, output_dir=args.output_dir)
+    print("Done.")
+
+
+if __name__ == "__main__":
+    main()
