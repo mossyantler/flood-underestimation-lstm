@@ -141,7 +141,7 @@ def aggregate_to_seed_summary(basin_metrics: pd.DataFrame) -> pd.DataFrame:
 
 
 def aggregate_to_final_summary(seed_summary: pd.DataFrame) -> pd.DataFrame:
-    """Seed median -> final (stratum) summary."""
+    """Seed median/min/max -> final (stratum) summary."""
     records: list[dict] = []
     for stratum, grp in seed_summary.groupby("stratum"):
         row: dict = {
@@ -151,6 +151,8 @@ def aggregate_to_final_summary(seed_summary: pd.DataFrame) -> pd.DataFrame:
         }
         for col in _METRIC_COLS:
             row[col] = float(grp[col].median())
+            row[f"{col}_min"] = float(grp[col].min())
+            row[f"{col}_max"] = float(grp[col].max())
         records.append(row)
     order = {s: i for i, s in enumerate(STRATA)}
     result = pd.DataFrame(records)
