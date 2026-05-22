@@ -79,7 +79,7 @@ class TestAssignStrata(unittest.TestCase):
     def test_all_stratum_excludes_nan_and_zero(self) -> None:
         obs_seq = [0.0, float("nan"), 5.0, 10.0]
         df = _make_required_series(["b1"], 4, obs_values={"b1": obs_seq})
-        thr = pd.DataFrame([{"basin": "b1", "q90_thr": 8.0, "q95_thr": 9.0, "q99_thr": 9.5}])
+        thr = pd.DataFrame([{"basin": "b1", "q50_thr": 4.0, "q90_thr": 8.0, "q95_thr": 9.0, "q99_thr": 9.5}])
         result = M.assign_strata(df, thr)
         all_rows = result[result["stratum"] == "all"]
         self.assertEqual(len(all_rows), 2)
@@ -87,7 +87,7 @@ class TestAssignStrata(unittest.TestCase):
     def test_q99_plus_stratum_filters_correctly(self) -> None:
         obs_seq = [5.0, 10.0, 20.0]
         df = _make_required_series(["b2"], 3, obs_values={"b2": obs_seq})
-        thr = pd.DataFrame([{"basin": "b2", "q90_thr": 8.0, "q95_thr": 9.0, "q99_thr": 15.0}])
+        thr = pd.DataFrame([{"basin": "b2", "q50_thr": 4.0, "q90_thr": 8.0, "q95_thr": 9.0, "q99_thr": 15.0}])
         result = M.assign_strata(df, thr)
         q99_rows = result[result["stratum"] == "obs_q99_plus"]
         self.assertEqual(len(q99_rows), 1)
@@ -109,7 +109,7 @@ class TestBasinMetrics(unittest.TestCase):
         df["q95"] = df["model1"]
         df["q99"] = df["model1"]
 
-        thr = pd.DataFrame([{"basin": "bX", "q90_thr": 100.0, "q95_thr": 100.0, "q99_thr": 100.0}])
+        thr = pd.DataFrame([{"basin": "bX", "q50_thr": 50.0, "q90_thr": 100.0, "q95_thr": 100.0, "q99_thr": 100.0}])
         long_df = M.assign_strata(df, thr)
         metrics = M.compute_basin_metrics(long_df)
 
@@ -121,7 +121,7 @@ class TestBasinMetrics(unittest.TestCase):
 
     def test_n_timesteps_recorded(self) -> None:
         df = _make_required_series(["bY"], 20)
-        thr = pd.DataFrame([{"basin": "bY", "q90_thr": 1000.0, "q95_thr": 1000.0, "q99_thr": 1000.0}])
+        thr = pd.DataFrame([{"basin": "bY", "q50_thr": 500.0, "q90_thr": 1000.0, "q95_thr": 1000.0, "q99_thr": 1000.0}])
         long_df = M.assign_strata(df, thr)
         metrics = M.compute_basin_metrics(long_df)
         all_row = metrics[(metrics["stratum"] == "all") & (metrics["basin"] == "bY")].iloc[0]

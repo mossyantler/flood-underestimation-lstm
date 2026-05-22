@@ -37,11 +37,13 @@ OFFICIAL_SEEDS: list[int] = [111, 222, 444]
 PRED_COLS: list[str] = ["model1", "q50", "q90", "q95", "q99"]
 STRATA: list[str] = [
     "all",
+    "obs_q50_plus", "obs_q50_minus",
     "obs_q90_plus", "obs_q90_minus",
     "obs_q95_plus", "obs_q95_minus",
     "obs_q99_plus", "obs_q99_minus",
 ]
 STRATUM_QUANTILE: dict[str, float] = {
+    "obs_q50_plus": 0.50, "obs_q50_minus": 0.50,
     "obs_q90_plus": 0.90, "obs_q90_minus": 0.90,
     "obs_q95_plus": 0.95, "obs_q95_minus": 0.95,
     "obs_q99_plus": 0.99, "obs_q99_minus": 0.99,
@@ -71,6 +73,7 @@ def compute_basin_thresholds(df: pd.DataFrame) -> pd.DataFrame:
         obs = grp["obs"]
         records.append({
             "basin": basin,
+            "q50_thr": float(obs.quantile(0.50)),
             "q90_thr": float(obs.quantile(0.90)),
             "q95_thr": float(obs.quantile(0.95)),
             "q99_thr": float(obs.quantile(0.99)),
