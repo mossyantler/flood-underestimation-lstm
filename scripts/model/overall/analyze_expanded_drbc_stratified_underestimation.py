@@ -109,7 +109,7 @@ def assign_strata(df: pd.DataFrame, thresholds: pd.DataFrame) -> pd.DataFrame:
 
 _METRIC_COLS: list[str] = [
     f"{c}_{m}" for c in PRED_COLS
-    for m in ["under_frac", "med_rel_bias", "cond_under_magnitude"]
+    for m in ["under_frac", "med_rel_bias", "cond_under_magnitude", "cond_under_abs_magnitude"]
 ]
 
 
@@ -142,8 +142,12 @@ def compute_basin_metrics(long_df: pd.DataFrame) -> pd.DataFrame:
                 row[f"{col}_cond_under_magnitude"] = float(
                     np.median((obs[under_mask] - pred[under_mask]) / obs[under_mask])
                 )
+                row[f"{col}_cond_under_abs_magnitude"] = float(
+                    np.median(obs[under_mask] - pred[under_mask])
+                )
             else:
                 row[f"{col}_cond_under_magnitude"] = float("nan")
+                row[f"{col}_cond_under_abs_magnitude"] = float("nan")
         records.append(row)
     return pd.DataFrame(records)
 

@@ -118,6 +118,9 @@ class TestBasinMetrics(unittest.TestCase):
         row = all_m1.iloc[0]
         self.assertAlmostEqual(row["model1_under_frac"], 0.6, places=5)
         self.assertAlmostEqual(row["model1_med_rel_bias"], -0.1, places=5)
+        # under timesteps: obs=10 pred=8 (diff=2), obs=30 pred=25 (diff=5), obs=50 pred=45 (diff=5)
+        # median([2, 5, 5]) = 5.0
+        self.assertAlmostEqual(row["model1_cond_under_abs_magnitude"], 5.0, places=5)
 
     def test_n_timesteps_recorded(self) -> None:
         df = _make_required_series(["bY"], 20)
