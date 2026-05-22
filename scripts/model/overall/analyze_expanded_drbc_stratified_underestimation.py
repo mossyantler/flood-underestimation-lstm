@@ -94,3 +94,31 @@ def assign_strata(df: pd.DataFrame, thresholds: pd.DataFrame) -> pd.DataFrame:
         parts.append(chunk)
 
     return pd.concat(parts, ignore_index=True)
+
+
+_METRIC_COLS: list[str] = [
+    f"{c}_{m}" for c in PRED_COLS for m in ["under_frac", "med_rel_bias"]
+]
+
+
+def compute_basin_metrics(long_df: pd.DataFrame) -> pd.DataFrame:
+    """Per (stratum x basin x seed) -> under_fraction and median_rel_bias for each pred_col.
+
+    Input: long-form DataFrame from assign_strata (has 'stratum' column).
+    """
+    records: list[dict] = []
+    for (stratum, basin, seed), grp in long_df.groupby(["stratum", "basin", "seed"]):
+        obs = grp["obs"].values
+        row: dict = {
+            "stratum": stratum,
+            "basin": basin,
+            "seed": seed,
+            "n_timesteps": len(grp),
+        }
+        for col in PRED_COLS:
+            pred = grp[col].values
+            row[f"{col}_under_frac"] = float((pred < obs).mean())
+            rel_err = (pred - obs) / obs
+            row[f"{col}_med_rel_bias"] = float(np.median(rel_err))
+        records.append(row)
+    return pd.DataFrame(records)

@@ -94,5 +94,39 @@ class TestAssignStrata(unittest.TestCase):
         self.assertAlmostEqual(q99_rows.iloc[0]["obs"], 20.0)
 
 
+class TestBasinMetrics(unittest.TestCase):
+    def test_under_fraction_and_median_rel_bias(self) -> None:
+        # obs = [10, 20, 30, 40, 50]
+        # model1 = [8, 25, 25, 45, 45]
+        # under at obs=10 (8<10), obs=30 (25<30), obs=50 (45<50) → under_frac = 3/5 = 0.6
+        # rel_err = [-0.2, 0.25, -0.167, 0.125, -0.1] → sorted: [-0.2, -0.167, -0.1, 0.125, 0.25]
+        # → median = -0.1
+        obs_seq = [10.0, 20.0, 30.0, 40.0, 50.0]
+        df = _make_required_series(["bX"], 5, obs_values={"bX": obs_seq})
+        df["model1"] = [8.0, 25.0, 25.0, 45.0, 45.0]
+        df["q50"] = df["model1"]
+        df["q90"] = df["model1"]
+        df["q95"] = df["model1"]
+        df["q99"] = df["model1"]
+
+        thr = pd.DataFrame([{"basin": "bX", "q90_thr": 100.0, "q95_thr": 100.0, "q99_thr": 100.0}])
+        long_df = M.assign_strata(df, thr)
+        metrics = M.compute_basin_metrics(long_df)
+
+        all_m1 = metrics[(metrics["stratum"] == "all") & (metrics["basin"] == "bX")]
+        self.assertEqual(len(all_m1), 1)
+        row = all_m1.iloc[0]
+        self.assertAlmostEqual(row["model1_under_frac"], 0.6, places=5)
+        self.assertAlmostEqual(row["model1_med_rel_bias"], -0.1, places=5)
+
+    def test_n_timesteps_recorded(self) -> None:
+        df = _make_required_series(["bY"], 20)
+        thr = pd.DataFrame([{"basin": "bY", "q90_thr": 1000.0, "q95_thr": 1000.0, "q99_thr": 1000.0}])
+        long_df = M.assign_strata(df, thr)
+        metrics = M.compute_basin_metrics(long_df)
+        all_row = metrics[(metrics["stratum"] == "all") & (metrics["basin"] == "bY")].iloc[0]
+        self.assertEqual(all_row["n_timesteps"], 20)
+
+
 if __name__ == "__main__":
     unittest.main()
