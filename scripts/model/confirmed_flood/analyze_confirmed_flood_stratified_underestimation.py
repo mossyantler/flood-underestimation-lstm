@@ -53,9 +53,12 @@ PRED_COLS: list[str] = ["model1", "q50", "q90", "q95", "q99"]
 
 STRATA: list[str] = [
     "all",
+    "minor_only",      # tier == minor
+    "moderate_only",   # tier == moderate
+    "major_only",      # tier == major
     "moderate_plus",   # tier ∈ {moderate, major}
-    "below_moderate",  # tier == minor
-    "major_plus",      # tier == major
+    "below_moderate",  # tier == minor  (alias for minor_only, kept for compat)
+    "major_plus",      # tier == major   (alias for major_only, kept for compat)
     "below_major",     # tier ∈ {minor, moderate}
     "noaa_corroborated",
 ]
@@ -102,6 +105,9 @@ def assign_strata(df: pd.DataFrame) -> pd.DataFrame:
     parts: list[pd.DataFrame] = []
     masks: dict[str, pd.Series] = {
         "all": pd.Series(True, index=df.index),
+        "minor_only": df["flood_tier"] == "minor",
+        "moderate_only": df["flood_tier"] == "moderate",
+        "major_only": df["flood_tier"] == "major",
         "moderate_plus": df["flood_tier"].isin(["moderate", "major"]),
         "below_moderate": df["flood_tier"] == "minor",
         "major_plus": df["flood_tier"] == "major",

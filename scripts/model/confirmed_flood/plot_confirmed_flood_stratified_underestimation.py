@@ -33,6 +33,10 @@ SEVERITY_LABELS = ["All", "Mod+", "Maj+"]
 BELOW_STRATA = ["below_major", "below_moderate", "noaa_corroborated"]
 BELOW_LABELS = ["<Major", "<Moderate", "NOAA\ncorroborated"]
 
+# Fixed-tier strata (mutually exclusive)
+TIER_STRATA = ["minor_only", "moderate_only", "major_only"]
+TIER_LABELS = ["Minor", "Moderate", "Major"]
+
 
 def _err_bounds(
     df: pd.DataFrame, strata: list[str], col: str
@@ -107,6 +111,25 @@ def make_figure(df: pd.DataFrame, metric: str, ylabel: str, filename: str) -> Pa
     return out
 
 
+def make_tier_figure(df: pd.DataFrame, metric: str, ylabel: str, filename: str) -> Path:
+    """Single-panel figure: fixed flood tiers (minor / moderate / major)."""
+    fig, ax = plt.subplots(figsize=(7, 5))
+    fig.suptitle(
+        f"Conditional Underestimation Magnitude — {ylabel}\n"
+        "Confirmed flood events by fixed tier, 48 basins, median across events & seeds",
+        fontsize=11,
+    )
+    plot_panel(ax, df, TIER_STRATA, TIER_LABELS, metric, ylabel, "")
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles, labels, fontsize=9, framealpha=0.8)
+    fig.tight_layout()
+    out = FIGURES_DIR / filename
+    fig.savefig(out, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Wrote {out}")
+    return out
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tables-dir", type=Path, default=TABLES_DIR)
@@ -127,6 +150,18 @@ def main(argv: list[str] | None = None) -> None:
         metric="cond_under_abs_magnitude",
         ylabel="Absolute magnitude [cms]",
         filename="confirmed_flood_stratified_underestimation_absolute.png",
+    )
+    make_tier_figure(
+        df,
+        metric="cond_under_magnitude",
+        ylabel="Relative magnitude [(obs−pred)/obs]",
+        filename="confirmed_flood_tier_underestimation_relative.png",
+    )
+    make_tier_figure(
+        df,
+        metric="cond_under_abs_magnitude",
+        ylabel="Absolute magnitude [cms]",
+        filename="confirmed_flood_tier_underestimation_absolute.png",
     )
 
 
