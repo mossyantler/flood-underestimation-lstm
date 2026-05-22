@@ -35,11 +35,16 @@ OUTPUT_TABLES_DIR = (
 
 OFFICIAL_SEEDS: list[int] = [111, 222, 444]
 PRED_COLS: list[str] = ["model1", "q50", "q90", "q95", "q99"]
-STRATA: list[str] = ["all", "obs_q90_plus", "obs_q95_plus", "obs_q99_plus"]
+STRATA: list[str] = [
+    "all",
+    "obs_q90_plus", "obs_q90_minus",
+    "obs_q95_plus", "obs_q95_minus",
+    "obs_q99_plus", "obs_q99_minus",
+]
 STRATUM_QUANTILE: dict[str, float] = {
-    "obs_q90_plus": 0.90,
-    "obs_q95_plus": 0.95,
-    "obs_q99_plus": 0.99,
+    "obs_q90_plus": 0.90, "obs_q90_minus": 0.90,
+    "obs_q95_plus": 0.95, "obs_q95_minus": 0.95,
+    "obs_q99_plus": 0.99, "obs_q99_minus": 0.99,
 }
 
 
@@ -86,9 +91,12 @@ def assign_strata(df: pd.DataFrame, thresholds: pd.DataFrame) -> pd.DataFrame:
     for stratum in STRATA:
         if stratum == "all":
             mask = pd.Series(True, index=valid.index)
-        else:
+        elif stratum.endswith("_plus"):
             thr_col = stratum.replace("obs_", "").replace("_plus", "_thr")
             mask = valid["obs"] > valid[thr_col]
+        else:  # _minus: complement (obs <= threshold)
+            thr_col = stratum.replace("obs_", "").replace("_minus", "_thr")
+            mask = valid["obs"] <= valid[thr_col]
         chunk = valid[mask].copy()
         chunk["stratum"] = stratum
         parts.append(chunk)
