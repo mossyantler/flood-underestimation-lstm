@@ -128,5 +128,42 @@ class TestBasinMetrics(unittest.TestCase):
         self.assertEqual(all_row["n_timesteps"], 20)
 
 
+class TestAggregation(unittest.TestCase):
+    def _make_basin_metrics(self) -> pd.DataFrame:
+        rows = []
+        for seed in [111, 222]:
+            for basin in ["b1", "b2", "b3"]:
+                for stratum in ["all", "obs_q90_plus"]:
+                    row = {"stratum": stratum, "basin": basin, "seed": seed, "n_timesteps": 100}
+                    for col in M._METRIC_COLS:
+                        row[col] = 0.5 if "under_frac" in col else -0.2
+                    rows.append(row)
+        return pd.DataFrame(rows)
+
+    def test_seed_summary_shape(self) -> None:
+        bm = self._make_basin_metrics()
+        seed_sum = M.aggregate_to_seed_summary(bm)
+        # 2 seeds x 2 strata = 4 rows
+        self.assertEqual(len(seed_sum), 4)
+        self.assertIn("n_basins", seed_sum.columns)
+        self.assertIn("model1_under_frac", seed_sum.columns)
+
+    def test_final_summary_shape(self) -> None:
+        bm = self._make_basin_metrics()
+        seed_sum = M.aggregate_to_seed_summary(bm)
+        final = M.aggregate_to_final_summary(seed_sum)
+        # 2 strata = 2 rows
+        self.assertEqual(len(final), 2)
+        self.assertIn("stratum", final.columns)
+        self.assertIn("q99_under_frac", final.columns)
+
+    def test_aggregation_computes_median(self) -> None:
+        bm = self._make_basin_metrics()
+        seed_sum = M.aggregate_to_seed_summary(bm)
+        final = M.aggregate_to_final_summary(seed_sum)
+        all_row = final[final["stratum"] == "all"].iloc[0]
+        self.assertAlmostEqual(all_row["model1_under_frac"], 0.5, places=5)
+
+
 if __name__ == "__main__":
     unittest.main()

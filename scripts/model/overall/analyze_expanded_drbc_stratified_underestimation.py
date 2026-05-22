@@ -122,3 +122,37 @@ def compute_basin_metrics(long_df: pd.DataFrame) -> pd.DataFrame:
             row[f"{col}_med_rel_bias"] = float(np.median(rel_err))
         records.append(row)
     return pd.DataFrame(records)
+
+
+def aggregate_to_seed_summary(basin_metrics: pd.DataFrame) -> pd.DataFrame:
+    """Basin median -> per (seed x stratum) summary."""
+    records: list[dict] = []
+    for (seed, stratum), grp in basin_metrics.groupby(["seed", "stratum"]):
+        row: dict = {
+            "seed": seed,
+            "stratum": stratum,
+            "n_basins": len(grp),
+            "n_timesteps_median": float(grp["n_timesteps"].median()),
+        }
+        for col in _METRIC_COLS:
+            row[col] = float(grp[col].median())
+        records.append(row)
+    return pd.DataFrame(records)
+
+
+def aggregate_to_final_summary(seed_summary: pd.DataFrame) -> pd.DataFrame:
+    """Seed median -> final (stratum) summary."""
+    records: list[dict] = []
+    for stratum, grp in seed_summary.groupby("stratum"):
+        row: dict = {
+            "stratum": stratum,
+            "n_basins": float(grp["n_basins"].median()),
+            "n_timesteps_median": float(grp["n_timesteps_median"].median()),
+        }
+        for col in _METRIC_COLS:
+            row[col] = float(grp[col].median())
+        records.append(row)
+    order = {s: i for i, s in enumerate(STRATA)}
+    result = pd.DataFrame(records)
+    result["_order"] = result["stratum"].map(order)
+    return result.sort_values("_order").drop(columns=["_order"]).reset_index(drop=True)
