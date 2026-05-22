@@ -108,12 +108,19 @@ def assign_strata(df: pd.DataFrame, thresholds: pd.DataFrame) -> pd.DataFrame:
 
 
 _METRIC_COLS: list[str] = [
-    f"{c}_{m}" for c in PRED_COLS for m in ["under_frac", "med_rel_bias"]
+    f"{c}_{m}" for c in PRED_COLS
+    for m in ["under_frac", "med_rel_bias", "cond_under_magnitude"]
 ]
 
 
 def compute_basin_metrics(long_df: pd.DataFrame) -> pd.DataFrame:
-    """Per (stratum x basin x seed) -> under_fraction and median_rel_bias for each pred_col.
+    """Per (stratum x basin x seed) -> metrics for each pred_col.
+
+    Metrics:
+      under_frac           -- P(pred < obs)
+      med_rel_bias         -- median((pred - obs) / obs) over all timesteps
+      cond_under_magnitude -- median((obs - pred) / obs) where pred < obs only
+                              (how large is the underestimation when it occurs)
 
     Input: long-form DataFrame from assign_strata (has 'stratum' column).
     """
@@ -128,9 +135,15 @@ def compute_basin_metrics(long_df: pd.DataFrame) -> pd.DataFrame:
         }
         for col in PRED_COLS:
             pred = grp[col].values
-            row[f"{col}_under_frac"] = float((pred < obs).mean())
-            rel_err = (pred - obs) / obs
-            row[f"{col}_med_rel_bias"] = float(np.median(rel_err))
+            under_mask = pred < obs
+            row[f"{col}_under_frac"] = float(under_mask.mean())
+            row[f"{col}_med_rel_bias"] = float(np.median((pred - obs) / obs))
+            if under_mask.any():
+                row[f"{col}_cond_under_magnitude"] = float(
+                    np.median((obs[under_mask] - pred[under_mask]) / obs[under_mask])
+                )
+            else:
+                row[f"{col}_cond_under_magnitude"] = float("nan")
         records.append(row)
     return pd.DataFrame(records)
 
