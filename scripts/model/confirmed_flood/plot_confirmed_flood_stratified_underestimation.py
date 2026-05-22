@@ -163,6 +163,18 @@ def main(argv: list[str] | None = None) -> None:
         ylabel="Absolute magnitude [cms]",
         filename="confirmed_flood_tier_underestimation_absolute.png",
     )
+    make_tier_figure(
+        df,
+        metric="under_frac",
+        ylabel="Under-estimation fraction [P(pred < obs)]",
+        filename="confirmed_flood_tier_under_fraction.png",
+    )
+    make_figure(
+        df,
+        metric="under_frac",
+        ylabel="Under-estimation fraction [P(pred < obs)]",
+        filename="confirmed_flood_stratified_under_fraction.png",
+    )
 
 
 if __name__ == "__main__":
