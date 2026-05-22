@@ -56,3 +56,41 @@ def load_required_series(
     combined = pd.concat(dfs, ignore_index=True)
     keep = ["seed", "basin", "datetime", "obs"] + PRED_COLS
     return combined[keep]
+
+
+def compute_basin_thresholds(df: pd.DataFrame) -> pd.DataFrame:
+    """Compute Q90/Q95/Q99 of observed discharge per basin from valid obs rows."""
+    valid = df[df["obs"].notna() & (df["obs"] > 0)]
+    records = []
+    for basin, grp in valid.groupby("basin"):
+        obs = grp["obs"]
+        records.append({
+            "basin": basin,
+            "q90_thr": float(obs.quantile(0.90)),
+            "q95_thr": float(obs.quantile(0.95)),
+            "q99_thr": float(obs.quantile(0.99)),
+        })
+    return pd.DataFrame(records)
+
+
+def assign_strata(df: pd.DataFrame, thresholds: pd.DataFrame) -> pd.DataFrame:
+    """Return long-form DataFrame with a 'stratum' column.
+
+    Filters to obs > 0 and obs not NaN. Each valid row appears once per stratum
+    it belongs to (nested: q99_plus subset q95_plus subset q90_plus subset all).
+    """
+    valid = df.merge(thresholds, on="basin", how="left")
+    valid = valid[valid["obs"].notna() & (valid["obs"] > 0)].copy()
+
+    parts: list[pd.DataFrame] = []
+    for stratum in STRATA:
+        if stratum == "all":
+            mask = pd.Series(True, index=valid.index)
+        else:
+            thr_col = stratum.replace("obs_", "").replace("_plus", "_thr")
+            mask = valid["obs"] > valid[thr_col]
+        chunk = valid[mask].copy()
+        chunk["stratum"] = stratum
+        parts.append(chunk)
+
+    return pd.concat(parts, ignore_index=True)
