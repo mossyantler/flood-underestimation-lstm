@@ -29,10 +29,10 @@ from shapely.validation import make_valid
 
 
 ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_PERF_CSV = ROOT / "output/model_analysis/expanded/confirmed_flood/performance/drbc_confirmed_flood_performance.csv"
-DEFAULT_EVENT_WINDOWS = ROOT / "output/model_analysis/expanded/confirmed_flood/inference/confirmed_flood_event_windows_used.csv"
-DEFAULT_CATALOG_CSV = ROOT / "output/model_analysis/expanded/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv"
-DEFAULT_COVERAGE_CSV = ROOT / "output/model_analysis/expanded/confirmed_flood/coverage/nws_flood_stage_coverage.csv"
+DEFAULT_PERF_CSV = ROOT / "output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv"
+DEFAULT_EVENT_WINDOWS = ROOT / "output/model_analysis/confirmed_flood/inference/confirmed_flood_event_windows_used.csv"
+DEFAULT_CATALOG_CSV = ROOT / "output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv"
+DEFAULT_COVERAGE_CSV = ROOT / "output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv"
 DEFAULT_DRBC_SELECTED = ROOT / "output/basin/drbc/basin_define/camelsh_drbc_selected.csv"
 DEFAULT_STATIC_ATTRIBUTES = ROOT / "data/CAMELSH_generic/drbc_holdout_confirmed_flood_events/attributes/static_attributes.csv"
 DEFAULT_SCREENING = ROOT / "output/basin/drbc/screening/drbc_screening_priority_broad.csv"

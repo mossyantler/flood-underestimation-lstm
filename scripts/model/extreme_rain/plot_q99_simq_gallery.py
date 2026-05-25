@@ -42,9 +42,9 @@ import xarray as xr
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
 DEFAULT_EVENT_RESPONSE = REPO_ROOT / "output/basin/expanded_drbc/analysis/event_response/tables/event_response_table.csv"
-DEFAULT_SERIES_DIR = REPO_ROOT / "output/model_analysis/expanded/extreme_rain/expanded_drbc/basin_performance/inference/required_series"
+DEFAULT_SERIES_DIR = REPO_ROOT / "output/model_analysis/extreme_rain/expanded_drbc/basin_performance/inference/required_series"
 DEFAULT_DATA_DIR = REPO_ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test/time_series"
-DEFAULT_OUTPUT_ROOT = REPO_ROOT / "output/model_analysis/expanded/extreme_rain/expanded_drbc/basin_performance/hydrograph"
+DEFAULT_OUTPUT_ROOT = REPO_ROOT / "output/model_analysis/extreme_rain/expanded_drbc/basin_performance/hydrograph"
 DEFAULT_SEEDS = [111, 222, 444]
 PADDING_HOURS = 72
 

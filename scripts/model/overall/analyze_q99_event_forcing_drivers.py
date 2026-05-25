@@ -37,7 +37,7 @@ from scipy import stats
 import xarray as xr
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-REQUIRED_DIR = REPO_ROOT / "output/model_analysis/expanded/expanded_drbc_test/required_series"
+REQUIRED_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test/required_series"
 NC_DIR = REPO_ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test/time_series"
 OUT_TABLES = REPO_ROOT / "output/q99_analysis/tables"
 OUT_FIGS = REPO_ROOT / "output/q99_analysis/figures"

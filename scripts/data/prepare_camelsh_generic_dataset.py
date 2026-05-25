@@ -43,7 +43,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--confirmed-flood-catalog",
         type=Path,
-        default=Path("output/model_analysis/expanded/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv"),
+        default=Path("output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv"),
         help="Confirmed flood catalog used when --profile confirmed_flood_events.",
     )
     parser.add_argument(

@@ -27,10 +27,10 @@ import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REQUIRED_SERIES_DIR = (
-    REPO_ROOT / "output/model_analysis/expanded/expanded_drbc_test/required_series"
+    REPO_ROOT / "output/model_analysis/expanded_drbc_test/required_series"
 )
 OUTPUT_TABLES_DIR = (
-    REPO_ROOT / "output/model_analysis/expanded/expanded_drbc_test/tables"
+    REPO_ROOT / "output/model_analysis/expanded_drbc_test/tables"
 )
 
 OFFICIAL_SEEDS: list[int] = [111, 222, 444]

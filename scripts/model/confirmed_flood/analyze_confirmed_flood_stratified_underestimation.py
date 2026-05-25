@@ -13,7 +13,7 @@ subset.  Metrics are computed at event-peak level and aggregated basin → seed 
 
 Input
 -----
-output/model_analysis/expanded/confirmed_flood/performance/drbc_confirmed_flood_performance.csv
+output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv
 
 Outputs
 -------
@@ -31,11 +31,11 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PERF_CSV = (
     REPO_ROOT
-    / "output/model_analysis/expanded/confirmed_flood/performance"
+    / "output/model_analysis/confirmed_flood/performance"
     / "drbc_confirmed_flood_performance.csv"
 )
 OUTPUT_TABLES_DIR = (
-    REPO_ROOT / "output/model_analysis/expanded/confirmed_flood/tables"
+    REPO_ROOT / "output/model_analysis/confirmed_flood/tables"
 )
 
 OFFICIAL_SEEDS: list[int] = [111, 222, 444]

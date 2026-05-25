@@ -60,7 +60,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=ROOT / "output/model_analysis/expanded/expanded_drbc_test",
+        default=ROOT / "output/model_analysis/expanded_drbc_test",
     )
     parser.add_argument("--seeds", type=int, nargs="+", default=[111, 222, 444])
     parser.add_argument("--device", default="auto", help="auto, cpu, mps, or cuda")

@@ -4,8 +4,8 @@
 # ///
 """Build an HTML gallery index for DRBC confirmed flood event hydrographs.
 
-Reads: output/model_analysis/expanded/confirmed_flood/hydrographs/confirmed_flood_hydrograph_manifest.csv
-Writes: output/model_analysis/expanded/confirmed_flood/hydrographs/event_plot_index.html
+Reads: output/model_analysis/confirmed_flood/hydrographs/confirmed_flood_hydrograph_manifest.csv
+Writes: output/model_analysis/confirmed_flood/hydrographs/event_plot_index.html
 """
 from __future__ import annotations
 
@@ -18,8 +18,8 @@ import pandas as pd
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_MANIFEST = REPO_ROOT / "output/model_analysis/expanded/confirmed_flood/hydrographs/confirmed_flood_hydrograph_manifest.csv"
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/expanded/confirmed_flood/hydrographs"
+DEFAULT_MANIFEST = REPO_ROOT / "output/model_analysis/confirmed_flood/hydrographs/confirmed_flood_hydrograph_manifest.csv"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/confirmed_flood/hydrographs"
 
 TIER_ORDER = ["major", "moderate", "minor"]
 TIER_LABELS = {"major": "Major Flood", "moderate": "Moderate Flood", "minor": "Minor Flood"}
@@ -126,7 +126,7 @@ def fix_path(plot_path: str) -> str:
     """Fix legacy paths to current expanded paths."""
     return plot_path.replace(
         "output/model_analysis/confirmed_flood/",
-        "output/model_analysis/expanded/confirmed_flood/",
+        "output/model_analysis/confirmed_flood/",
     )
 
 

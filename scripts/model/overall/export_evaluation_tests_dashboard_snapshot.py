@@ -25,13 +25,13 @@ DUCKDB_PATH = ROOT / "database/local/duckdb/camels.duckdb"
 
 SOURCES = {
     "expandedManifest": "configs/basin_splits/drbc_expanded_observed_test/manifest.csv",
-    "expandedFirstSummary": "output/model_analysis/expanded/expanded_drbc_test/tables/primary_summary_by_seed.csv",
+    "expandedFirstSummary": "output/model_analysis/expanded_drbc_test/tables/primary_summary_by_seed.csv",
     "expandedFirstRunner": "scripts/runs/official/run_expanded_drbc_test_evaluation.sh",
     "extremeRainPrimaryLong": "output/model_analysis/legacy/extreme_rain/primary/analysis/extreme_rain_stress_error_table_long.csv",
     "extremeRainRunner": "scripts/runs/official/run_subset300_extreme_rain_stress_test.sh",
-    "confirmedFloodPerformance": "output/model_analysis/expanded/confirmed_flood/performance/drbc_confirmed_flood_performance.csv",
-    "confirmedFloodCatalog": "output/model_analysis/expanded/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv",
-    "confirmedFloodHydrographs": "output/model_analysis/expanded/confirmed_flood/hydrographs/confirmed_flood_hydrograph_manifest.csv",
+    "confirmedFloodPerformance": "output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv",
+    "confirmedFloodCatalog": "output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv",
+    "confirmedFloodHydrographs": "output/model_analysis/confirmed_flood/hydrographs/confirmed_flood_hydrograph_manifest.csv",
 }
 
 

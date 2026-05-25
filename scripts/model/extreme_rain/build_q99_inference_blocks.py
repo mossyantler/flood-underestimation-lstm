@@ -25,7 +25,7 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
 DEFAULT_EVENT_RESPONSE = REPO_ROOT / "output/basin/expanded_drbc/analysis/event_response/tables/event_response_table.csv"
-DEFAULT_OUTPUT_CSV = REPO_ROOT / "output/model_analysis/expanded/extreme_rain/expanded_drbc/basin_performance/q99_inference_blocks.csv"
+DEFAULT_OUTPUT_CSV = REPO_ROOT / "output/model_analysis/extreme_rain/expanded_drbc/basin_performance/q99_inference_blocks.csv"
 
 
 def parse_args() -> argparse.Namespace:

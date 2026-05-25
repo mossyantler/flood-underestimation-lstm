@@ -34,7 +34,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 
 Q99_DIR = REPO_ROOT / "output/q99_analysis/expanded_drbc"
 # Use expanded_drbc_test required_series (all timesteps, all basins)
-REQUIRED_DIR = REPO_ROOT / "output/model_analysis/expanded/expanded_drbc_test/required_series"
+REQUIRED_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test/required_series"
 NC_DIR = REPO_ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test/time_series"
 
 STATIC_PATH = (

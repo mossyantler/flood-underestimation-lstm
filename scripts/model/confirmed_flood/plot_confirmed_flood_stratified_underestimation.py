@@ -17,8 +17,8 @@ import numpy as np
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-TABLES_DIR = REPO_ROOT / "output/model_analysis/expanded/confirmed_flood/tables"
-FIGURES_DIR = REPO_ROOT / "output/model_analysis/expanded/confirmed_flood/figures"
+TABLES_DIR = REPO_ROOT / "output/model_analysis/confirmed_flood/tables"
+FIGURES_DIR = REPO_ROOT / "output/model_analysis/confirmed_flood/figures"
 
 PRED_COLS = ["model1", "q50", "q90", "q95", "q99"]
 PRED_LABELS = {"model1": "Model 1", "q50": "Q50", "q90": "Q90", "q95": "Q95", "q99": "Q99"}

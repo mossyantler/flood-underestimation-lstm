@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[3]
 
 DEFAULT_DRBC_SELECTED = ROOT / "output/basin/drbc/basin_define/camelsh_drbc_selected.csv"
 DEFAULT_STATIC_ATTRS = ROOT / "output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_static_attributes_full.csv"
-DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/expanded/confirmed_flood/coverage"
+DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/confirmed_flood/coverage"
 
 USGS_SITE_API = "https://waterservices.usgs.gov/nwis/site/"
 NWPS_API = "https://api.water.noaa.gov/nwps/v1/gauges/{lid}"

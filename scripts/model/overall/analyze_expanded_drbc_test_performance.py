@@ -8,7 +8,7 @@
 # ///
 """Generate analysis tables and figures for the expanded DRBC test (85-basin holdout).
 
-Reads existing tables from output/model_analysis/expanded/expanded_drbc_test/tables/
+Reads existing tables from output/model_analysis/expanded_drbc_test/tables/
 and produces:
   tables/primary_epoch_summary.csv       — per-model/seed stats (legacy-compatible)
   tables/primary_epoch_basin_deltas.csv  — per-basin Model2-Model1 deltas
@@ -33,8 +33,8 @@ import pandas as pd
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_TABLES_DIR = REPO_ROOT / "output/model_analysis/expanded/expanded_drbc_test/tables"
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/expanded/expanded_drbc_test"
+DEFAULT_TABLES_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test/tables"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test"
 
 PRIMARY_EPOCHS: dict[tuple[str, int], int] = {
     ("model1", 111): 25,
