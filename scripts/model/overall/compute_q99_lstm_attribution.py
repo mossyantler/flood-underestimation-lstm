@@ -16,24 +16,25 @@
 For each Q99 extreme event (obs >= basin 99th pct, test period 2014-2016):
   - Extract 336h lookback window of forcing from NC files
   - Normalize with training scaler
-  - Forward pass through model2 (CudaLSTM + quantile head, epoch005, seed111)
+  - Forward pass through model2 (CudaLSTM + quantile head, epoch005)
   - Compute gradient of q99 output at event peak w.r.t. dynamic inputs
   - Attribute as |gradient| x |input| (GradientInput)
 
-Aggregates:
-  - Mean attribution per feature (feature importance bar chart)
-  - Mean attribution vs lag from event peak (temporal sensitivity profile)
-  - Stratified by q99_under_frac_event (underestimation vs overestimation events)
+Usage
+-----
+uv run compute_q99_lstm_attribution.py [--seed SEED]
+Defaults to seed 111. Pass --seed 222 or --seed 444 for other seeds.
 
 Outputs
 -------
-output/q99_analysis/tables/q99_lstm_attribution.csv     event×feature×lag table
-output/q99_analysis/figures/q99_lstm_feature_importance.png
-output/q99_analysis/figures/q99_lstm_temporal_lag.png
-output/q99_analysis/figures/q99_lstm_attribution_stratified.png
+output/q99_analysis/tables/q99_lstm_attribution_seed{SEED}.csv
+output/q99_analysis/figures/q99_lstm_feature_importance_seed{SEED}.png
+output/q99_analysis/figures/q99_lstm_temporal_lag_seed{SEED}.png
+output/q99_analysis/figures/q99_lstm_attribution_stratified_seed{SEED}.png
 """
 from __future__ import annotations
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -86,7 +87,18 @@ SEQ_LEN = 336
 HIDDEN_SIZE = 128
 N_QUANTILES = 4   # [0.5, 0.9, 0.95, 0.99]
 Q99_IDX = 3       # index of 0.99 quantile in output
-SEED = 111
+
+_SEED_RUN_DIRS = {
+    111: "camelsh_hourly_model2_drbc_holdout_subset300_seed111_1904_232450",
+    222: "camelsh_hourly_model2_drbc_holdout_subset300_seed222_2204_160730",
+    444: "camelsh_hourly_model2_drbc_holdout_subset300_seed444_2504_065913",
+}
+
+
+def _parse_args() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--seed", type=int, default=111, choices=[111, 222, 444])
+    return parser.parse_args().seed
 
 FEAT_LABELS = {
     "Rainf": "Rainfall (Rainf)",
@@ -347,7 +359,7 @@ C_UNDER = "#d62728"
 C_OVER = "#2ca02c"
 
 
-def plot_feature_importance(df: pd.DataFrame) -> None:
+def plot_feature_importance(df: pd.DataFrame, seed: int) -> None:
     attr_cols = [f"{f}_attr" for f in DYNAMIC_FEATURES]
     means = df[attr_cols].mean()
     stds = df[attr_cols].std()
@@ -369,17 +381,17 @@ def plot_feature_importance(df: pd.DataFrame) -> None:
     ax.set_xlabel("Mean |gradient × input| (GradientInput attribution)", fontsize=10)
     ax.set_title(
         f"LSTM input feature importance for Q99 predictions\n"
-        f"(seed111, epoch005, {len(df)} events, GradientInput)",
+        f"(seed{seed}, epoch005, {len(df)} events, GradientInput)",
         fontsize=10,
     )
     fig.tight_layout()
-    out = OUT_FIGS / "q99_lstm_feature_importance.png"
+    out = OUT_FIGS / f"q99_lstm_feature_importance_seed{seed}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight")
     plt.close(fig)
-    print(f"Saved: {out}")
+    print(f"Saved: {out.name}")
 
 
-def plot_temporal_lag(df: pd.DataFrame) -> None:
+def plot_temporal_lag(df: pd.DataFrame, seed: int) -> None:
     lags_h = [0, 24, 48, 72, 96, 120, 168, 240, 336]
     top_feats = ["Rainf", "CAPE", "Tair", "PotEvap"]
 
@@ -394,17 +406,17 @@ def plot_temporal_lag(df: pd.DataFrame) -> None:
 
     ax.set_xlabel("Hours before event peak", fontsize=10)
     ax.set_ylabel("Mean |gradient × input|", fontsize=10)
-    ax.set_title("Temporal sensitivity: how far back LSTM looks for Q99 peak", fontsize=10)
+    ax.set_title(f"Temporal sensitivity: how far back LSTM looks for Q99 peak (seed{seed})", fontsize=10)
     ax.legend(fontsize=9)
-    ax.invert_xaxis()  # 0 = peak, increasing left = further back
+    ax.invert_xaxis()
     fig.tight_layout()
-    out = OUT_FIGS / "q99_lstm_temporal_lag.png"
+    out = OUT_FIGS / f"q99_lstm_temporal_lag_seed{seed}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight")
     plt.close(fig)
-    print(f"Saved: {out}")
+    print(f"Saved: {out.name}")
 
 
-def plot_stratified(df: pd.DataFrame) -> None:
+def plot_stratified(df: pd.DataFrame, seed: int) -> None:
     """Attribution: underestimation events vs overestimation events."""
     attr_cols = [f"{f}_attr" for f in DYNAMIC_FEATURES]
     labels = [FEAT_LABELS[f] for f in DYNAMIC_FEATURES]
@@ -425,31 +437,36 @@ def plot_stratified(df: pd.DataFrame) -> None:
     ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=9)
     ax.set_ylabel("Mean |gradient × input|", fontsize=10)
     ax.set_title(
-        "LSTM feature attribution: underestimation vs overestimation events\n"
+        f"LSTM feature attribution: underestimation vs overestimation events (seed{seed})\n"
         "(q99_under_frac_event >= 0.5 = underestimation)",
         fontsize=10,
     )
     ax.legend(fontsize=9)
     fig.tight_layout()
-    out = OUT_FIGS / "q99_lstm_attribution_stratified.png"
+    out = OUT_FIGS / f"q99_lstm_attribution_stratified_seed{seed}.png"
     fig.savefig(out, dpi=150, bbox_inches="tight")
     plt.close(fig)
-    print(f"Saved: {out}")
+    print(f"Saved: {out.name}")
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 def main() -> None:
+    seed = _parse_args()
+    run_dir = REPO_ROOT / "runs/subset_comparison" / _SEED_RUN_DIRS[seed]
+    ckpt_path = run_dir / "model_epoch005.pt"
+    scaler_path = run_dir / "train_data" / "train_data_scaler.yml"
+
     # Load model
-    print("── Loading model …")
+    print(f"── Loading model (seed{seed}) …")
     model = MinimalQ99LSTM()
-    model.load_nh_checkpoint(CKPT_PATH)
+    model.load_nh_checkpoint(ckpt_path)
     model.eval()
-    print(f"  Checkpoint: {CKPT_PATH.name}")
+    print(f"  Checkpoint: {ckpt_path.name}")
 
     # Load scaler
     print("── Loading scaler …")
-    scaler = load_scaler(SCALER_PATH)
+    scaler = load_scaler(scaler_path)
     print(f"  Dynamic center keys: {list(scaler['center'].keys())[:4]} …")
 
     # Load static attributes
@@ -459,19 +476,19 @@ def main() -> None:
         static_df = static_df.rename(columns={"gauge_id": "basin"})
     static_df["basin"] = static_df["basin"].astype(str).str.zfill(8)
 
-    # Load event table (seed111 only)
+    # Load event table
     print("── Loading event table …")
     events_all = pd.read_csv(EVENT_CSV)
-    events = events_all[events_all["seed"] == SEED].copy()
+    events = events_all[events_all["seed"] == seed].copy()
     events["basin"] = events["basin"].astype(str)
-    print(f"  {len(events)} events (seed{SEED})")
+    print(f"  {len(events)} events (seed{seed})")
 
     # Attribution
     print(f"── Computing gradient attribution ({len(events)} events) …")
     attr_df = run_attribution(model, events, static_df, scaler)
-    out_csv = OUT_TABLES / "q99_lstm_attribution.csv"
+    out_csv = OUT_TABLES / f"q99_lstm_attribution_seed{seed}.csv"
     attr_df.to_csv(out_csv, index=False)
-    print(f"Saved: {out_csv}  ({len(attr_df)} rows)")
+    print(f"Saved: {out_csv.name}  ({len(attr_df)} rows)")
 
     # Summary
     attr_cols = [f"{f}_attr" for f in DYNAMIC_FEATURES]
@@ -482,9 +499,9 @@ def main() -> None:
 
     # Plots
     print("\n── Plots …")
-    plot_feature_importance(attr_df)
-    plot_temporal_lag(attr_df)
-    plot_stratified(attr_df)
+    plot_feature_importance(attr_df, seed)
+    plot_temporal_lag(attr_df, seed)
+    plot_stratified(attr_df, seed)
 
     print("\nDone.")
 
