@@ -27,10 +27,10 @@ Defaults to seed 111. Pass --seed 222 or --seed 444 for other seeds.
 
 Outputs
 -------
-output/q99_analysis/tables/q99_lstm_attribution_seed{SEED}.csv
-output/q99_analysis/figures/q99_lstm_feature_importance_seed{SEED}.png
-output/q99_analysis/figures/q99_lstm_temporal_lag_seed{SEED}.png
-output/q99_analysis/figures/q99_lstm_attribution_stratified_seed{SEED}.png
+output/model_analysis/q99_analysis/tables/q99_lstm_attribution_seed{SEED}.csv
+output/model_analysis/q99_analysis/figures/q99_lstm_feature_importance_seed{SEED}.png
+output/model_analysis/q99_analysis/figures/q99_lstm_temporal_lag_seed{SEED}.png
+output/model_analysis/q99_analysis/figures/q99_lstm_attribution_stratified_seed{SEED}.png
 """
 from __future__ import annotations
 
@@ -66,10 +66,10 @@ STATIC_PATH = (
     / "drbc_selected_static_attributes_full.csv"
 )
 NC_DIR = REPO_ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test/time_series"
-EVENT_CSV = REPO_ROOT / "output/q99_analysis/tables/q99_event_forcing_drivers.csv"
+EVENT_CSV = REPO_ROOT / "output/model_analysis/q99_analysis/tables/q99_event_forcing_drivers.csv"
 
-OUT_TABLES = REPO_ROOT / "output/q99_analysis/tables"
-OUT_FIGS = REPO_ROOT / "output/q99_analysis/figures"
+OUT_TABLES = REPO_ROOT / "output/model_analysis/q99_analysis/tables"
+OUT_FIGS = REPO_ROOT / "output/model_analysis/q99_analysis/figures"
 OUT_TABLES.mkdir(parents=True, exist_ok=True)
 OUT_FIGS.mkdir(parents=True, exist_ok=True)
 

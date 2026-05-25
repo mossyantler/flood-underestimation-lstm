@@ -17,9 +17,9 @@ systematically higher/lower Q99 bias?
 
 Outputs
 -------
-output/q99_analysis/tables/q99_lstm_attribution_basin.csv
-output/q99_analysis/figures/q99_lstm_attribution_basin_correlation_bar.png
-output/q99_analysis/figures/q99_lstm_attribution_basin_scatter.png
+output/model_analysis/q99_analysis/tables/q99_lstm_attribution_basin.csv
+output/model_analysis/q99_analysis/figures/q99_lstm_attribution_basin_correlation_bar.png
+output/model_analysis/q99_analysis/figures/q99_lstm_attribution_basin_scatter.png
 """
 from __future__ import annotations
 
@@ -34,8 +34,8 @@ import pandas as pd
 from scipy import stats
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-TABLE_DIR = REPO_ROOT / "output/q99_analysis/tables"
-FIG_DIR = REPO_ROOT / "output/q99_analysis/figures"
+TABLE_DIR = REPO_ROOT / "output/model_analysis/q99_analysis/tables"
+FIG_DIR = REPO_ROOT / "output/model_analysis/q99_analysis/figures"
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 
 DYNAMIC_FEATURES = [

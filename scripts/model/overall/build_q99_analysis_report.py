@@ -10,8 +10,8 @@
 
 Outputs
 -------
-output/q99_analysis/q99_analysis_report.html   (self-contained, base64 figures)
-output/q99_analysis/q99_analysis_report.md
+output/model_analysis/q99_analysis/q99_analysis_report.html   (self-contained, base64 figures)
+output/model_analysis/q99_analysis/q99_analysis_report.md
 """
 from __future__ import annotations
 
@@ -22,9 +22,9 @@ import numpy as np
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-TABLE_DIR  = REPO_ROOT / "output/q99_analysis/tables"
-FIG_DIR    = REPO_ROOT / "output/q99_analysis/figures"
-OUT_DIR    = REPO_ROOT / "output/q99_analysis"
+TABLE_DIR  = REPO_ROOT / "output/model_analysis/q99_analysis/tables"
+FIG_DIR    = REPO_ROOT / "output/model_analysis/q99_analysis/figures"
+OUT_DIR    = REPO_ROOT / "output/model_analysis/q99_analysis"
 
 # ── utilities ────────────────────────────────────────────────────────────────
 

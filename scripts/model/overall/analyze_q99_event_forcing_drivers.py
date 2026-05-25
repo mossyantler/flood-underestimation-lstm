@@ -18,10 +18,10 @@ For each Q99 event (obs >= basin 99th percentile, 2014-2016 test period):
 
 Outputs
 -------
-output/q99_analysis/tables/q99_event_forcing_drivers.csv   event-level table
-output/q99_analysis/tables/q99_event_forcing_correlation.csv
-output/q99_analysis/figures/q99_event_forcing_scatter.png
-output/q99_analysis/figures/q99_event_forcing_correlation_bar.png
+output/model_analysis/q99_analysis/tables/q99_event_forcing_drivers.csv   event-level table
+output/model_analysis/q99_analysis/tables/q99_event_forcing_correlation.csv
+output/model_analysis/q99_analysis/figures/q99_event_forcing_scatter.png
+output/model_analysis/q99_analysis/figures/q99_event_forcing_correlation_bar.png
 """
 from __future__ import annotations
 
@@ -39,8 +39,8 @@ import xarray as xr
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REQUIRED_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test/required_series"
 NC_DIR = REPO_ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test/time_series"
-OUT_TABLES = REPO_ROOT / "output/q99_analysis/tables"
-OUT_FIGS = REPO_ROOT / "output/q99_analysis/figures"
+OUT_TABLES = REPO_ROOT / "output/model_analysis/q99_analysis/tables"
+OUT_FIGS = REPO_ROOT / "output/model_analysis/q99_analysis/figures"
 OUT_TABLES.mkdir(parents=True, exist_ok=True)
 OUT_FIGS.mkdir(parents=True, exist_ok=True)
 
