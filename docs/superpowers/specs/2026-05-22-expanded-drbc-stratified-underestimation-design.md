@@ -17,7 +17,7 @@ overall 분석에 추가한다. 논문 Table 1 직접 생성 목표.
 ## 입력
 
 ```
-output/model_analysis/expanded/expanded_drbc_test/required_series/seed{111,222,444}/primary_required_series.csv
+output/model_analysis/expanded_drbc_test/required_series/seed{111,222,444}/primary_required_series.csv
 ```
 
 컬럼: `seed, basin, datetime, obs, model1, q50, q90, q95, q99`

@@ -64,7 +64,7 @@ Dataset detail
 | Input | `docs/experiment/method/data/data_processing_analysis_guide.md` | Markdown | CAMELSH 원천, input/result/analysis data 경계 설명 |
 | Input | `configs/pilot/basin_splits/scaling_300/manifest.csv` | CSV preview | 현재 subset300 basin manifest 확인 |
 | Input | `output/basin/timeseries/input_coverage/figures/overview.png` | Chart/image | input coverage figure 확인 |
-| Result | `output/model_analysis/expanded/expanded_drbc_test/tables/primary_summary_by_seed.csv` | CSV preview | expanded DRBC first test result snapshot 후보 |
+| Result | `output/model_analysis/expanded_drbc_test/tables/primary_summary_by_seed.csv` | CSV preview | expanded DRBC first test result snapshot 후보 |
 | Analysis | `dashboard/data/evidence_catalog_items.csv` | CSV preview | dashboard가 어떤 evidence를 노출하는지 확인 |
 | Database | `database/local/duckdb/camels.duckdb` catalog preset | DB preset shell | DB viewer의 위치와 read-only 성격 표시 |
 

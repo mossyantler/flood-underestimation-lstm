@@ -216,7 +216,7 @@ class DashboardEvidenceCatalogTests(unittest.TestCase):
     def test_scanner_excludes_raw_timeseries_by_default(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            raw = root / "output/model_analysis/expanded/expanded_drbc_test/raw_timeseries/model1_seed111_epoch025.csv"
+            raw = root / "output/model_analysis/expanded_drbc_test/raw_timeseries/model1_seed111_epoch025.csv"
             raw.parent.mkdir(parents=True)
             raw.write_text("a,b\n1,2\n", encoding="utf-8")
             candidates = scanner.scan_paths(root)
@@ -227,7 +227,7 @@ class DashboardEvidenceCatalogTests(unittest.TestCase):
             root = Path(tmp)
             doc = root / "docs/experiment/analysis/model/02_primary_high_flow_peak_performance.md"
             fig = root / "output/model_analysis/legacy/probabilistic_diagnostics/figures/primary_all_quantile_calibration.png"
-            summary = root / "output/model_analysis/expanded/expanded_drbc_test/analysis_summary.json"
+            summary = root / "output/model_analysis/expanded_drbc_test/analysis_summary.json"
             for path in [doc, fig, summary]:
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text("# Title\n", encoding="utf-8") if path.suffix == ".md" else path.write_bytes(b"demo")
@@ -235,7 +235,7 @@ class DashboardEvidenceCatalogTests(unittest.TestCase):
             rels = {row.source_path for row in candidates}
             self.assertIn("docs/experiment/analysis/model/02_primary_high_flow_peak_performance.md", rels)
             self.assertIn("output/model_analysis/legacy/probabilistic_diagnostics/figures/primary_all_quantile_calibration.png", rels)
-            self.assertIn("output/model_analysis/expanded/expanded_drbc_test/analysis_summary.json", rels)
+            self.assertIn("output/model_analysis/expanded_drbc_test/analysis_summary.json", rels)
 ```
 
 - [ ] **Step 2: Run tests and confirm failure**
@@ -543,7 +543,7 @@ paper-assets-report,Paper result assets report,overview,status,report,canonical,
 high-flow-chart,High-flow quantile comparison,analysis,main-result,chart,canonical,1,true,output/model_analysis/legacy/overall_analysis/main_comparison/figures/overall_conclusion/overall_conclusion_high_flow_quantiles.png,,docs/experiment/analysis/model/02_primary_high_flow_peak_performance.md,output/model_analysis/legacy/overall_analysis/main_comparison/figures/overall_conclusion/overall_conclusion_high_flow_quantiles.png,,,Q99 exceedance quantile comparison,Primary chart for peak underestimation claim,analysis;chart;q99,ready,
 dataset-guide,Data processing guide,foundation,dataset,doc,canonical,1,true,docs/experiment/method/data/data_processing_analysis_guide.md,,docs/experiment/method/data/data_processing_analysis_guide.md,,,,Input result analysis data boundary,Dataset workflow guide,foundation;dataset;data,ready,
 input-coverage-overview,Input coverage overview,foundation,dataset,chart,supporting,2,true,output/basin/timeseries/input_coverage/figures/overview.png,,,output/basin/timeseries/input_coverage/figures/overview.png,,,CAMELSH input coverage,Input coverage figure,foundation;dataset;coverage,ready,
-confirmed-flood-performance,Confirmed flood performance table,analysis,confirmed-flood,table,canonical,1,true,output/model_analysis/expanded/confirmed_flood/performance/drbc_confirmed_flood_performance.csv,scripts/model/confirmed_flood/export_confirmed_flood_dashboard_snapshot.py,,,output/model_analysis/expanded/confirmed_flood/performance/drbc_confirmed_flood_performance.csv,,NWS flood-stage event audit,Confirmed flood model performance rows,analysis;confirmed-flood,ready,
+confirmed-flood-performance,Confirmed flood performance table,analysis,confirmed-flood,table,canonical,1,true,output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv,scripts/model/confirmed_flood/export_confirmed_flood_dashboard_snapshot.py,,,output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv,,NWS flood-stage event audit,Confirmed flood model performance rows,analysis;confirmed-flood,ready,
 calibration-report,Probabilistic diagnostics report,analysis,calibration,report,canonical,1,true,output/model_analysis/legacy/probabilistic_diagnostics/report/probabilistic_diagnostics_report.md,,output/model_analysis/legacy/probabilistic_diagnostics/report/probabilistic_diagnostics_report.md,,,,q99 calibration caveat,Quantile coverage and pinball interpretation,analysis;calibration,ready,
 hydrograph-candidates,Representative hydrograph candidates,analysis,hydrograph,table,canonical,1,true,output/model_analysis/legacy/paper_result_assets/tables/representative_hydrograph_candidates.csv,,,,output/model_analysis/legacy/paper_result_assets/tables/representative_hydrograph_candidates.csv,,Hydrograph representative evidence,Selected basin/event hydrograph candidates,analysis;hydrograph,ready,
 reference-related-papers,Related papers map,reference,analysis,doc,supporting,2,true,docs/references/related_papers.md,,docs/references/related_papers.md,,,,Literature map for analysis claims,Related paper index,reference;papers,supporting,ready,

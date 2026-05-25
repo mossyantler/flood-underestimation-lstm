@@ -368,7 +368,7 @@ export const overviewStatusKpis: StatusKpi[] = [
     value: "ready",
     note: "NWS flood-stage event layer",
     status: "ready",
-    source: "output/model_analysis/expanded/confirmed_flood/",
+    source: "output/model_analysis/confirmed_flood/",
   },
 ];
 
@@ -913,7 +913,7 @@ case "analysis/hydrograph":
 case "analysis/stress":
   return simpleDetail("Stress test", "Historical stress는 primary claim이 아니라 benefit과 false-positive tradeoff를 점검하는 보조 분석이다.", "output/model_analysis/legacy/extreme_rain/primary/");
 case "analysis/confirmed-flood":
-  return simpleDetail("Confirmed flood", "NWS flood-stage confirmed event layer를 기준으로 event audit과 hydrograph evidence를 본다.", "output/model_analysis/expanded/confirmed_flood/");
+  return simpleDetail("Confirmed flood", "NWS flood-stage confirmed event layer를 기준으로 event audit과 hydrograph evidence를 본다.", "output/model_analysis/confirmed_flood/");
 case "analysis/event-regime":
   return simpleDetail("Event regime", "Event regime별 q99 effect, recall, under-deficit reduction을 비교한다.", "output/model_analysis/legacy/paper_result_assets/");
 case "analysis/attribute":

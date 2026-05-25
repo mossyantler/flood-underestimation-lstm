@@ -16,9 +16,9 @@
 |------|------|
 | 신규 스크립트 | `scripts/model/overall/analyze_expanded_drbc_stratified_underestimation.py` |
 | 신규 테스트 | `tests/test_stratified_underestimation.py` |
-| 출력 1 (논문 Table) | `output/model_analysis/expanded/expanded_drbc_test/tables/stratified_underestimation_summary.csv` |
-| 출력 2 (seed별 robustness) | `output/model_analysis/expanded/expanded_drbc_test/tables/stratified_underestimation_by_seed.csv` |
-| 입력 | `output/model_analysis/expanded/expanded_drbc_test/required_series/seed{111,222,444}/primary_required_series.csv` |
+| 출력 1 (논문 Table) | `output/model_analysis/expanded_drbc_test/tables/stratified_underestimation_summary.csv` |
+| 출력 2 (seed별 robustness) | `output/model_analysis/expanded_drbc_test/tables/stratified_underestimation_by_seed.csv` |
+| 입력 | `output/model_analysis/expanded_drbc_test/required_series/seed{111,222,444}/primary_required_series.csv` |
 
 입력 CSV 컬럼: `seed, basin, model1_epoch, model2_epoch, datetime, obs, model1, model2_q50_result, q50, q90, q95, q99, ...`
 
@@ -61,10 +61,10 @@ import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REQUIRED_SERIES_DIR = (
-    REPO_ROOT / "output/model_analysis/expanded/expanded_drbc_test/required_series"
+    REPO_ROOT / "output/model_analysis/expanded_drbc_test/required_series"
 )
 OUTPUT_TABLES_DIR = (
-    REPO_ROOT / "output/model_analysis/expanded/expanded_drbc_test/tables"
+    REPO_ROOT / "output/model_analysis/expanded_drbc_test/tables"
 )
 
 OFFICIAL_SEEDS: list[int] = [111, 222, 444]
@@ -632,7 +632,7 @@ git commit -m "feat: add main() entry point and write_outputs"
 ## Task 7: 실제 데이터로 smoke test 실행 + 출력 검증
 
 **Files:**
-- Read: `output/model_analysis/expanded/expanded_drbc_test/tables/stratified_underestimation_summary.csv`
+- Read: `output/model_analysis/expanded_drbc_test/tables/stratified_underestimation_summary.csv`
 
 - [ ] **Step 1: 스크립트 실행**
 
@@ -648,8 +648,8 @@ Computing basin-specific Q90/Q95/Q99 thresholds ...
 Assigning strata ...
 Computing per-basin metrics ...
 Aggregating ...
-Wrote output/model_analysis/expanded/expanded_drbc_test/tables/stratified_underestimation_by_seed.csv
-Wrote output/model_analysis/expanded/expanded_drbc_test/tables/stratified_underestimation_summary.csv
+Wrote output/model_analysis/expanded_drbc_test/tables/stratified_underestimation_by_seed.csv
+Wrote output/model_analysis/expanded_drbc_test/tables/stratified_underestimation_summary.csv
 Done.
 ```
 
@@ -658,7 +658,7 @@ Done.
 ```bash
 uv run python3 -c "
 import pandas as pd
-df = pd.read_csv('output/model_analysis/expanded/expanded_drbc_test/tables/stratified_underestimation_summary.csv')
+df = pd.read_csv('output/model_analysis/expanded_drbc_test/tables/stratified_underestimation_summary.csv')
 print(df[['stratum','model1_under_frac','q50_under_frac','q90_under_frac','q95_under_frac','q99_under_frac']].to_string())
 "
 ```
@@ -674,7 +674,7 @@ print(df[['stratum','model1_under_frac','q50_under_frac','q90_under_frac','q95_u
 ```bash
 uv run python3 -c "
 import pandas as pd
-df = pd.read_csv('output/model_analysis/expanded/expanded_drbc_test/tables/stratified_underestimation_by_seed.csv')
+df = pd.read_csv('output/model_analysis/expanded_drbc_test/tables/stratified_underestimation_by_seed.csv')
 print(df[['seed','stratum','model1_under_frac','q99_under_frac']].to_string())
 "
 ```
@@ -684,8 +684,8 @@ print(df[['seed','stratum','model1_under_frac','q99_under_frac']].to_string())
 - [ ] **Step 4: final commit**
 
 ```bash
-git add output/model_analysis/expanded/expanded_drbc_test/tables/stratified_underestimation_summary.csv \
-        output/model_analysis/expanded/expanded_drbc_test/tables/stratified_underestimation_by_seed.csv
+git add output/model_analysis/expanded_drbc_test/tables/stratified_underestimation_summary.csv \
+        output/model_analysis/expanded_drbc_test/tables/stratified_underestimation_by_seed.csv
 git commit -m "feat: generate stratified underestimation tables for 85-basin expanded DRBC test"
 ```
 

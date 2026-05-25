@@ -227,7 +227,7 @@ const ARTIFACT_CONFIGS: ArtifactConfig[] = [
     status: "ready",
     title: "Expanded DRBC primary summary",
     subtitle: "Expanded first-test result summary by seed",
-    sourcePath: "output/model_analysis/expanded/expanded_drbc_test/tables/primary_summary_by_seed.csv",
+    sourcePath: "output/model_analysis/expanded_drbc_test/tables/primary_summary_by_seed.csv",
     generatorPath: "scripts/model/overall/analyze_expanded_drbc_test_performance.py",
     interpretation: "expanded DRBC 기준 first test 결과 후보를 seed 단위로 확인한다.",
   },
