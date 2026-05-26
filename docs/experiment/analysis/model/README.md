@@ -1,41 +1,69 @@
-# Model 1/2 결과 분석 문서
+# Model 1/2 결과 분석 문서 (expanded DRBC rebuild)
 
-이 폴더는 subset300 기반 Model 1 deterministic LSTM과 Model 2 probabilistic quantile LSTM 결과를 분석 축별로 나누어 정리한다. 각 문서는 하나의 분석 질문만 다루며, 논문 Results section의 표와 그림을 만들 때 바로 참조하는 것을 목표로 한다.
+본 폴더는 expanded DRBC observed test (85 basin, seed 111/222/444, test 2014-2016) 기반 Model 1 deterministic LSTM과 Model 2 probabilistic quantile LSTM 결과를 7개 연구 질문(RQ)에 1:1 매핑해 정리한다. 각 문서는 단일 RQ만 다루며, 논문 Results section의 표·그림을 만들 때 직접 참조하는 것을 목표로 한다.
 
-완료에 가까운 분석부터 먼저 배치했다. 아직 최종 산출물이 없는 분석은 `예정`으로만 표시하고, 결과 해석은 쓰지 않는다.
+연구 질문(RQ-0 ~ RQ-5)과 분석 문서의 1:1 매핑은 [`00_research_question_analysis_map.md`](00_research_question_analysis_map.md)에서 정한다. 본 표는 분석 문서 단위 인덱스다.
 
-연구 질문(RQ-A ~ RQ-G)과 아래 분석 문서가 어떻게 1:1 대응되는지는 [`00_research_question_analysis_map.md`](00_research_question_analysis_map.md)에서 별도로 정리한다. 본 표는 분석 문서 단위의 인덱스이고, 그 위 단계의 RQ ↔ 분석 매핑은 `00` 문서를 본다.
+| 순서 | 문서 | 역할 |
+| ---: | --- | --- |
+| 0 | [`00_research_question_analysis_map.md`](00_research_question_analysis_map.md) | 핵심 주제 → RQ-0/1/2/3/4a/4b/5 분해와 산출물 매핑 |
+| 1 | [`01_q50_central.md`](01_q50_central.md) | RQ-1 — Model 2 `q50`가 Model 1 deterministic 대비 central 성능을 유지하는가 |
+| 2 | [`02_upper_quantile_peak_under.md`](02_upper_quantile_peak_under.md) | RQ-2 — upper quantile (`q90/q95/q99`)이 peak underestimation을 줄이는가 (α + β + δ triplet, Q99 + NOAA dual scope) |
+| 3 | [`03_cost.md`](03_cost.md) | RQ-3 — peak under 감소의 cost (FAR + over-prediction magnitude) |
+| 4a | [`04a_basin_cohort.md`](04a_basin_cohort.md) | RQ-4a — basin heterogeneity (M1 NSE 3-tier cohort) |
+| 4b | [`04b_event_type.md`](04b_event_type.md) | RQ-4b — NOAA event-type heterogeneity (Flash Flood / Flood / Coastal Flood) |
+| 5 | [`05_calibration_sharpness.md`](05_calibration_sharpness.md) | RQ-5 — quantile output calibration·sharpness forecast quality |
 
-| 순서 | 문서 | 상태 | 역할 |
-| ---: | --- | --- | --- |
-| 0 | [`00_research_question_analysis_map.md`](00_research_question_analysis_map.md) | 완료 | 핵심 주제를 RQ-A ~ RQ-G로 분해하고, 각 RQ가 아래 분석 문서와 어떻게 대응되는지 정리한다. |
-| 1 | [`01_primary_overall_performance.md`](01_primary_overall_performance.md) | 완료에 가까움 | primary checkpoint에서 Model 2 `q50`이 전체 hydrograph 성능을 얼마나 유지하는지 본다. |
-| 2 | [`02_primary_high_flow_peak_performance.md`](02_primary_high_flow_peak_performance.md) | 완료에 가까움 | Q-threshold exceedance stratum과 observed peak hour에서 `q90/q95/q99`가 peak underestimation을 줄이는지 본다. |
-| 3 | [`03_event_regime_performance.md`](03_event_regime_performance.md) | 완료에 가까움 | observed high-flow event를 ML event-regime과 rule label sensitivity로 나누어 model error를 해석한다. |
-| 4 | [`04_extreme_flood_proxy_performance.md`](04_extreme_flood_proxy_performance.md) | 부분 완료 | flood-relevance proxy tier별 결과를 보되, extreme proxy event 수가 작다는 한계를 명시한다. |
-| 5 | [`05_extreme_rain_stress_test.md`](05_extreme_rain_stress_test.md) | 완료에 가까움 | hourly `Rainf` 기반 historical stress event에서 upper quantile output의 peak tracking과 false-positive tradeoff를 보고, 대표 flow graph diagnostic으로 실제 event 모양을 확인한다. |
-| 6 | [`06_checkpoint_sensitivity.md`](06_checkpoint_sensitivity.md) | 완료에 가까움 | primary conclusion이 validation-best checkpoint 하나에만 의존하는지 all-validation-epoch sweep으로 확인한다. |
-| 7 | [`07_broad_vs_natural_robustness.md`](07_broad_vs_natural_robustness.md) | 완료에 가까움 | Broad 38개 test basin을 Natural 8개와 broad non-natural 30개로 다시 나누어 upper-tail 결론 방향이 유지되는지 본다. |
-| 8 | [`08_probabilistic_calibration_pinball.md`](08_probabilistic_calibration_pinball.md) | 완료에 가까움 | Model 2 quantile별 pinball/AQS, all-hour one-sided calibration, high-flow tail hit-rate, upper-tail spread를 진단한다. |
-| 9 | [`09_event_suppression_diagnosis_protocol.md`](09_event_suppression_diagnosis_protocol.md) | 완료 | extreme-rain event에서 observed flow가 눌리거나, 약한 강수 조건에서 managed-flow pulse/plateau가 생기는 case를 유역별로 진단한다. |
-| 10 | [`10_event_surrogate_shap.md`](10_event_surrogate_shap.md) | 초기 분석 완료 | event-level surrogate SHAP으로 q95/q99 under-deficit reduction과 q99 tradeoff가 어떤 hydromet/static 조건에서 커지는지 본다. |
+방법론 RQ-0 (병렬 quantile output 해석 framework) 문서는 [`docs/experiment/method/model/quantile_output_interpretation.md`](../../method/model/quantile_output_interpretation.md)에 둔다.
 
 ## 해석 원칙
 
-Primary 결과는 DRBC holdout `2014-2016` test를 기준으로 한다. Historical extreme-rain stress test는 DRBC basin holdout 조건은 유지하지만 `1980-2024` 기간을 포함하므로 temporal independence claim에는 쓰지 않는다.
+Primary 결과는 **expanded DRBC observed test 2014-2016**를 기준으로 한다. test split은 `data/CAMELSH_generic/drbc_expanded_observed_test/`에서 산출되며, seed 111/222/444 paired aggregation을 사용한다.
 
-Model 2의 `q50`은 중앙예측선이다. Model 1과의 중앙예측 성능 비교에는 `q50`을 쓰고, `q90/q95/q99`는 upper-tail decision output으로 별도 해석한다. 현재 quantile set에는 lower quantile이 없으므로 `q99`를 calibrated 99% prediction interval이나 return-period estimate로 쓰지 않는다.
+Model 2의 `q50`은 conditional median (M1 deterministic 대응). `q90/q95/q99`는 upper-tail decision output / conservatism level로 별도 해석한다. lower quantile이 없으므로 `q99`를 calibrated 99% prediction interval / return-period estimate로 표기하지 않는다. 자세한 해석 규칙은 [`docs/experiment/method/model/quantile_output_interpretation.md`](../../method/model/quantile_output_interpretation.md).
 
 ## 산출물 위치
 
-| 분석 | 주요 산출물 |
-| --- | --- |
-| Primary 전체 성능 / epoch metric box plot | `output/model_analysis/legacy/overall_analysis/main_comparison/`, `output/model_analysis/legacy/overall_analysis/epoch_sensitivity/figures/epoch_metric_boxplots/` (`metadata/epoch_metric_boxplots/`에 chart manifest) |
-| High-flow / peak | `output/model_analysis/legacy/quantile_analysis/analysis/` |
-| Event-regime | `output/model_analysis/legacy/quantile_analysis/event_regime_analysis/` |
-| Event-level surrogate SHAP | `output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/` |
-| Extreme-rain stress | `output/model_analysis/legacy/extreme_rain/primary/` |
-| Extreme-rain all-epoch sensitivity | `output/model_analysis/legacy/extreme_rain/all/` |
-| Event suppression / managed-flow diagnosis | `docs/experiment/analysis/model/09_event_suppression_diagnosis_protocol.md` |
-| Broad vs Natural robustness | `output/model_analysis/legacy/natural_broad_comparison/` |
-| Probabilistic calibration / pinball | `output/model_analysis/legacy/probabilistic_diagnostics/` |
+```text
+output/model_analysis/expanded_drbc_test/
+├── tables/
+│   ├── rq1_central_metrics_*.csv
+│   ├── rq2_q99_per_basin_thresholds.csv, rq2_q99_events_85basin.csv, rq2_q99_basin_warnings.csv
+│   ├── rq2_id_normalization_report.csv, rq2_noaa_basin_overlap_summary.csv, rq2_noaa_events_expanded_overlap.csv
+│   ├── rq2_alpha_event_peak_deficit_{q99,noaa}.csv + _summary.csv
+│   ├── rq2_beta_window_capture_{q99,noaa}.csv + _summary.csv
+│   ├── rq2_delta_threshold_recall_*.csv
+│   ├── rq3_far_*.csv, rq3_over_prediction_magnitude_*.csv
+│   ├── rq4a_nse_tier_*.csv
+│   ├── rq4b_event_type_metrics.csv, rq4b_event_type_mapping.csv, rq4b_noaa_annotation_unmatched.csv
+│   └── cross_tab_q99_noaa_sanity_*.csv
+├── figures/
+│   ├── rq1_central_metric_boxplots.png, rq1_paired_delta_scatter.png
+│   ├── rq2_alpha_by_tau.png, rq2_beta_by_tau.png, rq2_delta_recall_by_tau.png
+│   ├── rq3_cost_recall_tradeoff.png
+│   ├── rq4a_tier_metric_heatmap.png
+│   └── rq4b_event_type_bar.png
+└── probabilistic_diagnostics/      (RQ-5; analyze_expanded_drbc_probabilistic_diagnostics.py reuse)
+```
+
+## 분석 스크립트
+
+```text
+scripts/_lib/expanded_drbc.py                                # C0 vocabulary lock + utilities
+scripts/model/expanded_drbc/
+  compute_rq1_central_metrics.py                              # A1
+  build_q99_events.py                                         # B1
+  build_noaa_mapping.py                                       # B2
+  compute_rq2_alpha_peak_deficit.py                           # B3
+  compute_rq2_beta_window_capture.py                          # B4
+  compute_rq2_delta_threshold_recall.py                       # B5
+  compute_rq3_cost.py                                         # B6
+  compute_rq4a_nse_tier_stratify.py                           # B7
+  compute_rq4b_event_type_stratify.py                         # B8
+  compute_cross_tab_q99_noaa_sanity.py                        # B9
+scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py   # RQ-5 (reuse)
+```
+
+## Legacy 보존
+
+scaling_300 / DRBC-38 holdout 기반 구식 분석은 [`docs/archive/analysis_legacy/`](../../../archive/analysis_legacy/)로 이동. paper canonical 인용 범위에서 제외하지만 reproducibility 비교 보존.

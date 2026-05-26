@@ -1,0 +1,28 @@
+# Ralph Progress — Expanded DRBC Rebuild
+
+## Iteration 1 — 2026-05-26
+
+### US-001 COMPLETE
+- Created `scripts/_lib/expanded_drbc.py` (~5 KB) with full vocabulary lock:
+  - Period constants: TRAIN_PERIOD (2000-2010), TEST_PERIOD (2014-2016), EVENT_WINDOW_HOURS=6, EVENT_MERGE_GAP_HOURS=12, HIGH_FLOW_PERCENTILE=0.99, SEEDS=(111,222,444), TAU_ORDER=(model1,q50,q90,q95,q99)
+  - NOAA lexicon (empirical, Critic-verified): NOAA_LABELS=(Flash Flood, Flood, Coastal Flood, Other), NOAA_REGEX with disambiguation (`Flash Flood Watch` excluded, `Flood` ≠ `Flash Flood`/`Coastal Flood`), NOAA_TIE_BREAK most-specific-wins
+  - Utilities: `normalize_basin_id` (strip + zfill(8)), `filter_valid_rows` (drop NaN obs), `per_basin_seed_then_median` (canonical per-basin per-seed → seed-median), `paired_delta_per_seed` (returns per-basin per-seed delta DataFrame), `parse_dominant_event_type`
+- Smoke test (uv run python -c '...') PASSED:
+  - All constants assertion-checked
+  - normalize_basin_id handles strings, ints, None, 'nan'
+  - parse_dominant_event_type:
+    - 'Flash Flood#X; Flash Flood#Y' → Flash Flood, counts={Flash Flood: 2}
+    - 'Flash Flood Watch' → Other, counts={} (correctly excluded)
+    - 'Flood; Coastal Flood' → Coastal Flood (tie-break most-specific)
+  - per_basin_seed_then_median + paired_delta_per_seed verified numerically on a 2-basin × 3-seed fixture
+
+### Codebase learnings
+- `scripts/_lib/` is canonical helper location (per `scripts/AGENTS.md`); existing precedent `camelsh_flood_analysis_utils.py`
+- `uv run` is the project's Python runner per CLAUDE.md
+- Imports work via `from scripts._lib.expanded_drbc import ...` from repo root cwd
+
+### Next up
+US-002 (A1) — RQ-1 central metrics. Need to inspect:
+- `required_series/seed{111,222,444}/primary_required_series.csv` size & columns
+- Whether all 85 basins × 3 seeds × test-period hours fit in <2 GB RAM
+- Existing raw_metrics column set (NSE/KGE present; bias/MAE/RMSE absent — must compute fresh)

@@ -1,0 +1,12 @@
+{
+  "active": false,
+  "current_phase": "handoff-to-ralph",
+  "plan_path": ".omc/plans/2026-05-26-expanded-drbc-rebuild-execution.md",
+  "completed_at": "2026-05-26T08:45:00Z",
+  "_meta": {
+    "mode": "ralplan",
+    "sessionId": null,
+    "updatedAt": "2026-05-26T08:49:26.712Z",
+    "updatedBy": "state_write_tool"
+  }
+}

@@ -1,0 +1,243 @@
+{
+  "title": "Expanded DRBC Rebuild — RQ Analysis Pipeline",
+  "source_plan": ".omc/plans/2026-05-26-expanded-drbc-rebuild-execution.md",
+  "stories": [
+    {
+      "id": "US-001",
+      "title": "C0 — Vocabulary lock module scripts/_lib/expanded_drbc.py",
+      "priority": 1,
+      "passes": true,
+      "acceptanceCriteria": [
+        "File scripts/_lib/expanded_drbc.py exists with TAU_ORDER, PREDICTION_COLUMNS, TRAIN_PERIOD, TEST_PERIOD, EVENT_WINDOW_HOURS, EVENT_MERGE_GAP_HOURS, HIGH_FLOW_PERCENTILE, SEEDS, NOAA_LABELS, NOAA_REGEX, NOAA_TIE_BREAK constants",
+        "Module exposes normalize_basin_id(raw) -> str applying strip + zfill(8)",
+        "Module exposes per_basin_seed_then_median(df, *, value_col, basin_col, seed_col) computing per-basin per-seed → median across seeds within basin",
+        "Module exposes paired_delta_per_seed(df_m1, df_m2, *, value_col, basin_col, seed_col) returning per-basin per-seed delta DataFrame",
+        "Module exposes filter_valid_rows(df, *, obs_col, pred_cols) dropping NaN-obs rows",
+        "NOAA_LABELS == ('Flash Flood', 'Flood', 'Coastal Flood', 'Other') — no Riverine/Ice Jam",
+        "NOAA_TIE_BREAK == ('Flash Flood', 'Coastal Flood', 'Flood', 'Other') — most-specific wins",
+        "Smoke test: python -c \"from scripts._lib.expanded_drbc import TAU_ORDER, NOAA_LABELS, normalize_basin_id, per_basin_seed_then_median, paired_delta_per_seed, filter_valid_rows\" exits 0"
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "A1 — RQ-1 central metrics (NSE/KGE/bias/MAE/RMSE) compute",
+      "priority": 2,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Script scripts/model/expanded_drbc/compute_rq1_central_metrics.py exists",
+        "Produces output/model_analysis/expanded_drbc_test/tables/rq1_central_metrics_per_basin_seed.csv with 510 rows (85 basin × 3 seeds × 2 models, wide-form with nse/kge/bias/mae/rmse columns)",
+        "Produces output/model_analysis/expanded_drbc_test/tables/rq1_central_metrics_seed_median.csv with 425 rows (85 × 5 metrics, long-form)",
+        "Produces output/model_analysis/expanded_drbc_test/tables/rq1_central_metrics_pooled_summary.csv",
+        "Produces figures rq1_central_metric_boxplots.png and rq1_paired_delta_scatter.png",
+        "Imports from scripts/_lib/expanded_drbc.py (no inline duplication of aggregation order)",
+        "NSE from new script matches raw_metrics/model1_seed111_epoch025_metrics.csv within 1e-6 on 5 spot-checked basins",
+        "bias/MAE/RMSE hand-verified by NumPy on 2 random basins within 1e-6",
+        "CSV header comment documents sign convention + aggregation order + NaN policy"
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "B1 — Q99 threshold + event extraction (85 basin)",
+      "priority": 3,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Script scripts/model/expanded_drbc/build_q99_events.py exists",
+        "tables/rq2_q99_per_basin_thresholds.csv has exactly 85 rows with columns basin_id, q99_train_value, train_n_hours, n_test_exceedance_events",
+        "tables/rq2_q99_events_85basin.csv has columns basin_id, event_id, peak_time, peak_obs, window_start, window_end, window_truncated",
+        "Sum of n_test_exceedance_events equals row count of events table",
+        "All untruncated windows = 13 hours; truncated ≥ 7 hours",
+        "tables/rq2_q99_basin_warnings.csv lists any basin with 0 events or >300 events (WARN only, not failure)",
+        "Q99 hand-verified for 3 basins to 1e-3 relative tolerance",
+        "Uses TRAIN_PERIOD/TEST_PERIOD/EVENT_WINDOW_HOURS/EVENT_MERGE_GAP_HOURS constants from C0"
+      ]
+    },
+    {
+      "id": "US-004",
+      "title": "B2 — NOAA event mapping + dominant event-type parsing",
+      "priority": 4,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Script scripts/model/expanded_drbc/build_noaa_mapping.py exists",
+        "tables/rq2_id_normalization_report.csv produced (no rows where matched=False after normalize_basin_id)",
+        "tables/rq2_noaa_basin_overlap_summary.csv has columns n_noaa_basins, n_expanded_basins, n_overlap, n_noaa_only, n_expanded_only (n_noaa_basins empirically locked, expected 49)",
+        "tables/rq2_noaa_events_expanded_overlap.csv produced with dominant_event_type populated for every row",
+        "tables/rq4b_event_type_mapping.csv produced",
+        "tables/rq4b_noaa_annotation_unmatched.csv produced",
+        "Unmatched annotation count / total annotation count < 5%",
+        "Empirical label counts: Flash Flood ≥ 500 hits, Flood ≥ 100, Coastal Flood ≥ 5, Other < 50 (across catalog rows)",
+        "Event-type categories sum to 100% of overlapping events",
+        "Uses NOAA_REGEX, NOAA_TIE_BREAK, normalize_basin_id from C0"
+      ]
+    },
+    {
+      "id": "US-005",
+      "title": "B3 — RQ-2 α event peak under-deficit (Q99 + NOAA dual)",
+      "priority": 5,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Script scripts/model/expanded_drbc/compute_rq2_alpha_peak_deficit.py exists",
+        "tables/rq2_alpha_event_peak_deficit_q99.csv produced with columns basin_id, seed, event_id, tau, peak_under_deficit",
+        "tables/rq2_alpha_event_peak_deficit_q99_summary.csv produced",
+        "tables/rq2_alpha_event_peak_deficit_noaa.csv + summary produced",
+        "figures/rq2_alpha_by_tau.png produced",
+        "All peak_under_deficit values ∈ [0, 1]",
+        "Cross-basin median peak_under_deficit non-increasing in τ (M1 → q50 → q90 → q95 → q99)",
+        "Per-basin τ-monotonicity violation rate reported in summary CSV, < 20%",
+        "1 event hand-verified by computing deficit from raw data and matching CSV",
+        "Uses per_basin_seed_then_median + paired_delta + TAU_ORDER from C0"
+      ]
+    },
+    {
+      "id": "US-006",
+      "title": "B4 — RQ-2 β ±6h window peak capture",
+      "priority": 6,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Script scripts/model/expanded_drbc/compute_rq2_beta_window_capture.py exists",
+        "tables/rq2_beta_window_capture_q99.csv + summary produced",
+        "tables/rq2_beta_window_capture_noaa.csv + summary produced",
+        "figures/rq2_beta_by_tau.png produced",
+        "Capture ratio computed as max(q_τ in window) / max(obs in window)",
+        "Events with max(obs in window) ≤ 0 are dropped; drop count reported",
+        "Capture > 2 × max(obs) flagged in CSV warning column",
+        "Same row count contract as B3 modulo zero-obs drop"
+      ]
+    },
+    {
+      "id": "US-007",
+      "title": "B5 — RQ-2 δ Q99 threshold recall (pooled)",
+      "priority": 7,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Script scripts/model/expanded_drbc/compute_rq2_delta_threshold_recall.py exists",
+        "tables/rq2_delta_threshold_recall_per_basin_seed.csv produced with columns basin_id, seed, tau, n_q99_hours, n_hits, recall",
+        "tables/rq2_delta_threshold_recall_summary.csv produced",
+        "figures/rq2_delta_recall_by_tau.png produced",
+        "All recall values ∈ [0, 1]",
+        "n_q99_hours identical across seeds for each basin (assertion)",
+        "Denominator counts test-period (2014-2016) hours only",
+        "Cross-basin median: recall_M1 ≤ recall_q50 ≤ recall_q90 ≤ recall_q95 ≤ recall_q99",
+        "1 basin recall hand-verified"
+      ]
+    },
+    {
+      "id": "US-008",
+      "title": "B6 — RQ-3 cost (FAR + over-prediction magnitude)",
+      "priority": 8,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Script scripts/model/expanded_drbc/compute_rq3_cost.py exists",
+        "tables/rq3_far_per_basin_seed.csv + summary produced",
+        "tables/rq3_over_prediction_magnitude_per_basin_seed.csv + summary produced",
+        "figures/rq3_cost_recall_tradeoff.png produced (FAR vs δ recall scatter)",
+        "All FAR ∈ [0, 1]",
+        "Cross-basin median: FAR_M1 ≤ FAR_q50 ≤ FAR_q90 ≤ FAR_q95 ≤ FAR_q99",
+        "Over-pred magnitude ≥ 0",
+        "Non-Q99 hours ≈ 99% × test hours per basin",
+        "1 basin FAR hand-verified"
+      ]
+    },
+    {
+      "id": "US-009",
+      "title": "B7 — RQ-4a M1 NSE 3-tier cohort stratify",
+      "priority": 9,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Script scripts/model/expanded_drbc/compute_rq4a_nse_tier_stratify.py exists",
+        "tables/rq4a_nse_tier_assignments.csv produced (basin_id, m1_nse_seed_median, tier)",
+        "tables/rq4a_nse_tier_metrics.csv produced (tier, tau, alpha_median, beta_median, delta_median, far_median, over_pred_median, n_basins)",
+        "figures/rq4a_tier_metric_heatmap.png produced",
+        "Tier sizes 28/29/28 via pd.qcut(duplicates='raise')",
+        "Aggregates from B3/B4/B5/B6 per-basin tables (does NOT re-derive from required_series)",
+        "Uses A1's NSE seed_median (not raw_metrics NSE)"
+      ]
+    },
+    {
+      "id": "US-010",
+      "title": "B8 — RQ-4b NOAA event-type cohort stratify",
+      "priority": 10,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Script scripts/model/expanded_drbc/compute_rq4b_event_type_stratify.py exists",
+        "tables/rq4b_event_type_metrics.csv produced",
+        "figures/rq4b_event_type_bar.png produced",
+        "Events grouped by dominant_event_type with <5 events lumped to Other",
+        "n_events sum across types per τ equals NOAA-scope event count in B3",
+        "Other row present even when empty",
+        "Flash Flood subset verified against B3 NOAA on one basin"
+      ]
+    },
+    {
+      "id": "US-011",
+      "title": "B9 — Cross-tab Q99 ∩ NOAA sanity",
+      "priority": 11,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Script scripts/model/expanded_drbc/compute_cross_tab_q99_noaa_sanity.py exists",
+        "tables/cross_tab_q99_noaa_sanity_per_basin.csv + pooled produced",
+        "Row count of per-basin = B2 overlap basin count",
+        "Pooled n_both + n_noaa_only equals total NOAA-overlap events",
+        "Geometry: NOAA peak_time ∈ Q99 event window (no 12h secondary buffer)",
+        "One basin overlap manually verified"
+      ]
+    },
+    {
+      "id": "US-012",
+      "title": "C1 — Rewrite 00_research_question_analysis_map.md",
+      "priority": 12,
+      "passes": true,
+      "acceptanceCriteria": [
+        "docs/experiment/analysis/model/00_research_question_analysis_map.md lists exactly RQ-0/1/2/3/4a/4b/5",
+        "No scaling_300/subset_300/drbc_holdout(38)/RQ-A through RQ-G references in active doc",
+        "Body vs Supplement section present",
+        "Synthesis section ties B3/B4/B5/B6/B7/B8/B9 outputs to peak alleviation + cost + heterogeneity claims",
+        "Grep tokens (scaling_300|subset_300|subset300|RQ-A|RQ-B|RQ-C|RQ-D|RQ-E|RQ-F|RQ-G|Phase 1 stub) returns 0 matches in this file"
+      ]
+    },
+    {
+      "id": "US-013",
+      "title": "C2 — Extend quantile_output_interpretation.md with expanded DRBC application",
+      "priority": 13,
+      "passes": true,
+      "acceptanceCriteria": [
+        "docs/experiment/method/model/quantile_output_interpretation.md has Expanded DRBC application section",
+        "L1-L4 layer descriptions byte-equivalent to pre-edit version",
+        "6 prohibited interpretations section byte-equivalent",
+        "RQ-mapping table uses new IDs (RQ-0/1/2/3/4a/4b/5) only",
+        "References C0 vocabulary constants where appropriate"
+      ]
+    },
+    {
+      "id": "US-014",
+      "title": "C3 — Reorganize 01-10 docs (rename + archive)",
+      "priority": 14,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Pre-mv grep across dashboard/lib/ + scripts/dashboard/ for legacy doc refs run and hits = 0 after C3 completes",
+        "docs/archive/analysis_legacy/ subdirectory exists",
+        "8 legacy files moved via git mv to docs/archive/analysis_legacy/ (03, 04, 05, 06, 07, 09, 10, subset300_hydrograph_interpretation_report)",
+        "01_primary_overall_performance.md renamed via git mv to 01_q50_central.md",
+        "02_primary_high_flow_peak_performance.md renamed via git mv to 02_upper_quantile_peak_under.md",
+        "08_probabilistic_calibration_pinball.md renamed via git mv to 05_calibration_sharpness.md",
+        "3 new files created: 03_cost.md, 04a_basin_cohort.md, 04b_event_type.md",
+        "Active docs/experiment/analysis/model/*.md count = 8 (00, 01_q50_central, 02_upper_quantile_peak_under, 03_cost, 04a_basin_cohort, 04b_event_type, 05_calibration_sharpness, README)",
+        "git log --diff-filter=R shows renames (not delete+add)",
+        "README.md updated to reflect new layout"
+      ]
+    },
+    {
+      "id": "US-015",
+      "title": "C4 — Absorb 08 Phase 1 stub into 05_calibration_sharpness.md",
+      "priority": 15,
+      "passes": true,
+      "acceptanceCriteria": [
+        "C4.0 uncommitted diff inspection recorded: git status 08 + README.md diff inspected, chosen path (commit-or-stash) documented in commit message",
+        "05_calibration_sharpness.md (post-C3 rename) is full RQ-5 chapter, not Phase 1 stub",
+        "Cites probabilistic_diagnostics/* outputs",
+        "Has 7 sub-sections: coverage (one-sided), pinball, AQS, upper-tail spread, quantile crossing, climatology skill, peak event capture",
+        "No scaling_300 baseline section",
+        "Grep tokens (scaling_300|Phase 1 stub) returns 0 matches in this file"
+      ]
+    }
+  ]
+}

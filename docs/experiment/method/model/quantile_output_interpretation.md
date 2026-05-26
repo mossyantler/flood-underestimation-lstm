@@ -146,17 +146,56 @@ Model 2의 가치 주장은 τ에 따라 다르게 표현된다.
 6. **monotonicity 가정으로 시작**
    학습이 monotonicity를 강제하지 않으므로 crossing이 가능하다. crossing rate를 한 번 측정한 뒤, 어느 수준에서 가정할지 명시하고 사용한다.
 
-## RQ별 해석 layer 매핑
+## RQ별 해석 layer 매핑 (expanded DRBC rebuild)
+
+본 매핑은 expanded DRBC observed test split(85 basin, seed 111/222/444) 기준 7-RQ 구조에 적용된다.
 
 | RQ | 사용하는 묶음 방식 | 주된 layer | 표기·금지 사항 |
 | --- | --- | --- | --- |
-| RQ-A (전체 성능) | Pairwise | L3 | `q50`만 사용. `q90 / q95 / q99`를 끌고 들어오지 않는다 |
-| RQ-B (peak 핵심) | Sequence | L3 + L4 | recall과 precision(또는 false alarm rate)을 같은 표에서 보고 |
-| RQ-C (regime / tier / SHAP) | Sequence + Spread | L3 | regime별 spread 차이를 함께 보고. high-return tier는 본문에 올리지 않는다 |
-| RQ-D (extreme rain stress) | Sequence | L3 | peak tracking 이득과 false-positive cost를 같은 figure에서 보여준다 |
-| RQ-E (견고성) | Pairwise + Sequence | L3 | RQ-A와 RQ-B에서 쓴 해석축을 그대로 유지 |
-| RQ-F (calibration) | 전부 | L1 + L2 | one-sided임을 본문·캡션에 명시. lower quantile 부재 한계를 캡션에 한 줄 둔다 |
-| RQ-G (managed-flow 진단) | `q95 / q99` + obs | L3 | over-prediction이 모델 결함인지 obs 인공물인지 분리. case-by-case |
+| RQ-0 (framework 자체) | 전부 | L1 + L2 + L3 + L4 | 본 문서가 RQ-0 산출물. paper 본문 method section에 핵심 4수준만 압축 인용 |
+| RQ-1 (q50 central) | Pairwise | L3 | `q50`만 사용. `q90 / q95 / q99`를 끌고 들어오지 않는다 |
+| RQ-2 (upper quantile peak under) | Sequence | L3 + L4 | recall (δ) + precision side (RQ-3 FAR / over-pred) 같은 figure에서 보고 |
+| RQ-3 (cost: FAR + over-pred) | Sequence | L3 | RQ-2 recall과 동일 axis에서 보고. economic / operational cost 단위 사용 금지 |
+| RQ-4a (basin cohort, M1 NSE tier) | Sequence + Spread | L3 | tier별 spread 차이 보고. circularity caveat 명시 (cohort = central NSE, stratify = peak metric으로 axis 분리됨) |
+| RQ-4b (event-type, NOAA) | Sequence | L3 | Flash Flood / Flood / Coastal Flood / Other 그룹 sample size 명시. NoNOAA 데이터 품질 카테고리 분리 |
+| RQ-5 (calibration·sharpness) | 전부 | L1 + L2 | one-sided 명시. lower quantile 부재 한계를 캡션에 둔다. IQR-distance tier는 circular caveat. 본문 vs supplement 분리 |
+
+## Expanded DRBC application
+
+본 framework는 expanded DRBC observed test split(85 basin, seed 111/222/444, test 2014-2016) 분석에 다음과 같이 구체화된다.
+
+### Phase B vocabulary 자물쇠
+
+분석 스크립트는 `scripts/_lib/expanded_drbc.py`에서 다음 vocabulary 상수를 import한다 (re-define 금지):
+
+- `TAU_ORDER = ("model1", "q50", "q90", "q95", "q99")` — Sequence reading 표준 순서
+- `TRAIN_PERIOD = ("2000-01-01", "2010-12-31")`, `TEST_PERIOD = ("2014-01-01", "2016-12-31")`
+- `HIGH_FLOW_PERCENTILE = 0.99` — Q99 single threshold canonical
+- `EVENT_WINDOW_HOURS = 6`, `EVENT_MERGE_GAP_HOURS = 12`
+- `NOAA_LABELS = ("Flash Flood", "Flood", "Coastal Flood", "Other")` — empirical lexicon, 본 문서 6 prohibited와 일관
+- `NOAA_TIE_BREAK = ("Flash Flood", "Coastal Flood", "Flood", "Other")` — most-specific wins
+- `normalize_basin_id` — zfill(8) 정규화 (NOAA usgs_id vs CAMELSH basin_id alignment)
+- `per_basin_seed_then_median`, `paired_delta_per_seed` — aggregation 순서 canonical 함수
+
+### Aggregation 순서 (canonical)
+
+모든 RQ-2 / RQ-3 / RQ-4a Sequence reading 메트릭은 동일 순서로 집계한다:
+
+1. per-basin per-seed compute (또는 per-event per-basin per-seed)
+2. median across events within (basin, seed) — event-level metric인 경우
+3. median across seeds within basin
+4. cross-basin median + IQR
+
+Paired delta `Δ_seed = metric(M2_q50, seed) − metric(M1, seed)`는 per-seed level에서 계산하고 downstream에서 median-aggregate한다. delta-of-medians 형태 금지.
+
+### Q99 + NOAA dual scope
+
+RQ-2 / RQ-3는 두 event scope을 병행 보고한다:
+
+- **Q99 scope (85 basin)**: per-basin train-period Q99 threshold 초과 시각으로 event 정의. paper headline.
+- **NOAA scope (49 basin ∩ 85 expanded = 46 basin; test-period event-bearing 21 basin)**: NWS flood-stage exceedance event. `noaa_corroborated == True`인 row만 NOAA event-type label 부여. NoNOAA는 데이터 품질 카테고리로 분리.
+
+Cross-tab sanity (`scripts/model/expanded_drbc/compute_cross_tab_q99_noaa_sanity.py`)는 두 scope의 시간 일치를 정량화한다.
 
 ## 표·그림·본문 표기 규칙
 

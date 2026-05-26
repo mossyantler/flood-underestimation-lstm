@@ -1,0 +1,336 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1779805175883,
+  "projectRoot": "/Users/jang-minyeop/Project/CAMELS",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs",
+      "scripts",
+      "tests"
+    ],
+    "gitBranches": {
+      "defaultBranch": "master",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "basins": {
+      "path": "basins",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1779805175855,
+      "keyFiles": [
+        "AGENTS.md",
+        "CLAUDE.md"
+      ]
+    },
+    "configs": {
+      "path": "configs",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1779805175867,
+      "keyFiles": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "README.md",
+        "camelsh_hourly_model1_drbc_holdout_broad.yml",
+        "camelsh_hourly_model2_drbc_holdout_broad.yml"
+      ]
+    },
+    "dashboard": {
+      "path": "dashboard",
+      "purpose": null,
+      "fileCount": 10,
+      "lastAccessed": 1779805175867,
+      "keyFiles": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "README.md",
+        "next-env.d.ts",
+        "next.config.ts"
+      ]
+    },
+    "data": {
+      "path": "data",
+      "purpose": "Data files",
+      "fileCount": 3,
+      "lastAccessed": 1779805175872,
+      "keyFiles": [
+        "AGENTS.md",
+        "CLAUDE.md"
+      ]
+    },
+    "database": {
+      "path": "database",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1779805175874,
+      "keyFiles": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "README.md"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 4,
+      "lastAccessed": 1779805175875,
+      "keyFiles": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "README.md"
+      ]
+    },
+    "logs": {
+      "path": "logs",
+      "purpose": null,
+      "fileCount": 11,
+      "lastAccessed": 1779805175875,
+      "keyFiles": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "dashboard-dev-3000.err.log",
+        "dashboard-dev-3000.log",
+        "dashboard-dev-3000.pid"
+      ]
+    },
+    "output": {
+      "path": "output",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1779805175875,
+      "keyFiles": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "cleanup_manifest_2026-05-18.md"
+      ]
+    },
+    "report": {
+      "path": "report",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1779805175875,
+      "keyFiles": [
+        "논문 초본.docx",
+        "논문 초본_cited.docx"
+      ]
+    },
+    "runs": {
+      "path": "runs",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1779805175876,
+      "keyFiles": [
+        "AGENTS.md",
+        "CLAUDE.md"
+      ]
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 3,
+      "lastAccessed": 1779805175876,
+      "keyFiles": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "README.md"
+      ]
+    },
+    "skills": {
+      "path": "skills",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1779805175876,
+      "keyFiles": []
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 4,
+      "lastAccessed": 1779805175876,
+      "keyFiles": [
+        "test_confirmed_flood_inference_exports.py",
+        "test_confirmed_flood_stratified_underestimation.py",
+        "test_dashboard_evidence_catalog.py",
+        "test_stratified_underestimation.py"
+      ]
+    },
+    "tmp": {
+      "path": "tmp",
+      "purpose": null,
+      "fileCount": 60,
+      "lastAccessed": 1779805175876,
+      "keyFiles": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "add_docx_citations.py",
+        "camels_backup_20260519.dump",
+        "confirmed_flood_inference_smoke_catalog.csv"
+      ]
+    },
+    "vendor": {
+      "path": "vendor",
+      "purpose": "Third-party code",
+      "fileCount": 2,
+      "lastAccessed": 1779805175876,
+      "keyFiles": [
+        "AGENTS.md",
+        "CLAUDE.md"
+      ]
+    },
+    "dashboard/app": {
+      "path": "dashboard/app",
+      "purpose": "Application code",
+      "fileCount": 3,
+      "lastAccessed": 1779805175880,
+      "keyFiles": [
+        "globals.css",
+        "layout.tsx",
+        "page.tsx"
+      ]
+    },
+    "dashboard/components": {
+      "path": "dashboard/components",
+      "purpose": "UI components",
+      "fileCount": 21,
+      "lastAccessed": 1779805175880,
+      "keyFiles": [
+        "analysis-module-index.tsx",
+        "chart-card.tsx",
+        "checkpoint-card.tsx"
+      ]
+    },
+    "dashboard/data": {
+      "path": "dashboard/data",
+      "purpose": "Data files",
+      "fileCount": 4,
+      "lastAccessed": 1779805175880,
+      "keyFiles": [
+        "evidence_candidates.csv",
+        "evidence_catalog_items.csv",
+        "evidence_catalog_modules.csv"
+      ]
+    },
+    "scripts/data": {
+      "path": "scripts/data",
+      "purpose": "Data files",
+      "fileCount": 6,
+      "lastAccessed": 1779805175882,
+      "keyFiles": [
+        "download_camelsh_core.py",
+        "download_camelsh_hourly_selected.py",
+        "export_camelsh_matches_from_defined_region.py"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "docs/experiment/analysis/model/01_q50_central.md",
+      "accessCount": 2,
+      "lastAccessed": 1779805826136,
+      "type": "file"
+    },
+    {
+      "path": "docs/experiment/analysis/model/02_upper_quantile_peak_under.md",
+      "accessCount": 2,
+      "lastAccessed": 1779805870942,
+      "type": "file"
+    },
+    {
+      "path": "docs/experiment/analysis/model/05_calibration_sharpness.md",
+      "accessCount": 2,
+      "lastAccessed": 1779805936251,
+      "type": "file"
+    },
+    {
+      "path": "docs/experiment/analysis/model/00_research_question_analysis_map.md",
+      "accessCount": 2,
+      "lastAccessed": 1779806014266,
+      "type": "file"
+    },
+    {
+      "path": "docs/experiment/method/model/quantile_output_interpretation.md",
+      "accessCount": 2,
+      "lastAccessed": 1779806063776,
+      "type": "file"
+    },
+    {
+      "path": "docs/experiment/analysis/model/README.md",
+      "accessCount": 2,
+      "lastAccessed": 1779806103101,
+      "type": "file"
+    },
+    {
+      "path": "scripts/model/expanded_drbc/compute_rq4a_nse_tier_stratify.py",
+      "accessCount": 1,
+      "lastAccessed": 1779805196650,
+      "type": "file"
+    },
+    {
+      "path": "scripts/model/expanded_drbc/compute_rq4b_event_type_stratify.py",
+      "accessCount": 1,
+      "lastAccessed": 1779805247733,
+      "type": "file"
+    },
+    {
+      "path": "scripts/model/expanded_drbc/compute_cross_tab_q99_noaa_sanity.py",
+      "accessCount": 1,
+      "lastAccessed": 1779805293937,
+      "type": "file"
+    },
+    {
+      "path": "dashboard/package.json",
+      "accessCount": 1,
+      "lastAccessed": 1779805327102,
+      "type": "file"
+    },
+    {
+      "path": "configs/camelsh_hourly_model1_drbc_holdout_broad.yml",
+      "accessCount": 1,
+      "lastAccessed": 1779805335066,
+      "type": "file"
+    },
+    {
+      "path": "docs/experiment/analysis/model/03_cost.md",
+      "accessCount": 1,
+      "lastAccessed": 1779805393615,
+      "type": "file"
+    },
+    {
+      "path": "docs/experiment/analysis/model/04a_basin_cohort.md",
+      "accessCount": 1,
+      "lastAccessed": 1779805420514,
+      "type": "file"
+    },
+    {
+      "path": "docs/experiment/analysis/model/04b_event_type.md",
+      "accessCount": 1,
+      "lastAccessed": 1779805451370,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
