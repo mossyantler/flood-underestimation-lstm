@@ -13,7 +13,7 @@
 - lower quantile이 없는 현재 구성의 제약
 - 4개 output을 함께 읽는 세 가지 방식 (Pairwise / Sequence / Spread)
 - 자주 빠지는 오해석 6가지와 금지 표현
-- RQ-A부터 RQ-G까지에서 어떤 해석 layer를 어떻게 적용할지
+- RQ-0부터 RQ-5까지에서 어떤 해석 layer를 어떻게 적용할지
 - 표·그림·논문 본문에서의 표기 규칙
 
 ## 다루지 않는 범위
@@ -94,9 +94,9 @@ Model 2의 가치 주장은 τ에 따라 다르게 표현된다.
 
 | τ | 주장 형태 | 어느 RQ |
 | --- | --- | --- |
-| `q50` | 중앙예측 성능을 큰 손해 없이 유지 | RQ-A |
-| `q90 / q95` | observed peak underestimation을 의미 있게 완화 | RQ-B 본문 |
-| `q99` | 극단 peak protection이 가능하나 false-positive 비용이 동시에 커짐 | RQ-B / RQ-D supplement |
+| `q50` | 중앙예측 성능을 큰 손해 없이 유지 | RQ-1 |
+| `q90 / q95` | observed peak underestimation을 의미 있게 완화 | RQ-2 본문 |
+| `q99` | 극단 peak protection이 가능하나 false-positive 비용이 동시에 커짐 | RQ-2 / RQ-3 supplement |
 
 ## 4개 output을 함께 읽는 세 방식
 
@@ -104,7 +104,7 @@ Model 2의 가치 주장은 τ에 따라 다르게 표현된다.
 
 ### (1) Pairwise — `q50` vs Model 1
 
-용도: RQ-A, RQ-E의 central 성능 비교. `q90 / q95 / q99`는 끌고 들어오지 않는다.
+용도: RQ-1의 central 성능 비교. `q90 / q95 / q99`는 끌고 들어오지 않는다.
 
 | 비교 | 메트릭 |
 | --- | --- |
@@ -112,7 +112,7 @@ Model 2의 가치 주장은 τ에 따라 다르게 표현된다.
 
 ### (2) Sequence — `q50 → q90 → q95 → q99` 단조 증가폭
 
-용도: RQ-B, RQ-C, RQ-D. peak를 잡는 정도가 τ에 따라 어떻게 변하는가.
+용도: RQ-2, RQ-3, RQ-4a. peak를 잡는 정도가 τ에 따라 어떻게 변하는가.
 
 | 측정 | 의미 |
 | --- | --- |
@@ -122,7 +122,7 @@ Model 2의 가치 주장은 τ에 따라 다르게 표현된다.
 
 ### (3) Spread — `q99 − q50` 폭
 
-용도: RQ-F, RQ-G. one-sided uncertainty proxy.
+용도: RQ-5, RQ-4b. one-sided uncertainty proxy.
 
 | 사용 | 주의 |
 | --- | --- |

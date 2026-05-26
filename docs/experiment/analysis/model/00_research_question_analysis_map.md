@@ -4,7 +4,7 @@
 
 본 논문의 핵심 주제를 세부 연구 질문(Research Question, RQ)으로 분해하고, 각 RQ가 어떤 분석 문서·스크립트·산출물에 1:1로 대응되는지 정리한다. 분석 결과 수치 자체는 다시 쓰지 않고, "어느 질문을 어떤 분석으로 답하는가"의 지도를 제공한다.
 
-본 RQ 매핑은 **expanded DRBC observed test split(85 basin, seed 111/222/444, test 2014-2016)**을 canonical baseline으로 가정한다. scaling_300 / DRBC-38 holdout 매핑은 폐기(`docs/archive/analysis_legacy/` 보존).
+본 RQ 매핑은 **expanded DRBC observed test split(85 basin, seed 111/222/444, test 2014-2016)**을 canonical baseline으로 가정한다. 레거시 300-basin / DRBC-38 holdout 매핑은 폐기(`docs/archive/analysis_legacy/` 보존).
 
 ## 핵심 주제와 주장
 
@@ -168,7 +168,7 @@ output/model_analysis/expanded_drbc_test/
 
 ## Legacy 보존
 
-scaling_300 / DRBC-38 holdout 기반 구식 분석 문서는 `docs/archive/analysis_legacy/`로 이동:
+레거시 300-basin / DRBC-38 holdout 기반 구식 분석 문서는 `docs/archive/analysis_legacy/`로 이동:
 
 - `03_event_regime_performance.md`
 - `04_extreme_flood_proxy_performance.md`
@@ -177,6 +177,6 @@ scaling_300 / DRBC-38 holdout 기반 구식 분석 문서는 `docs/archive/analy
 - `07_broad_vs_natural_robustness.md`
 - `09_event_suppression_diagnosis_protocol.md`
 - `10_event_surrogate_shap.md`
-- `subset300_hydrograph_interpretation_report.md`
+- 300-basin subset hydrograph 해석 보고서
 
 본 paper canonical 인용 범위에서 제외하지만 reproducibility / 비교를 위해 보존.
