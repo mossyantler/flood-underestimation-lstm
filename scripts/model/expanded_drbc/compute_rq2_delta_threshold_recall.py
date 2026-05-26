@@ -26,8 +26,8 @@ Acceptance
 ----------
 - recall ∈ [0, 1]
 - n_q99_hours identical across seeds for each basin (assertion)
-- cross-basin median recall non-increasing across q50→q90→q95→q99 — wait, recall should INCREASE with τ
-  (higher τ = larger predictions = more likely to clear obs). Assertion: monotonic INCREASE in τ for q50..q99.
+- cross-basin median recall monotonically increases across q50→q90→q95→q99
+  (higher τ = larger predictions = more likely to clear the Q99 threshold).
 """
 from __future__ import annotations
 

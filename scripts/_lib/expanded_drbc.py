@@ -125,11 +125,12 @@ def per_basin_seed_then_median(
 ) -> pd.Series:
     """Canonical aggregation: per-basin per-seed value → median across seeds within basin.
 
-    Assumes `df` already carries one row per `(basin, seed)` for `value_col`
-    (or one row per `(basin, seed, event)` — the inner grouper averages within
-    `(basin, seed)` via .first() to require pre-aggregation by the caller).
+    Callers must pre-aggregate ``df`` to one row per ``(basin_col, seed_col)`` for
+    ``value_col``. The inner ``.first()`` dereferences the scalar; if multiple rows
+    exist per ``(basin, seed)``, only the first is used — callers are responsible
+    for reducing to scalar before calling this function.
 
-    Returns a Series indexed by `basin_col` containing the median across seeds.
+    Returns a Series indexed by ``basin_col`` containing the cross-seed median.
     """
     inner = df.groupby([basin_col, seed_col])[value_col].first()
     return inner.groupby(basin_col).median()
