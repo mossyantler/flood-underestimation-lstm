@@ -4,8 +4,11 @@
 
 완료에 가까운 분석부터 먼저 배치했다. 아직 최종 산출물이 없는 분석은 `예정`으로만 표시하고, 결과 해석은 쓰지 않는다.
 
+연구 질문(RQ-A ~ RQ-G)과 아래 분석 문서가 어떻게 1:1 대응되는지는 [`00_research_question_analysis_map.md`](00_research_question_analysis_map.md)에서 별도로 정리한다. 본 표는 분석 문서 단위의 인덱스이고, 그 위 단계의 RQ ↔ 분석 매핑은 `00` 문서를 본다.
+
 | 순서 | 문서 | 상태 | 역할 |
 | ---: | --- | --- | --- |
+| 0 | [`00_research_question_analysis_map.md`](00_research_question_analysis_map.md) | 완료 | 핵심 주제를 RQ-A ~ RQ-G로 분해하고, 각 RQ가 아래 분석 문서와 어떻게 대응되는지 정리한다. |
 | 1 | [`01_primary_overall_performance.md`](01_primary_overall_performance.md) | 완료에 가까움 | primary checkpoint에서 Model 2 `q50`이 전체 hydrograph 성능을 얼마나 유지하는지 본다. |
 | 2 | [`02_primary_high_flow_peak_performance.md`](02_primary_high_flow_peak_performance.md) | 완료에 가까움 | Q-threshold exceedance stratum과 observed peak hour에서 `q90/q95/q99`가 peak underestimation을 줄이는지 본다. |
 | 3 | [`03_event_regime_performance.md`](03_event_regime_performance.md) | 완료에 가까움 | observed high-flow event를 ML event-regime과 rule label sensitivity로 나누어 model error를 해석한다. |
