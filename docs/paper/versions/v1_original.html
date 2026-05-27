@@ -3,19 +3,323 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>v1 원본 초안 — 2026-05-27 00:47</title>
+<title>v1 — 원본 초안</title>
 <style>
 
-  body { font-family: Georgia, "Times New Roman", serif; font-size: 11pt; line-height: 1.8; color: #1a1a1a; background: #f8f7f4; margin: 0; }
-  h1 { font-size: 17pt; color: #1a365d; border-bottom: 2px solid #2c5282; padding-bottom: 8px; margin: 36px 0 18px; }
-  h2 { font-size: 13.5pt; color: #2c5282; margin: 28px 0 12px; }
-  h3 { font-size: 11.5pt; color: #2d3748; margin: 18px 0 8px; font-style: italic; }
-  p { margin-bottom: 11px; text-align: justify; }
-  .toc { background: #f0f4f8; border: 1px solid #cbd5e0; border-radius: 6px; padding: 20px 28px; margin-bottom: 36px; }
-  .toc p { margin: 2px 0; font-size: 10pt; }
-  .badge { display:inline-block; font-size:8pt; background:#ebf8ff; color:#2b6cb0; border-radius:10px; padding:1px 8px; margin-bottom:8px; font-family:sans-serif; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 11pt;
+    line-height: 1.8;
+    color: #1a1a1a;
+    background: #f8f7f4;
+  }
 
+  .page-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 60px 80px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    min-height: 100vh;
+  }
+
+  /* Title block */
+  .title-block {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 2px solid #2c5282;
+  }
+  .paper-title {
+    font-size: 18pt;
+    font-weight: bold;
+    line-height: 1.4;
+    color: #1a365d;
+    margin-bottom: 16px;
+  }
+  .paper-subtitle {
+    font-size: 12pt;
+    color: #4a5568;
+    font-style: italic;
+    margin-bottom: 20px;
+  }
+  .paper-date {
+    font-size: 10pt;
+    color: #718096;
+  }
+
+  /* TOC */
+  .toc {
+    background: #f0f4f8;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    padding: 24px 32px;
+    margin-bottom: 48px;
+  }
+  .toc h2 {
+    font-size: 13pt;
+    color: #2d3748;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #cbd5e0;
+    padding-bottom: 8px;
+  }
+  .toc ol {
+    list-style: none;
+    padding: 0;
+  }
+  .toc > ol > li {
+    margin-bottom: 6px;
+    font-weight: bold;
+    font-size: 10.5pt;
+  }
+  .toc > ol > li > ol {
+    margin-top: 4px;
+    margin-left: 20px;
+    list-style: none;
+  }
+  .toc > ol > li > ol > li {
+    font-weight: normal;
+    margin-bottom: 2px;
+    font-size: 10pt;
+  }
+  .toc a {
+    color: #2b6cb0;
+    text-decoration: none;
+  }
+  .toc a:hover { text-decoration: underline; }
+
+  /* Abstract */
+  .abstract-block {
+    background: #f7fafc;
+    border-left: 4px solid #3182ce;
+    padding: 20px 28px;
+    margin-bottom: 48px;
+    border-radius: 0 4px 4px 0;
+  }
+  .abstract-block h2 {
+    font-size: 12pt;
+    color: #2b6cb0;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .abstract-block p {
+    font-size: 10.5pt;
+    margin-bottom: 10px;
+    color: #2d3748;
+  }
+  .keywords {
+    margin-top: 14px;
+    font-size: 10pt;
+    color: #4a5568;
+    font-style: italic;
+  }
+
+  /* Headings */
+  h1.chapter {
+    font-size: 16pt;
+    color: #1a365d;
+    border-bottom: 2px solid #2c5282;
+    padding-bottom: 8px;
+    margin-top: 48px;
+    margin-bottom: 24px;
+  }
+  h2.section {
+    font-size: 13pt;
+    color: #2c5282;
+    margin-top: 32px;
+    margin-bottom: 14px;
+  }
+  h3.subsection {
+    font-size: 11.5pt;
+    color: #2d3748;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  p {
+    margin-bottom: 12px;
+    text-align: justify;
+  }
+
+  /* Tables */
+  .table-container {
+    margin: 20px 0 28px 0;
+    overflow-x: auto;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 10pt;
+  }
+  th {
+    background: #2c5282;
+    color: #fff;
+    padding: 8px 12px;
+    text-align: center;
+    font-weight: bold;
+  }
+  td {
+    padding: 7px 12px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+  }
+  tr:nth-child(even) td { background: #f7fafc; }
+  tr:hover td { background: #ebf4ff; }
+  td:first-child { text-align: left; font-weight: 500; }
+  .table-caption {
+    font-size: 9.5pt;
+    color: #4a5568;
+    margin-top: 6px;
+    text-align: center;
+    font-style: italic;
+  }
+
+  /* Figures */
+  .figure-container {
+    margin: 24px 0 32px 0;
+    text-align: center;
+  }
+  .figure-container img {
+    max-width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .figure-caption {
+    font-size: 9.5pt;
+    color: #4a5568;
+    margin-top: 8px;
+    text-align: center;
+    font-style: italic;
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+  }
+
+  /* Two-column figures */
+  .figure-row {
+    display: flex;
+    gap: 16px;
+    margin: 24px 0 32px 0;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .figure-row .figure-item {
+    flex: 1;
+    text-align: center;
+    min-width: 0;
+  }
+  .figure-row img {
+    max-width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  /* Math */
+  .math-block {
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 14px 20px;
+    margin: 16px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 10pt;
+    color: #2d3748;
+    text-align: center;
+  }
+
+  /* Code / Architecture */
+  .arch-block {
+    background: #2d3748;
+    color: #e2e8f0;
+    border-radius: 4px;
+    padding: 14px 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 9.5pt;
+    margin: 14px 0;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  /* Highlight boxes */
+  .highlight-box {
+    background: #fff5f5;
+    border: 1px solid #fc8181;
+    border-left: 4px solid #e53e3e;
+    border-radius: 4px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 10.5pt;
+  }
+  .highlight-box.blue {
+    background: #ebf8ff;
+    border-color: #63b3ed;
+    border-left-color: #3182ce;
+  }
+  .highlight-box.green {
+    background: #f0fff4;
+    border-color: #68d391;
+    border-left-color: #38a169;
+  }
+
+  /* Hypothesis list */
+  ol.hypothesis {
+    padding-left: 24px;
+    margin: 12px 0 16px;
+  }
+  ol.hypothesis li {
+    margin-bottom: 8px;
+    font-size: 10.5pt;
+  }
+
+  /* Contribution list */
+  ul.contrib {
+    padding-left: 22px;
+    margin: 12px 0;
+  }
+  ul.contrib li {
+    margin-bottom: 8px;
+    font-size: 10.5pt;
+  }
+
+  /* RQ table */
+  table.rq-table th { background: #4a5568; }
+
+  /* References */
+  .references ol {
+    padding-left: 24px;
+  }
+  .references li {
+    font-size: 10pt;
+    margin-bottom: 10px;
+    line-height: 1.6;
+    color: #2d3748;
+  }
+
+  /* Section divider */
+  hr.section-divider {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 40px 0;
+  }
+
+  /* Back to top */
+  .back-to-top {
+    text-align: right;
+    font-size: 9pt;
+    color: #a0aec0;
+    margin-top: 6px;
+  }
+  .back-to-top a { color: #a0aec0; text-decoration: none; }
+
+  /* Sidebar layout */
+  body { margin: 0; }
   .layout { display: flex; min-height: 100vh; }
   .sidebar {
     width: 210px;
@@ -30,62 +334,71 @@
     flex-shrink: 0;
   }
   .sidebar-header {
-    font-size: 11pt;
+    font-size: 10.5pt;
     font-weight: bold;
     color: #90cdf4;
-    padding: 0 18px 14px;
+    padding: 0 16px 12px;
     border-bottom: 1px solid #2c5282;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    line-height: 1.4;
   }
   .sidebar ul { list-style: none; padding: 0; margin: 0; }
   .sidebar li a {
     display: block;
-    padding: 9px 18px;
+    padding: 8px 16px;
     color: #bee3f8;
     text-decoration: none;
-    font-size: 9.5pt;
+    font-size: 9pt;
     line-height: 1.5;
     border-left: 3px solid transparent;
     transition: background 0.15s;
+    font-family: sans-serif;
   }
-  .sidebar li a:hover, .sidebar li a.active {
+  .sidebar li a:hover { background: #2a4a7f; color: #fff; }
+  .sidebar li a.active {
     background: #2a4a7f;
     border-left-color: #63b3ed;
     color: #fff;
   }
-  .sidebar li a small { color: #90cdf4; display: block; font-size: 8.5pt; }
+  .sidebar li a small { color: #90cdf4; display: block; font-size: 8pt; }
   .sidebar li.sep { border-top: 1px solid #2c5282; margin: 8px 0; }
   .sidebar-footer {
-    padding: 14px 18px 0;
+    padding: 12px 16px 0;
     border-top: 1px solid #2c5282;
     margin-top: 10px;
   }
-  .sidebar-footer a { color: #90cdf4; font-size: 9pt; text-decoration: none; }
-  .main-content { flex: 1; min-width: 0; padding: 50px 60px; }
+  .sidebar-footer a { color: #90cdf4; font-size: 8.5pt; text-decoration: none; font-family: sans-serif; }
+  .sidebar-footer a:hover { color: #fff; }
+  .main-content { flex: 1; min-width: 0; }
   @media (max-width: 700px) {
     .layout { flex-direction: column; }
     .sidebar { width: 100%; height: auto; position: relative; }
-    .main-content { padding: 24px 20px; }
+  }
+
+  @media print {
+    body { background: white; }
+    .sidebar { display: none; }
+    .page-wrapper { box-shadow: none; padding: 40px; }
   }
 
 </style>
 </head>
 <body>
 <div class="layout">
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar">
   <div class="sidebar-header">📋 버전 기록</div>
-  <ul>
-    <li><a href="v1_original.html" class="active">v1 — 원본 초안<br><small>2026-05-27 00:47</small></a></li>
-    <li><a href="v2_expanded.html">v2 — 확장 초안<br><small>2026-05-27 01:27</small></a></li>
-    <li><a href="v3_current_docx.html">v3 — 최신 docx<br><small>2026-05-27 01:31</small></a></li>
-    <li class="sep"></li>
-    <li><a href="../paper_draft.html">✨ 최종 HTML 논문<br><small>수식 + 그림 포함</small></a></li>
-  </ul>
+  <ul><li><a href="v1_original.html" class="active">v1 — 원본 초안<br><small>2026-05-27 00:47</small></a></li><li><a href="v2_expanded.html">v2 — 확장 초안<br><small>2026-05-27 01:27</small></a></li><li><a href="v3_current_docx.html">v3 — 최신 docx 초안<br><small>2026-05-27 01:31</small></a></li><li class="sep"></li><li><a href="../paper_draft.html">HTML 논문 초안<br><small>수식 + 그림 포함</small></a></li></ul>
   <div class="sidebar-footer"><a href="../../index.html">← 변경 이력 홈</a></div>
 </nav>
 <div class="main-content">
-<div class="badge">v1 — 원본 초안 (2026-05-27 00:47)</div>
-<p>목차</p><div class="toc"><p>초록 (Abstract)2</p></div><h1>제 1장 서론2</h1><h1>제 2장 이론적 배경2</h1><h2>2.1 LSTM2</h2><h3>2.1.1 Model 13</h3><h3>2.1.2 Model 23</h3><h2>2.2 평가지표4</h2><h3>2.2.1 전체 평가지표4</h3><h3>2.2.2 quantile 평가지표5</h3><h2>2.3 The CAMELS-H Dataset5</h2><h3>2.3.1 Meteorological (DRBC 유역특성, 특징)6</h3><h3>2.3.2 CAMELS-H6</h3><h1>제 3장 실험 방법6</h1><h2>3.1 유역 선정, 데이터 전처리6</h2><h3>3.1.1 유역선정 배경7</h3><h3>3.1.2 Train-Validation-Test 유역7</h3><h3>3.1.3 subset 300선택 과정7</h3><h2>3.2 모델 학습 방법8</h2><h3>3.2.1 Train8</h3><h3>3.2.2 Validation8</h3><h3>3.2.3 Test8</h3><h2>3.3 Primary model 선정8</h2><h2>3.4 분석 기준/방법8</h2><h3>3.4.1 지표9</h3><h3>3.4.2 극한값 분석 (extreme stress)9</h3><h1>제 4장 실험 결과, 분석 결과9</h1><h2>4.1 실험 결과값9</h2><h3>4.1.1 Model1 결과9</h3><h3>4.1.2 Model2 결과9</h3><h2>4.2 분석 결과9</h2><h3>4.2.1 지표면9</h3><h3>4.2.2 극한값 (extreme stress)9</h3><h1>제 5장 결론9</h1><p>그림 목차</p><p>표 목차</p><p>초록 (Abstract)</p><p>최근 다유역(Multi-basin) 딥러닝 유출 모델, 특히 LSTM(Long Short-Term Memory)은 하천 유량 예측에서 괄목할 만한 전반적 성능을 보여주고 있다. 그러나 결정론적(Deterministic) 단일 예측 방식은 극단적인 홍수 첨두(extreme flood peak)를 지속적으로 과소추정(underestimation)하는 고질적 한계를 지닌다. 본 연구는 LSTM 백본(backbone)의 구조적 변경  없이, 출력층을 결정론적 단일 예측(Model 1)에서 확률론적 분위수 예측(Model 2; q50, q90, q95, q99)으로 전환하는 것만으로 극한 홍수 과소추정 문제가 얼마나 완화되는지 평가하기 위한 연구 방법론을 설계했다. 본 중간 연구에서는 CAMELS-H(Hourly) 데이터셋을 활용하여, 델라웨어강 유역(DRBC)을 공간적 홀드아웃(Regional Holdout) 평가군으로 철저히 분리하고, DRBC 외부의 300개 유역(subset 300)을 대표 학습군으로 선별하는 데이터 전처리 및 실험 파이프라인을 구축하였다. 본 논문은 모델의 구조적 설계와 평가지표, 유역 선정 과정을 상세히 기술하며, 향후 이를 바탕으로 확률론적 딥러닝 모델이 극한 홍수 경보 체계에 미치는 영향을 정량적으로 검증하고자 한다.</p><h1>제 1장 서론</h1><p>하천 유량 예측에서 평상시의 유량을 정확히 맞추는 것도 중요하지만, 실질적인 재난 대응과 홍수 경보를 위해서는 드물게 발생하는 극단적 사상(extreme events)의 첨두유량(peak flow)을 포착하는 것이 필수적이다. 그러나 기존 수문 모델링에서 가장 우수한 성능을 보이는 딥러닝 기반의 결정론적(Deterministic) LSTM조차 극한 홍수 첨두를 실제보다 낮게 예측하는 과소추정(underestimation) 경향을 보인다. 이는 모델이 전체 평균 오차(예: NSE, MSE)를 최소화하는 방향으로만 학습될 경우, 발생 빈도가 낮은 극단적 첨두를 과감하게 예측하기보다는 통계적으로 안전한 평균치로 회귀(regression to the mean)하려 하기 때문이다.</p><p>본 연구는 이러한 '극한 홍수 과소추정'이 LSTM 내부 신경망 구조(Backbone)의 근본적 결함이 아니라 출력 방식(Output Design)의 한계에서 기인한다는 가설을 세운다. 이에 따라 기존의 단일 점 추정(Point estimate) 방식을 탈피하여, 상위 유량 발생 가능성을 불확실성 구간으로 직접 추론하는 확률론적 분위수(Probabilistic quantile) 예측 모델을 대안으로 제시한다. 본 논문은 두 가지 LSTM 모델(Model 1, Model 2)의 구조를 비교하고, CAMELS-H 데이터셋을 활용한 엄밀한 시공간 분할(Spatial-temporal split) 실험 설계를 통해 모델의 극한 유량 추종 성능을 검증하기 위한 방법론을 제안한다.</p><h1>제 2장 이론적 배경</h1><h2>2.1 LSTM</h2><p>본 연구는 다유역(Multi-basin) 하천 유량 예측을 위해 두 가지 LSTM 기반 모델을 비교한다. 두 모델은 입력 시계열을 처리하는 CudaLSTM 백본(Backbone) 구조는 완전히 동일하게 공유하며, 오직 결과를 출력하는 헤드 레이어(Head layer)와 손실 함수(Loss function)만이 다르다.</p><h3>2.1.1 Model 1</h3><p>Model 1은 전통적인 형태의 순수 LSTM (Pure LSTM) 모델이다. 매 시점마다 단일 유량값 하나를 예측하는 기존의 점 추정(Point estimate) 회귀 모델이다. 모델의 학습은 관측값과 예측값 간의 전반적인 적합도를 평가하는 NSE(Nash-Sutcliffe Efficiency) 기반의 손실 함수(또는 MSE)를 사용하여 진행된다. 구조가 단순하고 기존 평가지표와 호환성이 높지만, 극단적인 사상에서는 평균으로 회귀하여 첨두를 낮게 잡는 한계를 지닌다.</p><h3>2.1.2 Model 2</h3><p>Model 2는 Model 1의 백본에 분위수 헤드(Quantile Head)를 결합한 확률론적 모델이다. 점 추정 대신 중앙값(q50)과 상위 분위수(q90, q95, q99)를 동시에 추론하도록 예측 헤드를 확장하여 예측의 불확실성을 포착한다. 여기서 q99는 통계적 재현기간(99년 빈도)을 의미하는 것이 아니라, 해당 시점과 조건에서 모델이 예측하는 '극한의 상단 결정 출력(Upper-tail decision output)'을 의미한다.</p><p>Model 2의 학습을 위해서는 비대칭 손실 함수인 Pinball Loss를 사용한다. 특정 분위수 τ (예: 0.90)에 대한 Pinball Loss 공식은 다음과 같다:</p><p>이를 통해 모델은 관측값이 예측값을 초과할 때와 미달할 때 다른 페널티를 부여받으며, 설정된 τ에 맞는 분위수를 학습하게 된다.</p><p>그림 2.1 Model과 Model2의 구조 비교 모식도</p><p>그림 2.2 LSTM의 기상/유역 특성 입력 및 출력 시퀀스 구조</p><h2>2.2 평가지표</h2><p>모델 성능은 전반적인 유량 모의 능력과 확률론적 불확실성 포착 능력을 분리하여 평가한다.</p><p>여기서 는 시간 에서의 실제 관측 유량이고, 는 모델 예측 유량이다. (Model 1의 경우 이며, Model 2를 Point prediction처럼 비교할 때는  로 간주한다.) 는 평가에 사용하는 전체 시간 수,  는 전체 관측 유량의 평균을 의미한다.</p><h3>2.2.1 전체 평가지표</h3><p>결정론적 예측(Model 1 및 Model 2의 q50)의 전반적 성능을 평가하기 위해 수문학에서 널리 쓰이는 지표들을 활용한다.</p><p>NSE (Nash-Sutcliffe Efficiency): 전반적인 수문곡선의 적합도를 평가한다. 1.0에 가까울수록 완벽한 예측을 의미한다.</p><p>KGE (Kling-Gupta Efficiency): 상관관계, 평균 편향, 변동성을 종합적으로 평가하는 지표다.</p><p>(여기서 은 와   간의 피어슨 상관계수, 는 표준편차비(변동성), 는 평균비(편향)를 뜻한다.)</p><p>FHV (High-Flow Volume Error): 수문곡선 상단부(High-flow)의 총 체적 오차를 측정한다. 양수는 과대추정, 음수는 과소추정을 의미한다.</p><p>(여기서 는 전체 유량 중 상위 2% 등 고유량 임계값을 초과하는 타임스텝의 집합이다.)</p><p>Peak-Timing Error: 관측된 홍수 첨두 시점과 예측된 첨두 시점 간의 시간차(Hourly)를 측정한다.</p><p>(절댓값이 작을수록 첨두 발생 시점을 정확히 포착했음을 의미한다.)</p><h3>2.2.2 quantile 평가지표</h3><p>Model 2가 출력하는 확률론적 구간(q90, q95, q99)의 통계적 유효성을 검증한다.</p><p>Pinball Loss: 분위수 예측의 정확도를 직접적으로 측정하는 지표다. 낮을수록 우수하다.</p><p>(여기서 는 각 분위수 에 대한 비대칭 손실 함수이며, 는 계산에 포함된 대상 분위수 집합을 의미한다.)</p><p>Empirical Coverage: 실제 관측값이 특정 분위수 구간(예: q99 이하)에 포함되는 비율이다. 명목 범위(Nominal Coverage)와의 일치 여부를 본다.</p><p>(여기서 는 지시 함수(Indicator function)로 괄호 안의 조건이 참이면 1, 거짓이면 0을 반환한다.)</p><p>Calibration Error: 신뢰도(Reliability) 측면에서 구간이 얼마나 잘 보정되었는지 평가한다. 이상적인 모델의 경우 0에 수렴한다.</p><p>Upper-tail Spread: 고유량 발생 시 q99와 q50 간의 격차가 얼마나 충분한 안전 여유(Safety margin)를 확보하는지 평가한다.</p><h2>2.3 The CAMELS-H Dataset</h2><h3>2.3.1 Meteorological (DRBC 유역특성, 특징)</h3><p>연구의 주요 평가 지역인 델라웨어강 유역 (Delaware River Basin Commission, DRBC)은 다양한 기후(Climate), 지형(Topo), 토지 피복(Land cover)이 혼재되어 있어 모델의 일반화 성능을 평가하기에 적합하다. 시간당(Hourly) 발생하는 강수(Rainf), 기온(Tair), 증발산(PotEvap), 단파복사(SWdown) 등 역동적인 기상 강제력(Dynamic forcing)에 따라 매우 복잡한 수문 응답(Hydro response)을 보이는 특징을 지닌다.</p><h3>2.3.2 CAMELS-H</h3><p>본 연구는 대규모 표본 데이터셋인 CAMELS-H (Catchment Attributes and Meteorology for Large-sample Studies - Hourly)를 활용한다. CAMELS-H는 미국 전역의 수많은 유역(catchments)에 대해 시간 단위(Hourly)의 수문-기상 시계열 데이터와 유역별 정적 특성(Static catchment attributes; 면적, 평균 경사, 토양 깊이 등)을 제공한다. 일 단위(Daily) 데이터의 한계를 넘어 시간 단위의 급격한 극한 홍수 첨두 역학을 분석할 수 있는 최적의 데이터셋이다.</p><h1>제 3장 실험 방법</h1><h2>3.1 유역 선정, 데이터 전처리</h2><p>그림 3.1 미국 전역의 CAMELS-H 유역 분포 및 DRBC 지역(Holdout)표기 지도</p><h3>3.1.1 유역선정 배경</h3><p>본 연구의 목적은 학습 유역 내에서의 적합도를 높이는 것이 아니라, 미관측 유역(Ungauged basin) 및 미관측 극한 사상에서의 일반화 성능(Generalization)을 평가하는 것이다. 따라서 특정 지역(Delaware regional model)에 모델을 편향시키지 않기 위해, DRBC 유역 전체를 학습 과정에서 완전히 배제하는 공간적 홀드아웃(Regional Holdout) 기법을 채택하였다.</p><h3>3.1.2 Train-Validation-Test 유역</h3><p>전체 CAMELS-H 유역은 철저한 공간 분리 원칙에 따라 분할되었다.</p><p>Test 유역 (Evaluation Region): DRBC 공식 경계 내부에 위치하며 공간 중첩(Overlap) 규칙 및 관측 품질 게이트를 통과한 38개 유역을 모델 성능 평가를 위한 Test 유역으로 고정하였다.</p><p>Train-Validation 유역 (Training Pool): DRBC 경계와 겹치지 않는(Overlap 0.1 이하) 외부(non-DRBC) 유역 중 품질 검증을 통과한 유역들을 글로벌 학습 풀(Global training pool)로 정의하였다.</p><p>그림 3.2 유역 스크리닝 과정 및 시공간 분할 다이어그램</p><h3>3.1.3 subset 300선택 과정</h3><p>광범위한 non-DRBC 학습 풀(약 1,900여 개 유역) 전체를 사용하는 대신, 컴퓨팅 자원의 효율성과 데이터 밸런스를 고려하여 300개의 유역을 선별하는 scaling_300 subset 과정을 거쳤다. 단순히 무작위로 축소한 것이 아니라, 정적 속성(Static attributes)의 밸런스와 관측 유량의 이벤트-응답(Event-response) 분포가 전체 모집단(Prepared pool)의 특성을 훼손하지 않도록 계층적 표집(Representative audit)을 수행했다. 이를 통해 연산 비용을 통제하면서도 다유역 모델이 필요로 하는 기후적/지형적 다양성을 충분히 확보하였다.</p><p>그림 3.3 Subset300의 정적특성 및 유량응답특성의 대표성을 증명하는 Heatmap</p><h2>3.2 모델 학습 방법</h2><h3>3.2.1 Train</h3><h3>3.2.2 Validation</h3><h3>3.2.3 Test</h3><h2>3.3 Primary model 선정 (validation 한 뒤, epoch 몇에서 q50 성능이 가장 좋은지..)</h2><h2>3.4 분석 기준/방법</h2><h3>3.4.1 지표</h3><h3>3.4.2 극한값 분석 (extreme stress)</h3><h1>제 4장 실험 결과, 분석 결과</h1><h2>4.1 실험 결과값</h2><h3>4.1.1 Model1 결과</h3><h3>4.1.2 Model2 결과</h3><h2>4.2 분석 결과</h2><h3>4.2.1 지표면</h3><h3>4.2.2 극한값 (extreme stress)</h3><h1>제 5장 결론</h1><p>참고문헌</p>
+<div class="page-wrapper">
+<div class="title-block" id="top">
+  <div class="paper-date">2026-05-27 00:47</div>
+  <div class="paper-title">v1 — 원본 초안</div>
+</div>
+<p>목차</p><div class="toc"><p>초록 (Abstract)2</p></div><h1 class="chapter">제 1장 서론2</h1><h1 class="chapter">제 2장 이론적 배경2</h1><h2 class="section">2.1 LSTM2</h2><h3 class="subsection">2.1.1 Model 13</h3><h3 class="subsection">2.1.2 Model 23</h3><h2 class="section">2.2 평가지표4</h2><h3 class="subsection">2.2.1 전체 평가지표4</h3><h3 class="subsection">2.2.2 quantile 평가지표5</h3><h2 class="section">2.3 The CAMELS-H Dataset5</h2><h3 class="subsection">2.3.1 Meteorological (DRBC 유역특성, 특징)6</h3><h3 class="subsection">2.3.2 CAMELS-H6</h3><h1 class="chapter">제 3장 실험 방법6</h1><h2 class="section">3.1 유역 선정, 데이터 전처리6</h2><h3 class="subsection">3.1.1 유역선정 배경7</h3><h3 class="subsection">3.1.2 Train-Validation-Test 유역7</h3><h3 class="subsection">3.1.3 subset 300선택 과정7</h3><h2 class="section">3.2 모델 학습 방법8</h2><h3 class="subsection">3.2.1 Train8</h3><h3 class="subsection">3.2.2 Validation8</h3><h3 class="subsection">3.2.3 Test8</h3><h2 class="section">3.3 Primary model 선정8</h2><h2 class="section">3.4 분석 기준/방법8</h2><h3 class="subsection">3.4.1 지표9</h3><h3 class="subsection">3.4.2 극한값 분석 (extreme stress)9</h3><h1 class="chapter">제 4장 실험 결과, 분석 결과9</h1><h2 class="section">4.1 실험 결과값9</h2><h3 class="subsection">4.1.1 Model1 결과9</h3><h3 class="subsection">4.1.2 Model2 결과9</h3><h2 class="section">4.2 분석 결과9</h2><h3 class="subsection">4.2.1 지표면9</h3><h3 class="subsection">4.2.2 극한값 (extreme stress)9</h3><h1 class="chapter">제 5장 결론9</h1><p>그림 목차</p><p>표 목차</p><p>초록 (Abstract)</p><p>최근 다유역(Multi-basin) 딥러닝 유출 모델, 특히 LSTM(Long Short-Term Memory)은 하천 유량 예측에서 괄목할 만한 전반적 성능을 보여주고 있다. 그러나 결정론적(Deterministic) 단일 예측 방식은 극단적인 홍수 첨두(extreme flood peak)를 지속적으로 과소추정(underestimation)하는 고질적 한계를 지닌다. 본 연구는 LSTM 백본(backbone)의 구조적 변경  없이, 출력층을 결정론적 단일 예측(Model 1)에서 확률론적 분위수 예측(Model 2; q50, q90, q95, q99)으로 전환하는 것만으로 극한 홍수 과소추정 문제가 얼마나 완화되는지 평가하기 위한 연구 방법론을 설계했다. 본 중간 연구에서는 CAMELS-H(Hourly) 데이터셋을 활용하여, 델라웨어강 유역(DRBC)을 공간적 홀드아웃(Regional Holdout) 평가군으로 철저히 분리하고, DRBC 외부의 300개 유역(subset 300)을 대표 학습군으로 선별하는 데이터 전처리 및 실험 파이프라인을 구축하였다. 본 논문은 모델의 구조적 설계와 평가지표, 유역 선정 과정을 상세히 기술하며, 향후 이를 바탕으로 확률론적 딥러닝 모델이 극한 홍수 경보 체계에 미치는 영향을 정량적으로 검증하고자 한다.</p><h1 class="chapter">제 1장 서론</h1><p>하천 유량 예측에서 평상시의 유량을 정확히 맞추는 것도 중요하지만, 실질적인 재난 대응과 홍수 경보를 위해서는 드물게 발생하는 극단적 사상(extreme events)의 첨두유량(peak flow)을 포착하는 것이 필수적이다. 그러나 기존 수문 모델링에서 가장 우수한 성능을 보이는 딥러닝 기반의 결정론적(Deterministic) LSTM조차 극한 홍수 첨두를 실제보다 낮게 예측하는 과소추정(underestimation) 경향을 보인다. 이는 모델이 전체 평균 오차(예: NSE, MSE)를 최소화하는 방향으로만 학습될 경우, 발생 빈도가 낮은 극단적 첨두를 과감하게 예측하기보다는 통계적으로 안전한 평균치로 회귀(regression to the mean)하려 하기 때문이다.</p><p>본 연구는 이러한 '극한 홍수 과소추정'이 LSTM 내부 신경망 구조(Backbone)의 근본적 결함이 아니라 출력 방식(Output Design)의 한계에서 기인한다는 가설을 세운다. 이에 따라 기존의 단일 점 추정(Point estimate) 방식을 탈피하여, 상위 유량 발생 가능성을 불확실성 구간으로 직접 추론하는 확률론적 분위수(Probabilistic quantile) 예측 모델을 대안으로 제시한다. 본 논문은 두 가지 LSTM 모델(Model 1, Model 2)의 구조를 비교하고, CAMELS-H 데이터셋을 활용한 엄밀한 시공간 분할(Spatial-temporal split) 실험 설계를 통해 모델의 극한 유량 추종 성능을 검증하기 위한 방법론을 제안한다.</p><h1 class="chapter">제 2장 이론적 배경</h1><h2 class="section">2.1 LSTM</h2><p>본 연구는 다유역(Multi-basin) 하천 유량 예측을 위해 두 가지 LSTM 기반 모델을 비교한다. 두 모델은 입력 시계열을 처리하는 CudaLSTM 백본(Backbone) 구조는 완전히 동일하게 공유하며, 오직 결과를 출력하는 헤드 레이어(Head layer)와 손실 함수(Loss function)만이 다르다.</p><h3 class="subsection">2.1.1 Model 1</h3><p>Model 1은 전통적인 형태의 순수 LSTM (Pure LSTM) 모델이다. 매 시점마다 단일 유량값 하나를 예측하는 기존의 점 추정(Point estimate) 회귀 모델이다. 모델의 학습은 관측값과 예측값 간의 전반적인 적합도를 평가하는 NSE(Nash-Sutcliffe Efficiency) 기반의 손실 함수(또는 MSE)를 사용하여 진행된다. 구조가 단순하고 기존 평가지표와 호환성이 높지만, 극단적인 사상에서는 평균으로 회귀하여 첨두를 낮게 잡는 한계를 지닌다.</p><h3 class="subsection">2.1.2 Model 2</h3><p>Model 2는 Model 1의 백본에 분위수 헤드(Quantile Head)를 결합한 확률론적 모델이다. 점 추정 대신 중앙값(q50)과 상위 분위수(q90, q95, q99)를 동시에 추론하도록 예측 헤드를 확장하여 예측의 불확실성을 포착한다. 여기서 q99는 통계적 재현기간(99년 빈도)을 의미하는 것이 아니라, 해당 시점과 조건에서 모델이 예측하는 '극한의 상단 결정 출력(Upper-tail decision output)'을 의미한다.</p><p>Model 2의 학습을 위해서는 비대칭 손실 함수인 Pinball Loss를 사용한다. 특정 분위수 τ (예: 0.90)에 대한 Pinball Loss 공식은 다음과 같다:</p><p>이를 통해 모델은 관측값이 예측값을 초과할 때와 미달할 때 다른 페널티를 부여받으며, 설정된 τ에 맞는 분위수를 학습하게 된다.</p><p>그림 2.1 Model과 Model2의 구조 비교 모식도</p><p>그림 2.2 LSTM의 기상/유역 특성 입력 및 출력 시퀀스 구조</p><h2 class="section">2.2 평가지표</h2><p>모델 성능은 전반적인 유량 모의 능력과 확률론적 불확실성 포착 능력을 분리하여 평가한다.</p><p>여기서 는 시간 에서의 실제 관측 유량이고, 는 모델 예측 유량이다. (Model 1의 경우 이며, Model 2를 Point prediction처럼 비교할 때는  로 간주한다.) 는 평가에 사용하는 전체 시간 수,  는 전체 관측 유량의 평균을 의미한다.</p><h3 class="subsection">2.2.1 전체 평가지표</h3><p>결정론적 예측(Model 1 및 Model 2의 q50)의 전반적 성능을 평가하기 위해 수문학에서 널리 쓰이는 지표들을 활용한다.</p><p>NSE (Nash-Sutcliffe Efficiency): 전반적인 수문곡선의 적합도를 평가한다. 1.0에 가까울수록 완벽한 예측을 의미한다.</p><p>KGE (Kling-Gupta Efficiency): 상관관계, 평균 편향, 변동성을 종합적으로 평가하는 지표다.</p><p>(여기서 은 와   간의 피어슨 상관계수, 는 표준편차비(변동성), 는 평균비(편향)를 뜻한다.)</p><p>FHV (High-Flow Volume Error): 수문곡선 상단부(High-flow)의 총 체적 오차를 측정한다. 양수는 과대추정, 음수는 과소추정을 의미한다.</p><p>(여기서 는 전체 유량 중 상위 2% 등 고유량 임계값을 초과하는 타임스텝의 집합이다.)</p><p>Peak-Timing Error: 관측된 홍수 첨두 시점과 예측된 첨두 시점 간의 시간차(Hourly)를 측정한다.</p><p>(절댓값이 작을수록 첨두 발생 시점을 정확히 포착했음을 의미한다.)</p><h3 class="subsection">2.2.2 quantile 평가지표</h3><p>Model 2가 출력하는 확률론적 구간(q90, q95, q99)의 통계적 유효성을 검증한다.</p><p>Pinball Loss: 분위수 예측의 정확도를 직접적으로 측정하는 지표다. 낮을수록 우수하다.</p><p>(여기서 는 각 분위수 에 대한 비대칭 손실 함수이며, 는 계산에 포함된 대상 분위수 집합을 의미한다.)</p><p>Empirical Coverage: 실제 관측값이 특정 분위수 구간(예: q99 이하)에 포함되는 비율이다. 명목 범위(Nominal Coverage)와의 일치 여부를 본다.</p><p>(여기서 는 지시 함수(Indicator function)로 괄호 안의 조건이 참이면 1, 거짓이면 0을 반환한다.)</p><p>Calibration Error: 신뢰도(Reliability) 측면에서 구간이 얼마나 잘 보정되었는지 평가한다. 이상적인 모델의 경우 0에 수렴한다.</p><p>Upper-tail Spread: 고유량 발생 시 q99와 q50 간의 격차가 얼마나 충분한 안전 여유(Safety margin)를 확보하는지 평가한다.</p><h2 class="section">2.3 The CAMELS-H Dataset</h2><h3 class="subsection">2.3.1 Meteorological (DRBC 유역특성, 특징)</h3><p>연구의 주요 평가 지역인 델라웨어강 유역 (Delaware River Basin Commission, DRBC)은 다양한 기후(Climate), 지형(Topo), 토지 피복(Land cover)이 혼재되어 있어 모델의 일반화 성능을 평가하기에 적합하다. 시간당(Hourly) 발생하는 강수(Rainf), 기온(Tair), 증발산(PotEvap), 단파복사(SWdown) 등 역동적인 기상 강제력(Dynamic forcing)에 따라 매우 복잡한 수문 응답(Hydro response)을 보이는 특징을 지닌다.</p><h3 class="subsection">2.3.2 CAMELS-H</h3><p>본 연구는 대규모 표본 데이터셋인 CAMELS-H (Catchment Attributes and Meteorology for Large-sample Studies - Hourly)를 활용한다. CAMELS-H는 미국 전역의 수많은 유역(catchments)에 대해 시간 단위(Hourly)의 수문-기상 시계열 데이터와 유역별 정적 특성(Static catchment attributes; 면적, 평균 경사, 토양 깊이 등)을 제공한다. 일 단위(Daily) 데이터의 한계를 넘어 시간 단위의 급격한 극한 홍수 첨두 역학을 분석할 수 있는 최적의 데이터셋이다.</p><h1 class="chapter">제 3장 실험 방법</h1><h2 class="section">3.1 유역 선정, 데이터 전처리</h2><p>그림 3.1 미국 전역의 CAMELS-H 유역 분포 및 DRBC 지역(Holdout)표기 지도</p><h3 class="subsection">3.1.1 유역선정 배경</h3><p>본 연구의 목적은 학습 유역 내에서의 적합도를 높이는 것이 아니라, 미관측 유역(Ungauged basin) 및 미관측 극한 사상에서의 일반화 성능(Generalization)을 평가하는 것이다. 따라서 특정 지역(Delaware regional model)에 모델을 편향시키지 않기 위해, DRBC 유역 전체를 학습 과정에서 완전히 배제하는 공간적 홀드아웃(Regional Holdout) 기법을 채택하였다.</p><h3 class="subsection">3.1.2 Train-Validation-Test 유역</h3><p>전체 CAMELS-H 유역은 철저한 공간 분리 원칙에 따라 분할되었다.</p><p>Test 유역 (Evaluation Region): DRBC 공식 경계 내부에 위치하며 공간 중첩(Overlap) 규칙 및 관측 품질 게이트를 통과한 38개 유역을 모델 성능 평가를 위한 Test 유역으로 고정하였다.</p><p>Train-Validation 유역 (Training Pool): DRBC 경계와 겹치지 않는(Overlap 0.1 이하) 외부(non-DRBC) 유역 중 품질 검증을 통과한 유역들을 글로벌 학습 풀(Global training pool)로 정의하였다.</p><p>그림 3.2 유역 스크리닝 과정 및 시공간 분할 다이어그램</p><h3 class="subsection">3.1.3 subset 300선택 과정</h3><p>광범위한 non-DRBC 학습 풀(약 1,900여 개 유역) 전체를 사용하는 대신, 컴퓨팅 자원의 효율성과 데이터 밸런스를 고려하여 300개의 유역을 선별하는 scaling_300 subset 과정을 거쳤다. 단순히 무작위로 축소한 것이 아니라, 정적 속성(Static attributes)의 밸런스와 관측 유량의 이벤트-응답(Event-response) 분포가 전체 모집단(Prepared pool)의 특성을 훼손하지 않도록 계층적 표집(Representative audit)을 수행했다. 이를 통해 연산 비용을 통제하면서도 다유역 모델이 필요로 하는 기후적/지형적 다양성을 충분히 확보하였다.</p><p>그림 3.3 Subset300의 정적특성 및 유량응답특성의 대표성을 증명하는 Heatmap</p><h2 class="section">3.2 모델 학습 방법</h2><h3 class="subsection">3.2.1 Train</h3><h3 class="subsection">3.2.2 Validation</h3><h3 class="subsection">3.2.3 Test</h3><h2 class="section">3.3 Primary model 선정 (validation 한 뒤, epoch 몇에서 q50 성능이 가장 좋은지..)</h2><h2 class="section">3.4 분석 기준/방법</h2><h3 class="subsection">3.4.1 지표</h3><h3 class="subsection">3.4.2 극한값 분석 (extreme stress)</h3><h1 class="chapter">제 4장 실험 결과, 분석 결과</h1><h2 class="section">4.1 실험 결과값</h2><h3 class="subsection">4.1.1 Model1 결과</h3><h3 class="subsection">4.1.2 Model2 결과</h3><h2 class="section">4.2 분석 결과</h2><h3 class="subsection">4.2.1 지표면</h3><h3 class="subsection">4.2.2 극한값 (extreme stress)</h3><h1 class="chapter">제 5장 결론</h1><p>참고문헌</p>
+<div class="back-to-top"><a href="#top">↑ 맨 위로</a></div>
+</div>
 </div>
 </div>
 </body>
