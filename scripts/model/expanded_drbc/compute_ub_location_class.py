@@ -162,28 +162,49 @@ def summarize_location(loc: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     return pd.DataFrame(rows), by_basin
 
 
+def summarize_location_pooled(loc: pd.DataFrame) -> pd.DataFrame:
+    """Event-pooled fraction: pool all (event, seed) rows, count per class.
+
+    Each event is counted once per seed (3x total), preserving the sum=1
+    property that componentwise median breaks.  Interpretation: 'of all
+    (event, seed) evaluations, X% land in class C.'
+    """
+    total = len(loc)
+    rows = []
+    for cls in BAND_CLASSES:
+        n = int((loc["obs_class"] == cls).sum())
+        rows.append(
+            {
+                "obs_class": cls,
+                "pooled_fraction": n / total if total > 0 else 0.0,
+                "n_event_seed_pairs": n,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
 def plot_location_bar(
-    q99_summary: pd.DataFrame,
-    noaa_summary: pd.DataFrame,
+    q99_pooled: pd.DataFrame,
+    noaa_pooled: pd.DataFrame,
     out_path: Path,
 ) -> None:
     fig, axes = plt.subplots(1, 2, figsize=(11, 4))
-    for ax, summary, title in zip(
+    for ax, pooled, title in zip(
         axes,
-        [q99_summary, noaa_summary],
-        ["Q99 scope (85 basin)", "NOAA confirmed flood (21 basin)"],
+        [q99_pooled, noaa_pooled],
+        ["Q99 scope (85 basin, 926 events)", "NOAA confirmed flood (21 basin, 65 events)"],
     ):
-        medians = [
-            float(summary.set_index("obs_class").loc[c, "basin_median"])
+        fracs = [
+            float(pooled.set_index("obs_class").loc[c, "pooled_fraction"])
             for c in BAND_CLASSES
         ]
-        bars = ax.bar(BAND_CLASSES, medians, color=BAND_COLORS, edgecolor="0.3", linewidth=0.6)
+        bars = ax.bar(BAND_CLASSES, fracs, color=BAND_COLORS, edgecolor="0.3", linewidth=0.6)
         ax.set_ylim(0, 1.0)
-        ax.set_ylabel("Cross-basin median fraction of events")
+        ax.set_ylabel("Event-pooled fraction (sums to 1.0)")
         ax.set_title(title)
         ax.set_xticks(range(len(BAND_CLASSES)))
         ax.set_xticklabels(BAND_CLASSES, rotation=30, ha="right", fontsize=8)
-        for bar, val in zip(bars, medians):
+        for bar, val in zip(bars, fracs):
             if val > 0.01:
                 ax.text(
                     bar.get_x() + bar.get_width() / 2,
@@ -193,8 +214,11 @@ def plot_location_bar(
                     fontsize=8,
                 )
         ax.grid(axis="y", alpha=0.3)
+        total = sum(fracs)
+        ax.text(0.98, 0.97, f"sum={total:.3f}", transform=ax.transAxes,
+                ha="right", va="top", fontsize=7, color="0.5")
     fig.suptitle(
-        "Obs location within q50–q99 uncertainty band at event peaks\n"
+        "Obs location within q50–q99 uncertainty band at event peaks (event-pooled)\n"
         "(above_q99 = band failed; below_q50 = overestimation; band = q50 to q99)",
         fontsize=10,
     )
@@ -239,16 +263,24 @@ def run_scope(
     print(f"[UB-LOC] wrote {summary_path}", flush=True)
     print(f"[UB-LOC] {scope_name} summary:\n{summary.to_string(index=False)}", flush=True)
 
-    # Report above_q99 fraction (informational; high value for NOAA scope is expected —
-    # confirmed flood peaks frequently exceed q99 at exact peak hour, consistent with
-    # RQ-2 α NOAA = 0.172; Q99 scope typically lower since threshold is calibrated to train Q99).
-    above_q99_med = float(summary.set_index("obs_class").loc["above_q99", "basin_median"])
+    pooled = summarize_location_pooled(all_loc)
+    pooled_path = tables_dir / f"ub_location_class_{scope_name}_pooled.csv"
+    with pooled_path.open("w") as f:
+        f.write(
+            f"# UB location class — event-pooled fraction per class (scope={scope_name})\n"
+            f"# Pools all (event, seed) pairs; sums to 1.0. Use for bar chart.\n"
+        )
+        pooled.to_csv(f, index=False)
+    print(f"[UB-LOC] wrote {pooled_path}", flush=True)
+    print(f"[UB-LOC] {scope_name} pooled:\n{pooled.to_string(index=False)}", flush=True)
+
+    above_q99_pooled = float(pooled.set_index("obs_class").loc["above_q99", "pooled_fraction"])
     print(
-        f"[UB-LOC] {scope_name} above_q99 cross-basin median={above_q99_med:.3f}",
+        f"[UB-LOC] {scope_name} above_q99 event-pooled={above_q99_pooled:.3f}",
         flush=True,
     )
 
-    return summary
+    return pooled
 
 
 def main() -> None:
