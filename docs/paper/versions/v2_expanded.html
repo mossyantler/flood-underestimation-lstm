@@ -3,322 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>v2 — 확장 초안</title>
+<title>Flood LSTM — v2: 이론 + 수식 확장</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     font-family: 'Georgia', 'Times New Roman', serif;
     font-size: 11pt;
     line-height: 1.8;
     color: #1a1a1a;
     background: #f8f7f4;
+    margin: 0;
   }
-
-  .page-wrapper {
-    max-width: 900px;
-    margin: 0 auto;
-    background: #fff;
-    padding: 60px 80px;
-    box-shadow: 0 2px 20px rgba(0,0,0,0.08);
-    min-height: 100vh;
-  }
-
-  /* Title block */
-  .title-block {
-    text-align: center;
-    margin-bottom: 40px;
-    padding-bottom: 30px;
-    border-bottom: 2px solid #2c5282;
-  }
-  .paper-title {
-    font-size: 18pt;
-    font-weight: bold;
-    line-height: 1.4;
-    color: #1a365d;
-    margin-bottom: 16px;
-  }
-  .paper-subtitle {
-    font-size: 12pt;
-    color: #4a5568;
-    font-style: italic;
-    margin-bottom: 20px;
-  }
-  .paper-date {
-    font-size: 10pt;
-    color: #718096;
-  }
-
-  /* TOC */
-  .toc {
-    background: #f0f4f8;
-    border: 1px solid #cbd5e0;
-    border-radius: 6px;
-    padding: 24px 32px;
-    margin-bottom: 48px;
-  }
-  .toc h2 {
-    font-size: 13pt;
-    color: #2d3748;
-    margin-bottom: 16px;
-    border-bottom: 1px solid #cbd5e0;
-    padding-bottom: 8px;
-  }
-  .toc ol {
-    list-style: none;
-    padding: 0;
-  }
-  .toc > ol > li {
-    margin-bottom: 6px;
-    font-weight: bold;
-    font-size: 10.5pt;
-  }
-  .toc > ol > li > ol {
-    margin-top: 4px;
-    margin-left: 20px;
-    list-style: none;
-  }
-  .toc > ol > li > ol > li {
-    font-weight: normal;
-    margin-bottom: 2px;
-    font-size: 10pt;
-  }
-  .toc a {
-    color: #2b6cb0;
-    text-decoration: none;
-  }
-  .toc a:hover { text-decoration: underline; }
-
-  /* Abstract */
-  .abstract-block {
-    background: #f7fafc;
-    border-left: 4px solid #3182ce;
-    padding: 20px 28px;
-    margin-bottom: 48px;
-    border-radius: 0 4px 4px 0;
-  }
-  .abstract-block h2 {
-    font-size: 12pt;
-    color: #2b6cb0;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .abstract-block p {
-    font-size: 10.5pt;
-    margin-bottom: 10px;
-    color: #2d3748;
-  }
-  .keywords {
-    margin-top: 14px;
-    font-size: 10pt;
-    color: #4a5568;
-    font-style: italic;
-  }
-
-  /* Headings */
-  h1.chapter {
-    font-size: 16pt;
-    color: #1a365d;
-    border-bottom: 2px solid #2c5282;
-    padding-bottom: 8px;
-    margin-top: 48px;
-    margin-bottom: 24px;
-  }
-  h2.section {
-    font-size: 13pt;
-    color: #2c5282;
-    margin-top: 32px;
-    margin-bottom: 14px;
-  }
-  h3.subsection {
-    font-size: 11.5pt;
-    color: #2d3748;
-    margin-top: 20px;
-    margin-bottom: 10px;
-    font-style: italic;
-  }
-
-  p {
-    margin-bottom: 12px;
-    text-align: justify;
-  }
-
-  /* Tables */
-  .table-container {
-    margin: 20px 0 28px 0;
-    overflow-x: auto;
-  }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 10pt;
-  }
-  th {
-    background: #2c5282;
-    color: #fff;
-    padding: 8px 12px;
-    text-align: center;
-    font-weight: bold;
-  }
-  td {
-    padding: 7px 12px;
-    border: 1px solid #e2e8f0;
-    text-align: center;
-  }
-  tr:nth-child(even) td { background: #f7fafc; }
-  tr:hover td { background: #ebf4ff; }
-  td:first-child { text-align: left; font-weight: 500; }
-  .table-caption {
-    font-size: 9.5pt;
-    color: #4a5568;
-    margin-top: 6px;
-    text-align: center;
-    font-style: italic;
-  }
-
-  /* Figures */
-  .figure-container {
-    margin: 24px 0 32px 0;
-    text-align: center;
-  }
-  .figure-container img {
-    max-width: 100%;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  }
-  .figure-caption {
-    font-size: 9.5pt;
-    color: #4a5568;
-    margin-top: 8px;
-    text-align: center;
-    font-style: italic;
-    max-width: 80%;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.5;
-  }
-
-  /* Two-column figures */
-  .figure-row {
-    display: flex;
-    gap: 16px;
-    margin: 24px 0 32px 0;
-    justify-content: center;
-    align-items: flex-start;
-  }
-  .figure-row .figure-item {
-    flex: 1;
-    text-align: center;
-    min-width: 0;
-  }
-  .figure-row img {
-    max-width: 100%;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  }
-
-  /* Math */
-  .math-block {
-    background: #f7fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    padding: 14px 20px;
-    margin: 16px 0;
-    font-family: 'Courier New', monospace;
-    font-size: 10pt;
-    color: #2d3748;
-    text-align: center;
-  }
-
-  /* Code / Architecture */
-  .arch-block {
-    background: #2d3748;
-    color: #e2e8f0;
-    border-radius: 4px;
-    padding: 14px 20px;
-    font-family: 'Courier New', monospace;
-    font-size: 9.5pt;
-    margin: 14px 0;
-    text-align: center;
-    letter-spacing: 0.5px;
-  }
-
-  /* Highlight boxes */
-  .highlight-box {
-    background: #fff5f5;
-    border: 1px solid #fc8181;
-    border-left: 4px solid #e53e3e;
-    border-radius: 4px;
-    padding: 14px 18px;
-    margin: 16px 0;
-    font-size: 10.5pt;
-  }
-  .highlight-box.blue {
-    background: #ebf8ff;
-    border-color: #63b3ed;
-    border-left-color: #3182ce;
-  }
-  .highlight-box.green {
-    background: #f0fff4;
-    border-color: #68d391;
-    border-left-color: #38a169;
-  }
-
-  /* Hypothesis list */
-  ol.hypothesis {
-    padding-left: 24px;
-    margin: 12px 0 16px;
-  }
-  ol.hypothesis li {
-    margin-bottom: 8px;
-    font-size: 10.5pt;
-  }
-
-  /* Contribution list */
-  ul.contrib {
-    padding-left: 22px;
-    margin: 12px 0;
-  }
-  ul.contrib li {
-    margin-bottom: 8px;
-    font-size: 10.5pt;
-  }
-
-  /* RQ table */
-  table.rq-table th { background: #4a5568; }
-
-  /* References */
-  .references ol {
-    padding-left: 24px;
-  }
-  .references li {
-    font-size: 10pt;
-    margin-bottom: 10px;
-    line-height: 1.6;
-    color: #2d3748;
-  }
-
-  /* Section divider */
-  hr.section-divider {
-    border: none;
-    border-top: 1px solid #e2e8f0;
-    margin: 40px 0;
-  }
-
-  /* Back to top */
-  .back-to-top {
-    text-align: right;
-    font-size: 9pt;
-    color: #a0aec0;
-    margin-top: 6px;
-  }
-  .back-to-top a { color: #a0aec0; text-decoration: none; }
-
-  /* Sidebar layout */
-  body { margin: 0; }
   .layout { display: flex; min-height: 100vh; }
   .sidebar {
     width: 210px;
@@ -354,18 +49,10 @@
     font-family: sans-serif;
   }
   .sidebar li a:hover { background: #2a4a7f; color: #fff; }
-  .sidebar li a.active {
-    background: #2a4a7f;
-    border-left-color: #63b3ed;
-    color: #fff;
-  }
+  .sidebar li a.active { background: #2a4a7f; border-left-color: #63b3ed; color: #fff; }
   .sidebar li a small { color: #90cdf4; display: block; font-size: 8pt; }
   .sidebar li.sep { border-top: 1px solid #2c5282; margin: 8px 0; }
-  .sidebar-footer {
-    padding: 12px 16px 0;
-    border-top: 1px solid #2c5282;
-    margin-top: 10px;
-  }
+  .sidebar-footer { padding: 12px 16px 0; border-top: 1px solid #2c5282; margin-top: 10px; }
   .sidebar-footer a { color: #90cdf4; font-size: 8.5pt; text-decoration: none; font-family: sans-serif; }
   .sidebar-footer a:hover { color: #fff; }
   .main-content { flex: 1; min-width: 0; }
@@ -373,12 +60,122 @@
     .layout { flex-direction: column; }
     .sidebar { width: 100%; height: auto; position: relative; }
   }
-
   @media print {
-    body { background: white; }
     .sidebar { display: none; }
     .page-wrapper { box-shadow: none; padding: 40px; }
   }
+  .page-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 60px 80px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    min-height: 100vh;
+  }
+  .title-block {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 2px solid #2c5282;
+  }
+  .paper-title {
+    font-size: 18pt;
+    font-weight: bold;
+    line-height: 1.4;
+    color: #1a365d;
+    margin-bottom: 16px;
+  }
+  .paper-date { font-size: 10pt; color: #718096; }
+  .toc {
+    background: #f0f4f8;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    padding: 24px 32px;
+    margin-bottom: 48px;
+  }
+  .toc h2 {
+    font-size: 13pt;
+    color: #2d3748;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #cbd5e0;
+    padding-bottom: 8px;
+  }
+  .toc ol { list-style: none; padding: 0; margin: 0; }
+  .toc > ol > li { margin-bottom: 6px; font-weight: bold; font-size: 10.5pt; }
+  .toc > ol > li > ol {
+    margin-top: 4px;
+    margin-left: 20px;
+    list-style: none;
+  }
+  .toc > ol > li > ol > li {
+    font-weight: normal;
+    margin-bottom: 2px;
+    font-size: 10pt;
+  }
+  .toc > ol > li > ol > li > ol {
+    margin-top: 2px;
+    margin-left: 18px;
+    list-style: none;
+  }
+  .toc > ol > li > ol > li > ol > li {
+    font-weight: normal;
+    margin-bottom: 1px;
+    font-size: 9.5pt;
+    color: #4a5568;
+  }
+  .toc a { color: #2b6cb0; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  h1.chapter {
+    font-size: 16pt;
+    color: #1a365d;
+    border-bottom: 2px solid #2c5282;
+    padding-bottom: 8px;
+    margin-top: 48px;
+    margin-bottom: 24px;
+  }
+  h2.section {
+    font-size: 13pt;
+    color: #2c5282;
+    margin-top: 32px;
+    margin-bottom: 14px;
+  }
+  h3.subsection {
+    font-size: 11.5pt;
+    color: #2d3748;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+  p { margin-bottom: 12px; text-align: justify; }
+  .table-container { margin: 20px 0 28px 0; overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 10pt; }
+  th { background: #2c5282; color: #fff; padding: 8px 12px; text-align: center; font-weight: bold; }
+  td { padding: 7px 12px; border: 1px solid #e2e8f0; text-align: center; }
+  tr:nth-child(even) td { background: #f7fafc; }
+  tr:hover td { background: #ebf4ff; }
+  td:first-child { text-align: left; font-weight: 500; }
+  .figure-container { margin: 24px 0 8px 0; text-align: center; }
+  .figure-container img {
+    max-width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  p.figure-caption {
+    font-size: 9.5pt;
+    color: #4a5568;
+    margin-top: 4px;
+    margin-bottom: 24px;
+    text-align: center;
+    font-style: italic;
+  }
+  ul, ol { padding-left: 24px; margin-bottom: 12px; }
+  li { margin-bottom: 4px; }
+  .mjx-chtml { font-size: 105% !important; }
+  .references-section { margin-top: 40px; }
+  .references-section ol { padding-left: 24px; }
+  .references-section li { font-size: 10pt; margin-bottom: 10px; line-height: 1.6; color: #2d3748; }
+
 </style>
 <script>
   MathJax = {
@@ -393,16 +190,513 @@
 </head>
 <body>
 <div class="layout">
-<nav class="sidebar"><div class="sidebar-header">📋 버전 기록</div><ul><li><a href="v1_original.html">v1 — 원본 초안<br><small>2026-05-27 00:47</small></a></li><li><a href="v2_expanded.html" class="active">v2 — 확장 초안<br><small>2026-05-27 01:27</small></a></li><li><a href="v3_current_docx.html">v3 — 최신 docx 초안<br><small>2026-05-27 01:31</small></a></li><li class="sep"></li><li><a href="../paper_draft.html">HTML 논문 초안<br><small>수식 + 그림 포함</small></a></li></ul><div class="sidebar-footer"><a href="../../index.html">← 변경 이력 홈</a></div></nav>
+<nav class="sidebar">
+  <div class="sidebar-header">📋 버전 기록</div>
+  <ul>
+    <li><a href="v1_original.html">v1 — 초기 목차 초안<br><small>2026-05-27 00:47</small></a></li>
+    <li><a href="v2_expanded.html" class="active">v2 — 이론 + 수식 확장<br><small>2026-05-27 01:31</small></a></li>
+    <li><a href="v3_current_docx.html">v3 — 현재 작업중 docx<br><small>2026-05-27 (진행중)</small></a></li>
+    <li class="sep"></li>
+    <li><a href="../paper_draft.html">HTML 논문 초안<br><small>수식 + 그림 포함</small></a></li>
+  </ul>
+  <div class="sidebar-footer"><a href="../../index.html">← 변경 이력 홈</a></div>
+</nav>
 <div class="main-content">
 <div class="page-wrapper">
+
 <div class="title-block" id="top">
-  <div class="paper-date">2026-05-27 01:27</div>
   <div class="paper-title">Reducing Extreme Flood Underestimation with<br>Probabilistic Extensions of Multi-Basin LSTM Models</div>
+  <div class="paper-date">버전: v2 (이론 + 수식 확장) &nbsp;|&nbsp; 2026-05-27 01:31 &nbsp;|&nbsp; 상태: 초안</div>
 </div>
-<div class="toc"><h2>목차</h2><ol><li><a href="#_Toc230737563">초록 (Abstract)</a></li><li><a href="#_Toc230737564">제 1장 서론</a><ol><li><a href="#_Toc230737565">1.1 연구 배경</a></li><li><a href="#_Toc230737566">1.2 연구 목적과 가설</a></li><li><a href="#_Toc230737567">1.3 연구 기여</a></li></ol></li><li><a href="#_Toc230737568">제 2장 이론적 배경</a><ol><li><a href="#_Toc230737569">2.1 Multi-basin LSTM</a></li><li><a href="#_Toc230737570">2.2 Model 1: deterministic baseline</a></li><li><a href="#_Toc230737571">2.3 Model 2: probabilistic quantile extension</a></li><li><a href="#_Toc230737572">2.4 Quantile loss</a></li><li><a href="#_Toc230737573">2.5 평가 지표</a></li></ol></li><li><a href="#_Toc230737574">제 3장 데이터와 실험 방법</a><ol><li><a href="#_Toc230737575">3.1 CAMELSH hourly dataset</a></li><li><a href="#_Toc230737576">3.2 DRBC regional holdout</a></li><li><a href="#_Toc230737577">3.3 Basin split과 subset300 training design</a></li><li><a href="#_Toc230737578">3.4 Temporal split과 seed protocol</a></li><li><a href="#_Toc230737579">3.5 Primary checkpoint selection</a></li><li><a href="#_Toc230737580">3.6 Results 분석 질문</a></li></ol></li><li><a href="#_Toc230737581">제 4장 실험 결과</a><ol><li><a href="#_Toc230737582">4.1 RQ-1: q50 central performance</a></li><li><a href="#_Toc230737583">4.2 RQ-2: upper quantile의 peak underestimation 완화</a></li><li><a href="#_Toc230737584">4.3 RQ-3: recall 증가의 cost</a></li><li><a href="#_Toc230737585">4.4 RQ-4: basin 및 event-type heterogeneity</a></li><li><a href="#_Toc230737586">4.5 RQ-5: calibration, sharpness, and quantile sanity</a></li></ol></li><li><a href="#_Toc230737587">제 5장 논의</a><ol><li><a href="#_Toc230737588">5.1 Output design이 peak underestimation에 미치는 영향</a></li><li><a href="#_Toc230737589">5.2 Central prediction과 upper-tail output의 역할 분리</a></li><li><a href="#_Toc230737590">5.3 운영적 trade-off</a></li><li><a href="#_Toc230737591">5.4 한계</a></li></ol></li><li><a href="#_Toc230737592">제 6장 결론</a></li><li><a href="#_Toc230737593">참고문헌</a></li></ol></div>
-<div class="abstract-block"><h2>초록 (Abstract)</h2><p>Multi-basin LSTM은 large-sample hydrology에서 강력한 streamflow 예측 성능을 보였지만, 홍수 경보에서 중요한 극한 첨두유량(extreme flood peak)은 여전히 과소추정되는 경우가 많다. 본 연구는 이 문제가 LSTM backbone 자체의 한계라기보다 <strong>output design</strong>의 한계에서 크게 비롯된다는 가설을 검증한다. 이를 위해 동일한 CudaLSTM backbone과 동일한 입력·split·seed 조건을 고정하고, 단일 deterministic regression head를 쓰는 Model 1과 q50/q90/q95/q99를 동시에 출력하는 probabilistic quantile head Model 2를 비교하였다.</p><p>실험은 CAMELSH hourly dataset을 사용하였다. 모델은 Delaware River Basin Commission (DRBC) 경계 밖의 non-DRBC basin에서 학습하고, DRBC basin은 regional holdout test region으로 분리하였다. 본문 결과는 expanded DRBC observed test split 85개 basin, test period 2014–2016, paired seed 111/222/444를 기준으로 한다. Model 2의 q50은 Model 1 대비 중앙예측 성능을 유지하거나 개선하였다(NSE basin-median delta +0.149, RMSE −0.273). 더 중요한 결과는 upper quantile에서 나타났다. Q99 event scope에서 q99의 event peak under-deficit median은 0.018로 감소했고, Q99 threshold recall은 q50 0.069에서 q99 0.583으로 증가하였다. 다만 q99는 calibrated 99% predictive quantile은 아니며, all-hour empirical coverage는 0.787로 nominal 0.99보다 낮았다. 따라서 본 연구의 결론은 Model 2가 완전한 probabilistic forecast를 제공한다는 것이 아니라, <strong>tail-aware upper quantile output이 peak underestimation을 줄이는 운영적 decision output으로 기능한다</strong>는 것이다.</p></div><h1 class="chapter"><a id="제-1장-서론"></a><a id="_Toc230737564"></a>제 1장 서론</h1><h2 class="section"><a id="연구-배경"></a><a id="_Toc230737565"></a>1.1 연구 배경</h2><p>하천 유량 예측에서 평상시 유량을 잘 맞추는 것은 중요하지만, 실제 재난 대응과 홍수 경보에서는 드물게 발생하는 첨두유량을 놓치지 않는 것이 더 직접적인 안전 문제로 이어진다. 그러나 deterministic LSTM은 전체 기간의 평균적 오차를 줄이는 데에는 강하지만, rare high-flow event에서는 peak를 낮게 예측하는 경향을 보일 수 있다. 이는 training objective가 전체 시간의 bulk flow를 강하게 반영하고, 극단값은 빈도가 낮아 loss에서 충분히 강조되지 않기 때문이다.</p><p>본 연구는 이 문제를 LSTM을 더 복잡하게 만들 것인가가 아니라 같은 backbone의 출력을 어떻게 설계할 것인가의 문제로 다룬다. 즉 deterministic point estimate 하나만 출력하는 대신, 같은 시점에서 중앙예측과 여러 수준의 upper-tail output을 동시에 제공하면 extreme peak underestimation을 줄일 수 있는지 확인한다.</p><h2 class="section"><a id="연구-목적과-가설"></a><a id="_Toc230737566"></a>1.2 연구 목적과 가설</h2><p>본 논문의 핵심 목적은 다음 한 문장으로 요약된다.</p><p>Multi-basin LSTM 기반 hourly streamflow 예측에서 probabilistic quantile head만 추가해도 deterministic baseline의 extreme flood peak underestimation을 줄일 수 있는가?</p><p>이를 위해 다음 가설을 검증한다.</p><ol><li>Model 2의 q50은 Model 1 deterministic output과 비교 가능한 central prediction으로 기능해야 한다.</li><li>q90/q95/q99는 τ가 커질수록 peak underestimation을 줄이는 방향으로 작동해야 한다.</li><li>peak underestimation 감소에는 false-positive 또는 over-prediction cost가 동반되므로, recall만이 아니라 cost도 함께 평가해야 한다.</li><li>q99는 return-period flood나 양방향 prediction interval이 아니라 one-sided upper-tail decision output으로 해석해야 한다.</li></ol><h2 class="section"><a id="연구-기여"></a><a id="_Toc230737567"></a>1.3 연구 기여</h2><p>본 연구의 기여는 세 가지다.</p><ol><li><strong>공정한 Model 1 vs Model 2 비교 구조</strong>: backbone, 입력 변수, basin split, temporal split, seed를 고정하고 output head와 loss만 바꾸어 probabilistic head의 효과를 분리하였다.</li><li><strong>DRBC regional holdout 평가</strong>: non-DRBC basin에서 학습한 global multi-basin model을 DRBC basin에서 평가하여, spatial generalization 조건에서 peak underestimation을 분석하였다.</li><li><strong>quantile output 해석 framework 제시</strong>: q50은 central prediction, q90/q95/q99는 보수성 수준이 다른 upper-tail decision output으로 구분하고, calibration claim과 operational peak-capture claim을 분리하였다.</li></ol><h1 class="chapter"><a id="제-2장-이론적-배경"></a><a id="_Toc230737568"></a>제 2장 이론적 배경</h1><h2 class="section"><a id="multi-basin-lstm"></a><a id="_Toc230737569"></a>2.1 Multi-basin LSTM</h2><p>LSTM(Long Short-Term Memory)은 강수·기온·복사 등 dynamic forcing의 시간적 의존성을 학습하는 recurrent neural network이다. 수문 예측에서는 과거 forcing sequence와 basin static attributes를 함께 사용해 basin별 rainfall-runoff response를 예측한다. 본 연구의 두 모델은 모두 같은 CudaLSTM backbone을 사용한다.</p><p><div class="figure-container" style="background:#f0f4f8;padding:20px;text-align:center;color:#718096;font-size:9pt;border:1px dashed #cbd5e0;border-radius:4px;">[그림 — docx 원본 참조]</div></p><p>Model 1과 Model 2의 구조 비교 모식도</p><p><div class="figure-container" style="background:#f0f4f8;padding:20px;text-align:center;color:#718096;font-size:9pt;border:1px dashed #cbd5e0;border-radius:4px;">[그림 — docx 원본 참조]</div></p><p>LSTM의 기상·유역 특성 입력 및 출력 시퀀스 구조</p><h2 class="section"><a id="model-1-deterministic-baseline"></a><a id="_Toc230737570"></a>2.2 Model 1: deterministic baseline</h2><p>Model 1은 매 시점 하나의 streamflow 값을 예측하는 deterministic regression model이다.</p><p>forcing + static attributes → CudaLSTM backbone → regression head → Q_hat</p><p>이 모델은 baseline이다. 전체 hydrograph의 평균적 적합도를 잘 확보할 수 있지만, rare high-flow peak에서는 conditional mean 쪽으로 수축하면서 underestimation이 발생할 수 있다.</p><h2 class="section"><a id="model-2-probabilistic-quantile-extension"></a><a id="_Toc230737571"></a>2.3 Model 2: probabilistic quantile extension</h2><p>Model 2는 Model 1과 같은 backbone을 사용하되, head만 quantile output으로 바꾼다.</p><p>forcing + static attributes → CudaLSTM backbone → quantile head → q50, q90, q95, q99</p><p>q50은 conditional median으로, Model 1 deterministic output과 가장 직접적으로 비교되는 central prediction이다. q90/q95/q99는 lower quantile이 없는 one-sided upper-tail output이다. 따라서 본 연구에서는 이를 prediction interval이나 return-period estimate로 해석하지 않는다. 특히 q99는 100-year flood가 아니라, 해당 시점 조건에서 모델이 내는 가장 보수적인 upper-tail decision output이다.</p><h2 class="section"><a id="quantile-loss"></a><a id="_Toc230737572"></a>2.4 Quantile loss</h2><p>Model 2는 quantile별 pinball loss를 사용한다. 관측값을 , τ 분위 예측값을 라고 할 때 pinball loss는 다음과 같다.</p><p>Model 2의 전체 loss는 τ 집합 에 대해 weighted pinball loss를 평균한 값이다.</p><p>τ가 클수록 관측값이 예측값보다 큰 경우, 즉 under-prediction에 더 큰 penalty를 준다. 이 때문에 upper quantile은 peak underestimation을 줄이는 방향으로 학습된다.</p><h2 class="section"><a id="평가-지표"></a><a id="_Toc230737573"></a>2.5 평가 지표</h2><p>본 연구는 전체 성능과 flood-specific 성능을 분리한다.</p><ul><li><strong>NSE</strong>: hydrograph 전체 적합도. 1에 가까울수록 좋다.</li><li><strong>KGE</strong>: correlation, variability, bias를 함께 보는 지표.</li><li><strong>MAE/RMSE</strong>: 평균 절대오차와 평균 제곱근 오차.</li><li><strong>α event peak under-deficit</strong>: event peak에서 얼마나 부족하게 예측했는지.</li><li><strong>β ±6h window peak capture</strong>: 관측 peak 주변 6시간 창에서 예측 peak가 관측 peak를 얼마나 포착하는지.</li><li><strong>δ Q99 threshold recall</strong>: 관측값이 basin별 Q99 threshold 이상일 때 모델 output도 이를 넘는 비율.</li><li><strong>FAR (false alarm rate)</strong>: 관측값은 Q99 미만인데 모델 output이 Q99를 초과한 비율.</li><li><strong>Empirical one-sided coverage</strong>: 관측값이  이하에 들어오는 비율. 이는 calibration 진단이지만, high-flow 조건부 subset에서는 calibration이 아니라 tail hit-rate로 해석한다.</li></ul><h1 class="chapter"><a id="제-3장-데이터와-실험-방법"></a><a id="_Toc230737574"></a>제 3장 데이터와 실험 방법</h1><h2 class="section"><a id="camelsh-hourly-dataset"></a><a id="_Toc230737575"></a>3.1 CAMELSH hourly dataset</h2><p>본 연구는 CAMELSH hourly dataset을 사용한다. hourly 해상도는 daily dataset보다 빠른 flood response와 첨두 timing을 더 직접적으로 분석할 수 있다. Dynamic forcing에는 강수, 기온, 복사, 습도, 풍속 등 hourly meteorological variables를 사용하고, static attributes에는 area, slope, aridity, snow fraction, soil depth, permeability, forest fraction, baseflow index 등을 사용한다. Lagged observed streamflow는 본 비교축에 포함하지 않았다. 이는 deterministic baseline이 과도하게 강해져 probabilistic head의 순수 효과를 해석하기 어려워지는 것을 막기 위한 통제다.</p><h2 class="section"><a id="drbc-regional-holdout"></a><a id="_Toc230737576"></a>3.2 DRBC regional holdout</h2><p>Delaware River Basin Commission (DRBC) 경계는 본 연구의 regional holdout test region이다. 모델은 DRBC 내부 basin을 학습하지 않고, DRBC 밖 non-DRBC basin에서 global multi-basin model로 학습된다. 따라서 본 실험은 Delaware 전용 regional model이 아니라, 다른 지역에서 학습된 multi-basin representation이 DRBC에 일반화되는지를 평가한다.</p><p><div class="figure-container" style="background:#f0f4f8;padding:20px;text-align:center;color:#718096;font-size:9pt;border:1px dashed #cbd5e0;border-radius:4px;">[그림 — docx 원본 참조]</div></p><p>미국 전역 CAMELSH basin 분포와 DRBC holdout region</p><h2 class="section"><a id="basin-split과-subset300-training-design"></a><a id="_Toc230737577"></a>3.3 Basin split과 subset300 training design</h2><p>Training pool은 outlet이 DRBC 밖에 있고 DRBC polygon overlap이 0.1 이하인 quality-pass non-DRBC basin으로 구성하였다. Scaling pilot에서는 basin 수 100/300/600을 비교했고, non-DRBC validation 성능, static attribute distribution, observed-flow event-response diagnostics, random same-size subset benchmark, compute cost를 함께 고려해 subset300을 채택하였다. 이 선택은 DRBC test metric을 보고 결정하지 않았다.</p><p><div class="figure-container" style="background:#f0f4f8;padding:20px;text-align:center;color:#718096;font-size:9pt;border:1px dashed #cbd5e0;border-radius:4px;">[그림 — docx 원본 참조]</div></p><p>Basin screening과 train/validation/test split 구조</p><p><div class="figure-container" style="background:#f0f4f8;padding:20px;text-align:center;color:#718096;font-size:9pt;border:1px dashed #cbd5e0;border-radius:4px;">[그림 — docx 원본 참조]</div></p><p>Subset300 대표성 진단 heatmap</p><h2 class="section"><a id="temporal-split과-seed-protocol"></a><a id="_Toc230737578"></a>3.4 Temporal split과 seed protocol</h2><p>공식 시간 경계는 다음과 같다.</p><div class="table-container"><table><thead><tr><th><p>구분</p></th><th><p>기간</p></th><th><p>역할</p></th></tr></thead><tbody><tr><td><p>Train</p></td><td><p>2000-01-01 – 2010-12-31</p></td><td><p>non-DRBC basin에서 모델 학습</p></td></tr><tr><td><p>Validation</p></td><td><p>2011-01-01 – 2013-12-31</p></td><td><p>checkpoint 선택</p></td></tr><tr><td><p>Test</p></td><td><p>2014-01-01 – 2016-12-31</p></td><td><p>DRBC holdout 평가</p></td></tr></tbody></table></div><p>Model 1과 Model 2는 paired seed 111/222/444를 사용한다. Model 2 seed 333은 NaN loss로 중단되었으므로 final aggregate에서 제외하고, 공정한 paired-seed 비교를 위해 Model 1 seed 333도 제외하였다.</p><h2 class="section"><a id="primary-checkpoint-selection"></a><a id="_Toc230737579"></a>3.5 Primary checkpoint selection</h2><p>Model 1의 loss는 NSE 계열이고 Model 2의 loss는 pinball loss이므로 raw validation loss를 모델 간 checkpoint 선택 기준으로 직접 비교할 수 없다. 따라서 primary checkpoint는 non-DRBC validation median NSE를 기준으로 선택하였다. DRBC test 결과를 보고 checkpoint를 다시 고르지 않았다.</p><h2 class="section"><a id="results-분석-질문"></a><a id="_Toc230737580"></a>3.6 Results 분석 질문</h2><p>본 논문은 결과를 다음 연구 질문으로 나누어 해석한다.</p><div class="table-container"><table><thead><tr><th><p>RQ</p></th><th><p>질문</p></th><th><p>핵심 산출물</p></th></tr></thead><tbody><tr><td><p>RQ-1</p></td><td><p>q50가 central performance를 유지하는가</p></td><td><p>NSE, KGE, MAE, RMSE paired delta</p></td></tr><tr><td><p>RQ-2</p></td><td><p>upper quantile이 peak underestimation을 줄이는가</p></td><td><p>α, β, δ</p></td></tr><tr><td><p>RQ-3</p></td><td><p>그 대가로 false-positive cost가 얼마나 생기는가</p></td><td><p>FAR, over-prediction magnitude</p></td></tr><tr><td><p>RQ-4</p></td><td><p>basin/event type에 따라 효과가 다른가</p></td><td><p>M1 NSE tier, NOAA event type</p></td></tr><tr><td><p>RQ-5</p></td><td><p>quantile output은 calibrated and sharp한가</p></td><td><p>coverage, pinball, spread, crossing</p></td></tr></tbody></table></div><h1 class="chapter"><a id="제-4장-실험-결과"></a><a id="_Toc230737581"></a>제 4장 실험 결과</h1><h2 class="section"><a id="rq-1-q50-central-performance"></a><a id="_Toc230737582"></a>4.1 RQ-1: q50 central performance</h2><p>Model 2의 q50은 Model 1 대비 central prediction 성능을 유지하였다. Expanded DRBC observed test 85개 basin에서 basin-median 기준 NSE는 Model 1 −0.031, Model 2 q50 0.225였고, paired delta는 +0.149였다. RMSE와 MAE도 각각 −0.273, −0.197만큼 개선되었다.</p><div class="table-container"><table><thead><tr><th><p>Metric</p></th><th><p>Model 1 median</p></th><th><p>Model 2 q50 median</p></th><th><p>Δ(q50 − M1)</p></th></tr></thead><tbody><tr><td><p>NSE</p></td><td><p>−0.031</p></td><td><p>0.225</p></td><td><p>+0.149</p></td></tr><tr><td><p>KGE</p></td><td><p>0.082</p></td><td><p>0.158</p></td><td><p>+0.041</p></td></tr><tr><td><p>Bias</p></td><td><p>−0.459</p></td><td><p>−0.948</p></td><td><p>−0.437</p></td></tr><tr><td><p>MAE</p></td><td><p>2.584</p></td><td><p>2.509</p></td><td><p>−0.197</p></td></tr><tr><td><p>RMSE</p></td><td><p>4.850</p></td><td><p>4.393</p></td><td><p>−0.273</p></td></tr></tbody></table></div><p>Bias는 q50에서 더 negative하게 나타났다. 이는 q50이 conditional median을 따르고, skewed streamflow distribution에서는 mean과 median이 다를 수 있기 때문이다. 따라서 q50의 bias만으로 Model 2가 실패했다고 해석하기보다, upper quantile이 high-flow tail에서 어떤 보완 역할을 하는지 함께 봐야 한다.</p><p><div class="figure-container" style="background:#f0f4f8;padding:20px;text-align:center;color:#718096;font-size:9pt;border:1px dashed #cbd5e0;border-radius:4px;">[그림 — docx 원본 참조]</div></p><p>RQ-1 central metric comparison</p><h2 class="section"><a id="Xad6b93e2beb251165c8516a7ad23d0effddbd0f"></a><a id="_Toc230737583"></a>4.2 RQ-2: upper quantile의 peak underestimation 완화</h2><p>Q99 event scope에서 upper quantile은 τ가 커질수록 peak underestimation을 줄였다. Event peak under-deficit α의 basin median은 q50 0.657에서 q99 0.018로 감소하였다. 이는 q99가 event peak 시점에서 관측 peak를 거의 따라잡는 수준까지 under-deficit을 줄였다는 뜻이다.</p><div class="table-container"><table><thead><tr><th><p>Output</p></th><th><p>α peak under-deficit</p></th><th><p>β ±6h window capture</p></th><th><p>δ Q99 recall</p></th></tr></thead><tbody><tr><td><p>Model 1</p></td><td><p>0.588</p></td><td><p>0.519</p></td><td><p>0.143</p></td></tr><tr><td><p>q50</p></td><td><p>0.657</p></td><td><p>0.444</p></td><td><p>0.069</p></td></tr><tr><td><p>q90</p></td><td><p>0.376</p></td><td><p>0.733</p></td><td><p>0.280</p></td></tr><tr><td><p>q95</p></td><td><p>0.272</p></td><td><p>0.920</p></td><td><p>0.379</p></td></tr><tr><td><p>q99</p></td><td><p><strong>0.018</strong></p></td><td><p><strong>1.306</strong></p></td><td><p><strong>0.583</strong></p></td></tr></tbody></table></div><p>β는 q99에서 1.306으로 1을 넘었다. 이는 peak window 안에서 q99가 관측 peak를 초과하는 보수적 output을 낼 수 있음을 뜻한다. δ recall도 q50 0.069에서 q99 0.583으로 증가했다. 즉 q99는 high-flow exceedance를 더 많이 포착하지만, 이는 다음 절의 cost와 함께 해석해야 한다.</p><p><div class="figure-container" style="background:#f0f4f8;padding:20px;text-align:center;color:#718096;font-size:9pt;border:1px dashed #cbd5e0;border-radius:4px;">[그림 — docx 원본 참조]</div></p><p>RQ-2 event peak under-deficit by quantile</p><p><div class="figure-container" style="background:#f0f4f8;padding:20px;text-align:center;color:#718096;font-size:9pt;border:1px dashed #cbd5e0;border-radius:4px;">[그림 — docx 원본 참조]</div></p><p>RQ-2 Q99 threshold recall by quantile</p><p>NOAA confirmed flood event subset에서도 같은 방향이 확인되었다. Test-period overlap은 21개 basin, 65 events로 작지만, q99는 α를 0.172까지 낮추고 β를 0.977까지 높였다.</p><h2 class="section"><a id="rq-3-recall-증가의-cost"></a><a id="_Toc230737584"></a>4.3 RQ-3: recall 증가의 cost</h2><p>Upper quantile은 peak underestimation을 줄이는 대신 false-positive와 over-prediction magnitude를 증가시켰다.</p><div class="table-container"><table><thead><tr><th><p>Output</p></th><th><p>Recall δ</p></th><th><p>FAR</p></th><th><p>Over-prediction magnitude</p></th></tr></thead><tbody><tr><td><p>q50</p></td><td><p>0.069</p></td><td><p>0.0007</p></td><td><p>1.47</p></td></tr><tr><td><p>q90</p></td><td><p>0.280</p></td><td><p>0.0042</p></td><td><p>2.19</p></td></tr><tr><td><p>q95</p></td><td><p>0.379</p></td><td><p>0.0063</p></td><td><p>2.29</p></td></tr><tr><td><p>q99</p></td><td><p><strong>0.583</strong></p></td><td><p><strong>0.0164</strong></p></td><td><p><strong>3.44</strong></p></td></tr></tbody></table></div><p>q50에서 q99로 갈 때 recall은 약 8배 증가했지만 FAR은 약 23배 증가했다. 따라서 q99는 모든 상황에서 자동으로 최선인 output이 아니라, 더 높은 recall을 원할 때 선택할 수 있는 conservative decision output이다.</p><p><div class="figure-container" style="background:#f0f4f8;padding:20px;text-align:center;color:#718096;font-size:9pt;border:1px dashed #cbd5e0;border-radius:4px;">[그림 — docx 원본 참조]</div></p><p>RQ-3 recall–cost trade-off</p><h2 class="section"><a id="rq-4-basin-및-event-type-heterogeneity"></a><a id="_Toc230737585"></a>4.4 RQ-4: basin 및 event-type heterogeneity</h2><p>M1 NSE 기준 basin을 top/mid/bottom tier로 나누면, Model 1이 약한 basin에서 q99의 peak underestimation 완화 효과가 가장 크게 나타났다. Bottom tier에서는 q99의 α가 0.00, δ recall이 0.95까지 증가했지만 FAR도 0.0604로 가장 높았다. 반대로 top tier에서는 q99도 α 0.22의 under-deficit을 남겼고, recall은 0.39였다.</p><div class="table-container"><table><thead><tr><th><p>Tier</p></th><th><p>q50 α</p></th><th><p>q99 α</p></th><th><p>q50 δ</p></th><th><p>q99 δ</p></th><th><p>q99 FAR</p></th></tr></thead><tbody><tr><td><p>Top</p></td><td><p>0.74</p></td><td><p>0.22</p></td><td><p>0.02</p></td><td><p>0.39</p></td><td><p>0.0077</p></td></tr><tr><td><p>Mid</p></td><td><p>0.68</p></td><td><p>0.00</p></td><td><p>0.07</p></td><td><p>0.62</p></td><td><p>0.0115</p></td></tr><tr><td><p>Bottom</p></td><td><p>0.46</p></td><td><p>0.00</p></td><td><p>0.26</p></td><td><p>0.95</p></td><td><p>0.0604</p></td></tr></tbody></table></div><p>NOAA event-type 기준으로는 Flash Flood가 가장 어려운 category였다. Flash Flood에서는 q99에서도 α가 0.42 남았지만, riverine Flood category에서는 q99 α가 0.06까지 낮아졌다. 즉 upper quantile head는 전반적으로 peak underestimation을 줄이지만, 짧고 빠른 flash flood peak는 여전히 timing과 forcing resolution의 한계가 남는다.</p><p><div class="figure-container" style="background:#f0f4f8;padding:20px;text-align:center;color:#718096;font-size:9pt;border:1px dashed #cbd5e0;border-radius:4px;">[그림 — docx 원본 참조]</div></p><p>RQ-4a basin tier heterogeneity</p><p><div class="figure-container" style="background:#f0f4f8;padding:20px;text-align:center;color:#718096;font-size:9pt;border:1px dashed #cbd5e0;border-radius:4px;">[그림 — docx 원본 참조]</div></p><p>RQ-4b event-type heterogeneity</p><h2 class="section"><a id="X52e552122a986e688c17915e748c0f9cdd48ebd"></a><a id="_Toc230737586"></a>4.5 RQ-5: calibration, sharpness, and quantile sanity</h2><p>Model 2의 quantile output은 peak decision output으로는 유용했지만, nominal level에 완전히 calibrated되지는 않았다. All-hour empirical one-sided coverage는 모든 τ에서 nominal보다 낮았다.</p><div class="table-container"><table><thead><tr><th><p>Output</p></th><th><p>Nominal τ</p></th><th><p>Empirical coverage</p></th><th><p>Coverage error</p></th></tr></thead><tbody><tr><td><p>q50</p></td><td><p>0.50</p></td><td><p>0.339</p></td><td><p>−0.161</p></td></tr><tr><td><p>q90</p></td><td><p>0.90</p></td><td><p>0.506</p></td><td><p>−0.394</p></td></tr><tr><td><p>q95</p></td><td><p>0.95</p></td><td><p>0.638</p></td><td><p>−0.312</p></td></tr><tr><td><p>q99</p></td><td><p>0.99</p></td><td><p>0.787</p></td><td><p>−0.203</p></td></tr></tbody></table></div><p>따라서 q99를 calibrated 99% predictive quantile이라고 부르면 안 된다. 대신 본 연구에서는 q99를 high-flow tail에서 underestimation을 줄이는 one-sided upper-tail decision output으로 해석한다. Quantile crossing check에서는 q90 &lt; q50, q95 &lt; q90, q99 &lt; q95가 모두 0 row로 나타나 monotonicity sanity는 통과하였다.</p><p><div class="figure-container" style="background:#f0f4f8;padding:20px;text-align:center;color:#718096;font-size:9pt;border:1px dashed #cbd5e0;border-radius:4px;">[그림 — docx 원본 참조]</div></p><p>All-hour one-sided quantile calibration</p><h1 class="chapter"><a id="제-5장-논의"></a><a id="_Toc230737587"></a>제 5장 논의</h1><h2 class="section"><a id="X0386af23465611cbfffa745469ce0281dc116f9"></a><a id="_Toc230737588"></a>5.1 Output design이 peak underestimation에 미치는 영향</h2><p>결과는 본 연구의 핵심 가설을 지지한다. 같은 backbone을 유지해도 head를 deterministic point estimate에서 quantile output으로 바꾸면 upper-tail peak underestimation이 크게 줄었다. 특히 q99는 Q99 event scope에서 α를 거의 0에 가깝게 낮추고, Q99 threshold recall을 0.583까지 끌어올렸다. 이는 extreme peak 문제를 해결하기 위해 항상 더 복잡한 backbone이나 physics-guided core가 먼저 필요한 것은 아니라는 점을 보여준다.</p><h2 class="section"><a id="X850fcd18902625256276d026c082fe6adb5aac8"></a><a id="_Toc230737589"></a>5.2 Central prediction과 upper-tail output의 역할 분리</h2><p>q50은 central hydrograph를 담당하고, q90/q95/q99는 점점 보수적인 decision output으로 읽어야 한다. q50이 high-flow에서 under-bias를 보이는 것은 upper-tail output이 필요한 이유이기도 하다. 따라서 Model 2를 평가할 때 q50 하나만 Model 1과 비교하면 probabilistic head의 핵심 장점을 놓치게 된다.</p><h2 class="section"><a id="운영적-trade-off"></a><a id="_Toc230737590"></a>5.3 운영적 trade-off</h2><p>q99는 peak underestimation을 줄이지만 false-positive cost도 증가시킨다. 이 결과는 q99를 항상 최선의 forecast라고 주장하기보다, risk tolerance가 높은 상황에서 사용할 수 있는 conservative alert level로 해석해야 함을 의미한다. 실제 홍수 경보에서는 q90/q95/q99 중 어느 output을 사용할지는 missed peak cost와 false alarm cost의 상대적 중요도에 따라 달라진다.</p><h2 class="section"><a id="한계"></a><a id="_Toc230737591"></a>5.4 한계</h2><p>첫째, 현재 quantile set은 q50/q90/q95/q99만 포함하므로 lower quantile이 없다. 따라서 본 연구는 prediction interval, interval score, Winkler score 같은 양방향 uncertainty evaluation을 수행하지 않는다. 둘째, q99의 empirical coverage는 nominal 0.99보다 낮아 완전한 calibration을 주장할 수 없다. 셋째, Flash Flood category에서는 q99도 상당한 residual under-deficit을 남겼다. 이는 hourly forcing, basin response speed, routing/timing representation의 한계와 관련될 수 있다. 넷째, physics-guided hybrid core는 본 논문의 공식 비교축이 아니라 future work로 남긴다.</p><h1 class="chapter"><a id="제-6장-결론"></a><a id="_Toc230737592"></a>제 6장 결론</h1><p>본 연구는 CAMELSH hourly dataset과 DRBC regional holdout 조건에서 deterministic multi-basin LSTM과 probabilistic quantile LSTM을 비교하였다. 결과적으로 Model 2의 q50은 central prediction 성능을 유지했고, q90/q95/q99는 τ가 커질수록 extreme peak underestimation을 줄였다. 특히 q99는 Q99 event peak under-deficit을 0.018까지 낮추고 Q99 threshold recall을 0.583까지 높였다. 그러나 q99의 all-hour empirical coverage는 0.787로 nominal 0.99에 미치지 못했으므로 calibrated 99% predictive quantile로 해석해서는 안 된다.</p><p>따라서 본 논문의 핵심 결론은 다음과 같다.</p><p>Probabilistic quantile head는 deterministic LSTM의 extreme flood peak underestimation을 줄이는 효과적인 output design이며, q90/q95/q99는 calibration claim이 아니라 recall–cost trade-off를 조절하는 upper-tail decision outputs로 해석해야 한다.</p><p>후속 연구에서는 lower quantile을 포함한 full interval forecast, quantile calibration 개선, flash flood timing error 완화, 그리고 physics-guided conceptual core를 통한 routing/state representation 보완을 검토할 수 있다.</p><h1 class="chapter">참고문헌</h1><div class="references"><ol><ul><li>Addor, N., Newman, A. J., Mizukami, N., and Clark, M. P. (2017). The CAMELS data set: catchment attributes and meteorology for large-sample studies. <em>Hydrology and Earth System Sciences</em>, 21, 5293–5313.</li><li>Frame, J. M., Kratzert, F., Klotz, D., et al. (2022). Deep learning rainfall-runoff predictions of extreme events. <em>Hydrology and Earth System Sciences</em>, 26, 3377–3392.</li><li>Klotz, D., Kratzert, F., Gauch, M., et al. (2022). Uncertainty estimation with deep learning for rainfall-runoff modeling. <em>Hydrology and Earth System Sciences</em>, 26, 1673–1693.</li><li>Knoben, W. J. M., Freer, J. E., and Woods, R. A. (2019). Inherent benchmark or not? Comparing Nash-Sutcliffe and Kling-Gupta efficiency scores. <em>Hydrology and Earth System Sciences</em>, 23, 4323–4331.</li><li>Kratzert, F., Klotz, D., Brenner, C., Schulz, K., and Herrnegger, M. (2018). Rainfall-runoff modelling using Long Short-Term Memory networks. <em>Hydrology and Earth System Sciences</em>, 22, 6005–6022.</li><li>Kratzert, F., Klotz, D., Shalev, G., et al. (2019). Towards learning universal, regional, and local hydrological behaviors via machine learning applied to large-sample datasets. <em>Hydrology and Earth System Sciences</em>, 23, 5089–5110.</li><li>Kratzert, F., Klotz, D., Herrnegger, M., et al. (2019). Toward improved predictions in ungauged basins: exploiting the power of machine learning. <em>Water Resources Research</em>, 55, 11344–11354.</li><li>Mizukami, N., Rakovec, O., Newman, A. J., et al. (2019). On the choice of calibration metrics for high-flow estimation using hydrologic models. <em>Hydrology and Earth System Sciences</em>, 23, 2601–2614.</li><li>Tran, H., et al. (2025). CAMELSH: A large-sample hourly hydrometeorological dataset and attributes at watershed-scale for CONUS. Manuscript/preprint referenced in project literature notes.</li></ul></ol></div>
-<div class="back-to-top"><a href="#top">↑ 맨 위로</a></div>
-</div></div></div>
+
+<div class="toc">
+<h2>목차 (Table of Contents)</h2>
+<ol>
+<li><a href="#초록-abstract">초록 (Abstract)</a>
+<li><a href="#제-1장-서론">제 1장 서론</a>
+<ol>
+<li><a href="#연구-배경">1.1 연구 배경</a>
+<li><a href="#연구-목적과-가설">1.2 연구 목적과 가설</a>
+<li><a href="#연구-기여">1.3 연구 기여</a>
+</li></ol>
+<li><a href="#제-2장-이론적-배경">제 2장 이론적 배경</a>
+<ol>
+<li><a href="#multi-basin-lstm">2.1 Multi-basin LSTM</a>
+<li><a href="#model-1-deterministic-baseline">2.2 Model 1: deterministic baseline</a>
+<li><a href="#model-2-probabilistic-quantile-extension">2.3 Model 2: probabilistic quantile extension</a>
+<li><a href="#quantile-loss">2.4 Quantile loss</a>
+<li><a href="#평가-지표">2.5 평가 지표</a>
+</li></ol>
+<li><a href="#제-3장-데이터와-실험-방법">제 3장 데이터와 실험 방법</a>
+<ol>
+<li><a href="#camelsh-hourly-dataset">3.1 CAMELSH hourly dataset</a>
+<li><a href="#drbc-regional-holdout">3.2 DRBC regional holdout</a>
+<li><a href="#basin-split과-subset300-training-design">3.3 Basin split과 subset300 training design</a>
+<li><a href="#temporal-split과-seed-protocol">3.4 Temporal split과 seed protocol</a>
+<li><a href="#primary-checkpoint-selection">3.5 Primary checkpoint selection</a>
+<li><a href="#results-분석-질문">3.6 Results 분석 질문</a>
+</li></ol>
+<li><a href="#제-4장-실험-결과">제 4장 실험 결과</a>
+<ol>
+<li><a href="#rq-1-q50-central-performance">4.1 RQ-1: q50 central performance</a>
+<li><a href="#rq-2-upper-quantile의-peak-underestimation-완화">4.2 RQ-2: upper quantile의 peak underestimation 완화</a>
+<li><a href="#rq-3-recall-증가의-cost">4.3 RQ-3: recall 증가의 cost</a>
+<li><a href="#rq-4-basin-및-event-type-heterogeneity">4.4 RQ-4: basin 및 event-type heterogeneity</a>
+<li><a href="#rq-5-calibration-sharpness-and-quantile-sanity">4.5 RQ-5: calibration, sharpness, and quantile sanity</a>
+</li></ol>
+<li><a href="#제-5장-논의">제 5장 논의</a>
+<ol>
+<li><a href="#output-design이-peak-underestimation에-미치는-영향">5.1 Output design이 peak underestimation에 미치는 영향</a>
+<li><a href="#central-prediction과-upper-tail-output의-역할-분리">5.2 Central prediction과 upper-tail output의 역할 분리</a>
+<li><a href="#운영적-trade-off">5.3 운영적 trade-off</a>
+<li><a href="#한계">5.4 한계</a>
+</li></ol>
+<li><a href="#제-6장-결론">제 6장 결론</a>
+<li><a href="#참고문헌">참고문헌</a>
+</li>
+</ol>
+</div>
+
+<p>2026-05-27</p>
+<h1 class="chapter" id="초록-abstract">초록 (Abstract)</h1>
+<p>Multi-basin LSTM은 large-sample hydrology에서 강력한 streamflow 예측 성능을 보였지만, 홍수 경보에서 중요한 극한 첨두유량(extreme flood peak)은 여전히 과소추정되는 경우가 많다. 본 연구는 이 문제가 LSTM backbone 자체의 한계라기보다 <strong>output design</strong>의 한계에서 크게 비롯된다는 가설을 검증한다. 이를 위해 동일한 CudaLSTM backbone과 동일한 입력·split·seed 조건을 고정하고, 단일 deterministic regression head를 쓰는 Model 1과 q50/q90/q95/q99를 동시에 출력하는 probabilistic quantile head Model 2를 비교하였다.</p>
+<p>실험은 CAMELSH hourly dataset을 사용하였다. 모델은 Delaware River Basin Commission (DRBC) 경계 밖의 non-DRBC basin에서 학습하고, DRBC basin은 regional holdout test region으로 분리하였다. 본문 결과는 expanded DRBC observed test split 85개 basin, test period 2014–2016, paired seed 111/222/444를 기준으로 한다. Model 2의 q50은 Model 1 대비 중앙예측 성능을 유지하거나 개선하였다(NSE basin-median delta +0.149, RMSE −0.273). 더 중요한 결과는 upper quantile에서 나타났다. Q99 event scope에서 q99의 event peak under-deficit median은 0.018로 감소했고, Q99 threshold recall은 q50 0.069에서 q99 0.583으로 증가하였다. 다만 q99는 calibrated 99% predictive quantile은 아니며, all-hour empirical coverage는 0.787로 nominal 0.99보다 낮았다. 따라서 본 연구의 결론은 Model 2가 완전한 probabilistic forecast를 제공한다는 것이 아니라, <strong>tail-aware upper quantile output이 peak underestimation을 줄이는 운영적 decision output으로 기능한다</strong>는 것이다.</p>
+<h1 class="chapter" id="제-1장-서론">제 1장 서론</h1>
+<h2 class="section" id="연구-배경">1.1 연구 배경</h2>
+<p>하천 유량 예측에서 평상시 유량을 잘 맞추는 것은 중요하지만, 실제 재난 대응과 홍수 경보에서는 드물게 발생하는 첨두유량을 놓치지 않는 것이 더 직접적인 안전 문제로 이어진다. 그러나 deterministic LSTM은 전체 기간의 평균적 오차를 줄이는 데에는 강하지만, rare high-flow event에서는 peak를 낮게 예측하는 경향을 보일 수 있다. 이는 training objective가 전체 시간의 bulk flow를 강하게 반영하고, 극단값은 빈도가 낮아 loss에서 충분히 강조되지 않기 때문이다.</p>
+<p>본 연구는 이 문제를 LSTM을 더 복잡하게 만들 것인가가 아니라 같은 backbone의 출력을 어떻게 설계할 것인가의 문제로 다룬다. 즉 deterministic point estimate 하나만 출력하는 대신, 같은 시점에서 중앙예측과 여러 수준의 upper-tail output을 동시에 제공하면 extreme peak underestimation을 줄일 수 있는지 확인한다.</p>
+<h2 class="section" id="연구-목적과-가설">1.2 연구 목적과 가설</h2>
+<p>본 논문의 핵심 목적은 다음 한 문장으로 요약된다.</p>
+<p>Multi-basin LSTM 기반 hourly streamflow 예측에서 probabilistic quantile head만 추가해도 deterministic baseline의 extreme flood peak underestimation을 줄일 수 있는가?</p>
+<p>이를 위해 다음 가설을 검증한다.</p>
+<ol type="1">
+<li><p>Model 2의 q50은 Model 1 deterministic output과 비교 가능한 central prediction으로 기능해야 한다.</p></li>
+<li><p>q90/q95/q99는 τ가 커질수록 peak underestimation을 줄이는 방향으로 작동해야 한다.</p></li>
+<li><p>peak underestimation 감소에는 false-positive 또는 over-prediction cost가 동반되므로, recall만이 아니라 cost도 함께 평가해야 한다.</p></li>
+<li><p>q99는 return-period flood나 양방향 prediction interval이 아니라 one-sided upper-tail decision output으로 해석해야 한다.</p></li>
+</ol>
+<h2 class="section" id="연구-기여">1.3 연구 기여</h2>
+<p>본 연구의 기여는 세 가지다.</p>
+<ol type="1">
+<li><p><strong>공정한 Model 1 vs Model 2 비교 구조</strong>: backbone, 입력 변수, basin split, temporal split, seed를 고정하고 output head와 loss만 바꾸어 probabilistic head의 효과를 분리하였다.</p></li>
+<li><p><strong>DRBC regional holdout 평가</strong>: non-DRBC basin에서 학습한 global multi-basin model을 DRBC basin에서 평가하여, spatial generalization 조건에서 peak underestimation을 분석하였다.</p></li>
+<li><p><strong>quantile output 해석 framework 제시</strong>: q50은 central prediction, q90/q95/q99는 보수성 수준이 다른 upper-tail decision output으로 구분하고, calibration claim과 operational peak-capture claim을 분리하였다.</p></li>
+</ol>
+<h1 class="chapter" id="제-2장-이론적-배경">제 2장 이론적 배경</h1>
+<h2 class="section" id="multi-basin-lstm">2.1 Multi-basin LSTM</h2>
+<p>LSTM(Long Short-Term Memory)은 강수·기온·복사 등 dynamic forcing의 시간적 의존성을 학습하는 recurrent neural network이다. 수문 예측에서는 과거 forcing sequence와 basin static attributes를 함께 사용해 basin별 rainfall-runoff response를 예측한다. 본 연구의 두 모델은 모두 같은 CudaLSTM backbone을 사용한다.</p>
+<div class="figure-container"><img src="../docx_images/image1.png" style="width:5.7in;height:3.23809in" alt="Model 1과 Model 2의 구조 비교 모식도" /></div>
+<p>Model 1과 Model 2의 구조 비교 모식도</p>
+<div class="figure-container"><img src="../docx_images/image2.png" style="width:6.2in;height:1.8852in" alt="LSTM의 기상·유역 특성 입력 및 출력 시퀀스 구조" /></div>
+<p>LSTM의 기상·유역 특성 입력 및 출력 시퀀스 구조</p>
+<h2 class="section" id="model-1-deterministic-baseline">2.2 Model 1: deterministic baseline</h2>
+<p>Model 1은 매 시점 하나의 streamflow 값을 예측하는 deterministic regression model이다.</p>
+<pre><code>forcing + static attributes → CudaLSTM backbone → regression head → Q_hat</code></pre>
+<p>이 모델은 baseline이다. 전체 hydrograph의 평균적 적합도를 잘 확보할 수 있지만, rare high-flow peak에서는 conditional mean 쪽으로 수축하면서 underestimation이 발생할 수 있다.</p>
+<h2 class="section" id="model-2-probabilistic-quantile-extension">2.3 Model 2: probabilistic quantile extension</h2>
+<p>Model 2는 Model 1과 같은 backbone을 사용하되, head만 quantile output으로 바꾼다.</p>
+<pre><code>forcing + static attributes → CudaLSTM backbone → quantile head → q50, q90, q95, q99</code></pre>
+<p>q50은 conditional median으로, Model 1 deterministic output과 가장 직접적으로 비교되는 central prediction이다. q90/q95/q99는 lower quantile이 없는 one-sided upper-tail output이다. 따라서 본 연구에서는 이를 prediction interval이나 return-period estimate로 해석하지 않는다. 특히 q99는 100-year flood가 아니라, 해당 시점 조건에서 모델이 내는 가장 보수적인 upper-tail decision output이다.</p>
+<h2 class="section" id="quantile-loss">2.4 Quantile loss</h2>
+<p>Model 2는 quantile별 pinball loss를 사용한다. 관측값을 <span class="math inline">\(y_{t}\)</span>, τ 분위 예측값을 <span class="math inline">\(q_{\tau,t}\)</span>라고 할 때 pinball loss는 다음과 같다.</p>
+<p><span class="math display">\[\rho_{\tau}(y_{t} - q_{\tau,t}) = \left\{ \begin{matrix}
+\tau(y_{t} - q_{\tau,t}), &amp; y_{t} \geq q_{\tau,t} \\
+(1 - \tau)(q_{\tau,t} - y_{t}), &amp; y_{t} &lt; q_{\tau,t}
+\end{matrix} \right.\ \]</span></p>
+<p>Model 2의 전체 loss는 τ 집합 <span class="math inline">\(\{ 0.50,0.90,0.95,0.99\}\)</span>에 대해 weighted pinball loss를 평균한 값이다.</p>
+<p><span class="math display">\[\mathcal{L}_{M2} = \frac{1}{T}\sum_{t = 1}^{T}{\sum_{\tau \in Q}^{}w_{\tau}}\rho_{\tau}(y_{t} - q_{\tau,t})\]</span></p>
+<p>τ가 클수록 관측값이 예측값보다 큰 경우, 즉 under-prediction에 더 큰 penalty를 준다. 이 때문에 upper quantile은 peak underestimation을 줄이는 방향으로 학습된다.</p>
+<h2 class="section" id="평가-지표">2.5 평가 지표</h2>
+<p>본 연구는 전체 성능과 flood-specific 성능을 분리한다.</p>
+<ul>
+<li><p><strong>NSE</strong>: hydrograph 전체 적합도. 1에 가까울수록 좋다.</p></li>
+<li><p><strong>KGE</strong>: correlation, variability, bias를 함께 보는 지표.</p></li>
+<li><p><strong>MAE/RMSE</strong>: 평균 절대오차와 평균 제곱근 오차.</p></li>
+<li><p><strong>α event peak under-deficit</strong>: event peak에서 얼마나 부족하게 예측했는지.</p></li>
+<li><p><strong>β ±6h window peak capture</strong>: 관측 peak 주변 6시간 창에서 예측 peak가 관측 peak를 얼마나 포착하는지.</p></li>
+<li><p><strong>δ Q99 threshold recall</strong>: 관측값이 basin별 Q99 threshold 이상일 때 모델 output도 이를 넘는 비율.</p></li>
+<li><p><strong>FAR (false alarm rate)</strong>: 관측값은 Q99 미만인데 모델 output이 Q99를 초과한 비율.</p></li>
+<li><p><strong>Empirical one-sided coverage</strong>: 관측값이 <span class="math inline">\(q_{\tau}\)</span> 이하에 들어오는 비율. 이는 calibration 진단이지만, high-flow 조건부 subset에서는 calibration이 아니라 tail hit-rate로 해석한다.</p></li>
+</ul>
+<h1 class="chapter" id="제-3장-데이터와-실험-방법">제 3장 데이터와 실험 방법</h1>
+<h2 class="section" id="camelsh-hourly-dataset">3.1 CAMELSH hourly dataset</h2>
+<p>본 연구는 CAMELSH hourly dataset을 사용한다. hourly 해상도는 daily dataset보다 빠른 flood response와 첨두 timing을 더 직접적으로 분석할 수 있다. Dynamic forcing에는 강수, 기온, 복사, 습도, 풍속 등 hourly meteorological variables를 사용하고, static attributes에는 area, slope, aridity, snow fraction, soil depth, permeability, forest fraction, baseflow index 등을 사용한다. Lagged observed streamflow는 본 비교축에 포함하지 않았다. 이는 deterministic baseline이 과도하게 강해져 probabilistic head의 순수 효과를 해석하기 어려워지는 것을 막기 위한 통제다.</p>
+<h2 class="section" id="drbc-regional-holdout">3.2 DRBC regional holdout</h2>
+<p>Delaware River Basin Commission (DRBC) 경계는 본 연구의 regional holdout test region이다. 모델은 DRBC 내부 basin을 학습하지 않고, DRBC 밖 non-DRBC basin에서 global multi-basin model로 학습된다. 따라서 본 실험은 Delaware 전용 regional model이 아니라, 다른 지역에서 학습된 multi-basin representation이 DRBC에 일반화되는지를 평가한다.</p>
+<div class="figure-container"><img src="../docx_images/image3.png" style="width:5.8in;height:3.16532in" alt="미국 전역 CAMELSH basin 분포와 DRBC holdout region" /></div>
+<p>미국 전역 CAMELSH basin 분포와 DRBC holdout region</p>
+<h2 class="section" id="basin-split과-subset300-training-design">3.3 Basin split과 subset300 training design</h2>
+<p>Training pool은 outlet이 DRBC 밖에 있고 DRBC polygon overlap이 0.1 이하인 quality-pass non-DRBC basin으로 구성하였다. Scaling pilot에서는 basin 수 100/300/600을 비교했고, non-DRBC validation 성능, static attribute distribution, observed-flow event-response diagnostics, random same-size subset benchmark, compute cost를 함께 고려해 subset300을 채택하였다. 이 선택은 DRBC test metric을 보고 결정하지 않았다.</p>
+<div class="figure-container"><img src="../docx_images/image4.png" style="width:5.8in;height:3.09782in" alt="Basin screening과 train/validation/test split 구조" /></div>
+<p>Basin screening과 train/validation/test split 구조</p>
+<div class="figure-container"><img src="../docx_images/image5.png" style="width:5.8in;height:2.21814in" alt="Subset300 대표성 진단 heatmap" /></div>
+<p>Subset300 대표성 진단 heatmap</p>
+<h2 class="section" id="temporal-split과-seed-protocol">3.4 Temporal split과 seed protocol</h2>
+<p>공식 시간 경계는 다음과 같다.</p>
+<div class="table-container"><table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 37%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr>
+<th>구분</th>
+<th>기간</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Train</td>
+<td>2000-01-01 – 2010-12-31</td>
+<td>non-DRBC basin에서 모델 학습</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td>2011-01-01 – 2013-12-31</td>
+<td>checkpoint 선택</td>
+</tr>
+<tr>
+<td>Test</td>
+<td>2014-01-01 – 2016-12-31</td>
+<td>DRBC holdout 평가</td>
+</tr>
+</tbody>
+</table></div>
+<p>Model 1과 Model 2는 paired seed 111/222/444를 사용한다. Model 2 seed 333은 NaN loss로 중단되었으므로 final aggregate에서 제외하고, 공정한 paired-seed 비교를 위해 Model 1 seed 333도 제외하였다.</p>
+<h2 class="section" id="primary-checkpoint-selection">3.5 Primary checkpoint selection</h2>
+<p>Model 1의 loss는 NSE 계열이고 Model 2의 loss는 pinball loss이므로 raw validation loss를 모델 간 checkpoint 선택 기준으로 직접 비교할 수 없다. 따라서 primary checkpoint는 non-DRBC validation median NSE를 기준으로 선택하였다. DRBC test 결과를 보고 checkpoint를 다시 고르지 않았다.</p>
+<h2 class="section" id="results-분석-질문">3.6 Results 분석 질문</h2>
+<p>본 논문은 결과를 다음 연구 질문으로 나누어 해석한다.</p>
+<div class="table-container"><table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 57%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>RQ</th>
+<th>질문</th>
+<th>핵심 산출물</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RQ-1</td>
+<td>q50가 central performance를 유지하는가</td>
+<td>NSE, KGE, MAE, RMSE paired delta</td>
+</tr>
+<tr>
+<td>RQ-2</td>
+<td>upper quantile이 peak underestimation을 줄이는가</td>
+<td>α, β, δ</td>
+</tr>
+<tr>
+<td>RQ-3</td>
+<td>그 대가로 false-positive cost가 얼마나 생기는가</td>
+<td>FAR, over-prediction magnitude</td>
+</tr>
+<tr>
+<td>RQ-4</td>
+<td>basin/event type에 따라 효과가 다른가</td>
+<td>M1 NSE tier, NOAA event type</td>
+</tr>
+<tr>
+<td>RQ-5</td>
+<td>quantile output은 calibrated and sharp한가</td>
+<td>coverage, pinball, spread, crossing</td>
+</tr>
+</tbody>
+</table></div>
+<h1 class="chapter" id="제-4장-실험-결과">제 4장 실험 결과</h1>
+<h2 class="section" id="rq-1-q50-central-performance">4.1 RQ-1: q50 central performance</h2>
+<p>Model 2의 q50은 Model 1 대비 central prediction 성능을 유지하였다. Expanded DRBC observed test 85개 basin에서 basin-median 기준 NSE는 Model 1 −0.031, Model 2 q50 0.225였고, paired delta는 +0.149였다. RMSE와 MAE도 각각 −0.273, −0.197만큼 개선되었다.</p>
+<table style="width:67%;">
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 19%" />
+<col style="width: 23%" />
+<col style="width: 15%" />
+</colgroup>
+<thead>
+<tr>
+<th>Metric</th>
+<th style="text-align: right;">Model 1 median</th>
+<th style="text-align: right;">Model 2 q50 median</th>
+<th style="text-align: right;">Δ(q50 − M1)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NSE</td>
+<td style="text-align: right;">−0.031</td>
+<td style="text-align: right;">0.225</td>
+<td style="text-align: right;">+0.149</td>
+</tr>
+<tr>
+<td>KGE</td>
+<td style="text-align: right;">0.082</td>
+<td style="text-align: right;">0.158</td>
+<td style="text-align: right;">+0.041</td>
+</tr>
+<tr>
+<td>Bias</td>
+<td style="text-align: right;">−0.459</td>
+<td style="text-align: right;">−0.948</td>
+<td style="text-align: right;">−0.437</td>
+</tr>
+<tr>
+<td>MAE</td>
+<td style="text-align: right;">2.584</td>
+<td style="text-align: right;">2.509</td>
+<td style="text-align: right;">−0.197</td>
+</tr>
+<tr>
+<td>RMSE</td>
+<td style="text-align: right;">4.850</td>
+<td style="text-align: right;">4.393</td>
+<td style="text-align: right;">−0.273</td>
+</tr>
+</tbody>
+</table></div>
+<p>Bias는 q50에서 더 negative하게 나타났다. 이는 q50이 conditional median을 따르고, skewed streamflow distribution에서는 mean과 median이 다를 수 있기 때문이다. 따라서 q50의 bias만으로 Model 2가 실패했다고 해석하기보다, upper quantile이 high-flow tail에서 어떤 보완 역할을 하는지 함께 봐야 한다.</p>
+<div class="figure-container"><img src="../docx_images/image6.png" style="width:5.8in;height:1.16in" alt="RQ-1 central metric comparison" /></div>
+<p>RQ-1 central metric comparison</p>
+<h2 class="section" id="rq-2-upper-quantile의-peak-underestimation-완화">4.2 RQ-2: upper quantile의 peak underestimation 완화</h2>
+<p>Q99 event scope에서 upper quantile은 τ가 커질수록 peak underestimation을 줄였다. Event peak under-deficit α의 basin median은 q50 0.657에서 q99 0.018로 감소하였다. 이는 q99가 event peak 시점에서 관측 peak를 거의 따라잡는 수준까지 under-deficit을 줄였다는 뜻이다.</p>
+<table style="width:74%;">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 22%" />
+<col style="width: 25%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Output</th>
+<th style="text-align: right;">α peak under-deficit</th>
+<th style="text-align: right;">β ±6h window capture</th>
+<th style="text-align: right;">δ Q99 recall</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model 1</td>
+<td style="text-align: right;">0.588</td>
+<td style="text-align: right;">0.519</td>
+<td style="text-align: right;">0.143</td>
+</tr>
+<tr>
+<td>q50</td>
+<td style="text-align: right;">0.657</td>
+<td style="text-align: right;">0.444</td>
+<td style="text-align: right;">0.069</td>
+</tr>
+<tr>
+<td>q90</td>
+<td style="text-align: right;">0.376</td>
+<td style="text-align: right;">0.733</td>
+<td style="text-align: right;">0.280</td>
+</tr>
+<tr>
+<td>q95</td>
+<td style="text-align: right;">0.272</td>
+<td style="text-align: right;">0.920</td>
+<td style="text-align: right;">0.379</td>
+</tr>
+<tr>
+<td>q99</td>
+<td style="text-align: right;"><strong>0.018</strong></td>
+<td style="text-align: right;"><strong>1.306</strong></td>
+<td style="text-align: right;"><strong>0.583</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>β는 q99에서 1.306으로 1을 넘었다. 이는 peak window 안에서 q99가 관측 peak를 초과하는 보수적 output을 낼 수 있음을 뜻한다. δ recall도 q50 0.069에서 q99 0.583으로 증가했다. 즉 q99는 high-flow exceedance를 더 많이 포착하지만, 이는 다음 절의 cost와 함께 해석해야 한다.</p>
+<div class="figure-container"><img src="../docx_images/image7.png" style="width:5.8in;height:3.31428in" alt="RQ-2 event peak under-deficit by quantile" /></div>
+<p>RQ-2 event peak under-deficit by quantile</p>
+<div class="figure-container"><img src="../docx_images/image8.png" style="width:5.8in;height:3.31428in" alt="RQ-2 Q99 threshold recall by quantile" /></div>
+<p>RQ-2 Q99 threshold recall by quantile</p>
+<p>NOAA confirmed flood event subset에서도 같은 방향이 확인되었다. Test-period overlap은 21개 basin, 65 events로 작지만, q99는 α를 0.172까지 낮추고 β를 0.977까지 높였다.</p>
+<h2 class="section" id="rq-3-recall-증가의-cost">4.3 RQ-3: recall 증가의 cost</h2>
+<p>Upper quantile은 peak underestimation을 줄이는 대신 false-positive와 over-prediction magnitude를 증가시켰다.</p>
+<table style="width:59%;">
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 10%" />
+<col style="width: 9%" />
+<col style="width: 29%" />
+</colgroup>
+<thead>
+<tr>
+<th>Output</th>
+<th style="text-align: right;">Recall δ</th>
+<th style="text-align: right;">FAR</th>
+<th style="text-align: right;">Over-prediction magnitude</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>q50</td>
+<td style="text-align: right;">0.069</td>
+<td style="text-align: right;">0.0007</td>
+<td style="text-align: right;">1.47</td>
+</tr>
+<tr>
+<td>q90</td>
+<td style="text-align: right;">0.280</td>
+<td style="text-align: right;">0.0042</td>
+<td style="text-align: right;">2.19</td>
+</tr>
+<tr>
+<td>q95</td>
+<td style="text-align: right;">0.379</td>
+<td style="text-align: right;">0.0063</td>
+<td style="text-align: right;">2.29</td>
+</tr>
+<tr>
+<td>q99</td>
+<td style="text-align: right;"><strong>0.583</strong></td>
+<td style="text-align: right;"><strong>0.0164</strong></td>
+<td style="text-align: right;"><strong>3.44</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>q50에서 q99로 갈 때 recall은 약 8배 증가했지만 FAR은 약 23배 증가했다. 따라서 q99는 모든 상황에서 자동으로 최선인 output이 아니라, 더 높은 recall을 원할 때 선택할 수 있는 conservative decision output이다.</p>
+<div class="figure-container"><img src="../docx_images/image9.png" style="width:5.8in;height:4.83333in" alt="RQ-3 recall–cost trade-off" /></div>
+<p>RQ-3 recall–cost trade-off</p>
+<h2 class="section" id="rq-4-basin-및-event-type-heterogeneity">4.4 RQ-4: basin 및 event-type heterogeneity</h2>
+<p>M1 NSE 기준 basin을 top/mid/bottom tier로 나누면, Model 1이 약한 basin에서 q99의 peak underestimation 완화 효과가 가장 크게 나타났다. Bottom tier에서는 q99의 α가 0.00, δ recall이 0.95까지 증가했지만 FAR도 0.0604로 가장 높았다. 반대로 top tier에서는 q99도 α 0.22의 under-deficit을 남겼고, recall은 0.39였다.</p>
+<table style="width:54%;">
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tier</th>
+<th style="text-align: right;">q50 α</th>
+<th style="text-align: right;">q99 α</th>
+<th style="text-align: right;">q50 δ</th>
+<th style="text-align: right;">q99 δ</th>
+<th style="text-align: right;">q99 FAR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Top</td>
+<td style="text-align: right;">0.74</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">0.39</td>
+<td style="text-align: right;">0.0077</td>
+</tr>
+<tr>
+<td>Mid</td>
+<td style="text-align: right;">0.68</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.07</td>
+<td style="text-align: right;">0.62</td>
+<td style="text-align: right;">0.0115</td>
+</tr>
+<tr>
+<td>Bottom</td>
+<td style="text-align: right;">0.46</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.26</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">0.0604</td>
+</tr>
+</tbody>
+</table></div>
+<p>NOAA event-type 기준으로는 Flash Flood가 가장 어려운 category였다. Flash Flood에서는 q99에서도 α가 0.42 남았지만, riverine Flood category에서는 q99 α가 0.06까지 낮아졌다. 즉 upper quantile head는 전반적으로 peak underestimation을 줄이지만, 짧고 빠른 flash flood peak는 여전히 timing과 forcing resolution의 한계가 남는다.</p>
+<div class="figure-container"><img src="../docx_images/image10.png" style="width:5.8in;height:1.015in" alt="RQ-4a basin tier heterogeneity" /></div>
+<p>RQ-4a basin tier heterogeneity</p>
+<div class="figure-container"><img src="../docx_images/image11.png" style="width:5.8in;height:1.28889in" alt="RQ-4b event-type heterogeneity" /></div>
+<p>RQ-4b event-type heterogeneity</p>
+<h2 class="section" id="rq-5-calibration-sharpness-and-quantile-sanity">4.5 RQ-5: calibration, sharpness, and quantile sanity</h2>
+<p>Model 2의 quantile output은 peak decision output으로는 유용했지만, nominal level에 완전히 calibrated되지는 않았다. All-hour empirical one-sided coverage는 모든 τ에서 nominal보다 낮았다.</p>
+<table style="width:61%;">
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 12%" />
+<col style="width: 21%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th>Output</th>
+<th style="text-align: right;">Nominal τ</th>
+<th style="text-align: right;">Empirical coverage</th>
+<th style="text-align: right;">Coverage error</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>q50</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">0.339</td>
+<td style="text-align: right;">−0.161</td>
+</tr>
+<tr>
+<td>q90</td>
+<td style="text-align: right;">0.90</td>
+<td style="text-align: right;">0.506</td>
+<td style="text-align: right;">−0.394</td>
+</tr>
+<tr>
+<td>q95</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">0.638</td>
+<td style="text-align: right;">−0.312</td>
+</tr>
+<tr>
+<td>q99</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: right;">0.787</td>
+<td style="text-align: right;">−0.203</td>
+</tr>
+</tbody>
+</table></div>
+<p>따라서 q99를 calibrated 99% predictive quantile이라고 부르면 안 된다. 대신 본 연구에서는 q99를 high-flow tail에서 underestimation을 줄이는 one-sided upper-tail decision output으로 해석한다. Quantile crossing check에서는 q90 &lt; q50, q95 &lt; q90, q99 &lt; q95가 모두 0 row로 나타나 monotonicity sanity는 통과하였다.</p>
+<div class="figure-container"><img src="../docx_images/image12.png" style="width:5.8in;height:4.18889in" alt="All-hour one-sided quantile calibration" /></div>
+<p>All-hour one-sided quantile calibration</p>
+<h1 class="chapter" id="제-5장-논의">제 5장 논의</h1>
+<h2 class="section" id="output-design이-peak-underestimation에-미치는-영향">5.1 Output design이 peak underestimation에 미치는 영향</h2>
+<p>결과는 본 연구의 핵심 가설을 지지한다. 같은 backbone을 유지해도 head를 deterministic point estimate에서 quantile output으로 바꾸면 upper-tail peak underestimation이 크게 줄었다. 특히 q99는 Q99 event scope에서 α를 거의 0에 가깝게 낮추고, Q99 threshold recall을 0.583까지 끌어올렸다. 이는 extreme peak 문제를 해결하기 위해 항상 더 복잡한 backbone이나 physics-guided core가 먼저 필요한 것은 아니라는 점을 보여준다.</p>
+<h2 class="section" id="central-prediction과-upper-tail-output의-역할-분리">5.2 Central prediction과 upper-tail output의 역할 분리</h2>
+<p>q50은 central hydrograph를 담당하고, q90/q95/q99는 점점 보수적인 decision output으로 읽어야 한다. q50이 high-flow에서 under-bias를 보이는 것은 upper-tail output이 필요한 이유이기도 하다. 따라서 Model 2를 평가할 때 q50 하나만 Model 1과 비교하면 probabilistic head의 핵심 장점을 놓치게 된다.</p>
+<h2 class="section" id="운영적-trade-off">5.3 운영적 trade-off</h2>
+<p>q99는 peak underestimation을 줄이지만 false-positive cost도 증가시킨다. 이 결과는 q99를 항상 최선의 forecast라고 주장하기보다, risk tolerance가 높은 상황에서 사용할 수 있는 conservative alert level로 해석해야 함을 의미한다. 실제 홍수 경보에서는 q90/q95/q99 중 어느 output을 사용할지는 missed peak cost와 false alarm cost의 상대적 중요도에 따라 달라진다.</p>
+<h2 class="section" id="한계">5.4 한계</h2>
+<p>첫째, 현재 quantile set은 q50/q90/q95/q99만 포함하므로 lower quantile이 없다. 따라서 본 연구는 prediction interval, interval score, Winkler score 같은 양방향 uncertainty evaluation을 수행하지 않는다. 둘째, q99의 empirical coverage는 nominal 0.99보다 낮아 완전한 calibration을 주장할 수 없다. 셋째, Flash Flood category에서는 q99도 상당한 residual under-deficit을 남겼다. 이는 hourly forcing, basin response speed, routing/timing representation의 한계와 관련될 수 있다. 넷째, physics-guided hybrid core는 본 논문의 공식 비교축이 아니라 future work로 남긴다.</p>
+<h1 class="chapter" id="제-6장-결론">제 6장 결론</h1>
+<p>본 연구는 CAMELSH hourly dataset과 DRBC regional holdout 조건에서 deterministic multi-basin LSTM과 probabilistic quantile LSTM을 비교하였다. 결과적으로 Model 2의 q50은 central prediction 성능을 유지했고, q90/q95/q99는 τ가 커질수록 extreme peak underestimation을 줄였다. 특히 q99는 Q99 event peak under-deficit을 0.018까지 낮추고 Q99 threshold recall을 0.583까지 높였다. 그러나 q99의 all-hour empirical coverage는 0.787로 nominal 0.99에 미치지 못했으므로 calibrated 99% predictive quantile로 해석해서는 안 된다.</p>
+<p>따라서 본 논문의 핵심 결론은 다음과 같다.</p>
+<p>Probabilistic quantile head는 deterministic LSTM의 extreme flood peak underestimation을 줄이는 효과적인 output design이며, q90/q95/q99는 calibration claim이 아니라 recall–cost trade-off를 조절하는 upper-tail decision outputs로 해석해야 한다.</p>
+<p>후속 연구에서는 lower quantile을 포함한 full interval forecast, quantile calibration 개선, flash flood timing error 완화, 그리고 physics-guided conceptual core를 통한 routing/state representation 보완을 검토할 수 있다.</p>
+<div class="references-section"><h1 class="chapter" id="참고문헌">참고문헌</h1>
+<ul>
+<li><p>Addor, N., Newman, A. J., Mizukami, N., and Clark, M. P. (2017). The CAMELS data set: catchment attributes and meteorology for large-sample studies. <em>Hydrology and Earth System Sciences</em>, 21, 5293–5313.</p></li>
+<li><p>Frame, J. M., Kratzert, F., Klotz, D., et al. (2022). Deep learning rainfall-runoff predictions of extreme events. <em>Hydrology and Earth System Sciences</em>, 26, 3377–3392.</p></li>
+<li><p>Klotz, D., Kratzert, F., Gauch, M., et al. (2022). Uncertainty estimation with deep learning for rainfall-runoff modeling. <em>Hydrology and Earth System Sciences</em>, 26, 1673–1693.</p></li>
+<li><p>Knoben, W. J. M., Freer, J. E., and Woods, R. A. (2019). Inherent benchmark or not? Comparing Nash-Sutcliffe and Kling-Gupta efficiency scores. <em>Hydrology and Earth System Sciences</em>, 23, 4323–4331.</p></li>
+<li><p>Kratzert, F., Klotz, D., Brenner, C., Schulz, K., and Herrnegger, M. (2018). Rainfall-runoff modelling using Long Short-Term Memory networks. <em>Hydrology and Earth System Sciences</em>, 22, 6005–6022.</p></li>
+<li><p>Kratzert, F., Klotz, D., Shalev, G., et al. (2019). Towards learning universal, regional, and local hydrological behaviors via machine learning applied to large-sample datasets. <em>Hydrology and Earth System Sciences</em>, 23, 5089–5110.</p></li>
+<li><p>Kratzert, F., Klotz, D., Herrnegger, M., et al. (2019). Toward improved predictions in ungauged basins: exploiting the power of machine learning. <em>Water Resources Research</em>, 55, 11344–11354.</p></li>
+<li><p>Mizukami, N., Rakovec, O., Newman, A. J., et al. (2019). On the choice of calibration metrics for high-flow estimation using hydrologic models. <em>Hydrology and Earth System Sciences</em>, 23, 2601–2614.</p></li>
+<li><p>Tran, H., et al. (2025). CAMELSH: A large-sample hourly hydrometeorological dataset and attributes at watershed-scale for CONUS. Manuscript/preprint referenced in project literature notes.</p></li>
+</ul>
+</div>
+
+</div><!-- page-wrapper -->
+</div><!-- main-content -->
+</div><!-- layout -->
 </body>
 </html>
