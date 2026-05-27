@@ -129,6 +129,12 @@ DEVICE=cuda:0 \
 bash scripts/runs/official/run_expanded_drbc_test_evaluation.sh
 ```
 
+expanded observed DRBC test 평가 결과에서 RQ-1~4 분석 table/figure를 canonical 순서로 재생성할 때는 아래 wrapper를 사용한다. 기본 입력은 `output/model_analysis/expanded_drbc_test/required_series/`, `raw_metrics/`, `data/CAMELSH_generic/drbc_expanded_observed_test/time_series/`, confirmed-flood catalog이며, 산출물은 `output/model_analysis/expanded_drbc_test/{tables,figures}/`에 쓴다.
+
+```bash
+uv run scripts/model/expanded_drbc/run_all.py
+```
+
 Model 1 deterministic LSTM과 Model 2 quantile LSTM의 구조 비교도를 발표용 image로 만들 때는 아래 script를 사용한다. `h_{b,t}`, `\hat{Q}_{b,t}`, quantile outputs는 matplotlib mathtext로 렌더링하며, PNG/SVG/PDF를 `output/model_analysis/legacy/overall_analysis/main_comparison/figures/model_architecture/` 아래에 쓴다.
 
 ```bash

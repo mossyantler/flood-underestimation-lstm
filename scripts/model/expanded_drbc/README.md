@@ -25,6 +25,20 @@ Phase B  (B1·B2 먼저, 이후 병렬 가능)
 
 ## 실행 방법
 
+전체 RQ-0~4 산출물을 canonical 순서로 재생성:
+
+```bash
+uv run scripts/model/expanded_drbc/run_all.py
+```
+
+실제 실행 전 child command만 확인:
+
+```bash
+uv run scripts/model/expanded_drbc/run_all.py --dry-run
+```
+
+개별 script만 다시 실행:
+
 ```bash
 uv run scripts/model/expanded_drbc/<script>.py
 ```
