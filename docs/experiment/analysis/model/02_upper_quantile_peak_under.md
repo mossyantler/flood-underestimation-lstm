@@ -88,6 +88,8 @@ upper quantile output (q90 / q95 / q99)이 Model 1 deterministic 및 Model 2 q50
 
 이 reduction은 RQ-3 (cost) 분석과 결합해서 해석되어야 한다 — recall 증가 8× vs FAR 증가 23× 비대칭 tradeoff.
 
+**Uncertainty Band framing**: q99 Q99-scope α-median ≈ 0 / NOAA-scope β ≈ 0.977은 q99이 obs를 초과한다는 뜻이기도 하다. q99을 단일 정답 예측이 아닌 q50~q99 band의 upper envelope로 보면, 관측 peak가 band 내부에 들어오는가(α ≈ 0 = obs가 q99 아래)와 그 대가로 over-prediction cost가 얼마나 발생하는가(β > 1 / FAR 증가)를 함께 설명해야 한다. gap trajectory 관점에서 τ 증가 → under-gap 감소 + over-gap 증가는 단순 tradeoff이며, 이 band framing은 RQ-3 cost 분석으로 직결된다.
+
 ## 해석 framework 적용 (RQ-0)
 
 [`docs/experiment/method/model/quantile_output_interpretation.md`](../../method/model/quantile_output_interpretation.md)의 L3 + L4 layer + **Sequence reading** (τ = 50 → 90 → 95 → 99 진행). q_τ를 "decision output / conservatism level"로 해석. PI / return-period / 양방향 calibration 표현은 사용 금지.

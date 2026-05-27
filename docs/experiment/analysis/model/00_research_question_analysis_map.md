@@ -30,7 +30,7 @@
 | 항목 | 위치 |
 | --- | --- |
 | 분석 문서 | [`docs/experiment/method/model/quantile_output_interpretation.md`](../../method/model/quantile_output_interpretation.md) |
-| 핵심 도구 | L1-L4 해석 layer + Pairwise/Sequence/Spread reading + 6 prohibited interpretations |
+| 핵심 도구 | L1-L4 해석 layer + Pairwise/Sequence/Spread/**Uncertainty Band** reading + 6 prohibited interpretations |
 | Phase B 자물쇠 | `scripts/_lib/expanded_drbc.py` 의 vocabulary constants (TAU_ORDER, NOAA_LABELS, NOAA_REGEX 등) |
 
 ### RQ-1. q50가 중앙예측 성능을 유지하는가 (전제)

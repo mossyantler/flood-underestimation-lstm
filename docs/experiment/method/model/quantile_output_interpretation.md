@@ -98,7 +98,7 @@ Model 2의 가치 주장은 τ에 따라 다르게 표현된다.
 | `q90 / q95` | observed peak underestimation을 의미 있게 완화 | RQ-2 본문 |
 | `q99` | 극단 peak protection이 가능하나 false-positive 비용이 동시에 커짐 | RQ-2 / RQ-3 supplement |
 
-## 4개 output을 함께 읽는 세 방식
+## 4개 output을 함께 읽는 네 방식
 
 각 분석에서 어느 방식을 쓰는지 명시한다. 섞으면 해석이 흔들린다.
 
@@ -129,6 +129,27 @@ Model 2의 가치 주장은 τ에 따라 다르게 표현된다.
 | event / stratum별 spread 비교 | spread가 클수록 모델 자신감이 낮다는 신호 |
 | 부르는 이름 | "one-sided upper-tail spread"라 부른다. "uncertainty"는 양방향 분포 가정을 포함하므로 단독으로 쓰지 않는다 |
 
+### (4) Uncertainty Band — q50~q99 band 안에서 obs 위치
+
+용도: RQ-2 / RQ-3 보완 해석. q99 단독 평가 한계를 보완. obs가 q50~q99 band 내 어느 구간에 놓이는지로 upper-tail coverage를 설명한다.
+
+| obs 위치 class | 의미 |
+| --- | --- |
+| obs ≤ q50 | 중앙 예측보다 낮음; overestimation 가능 |
+| q50 < obs ≤ q90 | 보통 upper band 안에 포함 |
+| q90 < obs ≤ q95 | 높은 유량, upper band 내 포함 |
+| q95 < obs ≤ q99 | 극단 upper-tail band에 근접 |
+| obs > q99 | q99도 포착 못한 underestimation |
+
+각 τ에서 gap trajectory:
+
+- under-gap: `max(obs − q_τ, 0)`
+- over-gap: `max(q_τ − obs, 0)`
+
+τ 증가 → under-gap 감소 + over-gap 증가는 단순 tradeoff다. 논문에서 "q99이 정답"이 아니라 "upper quantile이 missed peak risk를 줄이는 대신 false alarm cost를 증가시킨다"로 표현한다. q99 > obs → "맞춘 것"이 아니라 over-gap이 과도하면 false alarm / overestimation cost 신호다.
+
+주의: 이 reading은 보완 해석이다. RQ-2 primary metric (α / β / δ)는 Sequence reading (L3) 기반이고, Uncertainty Band는 q99 결과를 manuscript에서 framing할 때 보조 layer로 사용한다.
+
 ## 금지 해석 6가지
 
 다음 표현은 본 연구의 모든 분석 문서, 표, 그림, 논문 본문에서 사용을 금지한다.
@@ -154,8 +175,8 @@ Model 2의 가치 주장은 τ에 따라 다르게 표현된다.
 | --- | --- | --- | --- |
 | RQ-0 (framework 자체) | 전부 | L1 + L2 + L3 + L4 | 본 문서가 RQ-0 산출물. paper 본문 method section에 핵심 4수준만 압축 인용 |
 | RQ-1 (q50 central) | Pairwise | L3 | `q50`만 사용. `q90 / q95 / q99`를 끌고 들어오지 않는다 |
-| RQ-2 (upper quantile peak under) | Sequence | L3 + L4 | recall (δ) + precision side (RQ-3 FAR / over-pred) 같은 figure에서 보고 |
-| RQ-3 (cost: FAR + over-pred) | Sequence | L3 | RQ-2 recall과 동일 axis에서 보고. economic / operational cost 단위 사용 금지 |
+| RQ-2 (upper quantile peak under) | Sequence + Uncertainty Band | L3 + L4 | recall (δ) + precision side (RQ-3 FAR / over-pred) 같은 figure에서 보고. q99를 upper envelope로 해석; obs location class 및 gap trajectory를 보완 framing으로 사용 |
+| RQ-3 (cost: FAR + over-pred) | Sequence + Uncertainty Band | L3 | RQ-2 recall과 동일 axis에서 보고. economic / operational cost 단위 사용 금지. over-gap trajectory가 FAR 증가와 연결됨을 명시 |
 | RQ-4a (basin cohort, M1 NSE tier) | Sequence + Spread | L3 | tier별 spread 차이 보고. circularity caveat 명시 (cohort = central NSE, stratify = peak metric으로 axis 분리됨) |
 | RQ-4b (event-type, NOAA) | Sequence | L3 | Flash Flood / Flood / Coastal Flood / Other 그룹 sample size 명시. NoNOAA 데이터 품질 카테고리 분리 |
 | RQ-5 (calibration·sharpness) | 전부 | L1 + L2 | one-sided 명시. lower quantile 부재 한계를 캡션에 둔다. IQR-distance tier는 circular caveat. 본문 vs supplement 분리 |
@@ -206,6 +227,18 @@ Cross-tab sanity (`scripts/model/expanded_drbc/compute_cross_tab_q99_noaa_sanity
 - coverage 보고: `P(obs ≤ q_τ)` 형태로 one-sided임을 식별 가능하게 적는다. high-flow stratum에서는 "conditional hit-rate"라 부른다.
 - 시각화: `q99`를 envelope fill로 그리지 않는다. line만 그린다. fill로 그리면 양방향 PI로 오해된다. 굳이 쓸 때는 캡션에 "one-sided upper-tail band, lower bound is not modeled"라 명시한다.
 - spread: "uncertainty"라 단독으로 쓰지 않고 "one-sided upper-tail spread (`q_τ − q_0.50`)"으로 적는다.
+
+## 논문 본문 framing 규칙 (Uncertainty Band)
+
+q99를 manuscript에서 쓸 때는 단일 point forecast가 아닌 upper uncertainty envelope로 frame한다.
+
+> q99의 peak underestimation 감소는 upper-tail protection의 증거로 해석하되, quantile level이 올라갈수록 증가하는 overestimation 및 false-alarm cost와 함께 평가해야 한다. q50~q99 band는 predicted upper uncertainty range이며, obs가 band 내 어느 구간에 놓이는지와 band 폭이 과도하지 않은지를 함께 보고한다.
+
+적용 원칙:
+
+- "q99가 좋다" 대신 "q50~q99 band 안에서 obs가 어느 구간에 들어오는가 + quantile level 증가에 따른 gap과 overestimation cost가 어떻게 변하는가"로 서술.
+- q99 단독 우위 구도 금지. band 폭과 false alarm 비용을 반드시 병기.
+- empirical coverage가 nominal 0.99보다 낮다는 caveat (q99 coverage = 0.787) 유지.
 
 ## 연결 문서
 
