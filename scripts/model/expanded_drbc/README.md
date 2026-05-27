@@ -21,6 +21,10 @@ Phase B  (B1·B2 먼저, 이후 병렬 가능)
   compute_rq4a_nse_tier_stratify.py     # B7 — RQ-4a M1 NSE 3-tier cohort (depends B3-B6)
   compute_rq4b_event_type_stratify.py   # B8 — RQ-4b NOAA event-type cohort (depends B2·B3)
   compute_cross_tab_q99_noaa_sanity.py  # B9 — Q99 ∩ NOAA geometry sanity (depends B1·B2)
+
+  compute_ub_location_class.py          # B10 — UB obs location class (below_q50 ~ above_q99)
+  compute_ub_gap_trajectory.py          # B11 — UB gap trajectory (under/over-gap by τ)
+  compute_ub_band_shape.py              # B12 — UB band-shape prospective (rel_width, g3_ratio, Spearman r)
 ```
 
 ## 실행 방법
@@ -47,8 +51,11 @@ uv run scripts/model/expanded_drbc/<script>.py
 
 ```text
 output/model_analysis/expanded_drbc_test/
-├── tables/     # rq1_*, rq2_*, rq3_*, rq4a_*, rq4b_*, cross_tab_* CSV
-└── figures/    # rq1_*, rq2_*, rq3_*, rq4a_*, rq4b_* PNG
+├── tables/     # rq1_*, rq2_*, rq3_*, rq4a_*, rq4b_*, cross_tab_*,
+│              # ub_location_class_*, ub_gap_trajectory_*, ub_band_shape_* CSV
+└── figures/    # rq1_*, rq2_*, rq3_*, rq4a_*, rq4b_*,
+               # ub_location_class_bar, ub_gap_trajectory, ub_band_shape_scatter,
+               # ub_hydrograph_fan PNG
 ```
 
 RQ-5 calibration·sharpness 산출물은 `scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py` 재활용 → `output/model_analysis/expanded_drbc_test/probabilistic_diagnostics/`.

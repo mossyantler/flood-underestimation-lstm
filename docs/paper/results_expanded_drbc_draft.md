@@ -81,7 +81,48 @@ Calibration and sharpness diagnostics는 Model 2 output의 한계를 명확히 �
 
 다만 climatology baseline 대비 pinball skill score는 `q99`에서 -0.271로 음수였다. 즉 가장 극단적인 quantile output은 high-flow peak protection에는 도움이 되지만, climatology-aware sharpness 관점에서는 손해가 있다. 본 연구의 주장은 Model 2가 완전히 calibrated 된 probabilistic forecast를 제공한다는 것이 아니라, upper-tail decision output이 deterministic LSTM의 peak underestimation을 줄이는 실용적 보완 신호를 제공한다는 데에 있다.
 
-## 8. Results summary
+## 8. Band width and tail shape as prospective flood risk indicators
+
+q50~q99 band를 사후(retrospective) 분석이 아니라 obs 없이 사용하는 사전(prospective) 위험 지표로 활용하려면, band shape 자체가 obs가 어느 gap에 위치할지와 상관관계를 가져야 한다. 이를 검증하기 위해 두 obs-free 지표를 정의하였다.
+
+- **rel_width** = `(q99 − q50) / q50`: 전체 band 상대 폭 — 모델이 해당 사건을 얼마나 불확실하게 보는가
+- **g3_ratio** = `(q99 − q95) / (q99 − q50)`: 극단 꼬리 비중 — band 불확실성 중 얼마나 많은 부분이 최상단(q95~q99 구간)에 집중되어 있는가
+
+두 지표와 obs gap class(below_q50=0 ~ above_q99=4, ordinal) 사이의 Spearman r을 Q99/NOAA scope별로 계산하였다(per-event pooled, Q99 n=2770, NOAA n=194).
+
+| Scope | Metric | r | p-value | 유의 |
+| --- | --- | ---: | ---: | --- |
+| Q99 | rel_width | -0.015 | 0.43 | ✗ |
+| Q99 | g3_ratio | +0.137 | <0.001 | ✓ |
+| NOAA | rel_width | +0.205 | 0.004 | ✓ |
+| NOAA | g3_ratio | +0.173 | 0.016 | ✓ |
+
+**rel_width는 Q99 scope에서 유의하지 않았다**(r = -0.015, p = 0.43). 이는 band 전체 폭만으로는 obs가 어느 gap에 들어갈지를 사전 예측하기 어렵다는 것을 의미한다. Q99 event는 이미 obs ≥ basin Q99 threshold 조건으로 선택된 high-flow event이므로, band 폭 자체가 obs gap 위치와 체계적 관계를 형성하지 않는다.
+
+반면 **g3_ratio는 Q99 scope에서 r = +0.137(p < 0.001)로 유의하게 양의 방향**이었다. 극단 꼬리 가중치(q95~q99 구간의 상대 폭)가 클수록 obs가 더 높은 gap에 위치할 가능성이 높아진다는 방향이며, 가설과 일치한다. NOAA scope에서도 rel_width(r = +0.205, p = 0.004)와 g3_ratio(r = +0.173, p = 0.016) 모두 유의하였다. NOAA confirmed flood는 event threshold가 더 극단적이어서 band width가 obs gap 위치와 양의 관계를 형성한다.
+
+r 절댓값은 모두 0.3 미만으로, 이 지표들은 obs gap class의 강한 사전 예측자가 아니다. 그러나 g3_ratio가 두 scope 모두에서 유의한 양의 방향을 보임으로써, "극단 꼬리 비중이 클수록 obs가 더 높은 band gap에 위치한다"는 개념적 framework를 경험적으로 뒷받침한다.
+
+두 지표를 각각 사분위(Q1~Q4) 구간으로 나누어 obs_class 조건부 분포를 확인한 결과는 다음과 같다.
+
+**g3_ratio 구간별 above_q99 비율 (Q99 scope):**
+
+| g3_ratio bin | below_q50 | q50–q90 | q90–q95 | q95–q99 | above_q99 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Q1 (낮은 꼬리) | 0.189 | 0.206 | 0.065 | 0.117 | 0.423 |
+| Q2 | 0.104 | 0.189 | 0.097 | 0.238 | 0.371 |
+| Q3 | 0.098 | 0.162 | 0.104 | 0.236 | 0.400 |
+| Q4 (높은 꼬리) | 0.051 | 0.124 | 0.072 | 0.218 | **0.535** |
+
+g3_ratio가 높은 구간(Q4)에서 above_q99 비율이 53.5%로, Q1(42.3%) 대비 11.2%p 높다. 동시에 below_q50 비율은 Q1의 18.9%에서 Q4의 5.1%로 낮아진다. 이는 꼬리가 두꺼운 band shape일수록 obs가 band 상단에 집중됨을 보여준다. NOAA scope에서도 같은 방향이 더 뚜렷했다(Q1 55.1% → Q4 73.5%).
+
+**rel_width 구간별 패턴 — Q99 scope에서 반전:**
+
+rel_width Q99 scope에서는 Q1(좁은 band) above_q99 47.3%에서 Q4(넓은 band) 33.8%로 감소하는 반전 패턴이 나타났다. Q4에서는 q95~q99 구간(25.8%)과 q50~q90 구간(24.1%)이 증가하는 반면 above_q99는 감소한다. 이는 앞서 언급한 Q99 event 정의 효과다 — 넓은 band에서 q99가 충분히 높이 뻗어 obs를 q95~q99 구간 안에 포함하는 경우가 늘어난다. NOAA scope에서는 이 반전이 없고 rel_width Q1=49.0% → Q4=69.4%로 단조 증가한다.
+
+이 결과의 실용적 의미는 다음과 같다. (1) g3_ratio가 높을 때(Q4)는 사전 경보 임계를 낮추거나 q99 수준의 대비를 권장하는 신호로 활용 가능하다. (2) rel_width만으로는 Q99 event scope에서 신뢰할 수 있는 사전 신호가 되기 어렵다. (3) 두 지표 모두 calibrated 확률이 아니라 상대적 위험 순위 신호로 한정해야 한다. q99가 calibrated 99% predictive quantile이 아님을 감안하면(Section 7), band shape 지표도 확률론적 band coverage 예측자가 아닌 모델의 상대적 불확실성 형태 신호로 해석하는 것이 적절하다.
+
+## 9. Results summary
 
 Expanded DRBC observed test는 Model 2 quantile head가 단순한 probabilistic decoration이 아니라, deterministic LSTM의 flood peak underestimation 문제를 완화하는 별도 output design임을 보여준다. `q50`은 central performance를 유지하면서, `q90/q95/q99`는 Q99 event와 NOAA confirmed flood event에서 peak under-deficit을 단조롭게 줄였다. 특히 `q99`는 Q99 event에서 alpha를 0.018까지 낮추고 threshold recall을 0.583까지 높였으며, under-gap은 q50의 23.7 cms에서 q99의 0.87 cms로 감소하였다.
 
@@ -96,7 +137,7 @@ Expanded DRBC observed test는 Model 2 quantile head가 단순한 probabilistic 
 - Main Figure 3 or Supplement: UB gap trajectory (`ub_gap_trajectory.png`) — under-gap/over-gap by τ
 - Main Table 1: central performance + peak metrics compact table
 - Main Table 2 or Supplement: basin tier heterogeneity
-- Supplement: UB location class bar (`ub_location_class_bar.png`), NOAA event-type stratification, Q99-NOAA cross-tab, RQ-5 calibration/sharpness diagnostics
+- Supplement: UB location class bar (`ub_location_class_bar.png`), UB band-shape lookup stacked bar (`ub_band_shape_lookup.png`), UB band-shape scatter (`ub_band_shape_scatter.png`), NOAA event-type stratification, Q99-NOAA cross-tab, RQ-5 calibration/sharpness diagnostics
 
 ## Evidence notes
 

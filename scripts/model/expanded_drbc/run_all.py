@@ -96,6 +96,11 @@ STEPS: tuple[Step, ...] = (
         Path("scripts/model/expanded_drbc/compute_ub_gap_trajectory.py"),
         (("--input-dir", "input_dir"),),
     ),
+    Step(
+        "B12 UB band-shape prospective",
+        Path("scripts/model/expanded_drbc/compute_ub_band_shape.py"),
+        (("--input-dir", "input_dir"),),
+    ),
 )
 
 
