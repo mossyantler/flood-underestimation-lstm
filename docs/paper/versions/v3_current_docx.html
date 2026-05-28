@@ -407,6 +407,7 @@
 <h1 class="chapter" id="제-4장-실험-결과">제 4장 실험 결과</h1>
 <h2 class="section" id="rq-1-q50-central-performance">4.1 RQ-1: q50 central performance</h2>
 <p>Model 2의 q50은 Model 1 대비 central prediction 성능을 유지하였다. Expanded DRBC observed test 85개 basin에서 basin-median 기준 NSE는 Model 1 −0.031, Model 2 q50 0.225였고, paired delta는 +0.149였다. RMSE와 MAE도 각각 −0.273, −0.197만큼 개선되었다.</p>
+<div class="table-container">
 <table style="width:67%;">
 <colgroup>
 <col style="width: 8%" />
@@ -459,6 +460,7 @@
 <p>RQ-1 central metric comparison</p>
 <h2 class="section" id="rq-2-upper-quantile의-peak-underestimation-완화">4.2 RQ-2: upper quantile의 peak underestimation 완화</h2>
 <p>Q99 event scope에서 upper quantile은 τ가 커질수록 peak underestimation을 줄였다. Event peak under-deficit α의 basin median은 q50 0.657에서 q99 0.018로 감소하였다. 이는 q99가 event peak 시점에서 관측 peak를 거의 따라잡는 수준까지 under-deficit을 줄였다는 뜻이다.</p>
+<div class="table-container">
 <table style="width:74%;">
 <colgroup>
 <col style="width: 10%" />
@@ -513,6 +515,7 @@
 <p>NOAA confirmed flood event subset에서도 같은 방향이 확인되었다. Test-period overlap은 21개 basin, 65 events로 작지만, q99는 α를 0.172까지 낮추고 β를 0.977까지 높였다.</p>
 <h2 class="section" id="rq-3-recall-증가의-cost">4.3 RQ-3: recall 증가의 cost</h2>
 <p>Upper quantile은 peak underestimation을 줄이는 대신 false-positive와 over-prediction magnitude를 증가시켰다.</p>
+<div class="table-container">
 <table style="width:59%;">
 <colgroup>
 <col style="width: 9%" />
@@ -559,6 +562,7 @@
 <p>RQ-3 recall–cost trade-off</p>
 <h2 class="section" id="rq-4-basin-및-event-type-heterogeneity">4.4 RQ-4: basin 및 event-type heterogeneity</h2>
 <p>M1 NSE 기준 basin을 top/mid/bottom tier로 나누면, Model 1이 약한 basin에서 q99의 peak underestimation 완화 효과가 가장 크게 나타났다. Bottom tier에서는 q99의 α가 0.00, δ recall이 0.95까지 증가했지만 FAR도 0.0604로 가장 높았다. 반대로 top tier에서는 q99도 α 0.22의 under-deficit을 남겼고, recall은 0.39였다.</p>
+<div class="table-container">
 <table style="width:54%;">
 <colgroup>
 <col style="width: 9%" />
@@ -610,6 +614,7 @@
 <p>RQ-4b event-type heterogeneity</p>
 <h2 class="section" id="rq-5-calibration-sharpness-and-quantile-sanity">4.5 RQ-5: calibration, sharpness, and quantile sanity</h2>
 <p>Model 2의 quantile output은 peak decision output으로는 유용했지만, nominal level에 완전히 calibrated되지는 않았다. All-hour empirical one-sided coverage는 모든 τ에서 nominal보다 낮았다.</p>
+<div class="table-container">
 <table style="width:61%;">
 <colgroup>
 <col style="width: 9%" />
