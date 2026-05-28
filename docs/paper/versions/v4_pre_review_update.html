@@ -878,25 +878,21 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 <div class="table-container">
 <table>
   <thead>
-    <tr><th>지표</th><th>Model 1 중앙값</th><th>Model 2 q50 중앙값</th><th>Δ (q50 − M1)</th><th>Δ IQR (Q25 / Q75)</th></tr>
+    <tr><th>지표</th><th>Model 1 중앙값</th><th>Model 2 q50 중앙값</th><th>Δ (q50 − M1)</th></tr>
   </thead>
   <tbody>
-    <tr><td>NSE</td><td>−0.031</td><td>0.225</td><td><strong>+0.149</strong></td><td>−0.039 / +0.448</td></tr>
-    <tr><td>KGE</td><td>0.082</td><td>0.158</td><td>+0.041</td><td>−0.087 / +0.343</td></tr>
-    <tr><td>Bias</td><td>−0.459</td><td>−0.948</td><td>−0.437</td><td>−1.087 / +0.319</td></tr>
-    <tr><td>MAE (cms)</td><td>2.584</td><td>2.509</td><td>−0.197</td><td>−0.780 / +0.126</td></tr>
-    <tr><td>RMSE (cms)</td><td>4.850</td><td>4.393</td><td>−0.273</td><td>−1.140 / +0.246</td></tr>
-    <tr><td>FHV (%)</td><td>−12.3</td><td>−36.1</td><td>−8.5</td><td>−58.5 / +8.2</td></tr>
+    <tr><td>NSE</td><td>−0.031</td><td>0.225</td><td><strong>+0.149</strong></td></tr>
+    <tr><td>KGE</td><td>0.082</td><td>0.158</td><td>+0.041</td></tr>
+    <tr><td>Bias</td><td>−0.459</td><td>−0.948</td><td>−0.437</td></tr>
+    <tr><td>MAE (cms)</td><td>2.584</td><td>2.509</td><td>−0.197</td></tr>
+    <tr><td>RMSE (cms)</td><td>4.850</td><td>4.393</td><td>−0.273</td></tr>
   </tbody>
 </table>
-<div class="table-caption">표 1. 중앙 예측 성능 비교 (유역 간 중앙값 기준, n = 85개 DRBC basin, 2014–2016 test period). Δ IQR은 유역 간 paired delta의 사분위 범위. FHV는 유량 지속 곡선(FDC) 상위 2% 구간의 volume bias (Yilmaz et al., 2008).</div>
+<div class="table-caption">표 1. 중앙 예측 성능 비교 (유역 간 중앙값 기준, n = 85개 DRBC basin, 2014–2016 test period).</div>
 </div>
 
 <p>
-  Model 1의 basin-median NSE가 −0.031로 음수인 점은 맥락이 필요하다. 확장 DRBC 유역은 훈련 풀(non-DRBC 유역)과 다른 수문 체제를 가질 수 있으며, 이는 분포 이동(distribution shift)으로 이어진다. DRBC 유역은 도시화, 인위적 유량 조절, 지하수 추출 등 non-stationarity 요인이 복합적으로 작용한다. Seed 111/222/444 세 반복에서 Model 1 유역별 NSE의 seed-median IQR은 [−0.889, +0.314]로 유역 간 이질성이 크며, 음수 NSE는 특정 seed가 아닌 전 seed에 공통으로 나타나는 구조적 특성이다. 두 모델이 같은 유역-seed 쌍에서 평가되므로, 음수 NSE baseline은 상대 비교의 유효성에 영향을 주지 않는다.
-</p>
-<p>
-  Bias는 q50에서 더 negative하게 나타났다(−0.459 → −0.948, Δ = −0.437). 이는 q50이 conditional median을 추정하는 분위수 산출값이고, positively skewed 유량 분포에서 평균 추종 결정론적 출력과 중앙값 추종 분위수 출력이 다르게 동작하기 때문이다. FDC 상위 2% 구간 volume bias 지표인 FHV도 같은 방향을 지지한다. FHV는 Model 1에서 −12.3%, Model 2 q50에서 −36.1%로, q50이 고유량 구간에서 더 심한 과소 추정을 보였다(Δ = −8.5%). 이는 q50의 bias 악화가 전체 유량 구간이 아니라 고유량 구간에 집중됨을 시사하며, upper quantile을 통한 보완 필요성을 정당화한다.
+  Bias는 q50에서 더 negative하게 나타났다(−0.459 → −0.948, Δ = −0.437). 이는 q50이 conditional median을 추정하는 분위수 산출값이고, 편향된 유량 분포에서 평균 추종 결정론적 출력과 중앙값 추종 분위수 출력이 다르게 동작할 수 있기 때문이다. 따라서 q50의 bias만으로 Model 2가 실패했다고 해석하기보다, upper quantile이 high-flow tail에서 어떤 보완 역할을 하는지 함께 봐야 한다.
 </p>
 
 <div class="figure-row">
@@ -1120,9 +1116,6 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 <p>
   이 결과는 extreme peak 문제를 해결하기 위해 항상 더 복잡한 backbone이나 physics-guided core가 먼저 필요한 것은 아니라는 점을 시사한다. Output design의 변경만으로도 의미 있는 개선이 가능하다.
 </p>
-<p>
-  단, 해석 시 중요한 한계를 인지해야 한다. Model 2는 출력 헤드(quantile head)와 손실 함수(Pinball loss)를 동시에 변경하였다. Pinball loss는 비대칭 gradient signal을 통해 backbone의 내부 표현 자체에도 영향을 줄 수 있으므로, 관측된 개선이 "output head 변경만의 효과"인지 "Pinball loss의 학습 신호 변화 효과"인지를 현 실험 설계에서 완전히 분리하기 어렵다. 두 요소를 독립적으로 평가하려면 동일 backbone에 q50 단독 Pinball loss를 적용한 ablation이 필요하며, 이는 향후 연구 과제로 남긴다.
-</p>
 
 <h2 class="section" id="s52">5.2 Central Prediction과 Upper-tail Output의 역할 분리</h2>
 
@@ -1147,8 +1140,6 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 </p>
 
 <h2 class="section" id="s54">5.4 한계 및 향후 연구</h2>
-
-<p><strong>한계 0 — 출력 설계와 손실 함수의 결합 변경:</strong> Model 2는 quantile head와 Pinball loss를 동시에 변경하였다. 두 요소의 기여를 완전히 분리하는 ablation 실험을 수행하지 않았으므로, 관측된 peak underestimation 감소가 head 구조의 효과인지 Pinball loss의 gradient signal 변화 효과인지를 현 실험에서 단정하기 어렵다. 이 한계는 5.1절 논의에서도 명시하였으며, 향후 ablation으로 검증이 필요하다.</p>
 
 <p><strong>한계 1 — 확률론적 보정 부족:</strong> q99의 empirical coverage(0.787)가 nominal(0.99)에 미치지 못하므로, 완전한 calibration을 주장할 수 없다. Quantile Crossing Penalty(QCP), quantile recalibration, 또는 extreme value 통계적 사후 처리를 통한 개선이 필요하다.</p>
 

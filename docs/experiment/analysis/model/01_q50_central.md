@@ -14,7 +14,7 @@ Model 2 probabilistic quantile LSTM의 conditional median output `q50`이 Model 
 
 스크립트: `scripts/model/expanded_drbc/compute_rq1_central_metrics.py`
 
-- 5-metric: NSE, KGE, bias = mean(pred − obs), MAE = mean(|pred − obs|), RMSE = sqrt(mean((pred − obs)²))
+- 6-metric: NSE, KGE, bias = mean(pred − obs), MAE = mean(|pred − obs|), RMSE = sqrt(mean((pred − obs)²)), FHV = (Σsim_top2% − Σobs_top2%) / Σobs_top2% × 100 (Yilmaz 2008)
 - per-basin per-seed 각 모델별 metric 산출
 - Paired delta = `metric(M2_q50, seed) − metric(M1, seed)` per basin per seed (per-seed level delta, not delta-of-medians)
 - Aggregation: per-basin per-seed → median across seeds within basin → cross-basin pooled summary
@@ -24,7 +24,7 @@ Model 2 probabilistic quantile LSTM의 conditional median output `q50`이 Model 
 
 - NSE/KGE: 새 산출물 vs `raw_metrics/model1_seed111_epoch025_metrics.csv` 1e-6 이내 (5 basin spot-check, max diff = 1.29e-7).
 - bias/MAE/RMSE: NumPy 핸드 컴퓨트 (2 basin) 1e-6 이내 (실제 diff = 0 / 4.44e-16).
-- 510-row wide + 425-row long contract 충족.
+- 510-row wide + 510-row long contract 충족 (6 metric × 85 basin).
 
 ## 결과 (cross-basin pooled summary)
 
@@ -35,6 +35,7 @@ Model 2 probabilistic quantile LSTM의 conditional median output `q50`이 Model 
 | Bias | −0.459 | −0.948 | −0.437 | −1.087 / +0.319 |
 | MAE | 2.584 | 2.509 | −0.197 | −0.780 / +0.126 |
 | RMSE | 4.850 | 4.393 | −0.273 | −1.140 / +0.246 |
+| FHV (%) | -12.3 | -36.1 | **-8.5** | -58.5 / +8.2 |
 
 ### 해석
 
@@ -52,7 +53,7 @@ Model 2 probabilistic quantile LSTM의 conditional median output `q50`이 Model 
 ```text
 output/model_analysis/expanded_drbc_test/tables/
   rq1_central_metrics_per_basin_seed.csv     (510 rows)
-  rq1_central_metrics_seed_median.csv        (425 rows)
+  rq1_central_metrics_seed_median.csv        (510 rows)
   rq1_central_metrics_pooled_summary.csv
 output/model_analysis/expanded_drbc_test/figures/
   rq1_central_metric_boxplots.png
@@ -63,3 +64,4 @@ output/model_analysis/expanded_drbc_test/figures/
 
 - bias의 sign 차이는 M1 (mean-tracking) vs M2 q50 (median-tracking) loss difference. 본질적 model failure가 아니다.
 - "큰 손해 없이"의 정량적 기준은 plan에서 명시되지 않았으나 NSE +0.15는 paper 본문 headline으로 사용 가능한 수준이다.
+- **FHV 해석**: M1 -12.3%, M2 q50 -36.1% — 두 모델 모두 상위 2% 고유량 구간을 과소 추정하며, q50이 훨씬 심하다. Bias 결과(Δ = -0.437)와 같은 방향이며, pinball loss 기반 median-tracking이 고유량 구간에서 특히 under-bias를 강화한다는 해석을 지지한다. Δ IQR이 매우 넓어(-58.5 / +8.2) 유역 간 이질성이 크다.

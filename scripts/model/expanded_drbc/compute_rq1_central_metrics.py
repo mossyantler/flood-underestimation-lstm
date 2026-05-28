@@ -12,19 +12,20 @@ Inputs
 ------
 - output/model_analysis/expanded_drbc_test/required_series/seed{111,222,444}/primary_required_series.csv
 - output/model_analysis/expanded_drbc_test/raw_metrics/model{1,2}_seed{111,222,444}_epoch*_metrics.csv
-  (NSE/KGE cross-check only; bias/MAE/RMSE are computed fresh here)
+  (NSE/KGE cross-check only; bias/MAE/RMSE/FHV are computed fresh here)
 
 Outputs
 -------
 - tables/rq1_central_metrics_per_basin_seed.csv     (wide form: 85 × 3 × 2 = 510 rows)
-- tables/rq1_central_metrics_seed_median.csv        (long form: 85 × 5 = 425 rows)
+- tables/rq1_central_metrics_seed_median.csv        (long form: 85 × 6 = 510 rows)
 - tables/rq1_central_metrics_pooled_summary.csv
 - figures/rq1_central_metric_boxplots.png
 - figures/rq1_paired_delta_scatter.png
 
 Metrics: NSE, KGE, bias = mean(pred − obs), MAE = mean(|pred − obs|),
-RMSE = sqrt(mean((pred − obs)^2)). NaN-obs rows dropped per
-:func:`scripts._lib.expanded_drbc.filter_valid_rows`.
+RMSE = sqrt(mean((pred − obs)^2)),
+FHV = sum(sim_top2% − obs_top2%) / sum(obs_top2%) × 100  (Yilmaz 2008).
+NaN-obs rows dropped per :func:`scripts._lib.expanded_drbc.filter_valid_rows`.
 
 Aggregation order (canonical from C0):
 per-basin per-seed compute → median across seeds within basin → cross-basin summary.
@@ -64,11 +65,25 @@ DEFAULT_RAW_METRICS_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test/
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test"
 
 REQUIRED_COLS = ("seed", "basin", "obs", "model1", "q50")
-METRIC_ORDER = ("nse", "kge", "bias", "mae", "rmse")
+METRIC_ORDER = ("nse", "kge", "bias", "mae", "rmse", "fhv")
+_FHV_H = 0.02  # top 2% of FDC (Yilmaz 2008)
+
+
+def _compute_fhv(obs: np.ndarray, pred: np.ndarray) -> float:
+    """FHV: top-2% FDC volume bias (Yilmaz 2008). obs/sim sorted independently."""
+    obs_sorted = np.sort(obs)[::-1]
+    pred_sorted = np.sort(pred)[::-1]
+    n = max(1, round(_FHV_H * len(obs_sorted)))
+    obs_top = obs_sorted[:n]
+    pred_top = pred_sorted[:n]
+    denom = obs_top.sum()
+    if denom == 0:
+        return float("nan")
+    return float((pred_top.sum() - denom) / denom * 100)
 
 
 def compute_metrics(obs: np.ndarray, pred: np.ndarray) -> dict[str, float]:
-    """Return NSE / KGE / bias / MAE / RMSE for a single (obs, pred) array pair.
+    """Return NSE / KGE / bias / MAE / RMSE / FHV for a single (obs, pred) array pair.
 
     NaN-obs entries are assumed already filtered. Pred-NaN entries are
     masked out for this metric pair only.
@@ -98,7 +113,8 @@ def compute_metrics(obs: np.ndarray, pred: np.ndarray) -> dict[str, float]:
     bias = float(residual.mean())
     mae = float(np.abs(residual).mean())
     rmse = float(np.sqrt((residual ** 2).mean()))
-    return {"nse": float(nse), "kge": float(kge), "bias": bias, "mae": mae, "rmse": rmse}
+    fhv = _compute_fhv(obs, pred)
+    return {"nse": float(nse), "kge": float(kge), "bias": bias, "mae": mae, "rmse": rmse, "fhv": fhv}
 
 
 def load_seed_csv(path: Path) -> pd.DataFrame:
