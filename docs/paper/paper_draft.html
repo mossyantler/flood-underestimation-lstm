@@ -417,7 +417,7 @@
   <div class="paper-subtitle">
     극한 홍수 과소추정 완화를 위한 다중 유역 LSTM 확률론적 확장
   </div>
-  <div class="paper-date">초안 날짜: 2026년 5월 27일 &nbsp;|&nbsp; 상태: 검토용 초안</div>
+  <div class="paper-date">초안 날짜: 2026년 5월 27일 &nbsp;|&nbsp; 수정: 2026년 5월 29일 &nbsp;|&nbsp; 상태: 1차 리뷰 반영 초안</div>
 </div>
 
 <!-- =============================== TOC ================================== -->
@@ -430,15 +430,15 @@
       <ol>
         <li><a href="#s11">1.1 연구 배경</a></li>
         <li><a href="#s12">1.2 연구 목적과 가설</a></li>
-        <li><a href="#s13">1.3 연구 기여</a></li>
+        <li><a href="#s13">1.3 연구의 기여점</a></li>
       </ol>
     </li>
     <li>
       <a href="#ch2">제 2장 이론적 배경</a>
       <ol>
-        <li><a href="#s21">2.1 Multi-basin LSTM</a></li>
-        <li><a href="#s22">2.2 Model 1: Deterministic Baseline</a></li>
-        <li><a href="#s23">2.3 Model 2: Probabilistic Quantile Extension</a></li>
+        <li><a href="#s21">2.1 다중 유역 LSTM</a></li>
+        <li><a href="#s22">2.2 Model 1: 결정론적 기준 모델</a></li>
+        <li><a href="#s23">2.3 Model 2: 확률론적 분위수 확장</a></li>
         <li><a href="#s24">2.4 분위수 손실 함수 (Pinball Loss)</a></li>
         <li><a href="#s25">2.5 평가 지표</a>
           <ol>
@@ -454,28 +454,28 @@
       <ol>
         <li><a href="#s31">3.1 CAMELSH Hourly Dataset</a></li>
         <li><a href="#s32">3.2 DRBC Regional Holdout</a></li>
-        <li><a href="#s33">3.3 Basin Split과 Subset300 Training Design</a></li>
-        <li><a href="#s34">3.4 Temporal Split과 Seed Protocol</a></li>
-        <li><a href="#s35">3.5 Primary Checkpoint Selection</a></li>
+        <li><a href="#s33">3.3 유역 분할과 Subset300 학습 설계</a></li>
+        <li><a href="#s34">3.4 시간 분할과 난수 시드 규약</a></li>
+        <li><a href="#s35">3.5 기본 체크포인트 선택</a></li>
         <li><a href="#s36">3.6 결과 분석 질문 (Research Questions)</a></li>
       </ol>
     </li>
     <li>
       <a href="#ch4">제 4장 실험 결과</a>
       <ol>
-        <li><a href="#s41">4.1 RQ-1: q50 Central Performance</a></li>
-        <li><a href="#s42">4.2 RQ-2: Upper Quantile의 Peak Underestimation 완화</a></li>
-        <li><a href="#s43">4.3 RQ-3: Recall 증가의 Cost</a></li>
-        <li><a href="#s44">4.4 RQ-4: Basin 및 Event-type Heterogeneity</a></li>
-        <li><a href="#s45">4.5 RQ-5: Calibration, Sharpness, and Quantile Sanity</a></li>
+        <li><a href="#s41">4.1 RQ-1: q50 중앙 예측 성능</a></li>
+        <li><a href="#s42">4.2 RQ-2: 상위 분위수의 첨두 과소추정 완화</a></li>
+        <li><a href="#s43">4.3 RQ-3: 재현율 증가의 비용</a></li>
+        <li><a href="#s44">4.4 RQ-4: 유역 및 사건 유형 이질성</a></li>
+        <li><a href="#s45">4.5 RQ-5: 보정, 예리도, 분위수 단조성</a></li>
       </ol>
     </li>
     <li>
       <a href="#ch5">제 5장 논의</a>
       <ol>
-        <li><a href="#s51">5.1 Output Design이 Peak Underestimation에 미치는 영향</a></li>
-        <li><a href="#s52">5.2 Central Prediction과 Upper-tail Output의 역할 분리</a></li>
-        <li><a href="#s53">5.3 운영적 Trade-off</a></li>
+        <li><a href="#s51">5.1 출력 설계가 첨두 과소추정에 미치는 영향</a></li>
+        <li><a href="#s52">5.2 중앙 예측값과 상위 꼬리 출력의 역할 분리</a></li>
+        <li><a href="#s53">5.3 운영적 상충 관계</a></li>
         <li><a href="#s54">5.4 한계 및 향후 연구</a></li>
       </ol>
     </li>
@@ -488,22 +488,22 @@
 <div class="abstract-block" id="abstract">
   <h2>초록 (Abstract)</h2>
   <p>
-    극한 홍수 예측에서 첨두 유량을 낮게 예측하면 경보와 대응이 늦어질 수 있다. Multi-basin LSTM은 여러 유역의 수문 반응을 함께 학습할 수 있지만, deterministic output만 사용할 경우 큰 홍수 첨두를 과소추정하는 경향이 남는다. 본 연구는 이러한 한계가 LSTM backbone 자체만의 문제가 아니라, 하나의 중앙예측값만 내는 output design의 제약일 수 있다고 보았다.
+    극한 홍수 예측에서 첨두 유량을 낮게 예측하면 경보와 대응이 늦어질 수 있다. 다중 유역 LSTM은 여러 유역의 수문 반응을 함께 학습할 수 있지만, 결정론적 출력만 사용할 경우 큰 홍수 첨두를 과소추정하는 경향이 남는다. 본 연구는 이러한 한계가 LSTM 기반망(backbone: 입력 시퀀스에서 특징을 추출하는 핵심 신경망 구조) 자체만의 문제가 아니라, 하나의 중앙예측값만 내는 출력 설계의 제약일 수 있다고 보았다.
   </p>
   <p>
-    이를 확인하기 위해 동일한 LSTM backbone을 유지한 채, 출력 head만 deterministic prediction에서 q50/q90/q95/q99 quantile output으로 확장한 probabilistic multi-basin LSTM을 구성하였다. Model 1은 deterministic LSTM baseline으로, Model 2는 quantile head를 가진 probabilistic extension으로 정의하였다. 두 모델은 fixed subset300 학습 조건에서 paired seed 111/222/444로 비교하였고, Results 분석은 expanded DRBC observed test split의 85개 basin, 2014–2016 test period를 canonical evaluation으로 사용하였다.
+    이를 확인하기 위해 동일한 LSTM 기반망을 유지한 채, 출력 헤드(output head: 기반망에 연결되어 최종 예측값을 생성하는 출력 계층)만 결정론적 예측에서 q50/q90/q95/q99 분위수 출력으로 확장한 확률론적 다중 유역 LSTM을 구성하였다. Model 1은 결정론적 LSTM 기준 모델로, Model 2는 분위수 헤드를 가진 확률론적 확장 모델로 정의하였다. 두 모델은 고정 subset300 학습 조건에서 난수 시드(seed) 111/222/444를 쌍별로 비교하였고, 결과 분석은 확장 DRBC 관측 테스트 세트(85개 유역, 2014–2016 평가 기간)를 기본 평가 기준으로 사용하였다.
   </p>
   <p>
-    결과적으로 Model 2의 q50은 central prediction 성능을 유지하였다. Basin-median NSE는 Model 1의 −0.031에서 Model 2 q50의 0.225로 증가했으며(Δ = +0.149), RMSE와 MAE도 각각 −0.273, −0.197 개선되었다. 더 중요한 결과는 upper quantile에서 나타났다. Q99 exceedance event(82개 유역, 926개 사건)에서 q99의 event peak under-deficit(α)은 0.018까지 낮아졌고, Q99 threshold recall(δ)은 0.583까지 높아졌다. NOAA/NWS confirmed flood subset(21개 유역, 65개 사건)에서도 같은 방향의 개선이 확인되었다.
+    결과적으로 Model 2의 q50은 중앙 예측 성능을 유지하였다. 유역 중앙값 NSE는 Model 1의 −0.031에서 Model 2 q50의 0.225로 증가했으며(Δ = +0.149), RMSE와 MAE도 각각 −0.273, −0.197 개선되었다. 더 중요한 결과는 상위 분위수에서 나타났다. Q99 초과 사건(82개 유역, 926개 사건)에서 q99의 사건 첨두 과소추정 비율 α(수식 6)는 0.018까지 낮아졌고, Q99 임계값 재현율 δ(수식 8)는 0.583까지 높아졌다. NOAA/NWS 확인 홍수 부분집합(21개 유역, 65개 사건)에서도 같은 방향의 개선이 확인되었다.
   </p>
   <p>
-    그러나 이 개선은 비용 없이 얻어진 것이 아니다. q99는 q50보다 high-flow recall을 약 8배 높였지만, false alarm rate(FAR)도 약 23배 증가시켰다. All-hour empirical one-sided coverage는 q99에서 0.787로 nominal 0.99에 미치지 못했다. 따라서 본 연구의 quantile output은 calibrated 99% predictive interval이나 return-period estimate가 아니라, 극한 첨두 과소추정을 줄이기 위한 upper-tail decision output으로 해석해야 한다.
+    그러나 이 개선은 비용 없이 얻어진 것이 아니다. q99는 q50보다 고유량 재현율을 약 8배 높였지만, 오경보율(FAR)도 약 23배 증가시켰다. 전 시간 경험적 단측 피복률 Coverage(τ)(수식 10)은 q99에서 0.787로 명목 피복률 0.99에 미치지 못했다. 따라서 본 연구의 분위수 출력은 보정된 99% 예측 구간이나 재현 주기 추정값이 아니라, 극한 첨두 과소추정을 줄이기 위한 상위 꼬리 결정 출력으로 해석해야 한다.
   </p>
   <p>
-    본 연구는 deterministic LSTM의 극한 홍수 과소추정 문제가 일부는 output design에서 비롯될 수 있음을 보이며, 동일한 backbone에 probabilistic quantile head를 추가하는 것만으로도 flood peak protection 성능을 개선할 수 있음을 제시한다.
+    본 연구는 결정론적 LSTM의 극한 홍수 과소추정 문제가 일부는 출력 설계에서 비롯될 수 있음을 보이며, 동일한 기반망에 확률론적 분위수 헤드를 추가하는 것만으로도 홍수 첨두 보호 성능을 개선할 수 있음을 제시한다.
   </p>
   <div class="keywords">
-    <strong>Keywords:</strong> Multi-basin LSTM, probabilistic streamflow forecasting, extreme flood underestimation, quantile regression, DRBC holdout, peak underestimation, uncertainty band
+    <strong>주요어:</strong> 다중 유역 LSTM (Multi-basin LSTM), 확률론적 유량 예측 (probabilistic streamflow forecasting), 극한 홍수 과소추정 (extreme flood underestimation), 분위수 회귀 (quantile regression), DRBC 지역 holdout, 첨두 과소추정 (peak underestimation), 불확실성 밴드 (uncertainty band)
   </div>
 </div>
 
@@ -516,87 +516,95 @@
   하천 유량 예측에서 평상시 유량을 잘 맞추는 것은 중요하지만, 실제 재난 대응과 홍수 경보에서는 드물게 발생하는 첨두유량을 놓치지 않는 것이 더 직접적인 안전 문제로 이어진다. 수문 예측 모델은 Nash-Sutcliffe Efficiency(NSE)와 같은 전체 기간 지표를 최적화하는 과정에서 자연스럽게 평상시 유량 조건에 더 많은 학습 용량을 할당하게 된다. 이 때문에 관측 빈도가 낮은 극한 홍수 사건에서는 모델이 첨두 크기를 낮게 예측하는 경향이 나타날 수 있다.
 </p>
 <p>
-  LSTM(Long Short-Term Memory) 기반 수문 예측 모델은 최근 여러 유역에 걸친 rainfall-runoff 관계를 동시에 학습하는 multi-basin 구조로 발전하였으며, 전통적인 물리 기반 모델 수준 이상의 예측 성능을 보여왔다(Kratzert et al., 2018, 2019). 그러나 하나의 deterministic 출력값만 생성하는 구조에서는 rare high-flow event에서 peak를 낮게 예측하는 경향이 여전히 남는다. 이는 training objective가 전체 시간의 bulk flow를 강하게 반영하고, 극단값은 빈도가 낮아 loss에서 충분히 강조되지 않기 때문이다.
+  LSTM(Long Short-Term Memory) 기반 수문 예측 모델은 최근 여러 유역에 걸친 강우-유출(rainfall-runoff) 관계를 동시에 학습하는 다중 유역 구조로 발전하였으며, 전통적인 물리 기반 모델 수준 이상의 예측 성능을 보여왔다(Kratzert et al., 2018, 2019). 그러나 하나의 결정론적 출력값만 생성하는 구조에서는 드문 고유량 홍수 사건에서 첨두를 낮게 예측하는 경향이 여전히 남는다. 이는 학습 목적함수(모델이 최소화하려는 기준 함수, 여기서는 NSE 기반 오차)가 전체 시간의 전반적인 유량을 강하게 반영하는 반면, 극단값은 발생 빈도가 낮아 손실 함수에서 충분히 강조되지 않기 때문이다.
 </p>
 <p>
-  본 연구는 이 문제를 "LSTM을 더 복잡하게 만들 것인가"가 아니라 "같은 backbone의 출력을 어떻게 설계할 것인가"의 문제로 다룬다. 즉 deterministic point estimate 하나만 출력하는 대신, 같은 시점에서 중앙예측과 여러 수준의 upper-tail output을 동시에 제공하면 extreme peak underestimation을 줄일 수 있는지 확인한다.
+  본 연구는 이 문제를 "LSTM을 더 복잡하게 만들 것인가"가 아니라 "같은 기반망의 출력을 어떻게 설계할 것인가"의 문제로 다룬다. 즉 결정론적 점 추정값 하나만 출력하는 대신, 같은 시점에서 중앙예측과 여러 수준의 상위 꼬리(upper-tail) 출력을 동시에 제공하면 극한 첨두 과소추정을 줄일 수 있는지 확인한다.
 </p>
 
 <h2 class="section" id="s12">1.2 연구 목적과 가설</h2>
 
 <div class="highlight-box blue">
-  <strong>핵심 연구 질문:</strong> Multi-basin LSTM 기반 hourly streamflow 예측에서 probabilistic quantile head만 추가해도 deterministic baseline의 extreme flood peak underestimation을 줄일 수 있는가?
+  <strong>핵심 연구 질문:</strong> 다중 유역 LSTM 기반 시간 단위 유량 예측에서 확률론적 분위수 헤드만 추가해도 결정론적 기준 모델의 극한 홍수 첨두 과소추정을 줄일 수 있는가?
 </div>
 
 <p>이를 위해 다음 가설을 검증한다.</p>
 
 <ol class="hypothesis">
-  <li><strong>H1.</strong> Model 2의 q50은 Model 1 deterministic output과 비교 가능한 central prediction으로 기능해야 한다. <em>(→ RQ-1)</em></li>
-  <li><strong>H2.</strong> q90/q95/q99는 τ가 커질수록 peak underestimation을 줄이는 방향으로 작동해야 한다. <em>(→ RQ-2)</em></li>
-  <li><strong>H3.</strong> Peak underestimation 감소에는 false-positive 또는 over-prediction cost가 동반되므로, recall만이 아니라 cost도 함께 평가해야 한다. <em>(→ RQ-3)</em></li>
-  <li><strong>H4.</strong> q99는 return-period flood나 양방향 prediction interval이 아니라 one-sided upper-tail decision output으로 해석해야 한다. <em>(→ RQ-5)</em></li>
+  <li><strong>H1.</strong> Model 2의 q50은 Model 1 결정론적 출력과 비교 가능한 중앙 예측값으로 기능해야 한다. <em>(→ RQ-1)</em></li>
+  <li><strong>H2.</strong> q90/q95/q99는 τ가 커질수록 첨두 과소추정을 줄이는 방향으로 작동해야 한다. <em>(→ RQ-2)</em></li>
+  <li><strong>H3.</strong> 첨두 과소추정 감소에는 오탐지(false-positive) 또는 과대예측 비용이 동반되므로, 재현율만이 아니라 비용도 함께 평가해야 한다. <em>(→ RQ-3)</em></li>
+  <li><strong>H4.</strong> q99는 재현 주기 홍수나 양방향 예측 구간이 아니라 단측 상위 꼬리 결정 출력으로 해석해야 한다. <em>(→ RQ-5)</em></li>
 </ol>
 
-<h2 class="section" id="s13">1.3 연구 기여</h2>
+<h2 class="section" id="s13">1.3 연구의 기여점</h2>
 
 <ul class="contrib">
-  <li><strong>공정한 Model 1 vs Model 2 비교 구조:</strong> backbone, 입력 변수, basin split, temporal split, seed를 고정하고 output head와 loss만 바꾸어 probabilistic head의 효과를 분리하였다.</li>
-  <li><strong>DRBC regional holdout 평가:</strong> non-DRBC basin에서 학습한 global multi-basin model을 DRBC basin에서 평가하여, spatial generalization 조건에서 peak underestimation을 분석하였다.</li>
-  <li><strong>Quantile output 해석 framework 제시:</strong> q50은 central prediction, q90/q95/q99는 보수성 수준이 다른 upper-tail decision output으로 구분하고, calibration claim과 operational peak-capture claim을 분리하였다.</li>
+  <li><strong>공정한 Model 1 vs Model 2 비교 구조:</strong> 기반망, 입력 변수, 유역 분할, 시간 분할, 난수 시드를 고정하고 출력 헤드와 손실 함수만 바꾸어 확률론적 헤드의 효과를 분리하였다.</li>
+  <li><strong>DRBC 지역 검증 보류 평가:</strong> DRBC 밖 유역에서 학습한 광역 다중 유역 모델을 DRBC 유역에서 평가하여, 공간 일반화(spatial generalization) 조건에서 첨두 과소추정을 분석하였다.</li>
+  <li><strong>분위수 출력 해석 체계 제시:</strong> q50은 중앙 예측값, q90/q95/q99는 보수성 수준이 다른 상위 꼬리 결정 출력으로 구분하고, 보정 주장과 운영적 첨두 포착 주장을 분리하였다.</li>
 </ul>
 
 <!-- ============================ CHAPTER 2 ================================ -->
 <h1 class="chapter" id="ch2">제 2장 이론적 배경</h1>
 
-<h2 class="section" id="s21">2.1 Multi-basin LSTM</h2>
+<h2 class="section" id="s21">2.1 다중 유역 LSTM</h2>
 
 <p>
-  LSTM(Long Short-Term Memory)은 vanishing gradient 문제를 cell state와 gating mechanism으로 극복한 recurrent neural network로, 강수·기온·복사 등 dynamic forcing의 시간적 의존성을 효과적으로 학습한다. 수문 예측에서는 과거 forcing sequence와 basin static attributes를 함께 사용해 basin별 rainfall-runoff response를 예측한다.
+  LSTM(Long Short-Term Memory)은 경사 소실(vanishing gradient: 역전파 시 기울기 신호가 점점 작아져 깊은 층의 학습이 어려워지는 현상) 문제를 셀 상태(cell state)와 게이팅 메커니즘(gating mechanism)으로 극복한 순환 신경망(recurrent neural network)으로, 강수·기온·복사 등 동적 강제력(dynamic forcing)의 시간적 의존성을 효과적으로 학습한다. 수문 예측에서는 과거 강제력 시퀀스와 유역 정적 속성(static attributes)을 함께 사용해 유역별 강우-유출 반응을 예측한다.
 </p>
 <p>
-  Multi-basin LSTM은 수백 개의 유역 데이터를 하나의 모델에서 함께 학습함으로써, 데이터가 부족한 개별 유역에서도 다른 유역의 패턴을 활용한 일반화 성능을 얻을 수 있다(Kratzert et al., 2019). 본 연구의 두 모델은 모두 같은 CudaLSTM backbone을 사용한다.
+  다중 유역 LSTM은 수백 개의 유역 데이터를 하나의 모델에서 함께 학습함으로써, 데이터가 부족한 개별 유역에서도 다른 유역의 패턴을 활용한 일반화 성능을 얻을 수 있다(Kratzert et al., 2019). 본 연구의 두 모델은 모두 같은 CudaLSTM 기반망을 사용한다.
+</p>
+
+<p>
+  그림 1은 두 모델의 아키텍처를 비교한다. 두 모델은 동일한 다중 유역 CudaLSTM 기반망(은닉 크기 128, 참조 기간(lookback) 336시간)을 공유하며, 차이는 출력 헤드와 학습 목적함수뿐이다. Model 1은 회귀 헤드와 NSE 손실을, Model 2는 분위수 헤드와 Pinball 손실을 사용한다.
 </p>
 
 <div class="figure-container">
   <img src="docx_images/image1.png" alt="Model 1 vs Model 2 Architecture">
   <div class="figure-caption">
-    <strong>그림 1.</strong> Model 1 vs. Model 2 아키텍처 비교. 두 모델은 동일한 shared multi-basin CudaLSTM backbone(hidden size 128, 336h lookback)을 사용한다. 차이는 output head와 training objective뿐이다 — Model 1은 regression head + NSE loss, Model 2는 quantile head + pinball loss.
+    <strong>그림 1.</strong> Model 1 vs. Model 2 아키텍처 비교.
   </div>
 </div>
+
+<p>
+  그림 2는 단일 시퀀스의 입출력 구조를 나타낸다. 동적 강제력과 유역 정적 속성을 336시간 참조 기간으로 입력받으며, 마지막 시점에서 Model 1은 단일 점 추정값을, Model 2는 q50/q90/q95/q99를 동시에 출력한다.
+</p>
 
 <div class="figure-container">
   <img src="docx_images/image2.png" alt="Single 336-hour sequence input-output structure">
   <div class="figure-caption">
-    <strong>그림 2.</strong> 단일 336시간 시퀀스 입력-출력 구조. Dynamic inputs + static attributes를 336시간 lookback으로 소비하고, 마지막 시점에서 Model 1은 point estimate, Model 2는 q50/q90/q95/q99를 동시에 출력한다.
+    <strong>그림 2.</strong> 단일 336시간 시퀀스 입력-출력 구조.
   </div>
 </div>
 
-<h2 class="section" id="s22">2.2 Model 1: Deterministic Baseline</h2>
+<h2 class="section" id="s22">2.2 Model 1: 결정론적 기준 모델</h2>
 
 <p>
-  Model 1은 매 시점 하나의 streamflow 값을 예측하는 deterministic regression model이다. 전체 hydrograph의 평균적 적합도를 잘 확보할 수 있지만, rare high-flow peak에서는 conditional mean 쪽으로 수축하면서 underestimation이 발생할 수 있다.
+  Model 1은 매 시점 하나의 유량 값을 예측하는 결정론적 회귀 모델이다. 전체 수문곡선의 평균적 적합도를 잘 확보할 수 있지만, 드문 고유량 첨두에서는 조건부 평균 쪽으로 수축하면서 과소추정이 발생할 수 있다.
 </p>
 
-<p style="color:#4a5568;font-size:10pt;font-style:italic;">→ 그림 1 (Model 1 vs. Model 2 Architecture) 참조.</p>
+<p style="color:#4a5568;font-size:10pt;font-style:italic;">→ 그림 1 (Model 1 vs. Model 2 아키텍처) 참조.</p>
 
-<h2 class="section" id="s23">2.3 Model 2: Probabilistic Quantile Extension</h2>
+<h2 class="section" id="s23">2.3 Model 2: 확률론적 분위수 확장</h2>
 
 <p>
-  Model 2는 Model 1과 같은 backbone을 사용하되, head만 quantile output으로 바꾼다. 출력 분위수 집합은 τ ∈ {0.50, 0.90, 0.95, 0.99}이다.
+  Model 2는 Model 1과 같은 기반망을 사용하되, 헤드만 분위수 출력으로 바꾼다. 출력 분위수 집합은 τ ∈ {0.50, 0.90, 0.95, 0.99}이다.
 </p>
 
-<p style="color:#4a5568;font-size:10pt;font-style:italic;">→ 그림 1 (Model 1 vs. Model 2 Architecture) 참조.</p>
+<p style="color:#4a5568;font-size:10pt;font-style:italic;">→ 그림 1 (Model 1 vs. Model 2 아키텍처) 참조.</p>
 
 <p>
-  q50은 conditional median으로, Model 1 deterministic output과 가장 직접적으로 비교되는 central prediction이다. q90/q95/q99는 lower quantile이 없는 one-sided upper-tail output이다. 따라서 본 연구에서는 이를 prediction interval이나 return-period estimate로 해석하지 않는다. 특히 <strong>q99는 100-year flood가 아니라</strong>, 해당 시점 조건에서 모델이 내는 가장 보수적인 upper-tail decision output이다.
+  q50은 조건부 중앙값(입력 조건 하에서 유량의 50번째 백분위 추정값)으로, Model 1 결정론적 출력과 가장 직접적으로 비교되는 중앙 예측값이다. q90/q95/q99는 하위 분위수가 없는 단측 상위 꼬리 출력(하나의 상한선만 제공하며 양방향 불확실성 구간을 구성하지 않는 단방향 출력)이다. 따라서 본 연구에서는 이를 예측 구간이나 재현 주기 추정값으로 해석하지 않는다. 특히 <strong>q99는 100년 빈도 홍수가 아니라</strong>, 해당 시점 조건에서 모델이 내는 가장 보수적인 상위 꼬리 결정 출력이다.
 </p>
 
 <h2 class="section" id="s24">2.4 분위수 손실 함수 (Pinball Loss)</h2>
 
 <p>
-  Model 2는 분위수별 <strong>pinball loss</strong>(Koenker &amp; Bassett, 1978)를 사용하여 학습한다.
+  Model 2는 분위수별 <strong>Pinball 손실</strong>(Koenker &amp; Bassett, 1978)을 사용하여 학습한다.
   시각 \(t\)에서 관측 유량을 \(y_t\), 분위수 \(\tau\)에 대한 예측값을 \(\hat{y}_{t,\tau}\)라 할 때,
-  단일 시각의 pinball loss는 다음과 같이 정의된다.
+  단일 시각의 Pinball 손실은 다음과 같이 정의된다.
 </p>
 
 \[
@@ -621,8 +629,8 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 
 <p>
   여기서 \(T\)는 학습 기간의 전체 시간스텝 수이다.
-  \(\tau\)가 클수록 관측값이 예측값보다 큰 경우(under-prediction)에 더 큰 패널티가 부과된다.
-  이 비대칭 구조 덕분에 상위 분위수(q90, q95, q99)는 첨두 과소추정을 줄이는 방향으로 학습된다.
+  \(\tau\)가 클수록 관측값이 예측값보다 큰 경우(과소예측: 모델이 실제보다 낮게 예측한 상태)에 더 큰 패널티가 부과된다.
+  이러한 비대칭 구조로 상위 분위수(q90, q95, q99)는 첨두 과소추정을 줄이는 방향으로 학습한다.
   반면 Model 1은 표준 NSE 기반 평균제곱오차 손실을 사용한다.
 </p>
 
@@ -639,7 +647,7 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
   <li>\(\hat{y}_{t,\tau}\) : 시각 \(t\)에서 분위수 \(\tau\)의 예측값 (Model 2)</li>
   <li>\(\bar{y}\) : 평가 기간 관측 유량의 시간 평균</li>
   <li>\(T\) : 평가 기간 전체 시간스텝 수</li>
-  <li>\(\mathbf{1}[\cdot]\) : 조건이 참이면 1, 거짓이면 0을 반환하는 지시 함수(indicator function)</li>
+  <li>\(\mathbf{1}[\cdot]\) : 조건이 참이면 1, 거짓이면 0을 반환하는 지시 함수</li>
 </ul>
 
 <h3 class="subsection" id="s251">2.5.1 전체 성능 지표</h3>
@@ -679,7 +687,7 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 \tag{5}
 \]
 
-<p>두 지표 모두 단위는 m³/s이며, 0에 가까울수록 우수하다. RMSE는 이상치(outlier)에 민감하고 MAE는 선형적이므로, 두 지표를 함께 사용하면 오차 분포의 성격을 파악할 수 있다.</p>
+<p>두 지표 모두 단위는 m³/s이며, 0에 가까울수록 우수하다. RMSE는 이상값(극단 오차)에 민감하고 MAE는 선형적이므로, 두 지표를 함께 사용하면 오차 분포의 성격을 파악할 수 있다.</p>
 
 <h3 class="subsection" id="s252">2.5.2 홍수 첨두 성능 지표</h3>
 
@@ -689,7 +697,7 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
   \(Q_{99}^{(b)}\)는 유역 \(b\)의 관측 유량 99번째 백분위수이다.
 </p>
 
-<p><strong>첨두 과소추정 비율 \(\alpha\) (Peak Under-Deficit)</strong></p>
+<p><strong>첨두 과소추정 비율 \(\alpha\)</strong></p>
 <p>Q99 사건의 관측 첨두 시각에서 예측값이 얼마나 부족한지를 상대 비율로 측정한다. 0에 가까울수록 첨두를 잘 포착한 것이다.</p>
 
 \[
@@ -703,7 +711,7 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
   \(\hat{y}_{e,\tau}^{\text{peak}}\)는 분위수 \(\tau\)의 예측 첨두유량이다.
 </p>
 
-<p><strong>±6시간 창 포착률 \(\beta\) (Window Capture Rate)</strong></p>
+<p><strong>±6시간 창 포착률 \(\beta\)</strong></p>
 <p>관측 첨두 발생 시각 기준 ±6시간 창 안에서 예측값이 관측 첨두 크기에 도달하는지 여부를 평가한다. 1에 가까울수록 우수하다.</p>
 
 \[
@@ -713,10 +721,10 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 \]
 
 <p style="margin-top:6px;">
-  여기서 \(t_e\)는 사건 \(e\)의 관측 첨두 발생 시각, \(k\)는 시간 오프셋(hour) 단위이다.
+  여기서 \(t_e\)는 사건 \(e\)의 관측 첨두 발생 시각, \(k\)는 시간 오프셋(단위: 시간) 단위이다.
 </p>
 
-<p><strong>Q99 임계값 재현율 \(\delta\) (Q99 Threshold Recall)</strong></p>
+<p><strong>Q99 임계값 재현율 \(\delta\)</strong></p>
 <p>관측값이 유역별 Q99 임계값을 초과하는 모든 시간스텝 중, 예측값도 Q99를 초과하는 비율이다. 홍수 경보 관점에서 1에 가까울수록 우수하다.</p>
 
 \[
@@ -725,8 +733,8 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 \tag{8}
 \]
 
-<p><strong>오경보율 FAR (False Alarm Rate)</strong></p>
-<p>예측이 Q99를 초과하였지만 실제 관측은 Q99 미만인 경우의 비율이다. 홍수 경보의 신뢰도 비용을 나타내며, 0에 가까울수록 우수하다.</p>
+<p><strong>오경보율 FAR</strong></p>
+<p>예측이 Q99를 초과하였지만 실제 관측은 Q99 미만인 경우의 비율이다. 홍수 경보가 틀린 오경보의 비율을 나타내며, 0에 가까울수록 우수하다.</p>
 
 \[
 \text{FAR} = \frac{\#\!\left\{t:\; y_t \leq Q_{99}^{(b)} \;\wedge\; \hat{y}_{t,\tau} > Q_{99}^{(b)}\right\}}
@@ -737,11 +745,11 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 <h3 class="subsection" id="s253">2.5.3 확률론적 보정 지표</h3>
 
 <p>
-  Model 2가 출력하는 분위수 예측의 통계적 유효성은 경험적 피복률(empirical coverage)로 진단한다.
+  Model 2가 출력하는 분위수 예측의 통계적 유효성은 경험적 피복률로 진단한다.
 </p>
 
-<p><strong>경험적 피복률 (Empirical Coverage)</strong></p>
-<p>실제 관측값이 분위수 \(\tau\) 예측값 이하에 놓이는 비율이다. 이상적으로 보정된 모델이라면 Coverage(\(\tau\)) ≈ \(\tau\)가 성립한다.</p>
+<p><strong>경험적 피복률</strong></p>
+<p>실제 관측값이 분위수 \(\tau\) 예측값 이하에 놓이는 비율이다. 이상적으로 보정(calibration: 예측 분위수의 통계적 신뢰도가 명목값과 일치하는 상태)된 모델이라면 Coverage(\(\tau\)) ≈ \(\tau\)가 성립한다.</p>
 
 \[
 \text{Coverage}(\tau) = \frac{1}{T}\sum_{t=1}^{T}\mathbf{1}\!\left[y_t \leq \hat{y}_{t,\tau}\right]
@@ -749,7 +757,7 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 \]
 
 <p>
-  보정 오차(Calibration Error)는 명목 피복률 \(\tau\)와 경험적 피복률의 차이로 정의한다.
+  보정 오차 CE(\(\tau\))는 명목 피복률 \(\tau\)와 경험적 피복률의 차이로 정의한다.
 </p>
 
 \[
@@ -771,9 +779,9 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
     <tr><td>NSE</td><td>(3)</td><td>1.0</td><td>전체 수문곡선</td></tr>
     <tr><td>KGE</td><td>(4)</td><td>1.0</td><td>전체 수문곡선</td></tr>
     <tr><td>MAE / RMSE</td><td>(5)</td><td>0</td><td>전체 수문곡선</td></tr>
-    <tr><td>\(\alpha\) (peak under-deficit)</td><td>(6)</td><td>0</td><td>Q99 사건 첨두</td></tr>
-    <tr><td>\(\beta\) (window capture)</td><td>(7)</td><td>1.0</td><td>Q99 사건 첨두</td></tr>
-    <tr><td>\(\delta\) (Q99 recall)</td><td>(8)</td><td>1.0</td><td>Q99 초과 시간스텝</td></tr>
+    <tr><td>\(\alpha\) (첨두 과소추정 비율)</td><td>(6)</td><td>0</td><td>Q99 사건 첨두</td></tr>
+    <tr><td>\(\beta\) (창 포착률)</td><td>(7)</td><td>1.0</td><td>Q99 사건 첨두</td></tr>
+    <tr><td>\(\delta\) (Q99 재현율)</td><td>(8)</td><td>1.0</td><td>Q99 초과 시간스텝</td></tr>
     <tr><td>FAR</td><td>(9)</td><td>0</td><td>Q99 초과 시간스텝</td></tr>
     <tr><td>Coverage(\(\tau\))</td><td>(10)</td><td>\(\tau\)</td><td>전체 시간스텝</td></tr>
     <tr><td>CE(\(\tau\))</td><td>(11)</td><td>0</td><td>전체 시간스텝</td></tr>
@@ -788,42 +796,46 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 <h2 class="section" id="s31">3.1 CAMELSH Hourly Dataset</h2>
 
 <p>
-  본 연구는 CAMELSH(Catchment Attributes and MEteorology for Large-sample Studies — Hourly) hourly dataset을 사용한다(Tran et al., 2025). hourly 해상도는 daily dataset보다 빠른 flood response와 첨두 timing을 더 직접적으로 분석할 수 있는 장점이 있다.
+  본 연구는 CAMELSH(Catchment Attributes and MEteorology for Large-sample Studies — Hourly) 시간 단위 자료집합을 사용한다(Tran et al., 2025). 시간 단위 해상도는 일 단위 자료집합보다 빠른 홍수 응답과 첨두 발생 시각을 더 직접적으로 분석할 수 있는 장점이 있다.
 </p>
 <p>
-  Dynamic forcing에는 강수, 기온, 복사, 습도, 풍속 등 hourly meteorological variables를 사용하고, static attributes에는 area, slope, aridity, snow fraction, soil depth, permeability, forest fraction, baseflow index 등을 사용한다. Lagged observed streamflow는 본 비교축에 포함하지 않았다. 이는 deterministic baseline이 과도하게 강해져 probabilistic head의 순수 효과를 해석하기 어려워지는 것을 막기 위한 통제다.
+  동적 강제력에는 강수, 기온, 복사, 습도, 풍속 등 시간 단위 기상 변수를 사용하고, 정적 속성에는 면적, 경사, 건조도, 적설 비율, 토심, 투수율, 산림 비율, 기저유출 지수 등을 사용한다. 지연 관측 유량은 본 비교축에 포함하지 않았다. 이는 결정론적 기준 모델이 과도하게 강해져 확률론적 헤드의 순수 효과를 해석하기 어려워지는 것을 막기 위함이다.
 </p>
 
 <h2 class="section" id="s32">3.2 DRBC Regional Holdout</h2>
 
 <p>
-  Delaware River Basin Commission(DRBC) 경계는 본 연구의 regional holdout test region이다. DRBC holdout 정의는 outlet_in_drbc == True AND overlap_ratio ≥ 0.9 조건을 만족하는 154개 basin이다. 모델은 DRBC 내부 basin을 학습하지 않고, non-DRBC basin에서 global multi-basin model로 학습된다. 따라서 본 실험은 Delaware 전용 regional model이 아니라, 다른 지역에서 학습된 multi-basin representation이 DRBC에 일반화되는지를 평가한다.
+  Delaware River Basin Commission(DRBC) 경계는 본 연구의 지역 검증 보류 평가 구역이다. 모델은 DRBC 내부 유역을 학습하지 않고, DRBC 밖 유역에서 광역 다중 유역 모델로 학습된다. 따라서 본 실험은 Delaware 전용 지역 모델이 아니라, 다른 지역에서 학습된 다중 유역 표현이 DRBC에 공간 일반화되는지를 평가한다.
 </p>
 
 <div class="figure-container">
   <img src="docx_images/image3.png" alt="Fixed Subset300 Basin Splits for Model 1 / Model 2">
   <div class="figure-caption">
-    <strong>그림 3.</strong> Fixed Subset300 Basin Splits (Model 1 / Model 2 공통). Train 269개 basin(청록), Validation 31개(주황), DRBC test 38개(적색). 모델은 Train basin에서만 학습하고, DRBC 경계 내 holdout basin에서 평가된다.
+    <strong>그림 3.</strong> 고정 Subset300 유역 분할 (Model 1 / Model 2 공통). 학습 269개 유역(청록), 검증 31개(주황), DRBC 테스트 38개(적색). 모델은 학습 유역에서만 학습하고, DRBC 경계 내 검증 보류 유역에서 평가된다.
   </div>
 </div>
 
-<h2 class="section" id="s33">3.3 Basin Split과 Subset300 Training Design</h2>
+<h2 class="section" id="s33">3.3 유역 분할과 Subset300 학습 설계</h2>
 
 <p>
-  Training pool은 outlet이 DRBC 밖에 있고 DRBC polygon overlap이 0.1 이하인 quality-pass non-DRBC basin으로 구성하였다(outlet_in_drbc == False AND overlap_ratio ≤ 0.1, quality gate 통과 → 1,923개). Scaling pilot에서는 basin 수 100/300/600을 비교했고, non-DRBC validation 성능, static attribute distribution, observed-flow event-response diagnostics, random same-size subset benchmark, compute cost를 함께 고려해 <strong>subset300을 채택</strong>하였다. 이 선택은 DRBC test metric을 보고 결정하지 않았다.
+  학습 풀(training pool)은 배출구가 DRBC 밖에 있고 DRBC 다각형 중첩 비율이 0.1 이하인 품질 기준 통과 비(非)DRBC 유역으로 구성하였다(outlet_in_drbc == False AND overlap_ratio ≤ 0.1, 품질 기준 통과 → 1,923개). 규모 파일럿 실험에서는 유역 수 100/300/600을 비교했고, 비DRBC 검증 성능, 정적 속성 분포, 관측 유량 사건 반응 진단, 동일 크기 임의 서브셋 기준선, 계산 비용을 함께 고려해 <strong>subset300을 채택</strong>하였다. 이 선택은 DRBC 테스트 지표를 보고 결정하지 않았다.
 </p>
 <p>
-  Expanded DRBC observed test split은 품질 기준과 2014–2016 기간 포함 조건을 통과한 <strong>DRBC 85개 유역</strong>을 canonical evaluation으로 사용한다. 기존 DRBC-38 보류 세트는 보관 비교 맥락으로만 둔다.
+  확장 DRBC 관측 테스트 분할은 품질 기준과 2014–2016 기간 포함 조건을 통과한 <strong>DRBC 85개 유역</strong>을 공식 평가 기준으로 사용한다. 기존 DRBC-38 보류 세트는 보관 비교 맥락으로만 둔다.
 </p>
 
 <div class="figure-container">
   <img src="docx_images/image5.png" alt="Attribute-Level Bias by Scope heatmap">
   <div class="figure-caption">
-    <strong>그림 4.</strong> Subset size(100/300/600) × Split(Combined/Train/Validation)별 static attribute standardized mean bias. Subset300(가운데 열)은 대부분 속성에서 |bias| &lt; 0.1로 전체 pool 대비 대표성이 양호함을 보여준다.
+    <strong>그림 4.</strong> Subset size(100/300/600) × Split(Combined/Train/Validation)별 유역 정적 속성 표준화 평균 편향(standardized mean bias).
   </div>
 </div>
 
-<h2 class="section" id="s34">3.4 Temporal Split과 Seed Protocol</h2>
+<p>
+  그림 4는 subset 크기와 분할 방식에 따른 정적 속성 편향을 나타낸다. Subset300(가운데 열)은 대부분 속성에서 |편향| &lt; 0.1로, 전체 pool 대비 유역 특성 대표성이 양호하다. 반면 subset100은 일부 속성에서 편향이 더 크게 나타나 subset300이 학습 데이터 품질 측면에서 더 적합함을 확인할 수 있다.
+</p>
+
+<h2 class="section" id="s34">3.4 시간 분할과 난수 시드 규약</h2>
 
 <div class="table-container">
 <table>
@@ -833,20 +845,20 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
   <tbody>
     <tr><td>Train</td><td>2000-01-01 – 2010-12-31</td><td>non-DRBC basin에서 모델 학습</td></tr>
     <tr><td>Validation</td><td>2011-01-01 – 2013-12-31</td><td>Checkpoint 선택</td></tr>
-    <tr><td>Test</td><td>2014-01-01 – 2016-12-31</td><td>DRBC holdout 평가</td></tr>
+    <tr><td>테스트</td><td>2014-01-01 – 2016-12-31</td><td>DRBC 검증 보류 평가</td></tr>
   </tbody>
 </table>
 <div class="table-caption">표 B. 공식 temporal split 정의.</div>
 </div>
 
 <p>
-  Model 1과 Model 2는 paired seed 111/222/444를 사용한다. Model 2 seed 333은 NaN loss로 중단되었으므로 final aggregate에서 제외하고, 공정한 paired-seed 비교를 위해 Model 1 seed 333도 제외하였다. 결과 집계는 유역×시드 단위로 지표를 계산하고, 시드 중앙값을 유역 안에서 취한 뒤, 유역 간 중앙값과 사분위 범위(IQR)를 보고하는 방식을 따랐다.
+  Model 1과 Model 2는 쌍별(paired) 난수 시드 111/222/444를 사용한다. Model 2 시드 333은 NaN 손실로 중단되었으므로 최종 집계에서 제외하고, 공정한 쌍별 시드 비교를 위해 Model 1 시드 333도 제외하였다. 결과 집계는 유역×시드 단위로 지표를 계산하고, 시드 중앙값을 유역 안에서 취한 뒤, 유역 간 중앙값과 사분위 범위(IQR)를 보고하는 방식을 따랐다.
 </p>
 
-<h2 class="section" id="s35">3.5 Primary Checkpoint Selection</h2>
+<h2 class="section" id="s35">3.5 기본 체크포인트 선택</h2>
 
 <p>
-  Model 1의 loss는 NSE 계열이고 Model 2의 loss는 pinball loss이므로, raw validation loss를 모델 간 checkpoint 선택 기준으로 직접 비교할 수 없다. 따라서 primary checkpoint는 non-DRBC validation median NSE를 기준으로 선택하였다. DRBC test 결과를 보고 checkpoint를 다시 고르지 않았다.
+  Model 1의 손실 함수는 NSE 계열이고 Model 2의 손실 함수는 Pinball 손실이므로, 원시 검증 손실을 모델 간 체크포인트 선택 기준으로 직접 비교할 수 없다. 따라서 기본 체크포인트는 비DRBC 검증 중앙값 NSE를 기준으로 선택하였다. DRBC 테스트 결과를 보고 체크포인트를 다시 고르지 않았다.
 </p>
 
 <h2 class="section" id="s36">3.6 결과 분석 질문 (Research Questions)</h2>
@@ -857,11 +869,11 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
     <tr><th>RQ</th><th>대응 가설</th><th>질문</th><th>핵심 산출물</th></tr>
   </thead>
   <tbody>
-    <tr><td>RQ-1</td><td>H1</td><td>q50이 central performance를 유지하는가?</td><td>NSE, KGE, FHV, MAE, RMSE paired delta</td></tr>
-    <tr><td>RQ-2</td><td>H2</td><td>upper quantile이 peak underestimation을 줄이는가?</td><td>α (under-deficit), β (window capture), δ (recall)</td></tr>
-    <tr><td>RQ-3</td><td>H3</td><td>그 대가로 false-positive cost가 얼마나 생기는가?</td><td>FAR, over-prediction magnitude</td></tr>
-    <tr><td>RQ-4</td><td>—</td><td>basin/event type에 따라 효과가 다른가?</td><td>M1 NSE tier, NOAA event type</td></tr>
-    <tr><td>RQ-5</td><td>H4</td><td>quantile output은 calibrated and sharp한가?</td><td>empirical coverage, pinball, spread, crossing</td></tr>
+    <tr><td>RQ-1</td><td>H1</td><td>q50이 중앙 예측 성능을 유지하는가?</td><td>NSE, KGE, FHV, MAE, RMSE 쌍별 차이</td></tr>
+    <tr><td>RQ-2</td><td>H2</td><td>상위 분위수가 첨두 과소추정을 줄이는가?</td><td>α(과소추정 비율), β(창 포착률), δ(재현율)</td></tr>
+    <tr><td>RQ-3</td><td>H3</td><td>그 대가로 오탐지 비용이 얼마나 생기는가?</td><td>FAR, 과대예측 크기</td></tr>
+    <tr><td>RQ-4</td><td>—</td><td>유역/사건 유형에 따라 효과가 다른가?</td><td>Model 1 NSE 계층(tier), NOAA 사건 유형</td></tr>
+    <tr><td>RQ-5</td><td>H4</td><td>분위수 출력은 보정되고 예리한가?</td><td>경험적 피복률, Pinball, 밴드 폭, 단조성</td></tr>
   </tbody>
 </table>
 <div class="table-caption">표 C. 본 연구의 결과 분석 연구 질문 체계. RQ-4는 H1–H4 범위 밖의 탐색적 이질성 분석이다.</div>
@@ -870,10 +882,10 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 <!-- ============================ CHAPTER 4 ================================ -->
 <h1 class="chapter" id="ch4">제 4장 실험 결과</h1>
 
-<h2 class="section" id="s41">4.1 RQ-1: q50 Central Performance</h2>
+<h2 class="section" id="s41">4.1 RQ-1: q50 중앙 예측 성능</h2>
 
 <p>
-  Model 2의 q50은 Model 1 대비 central prediction 성능을 유지하였다. Expanded DRBC observed test 85개 basin에서 basin-median 기준 NSE는 Model 1 −0.031, Model 2 q50 0.225였고, paired delta는 +0.149였다. RMSE와 MAE도 각각 −0.273, −0.197만큼 개선되었으며, KGE도 +0.041 증가하였다.
+  Model 2의 q50은 Model 1 대비 중앙 예측 성능을 유지하였다. 확장 DRBC 관측 테스트 85개 유역에서 유역 중앙값 기준 NSE는 Model 1 −0.031, Model 2 q50 0.225였고, 쌍별 차이(Δ)는 +0.149였다. RMSE와 MAE도 각각 −0.273, −0.197만큼 개선되었으며, KGE도 +0.041 증가하였다. 이는 Model 2 q50이 전반적인 수문곡선 형태를 더 균형 잡히고 정확하게 예측하고 있음을 의미하며, 확률론적 헤드로의 전환이 중앙 예측 성능을 저하시키지 않음을 보여준다.
 </p>
 
 <div class="table-container">
@@ -894,36 +906,36 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 </div>
 
 <p>
-  Model 1의 basin-median NSE가 −0.031로 음수인 점은 맥락이 필요하다. 확장 DRBC 유역은 훈련 풀(non-DRBC 유역)과 다른 수문 체제를 가질 수 있으며, 이는 분포 이동(distribution shift)으로 이어진다. DRBC 유역은 도시화, 인위적 유량 조절, 지하수 추출 등 non-stationarity 요인이 복합적으로 작용한다. Seed 111/222/444 세 반복에서 Model 1 유역별 NSE의 seed-median IQR은 [−0.889, +0.314]로 유역 간 이질성이 크며, 음수 NSE는 특정 seed가 아닌 전 seed에 공통으로 나타나는 구조적 특성이다. 두 모델이 같은 유역-seed 쌍에서 평가되므로, 음수 NSE baseline은 상대 비교의 유효성에 영향을 주지 않는다.
+  Model 1의 유역 중앙값 NSE가 −0.031로 음수인 점은 맥락이 필요하다. 확장 DRBC 유역은 학습 풀(비DRBC 유역)과 다른 수문 체제를 가질 수 있으며, 이는 분포 이동(distribution shift)으로 이어진다. DRBC 유역은 도시화, 인위적 유량 조절, 지하수 추출 등 비정상성(non-stationarity) 요인이 복합적으로 작용한다. 시드 111/222/444 세 반복에서 Model 1 유역별 NSE의 시드 중앙값 IQR은 [−0.889, +0.314]로 유역 간 이질성이 크며, 음수 NSE는 특정 시드가 아닌 전 시드에 공통으로 나타나는 구조적 특성이다. 두 모델이 같은 유역-시드 쌍에서 평가되므로, 음수 NSE 기준값은 상대 비교의 유효성에 영향을 주지 않는다.
 </p>
 <p>
-  Bias는 q50에서 더 negative하게 나타났다(−0.459 → −0.948, Δ = −0.437). 이는 q50이 conditional median을 추정하는 분위수 산출값이고, positively skewed 유량 분포에서 평균 추종 결정론적 출력과 중앙값 추종 분위수 출력이 다르게 동작하기 때문이다. FDC 상위 2% 구간 volume bias 지표인 FHV도 같은 방향을 지지한다. FHV는 Model 1에서 −12.3%, Model 2 q50에서 −36.1%로, q50이 고유량 구간에서 더 심한 과소 추정을 보였다(Δ = −8.5%). 이는 q50의 bias 악화가 전체 유량 구간이 아니라 고유량 구간에 집중됨을 시사하며, upper quantile을 통한 보완 필요성을 정당화한다.
+  편향(Bias)은 q50에서 더 음수 방향으로 나타났다(−0.459 → −0.948, Δ = −0.437). 이는 q50이 조건부 중앙값을 추정하는 분위수 산출값이고, 양의 비대칭(positively skewed) 유량 분포에서 평균 추종 결정론적 출력과 중앙값 추종 분위수 출력이 다르게 동작하기 때문이다. 유량 지속 곡선(FDC) 상위 2% 구간 부피 편향 지표인 FHV도 같은 방향을 지지한다. FHV는 Model 1에서 −12.3%, Model 2 q50에서 −36.1%로, q50이 고유량 구간에서 더 심한 과소 추정을 보였다(Δ = −8.5%). 이는 q50의 편향 악화가 전체 유량 구간이 아니라 고유량 구간에 집중됨을 시사하며, 상위 분위수를 통한 보완 필요성을 정당화한다.
 </p>
 
 <div class="figure-row">
   <div class="figure-item">
     <img src="figures/rq1_central_metric_boxplots.png" alt="RQ-1 central metric boxplots">
-    <div class="figure-caption"><strong>그림 3a.</strong> Model 1 vs Model 2 q50 중앙 성능 지표 boxplot. 85개 DRBC basin 기준 NSE, KGE, Bias, MAE, RMSE 분포.</div>
+    <div class="figure-caption"><strong>그림 3a.</strong> Model 1 vs Model 2 q50 중앙 성능 지표 상자 그림. 85개 DRBC 유역 기준 NSE, KGE, 편향, MAE, RMSE 분포.</div>
   </div>
   <div class="figure-item">
     <img src="figures/rq1_paired_delta_scatter.png" alt="RQ-1 paired delta scatter">
-    <div class="figure-caption"><strong>그림 3b.</strong> Paired seed delta scatter. 각 점은 유역, x축은 Model 1 NSE, y축은 q50-M1 NSE delta. 대부분 유역에서 q50이 개선됨을 보여준다.</div>
+    <div class="figure-caption"><strong>그림 3b.</strong> 쌍별 시드 차이 산점도. 각 점은 유역, x축은 Model 1 NSE, y축은 q50-M1 NSE 차이. 대부분 유역에서 q50이 개선됨을 보여준다.</div>
   </div>
 </div>
 
-<h2 class="section" id="s42">4.2 RQ-2: Upper Quantile의 Peak Underestimation 완화</h2>
+<h2 class="section" id="s42">4.2 RQ-2: 상위 분위수의 첨두 과소추정 완화</h2>
 
 <p>
-  Q99 exceedance event(유역별 학습 기간 관측 99 백분위 임계값 기준)에서, Model 2의 상위 분위수 산출값은 peak underestimation을 τ가 증가함에 따라 단조롭게 줄였다. 분석 대상은 <strong>82개 활성 유역의 926개 Q99 사건</strong>이었다.
+  Q99 초과 사건(유역별 학습 기간 관측 99 백분위 임계값 기준)에서, Model 2의 상위 분위수 산출값은 첨두 과소추정을 τ가 증가함에 따라 단조롭게 줄였다. 분석 대상은 <strong>82개 활성 유역의 926개 Q99 사건</strong>이었다.
 </p>
 <p>
-  Event peak under-deficit α의 basin median은 q50 0.657에서 q99 0.018로 감소하였다. 이는 q99가 event peak 시점에서 관측 peak를 거의 따라잡는 수준까지 under-deficit을 줄였다는 뜻이다. 다만 유역 간 IQR은 여전히 크다(IQR 0.000–0.283).
+  사건 첨두 과소추정 비율 α(관측 첨두 대비 과소추정 비율, 수식 6)의 유역 중앙값은 q50 0.657에서 q99 0.018로 감소하였다. 이는 q99가 사건 첨두 시각에서 관측 첨두를 거의 따라잡는 수준까지 과소추정을 줄였다는 의미이다. 즉, τ가 높아질수록 모델이 극한 홍수 첨두를 더 잘 포착하게 된다. 다만 유역 간 IQR은 여전히 크며(IQR 0.000–0.283), 유역에 따른 효과 편차가 존재한다.
 </p>
 
 <div class="table-container">
 <table>
   <thead>
-    <tr><th>산출값</th><th>α (peak under-deficit)</th><th>β (±6h window capture)</th><th>δ (Q99 recall)</th></tr>
+    <tr><th>산출값</th><th>α (첨두 과소추정 비율)</th><th>β (±6시간 창 포착률)</th><th>δ (Q99 재현율)</th></tr>
   </thead>
   <tbody>
     <tr><td>Model 1</td><td>0.588</td><td>0.519</td><td>0.143</td></tr>
@@ -939,28 +951,28 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 <div class="figure-row">
   <div class="figure-item">
     <img src="figures/rq2_alpha_by_tau.png" alt="alpha by tau">
-    <div class="figure-caption"><strong>그림 4a.</strong> τ별 event peak under-deficit (α). τ가 커질수록 단조 감소.</div>
+    <div class="figure-caption"><strong>그림 4a.</strong> τ별 사건 첨두 과소추정 비율 α(수식 6). τ가 커질수록 단조 감소.</div>
   </div>
   <div class="figure-item">
     <img src="figures/rq2_beta_by_tau.png" alt="beta by tau">
-    <div class="figure-caption"><strong>그림 4b.</strong> τ별 ±6시간 window capture rate (β). q99에서 1.306 — 관측 첨두 초과.</div>
+    <div class="figure-caption"><strong>그림 4b.</strong> τ별 ±6시간 창 포착률 β(수식 7). q99에서 1.306 — 관측 첨두 초과.</div>
   </div>
   <div class="figure-item">
     <img src="figures/rq2_delta_recall_by_tau.png" alt="delta recall by tau">
-    <div class="figure-caption"><strong>그림 4c.</strong> τ별 Q99 threshold recall (δ). q50 0.069 → q99 0.583, 약 8배 증가.</div>
+    <div class="figure-caption"><strong>그림 4c.</strong> τ별 Q99 임계값 재현율 δ(수식 8). q50 0.069 → q99 0.583, 약 8배 증가.</div>
   </div>
 </div>
 
 <h3 class="subsection">불확실성 밴드 관점의 재해석</h3>
 
 <p>
-  전체 사건 기준(event-pooled)으로 관측 유량의 불확실성 밴드 내 위치 분포를 분석하면, q50~q99 밴드 안에 들어오는 경우(q50–q90 + q90–q95 + q95–q99 구간 합산)는 약 <strong>45%</strong>였고, q99를 초과하는 경우(above_q99)는 약 <strong>43%</strong>였다. q50 미만으로 과대 추정된 경우(below_q50)는 약 11%였다. Q99 사건 첨두의 43%는 q99도 관측을 추종하지 못한다. (주: 클래스별 독립 중앙값은 simplex 제약을 깨므로 event-pooled 비율을 사용한다.)
+  전체 사건 집계(event-pooled) 기준으로 관측 유량의 불확실성 밴드 내 위치 분포를 분석하면, q50~q99 밴드 안에 들어오는 경우(q50–q90 + q90–q95 + q95–q99 구간 합산)는 약 <strong>45%</strong>였고, q99를 초과하는 경우는 약 <strong>43%</strong>였다. q50 미만으로 과대 추정된 경우는 약 11%였다. 실제 첨두 유량의 43%는 q99보다 높은 유량을 보였다. 이는 현재 분위수 출력 체계가 극한 홍수 첨두의 절반 가까이를 여전히 과소평가하고 있음을 의미하며, 보정 개선이나 추가 사후 처리의 필요성을 직접적으로 시사한다. (주: 클래스별 독립 중앙값은 단체(simplex) 제약을 깨므로 사건 집계 비율을 사용한다.)
 </p>
 
 <div class="figure-container">
   <img src="figures/ub_location_class_bar.png" alt="uncertainty band location class bar">
   <div class="figure-caption">
-    <strong>그림 5.</strong> Q99 사건 첨두 시각에서의 관측 유량 위치 분포 (event-pooled). below_q50: 11%, q50–q90: 17%, q90–q95: 8%, q95–q99: 20%, above_q99: 43%. 합계 = 100%. NOAA 범위는 above_q99 57%로 더 극단적이다.
+    <strong>그림 5.</strong> Q99 사건 첨두 시각에서의 관측 유량 위치 분포 (사건 집계 기준). q50 미만: 11%, q50–q90: 17%, q90–q95: 8%, q95–q99: 20%, q99 초과: 43%. 합계 = 100%. NOAA 범위는 q99 초과 57%로 더 극단적이다.
   </div>
 </div>
 
@@ -980,22 +992,22 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 <h3 class="subsection">NOAA 확인 홍수 사건의 독립 검증</h3>
 
 <p>
-  NOAA/NWS confirmed flood 목록과 확장 DRBC 유역의 중첩은 21개 유역, 65개 사건이었다. NOAA 범위에서도 상위 분위수의 방향성은 Q99 범위와 일치하였다. q50의 α는 0.788이었고, q99에서 0.172로 감소(78.1% 감소)하였다. β는 q50 0.282에서 q99 0.977로 증가하였다.
+  NOAA/NWS 확인 홍수 목록과 확장 DRBC 유역의 중첩은 21개 유역, 65개 사건이었다. NOAA 범위에서도 상위 분위수의 방향성은 Q99 범위와 일치하였다. q50의 α(수식 6)는 0.788이었고, q99에서 0.172로 감소(78.1% 감소)하였다. β(수식 7)는 q50 0.282에서 q99 0.977로 증가하였다. 이러한 결과는 NOAA가 공식적으로 확인한 실제 홍수 사건에서도 상위 분위수의 첨두 보호 효과가 일관되게 나타남을 독립적으로 뒷받침한다.
 </p>
 <p>
-  밴드 관점에서 NOAA 확인 홍수 사건은 더 극단적인 패턴을 보였다. 사건 첨두 시각에서 관측 유량이 q99를 초과하는 비율은 유역 간 중앙값 기준 <strong>1.0</strong>이었다 — 21개 유역 전부에서 확인 홍수 첨두가 q99를 초과하였다. 과소 간격은 q99에서 21.2 cms로 여전히 잔류하였다(Q99 범위 0.87 cms 대비 약 24배).
+  밴드 관점에서 NOAA 확인 홍수 사건은 더 극단적인 패턴을 보였다. 사건 첨두 시각에서 관측 유량이 q99를 초과하는 비율은 유역 간 중앙값 기준 <strong>1.0</strong>이었다 — 21개 유역 전부에서 관측 유량 첨두가 q99를 초과하였다. 모델이 실제보다 21.2 cms나 적게 예측하는 오차가 여전히 남아있었다(Q99 범위 0.87 cms 대비 약 24배). 이는 NOAA 확인 홍수처럼 실제로 극단적인 사건일수록 q99조차 충분하지 않을 수 있음을 의미하며, 현재 모델의 상한선을 나타낸다.
 </p>
 
-<h2 class="section" id="s43">4.3 RQ-3: Recall 증가의 Cost</h2>
+<h2 class="section" id="s43">4.3 RQ-3: 재현율 증가의 비용</h2>
 
 <p>
-  Upper quantile은 peak underestimation을 줄이는 대신 false-positive와 over-prediction magnitude를 증가시켰다. Q99 임계값 기준 FAR은 q50에서 0.0007, q99에서 0.0164로 약 <strong>23배</strong> 증가하였다. Over-prediction magnitude도 q50 1.47 cms에서 q99 3.44 cms로 증가하였다.
+  상위 분위수는 과소추정을 줄이는 대신 오경보(false-positive)와 과대예측 크기를 증가시켰다. Q99 임계값 기준 오경보율(FAR)은 q50에서 0.0007, q99에서 0.0164로 약 <strong>23배</strong> 증가하였다. 과대예측 크기도 q50 1.47 cms에서 q99 3.44 cms로 증가하였다. 이는 τ를 높일수록 홍수 첨두를 더 잘 포착하는 반면, 실제 홍수가 아닌 상황에서도 경보를 발령하는 오경보가 함께 늘어남을 의미한다. 따라서 운영 상황에서 τ 선택은 미포착(false negative) 홍수의 비용과 오경보(false alarm) 비용을 함께 고려해야 한다.
 </p>
 
 <div class="table-container">
 <table>
   <thead>
-    <tr><th>산출값</th><th>Q99 Recall (δ)</th><th>FAR</th><th>Over-prediction magnitude (cms)</th></tr>
+    <tr><th>산출값</th><th>Q99 재현율 δ(수식 8)</th><th>FAR(수식 9)</th><th>과대예측 크기 (cms)</th></tr>
   </thead>
   <tbody>
     <tr><td>q50</td><td>0.069</td><td>0.0007</td><td>1.47</td></tr>
@@ -1015,15 +1027,15 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 </div>
 
 <div class="highlight-box">
-  <strong>핵심 상충 관계:</strong> q50 → q99 이동 시 Q99 recall은 약 8배 증가(0.069 → 0.583)하지만, FAR은 약 23배 증가(0.0007 → 0.0164)한다. 이 비대칭 상충은 q99를 모든 상황에서 "자동으로 최선인 단일 산출값"으로 해석할 수 없음을 의미한다.
+  <strong>핵심 상충 관계:</strong> q50 → q99 이동 시 Q99 재현율 δ은 약 8배 증가(0.069 → 0.583)하지만, FAR은 약 23배 증가(0.0007 → 0.0164)한다. 이 비대칭 상충은 q99를 모든 상황에서 "자동으로 최선인 단일 산출값"으로 해석할 수 없음을 의미한다.
 </div>
 
-<h2 class="section" id="s44">4.4 RQ-4: Basin 및 Event-type Heterogeneity</h2>
+<h2 class="section" id="s44">4.4 RQ-4: 유역 및 사건 유형 이질성</h2>
 
-<h3 class="subsection">4.4a Model 1 NSE 기준 Basin Tier</h3>
+<h3 class="subsection">4.4a Model 1 NSE 기준 유역 계층(tier)</h3>
 
 <p>
-  Model 1 NSE 기준 basin을 top/mid/bottom tier로 나누면, Model 1이 약한 basin에서 q99의 peak underestimation 완화 효과가 가장 크게 나타났다. Bottom tier에서는 q99의 α가 0.00, δ recall이 0.95까지 증가했지만 FAR도 0.0604로 가장 높았다.
+  Model 1 NSE 기준으로 유역을 상위/중간/하위 계층(tier)으로 나누면, Model 1의 NSE 점수가 가장 낮은 하위 계층 유역에서 q99의 첨두 과소추정 완화 효과가 가장 크게 나타났다. 하위 계층에서는 q99의 α(과소추정 비율, 수식 6)가 0.00, δ(Q99 재현율, 수식 8)가 0.95까지 증가했지만 FAR도 0.0604로 가장 높았다. 이는 결정론적 예측이 가장 부정확한 유역일수록 상위 분위수의 상대적 개선 폭이 크지만, 동시에 오경보 위험도 높아진다는 비대칭 관계를 보여준다.
 </p>
 
 <div class="table-container">
@@ -1047,29 +1059,29 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
   </div>
 </div>
 
-<h3 class="subsection">4.4b NOAA Event-type Heterogeneity</h3>
+<h3 class="subsection">4.4b NOAA 사건 유형 이질성</h3>
 
 <p>
-  NOAA event-type 기준으로는 Flash Flood(돌발 홍수)가 가장 어려운 category였다. Flash Flood에서는 q99에서도 α가 0.42 남았고 β도 0.88에 머물렀다. 반면 일반 Flood 사건에서는 q99 α가 0.06, β가 1.09로 개선되었다. 이는 hourly forcing과 basin response speed의 한계로 인해 빠른 상승을 보이는 돌발 홍수의 timing 포착이 여전히 어렵다는 점을 보여준다.
+  NOAA 사건 유형 기준으로는 돌발 홍수(Flash Flood)가 가장 어려운 범주였다. 돌발 홍수에서는 q99에서도 α(과소추정 비율, 수식 6)가 0.42 남았고 β(±6시간 창 포착률, 수식 7)도 0.88에 머물렀다. 반면 일반 홍수(Flood) 사건에서는 q99 α가 0.06, β가 1.09로 개선되었다. 이는 시간 단위 강제력과 유역 응답 속도의 한계로 인해 빠른 상승을 보이는 돌발 홍수의 발생 시각 포착이 여전히 어렵다는 점을 보여준다. 돌발 홍수는 강수 신호가 유량 첨두로 이어지는 시간이 매우 짧아, 현재의 336시간 참조 기간 내에서도 충분한 선행 신호를 포착하지 못하기 때문으로 해석된다.
 </p>
 
 <div class="figure-container">
   <img src="figures/rq4b_event_type_bar.png" alt="RQ-4b event type bar">
   <div class="figure-caption">
-    <strong>그림 9.</strong> NOAA event type별 q99 성능 비교. Flash Flood, Flood, Unknown(NOAA 미확인) 각 유형에서 q99의 α와 β를 보여준다. Flash Flood는 q99에서도 α = 0.42로 잔존 underestimation이 크다.
+    <strong>그림 9.</strong> NOAA 사건 유형별 q99 성능 비교. 돌발 홍수(Flash Flood), 일반 홍수(Flood), 미확인(NOAA 미확인) 각 유형에서 q99의 α와 β를 보여준다. 돌발 홍수는 q99에서도 α = 0.42로 잔존 과소추정이 크다.
   </div>
 </div>
 
-<h2 class="section" id="s45">4.5 RQ-5: Calibration, Sharpness, and Quantile Sanity</h2>
+<h2 class="section" id="s45">4.5 RQ-5: 보정, 예리도, 분위수 단조성</h2>
 
 <p>
-  Model 2의 quantile output은 peak decision output으로는 유용했지만, nominal level에 완전히 calibrated되지는 않았다. All-hour empirical one-sided coverage는 모든 τ에서 nominal보다 낮았다.
+  Model 2의 분위수 출력은 첨두 결정 산출값으로는 유용했지만, 명목 수준에 완전히 보정되지는 않았다. 전 시간 경험적 단측 피복률 Coverage(τ)(수식 10)은 모든 τ에서 명목 피복률보다 낮았다.
 </p>
 
 <div class="table-container">
 <table>
   <thead>
-    <tr><th>산출값</th><th>Nominal τ</th><th>Empirical coverage</th><th>Coverage error</th></tr>
+    <tr><th>산출값</th><th>명목 τ</th><th>경험적 피복률 Coverage(τ)</th><th>보정 오차 CE(τ)</th></tr>
   </thead>
   <tbody>
     <tr><td>q50</td><td>0.50</td><td>0.339</td><td>−0.161</td></tr>
@@ -1078,11 +1090,11 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
     <tr><td>q99</td><td>0.99</td><td>0.787</td><td>−0.203</td></tr>
   </tbody>
 </table>
-<div class="table-caption">표 5. All-hour one-sided quantile calibration 결과. 모든 τ에서 empirical coverage &lt; nominal τ.</div>
+<div class="table-caption">표 5. 전 시간 단측 분위수 보정 결과. 모든 τ에서 경험적 피복률 Coverage(τ) &lt; 명목 τ.</div>
 </div>
 
 <div class="highlight-box">
-  <strong>중요한 해석 제한:</strong> q99의 all-hour empirical coverage는 0.787로 nominal 0.99보다 크게 낮다. 따라서 q99를 "calibrated 99% predictive quantile" 또는 수문학적 100년 빈도 홍수로 표현해서는 안 된다. q99는 극한 첨두 과소추정을 줄이기 위한 <strong>upper-tail decision output</strong>으로 해석해야 한다.
+  <strong>중요한 해석 제한:</strong> q99의 전 시간 경험적 피복률 Coverage(q99)은 0.787로 명목 0.99보다 크게 낮다. 따라서 q99를 "보정된 99% 예측 분위수" 또는 수문학적 100년 빈도 홍수로 표현해서는 안 된다. q99는 극한 첨두 과소추정을 줄이기 위한 <strong>상위 꼬리 결정 출력(upper-tail decision output)</strong>으로 해석해야 한다.
 </div>
 
 <div class="figure-container">
@@ -1093,10 +1105,13 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 </div>
 
 <p>
-  Pinball 손실 관점에서는 상위 분위수가 고유량 결정 신호로 유용한 성능을 보였다. 전 시간 평균 Pinball 손실은 q50 4.656에서 q99 1.638로 감소하였고, Q99 초과 꼬리 적중률은 q99에서 0.563이었다. 그러나 기후학적 기준선 대비 Pinball 기술 점수는 q99에서 −0.271로 음수였다. 이는 q99가 고유량 첨두 보호에는 도움이 되지만, 기후학적 예리도 관점에서는 손해가 있음을 의미한다.
+  이처럼 모든 분위수에서 경험적 피복률이 명목값보다 낮다는 사실은, 모델이 체계적으로 분위수를 과소하게 추정하고 있음을 의미한다. 다시 말해, q90이라고 출력해도 실제 관측값이 그 아래에 머무는 비율은 명목 90%가 아닌 약 51%에 불과하다. 이러한 보정 부족은 Pinball 손실로 학습하더라도 분포 이동이 심한 조건에서는 자동으로 해소되지 않으며, 보정 사후 처리(recalibration) 또는 분위수 교차 페널티(QCP) 추가가 필요함을 시사한다.
 </p>
 <p>
-  Quantile crossing check에서는 q90 &lt; q50, q95 &lt; q90, q99 &lt; q95가 모두 0 row로 나타나 monotonicity sanity는 통과하였다.
+  Pinball 손실 관점에서는 상위 분위수가 고유량 결정 신호로 유용한 성능을 보였다. 전 시간 평균 Pinball 손실은 q50 4.656에서 q99 1.638로 감소하였고, Q99를 초과하는 대홍수 사건에서 q99의 적중률은 56.3%였다. 그러나 기후학적 기준선 대비 Pinball 기술 점수는 q99에서 −0.271로 음수였다. 이는 q99가 고유량 첨두 보호에는 도움이 되지만, 기후학적 예리도(sharpness) 관점에서는 손해가 있음을 의미한다. 즉 q99는 평균적인 유량 수준의 예측에서는 기후 평균보다 덜 정확하지만, 극한 홍수 발생 여부를 판단하는 결정 신호로서의 가치는 유지된다.
+</p>
+<p>
+  홍수 예측 상한선(q50/q90/q95/q99) 데이터를 전수 조사한 결과 분위수 역전(quantile crossing) 오류가 발생하지 않았다(단조성 검증 통과).
 </p>
 
 <div class="figure-row">
@@ -1113,58 +1128,62 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 <!-- ============================ CHAPTER 5 ================================ -->
 <h1 class="chapter" id="ch5">제 5장 논의</h1>
 
-<h2 class="section" id="s51">5.1 Output Design이 Peak Underestimation에 미치는 영향</h2>
+<h2 class="section" id="s51">5.1 출력 설계가 첨두 과소추정에 미치는 영향</h2>
 
 <p>
-  결과는 본 연구의 핵심 가설을 지지한다. 같은 backbone을 유지해도 head를 deterministic point estimate에서 quantile output으로 바꾸면 upper-tail peak underestimation이 크게 줄었다. 특히 q99는 Q99 event scope에서 α를 거의 0에 가깝게 낮추고(0.018), Q99 threshold recall을 0.583까지 끌어올렸다.
+  결과는 본 연구의 핵심 가설을 지지한다. 같은 기반망을 유지해도 헤드를 결정론적 점 추정값에서 분위수 출력으로 바꾸면 상위 꼬리 과소추정이 크게 감소한다. 특히 q99는 Q99 사건 범위에서 α(과소추정 비율, 수식 6)를 거의 0에 가깝게 낮추고(0.018), δ(Q99 임계값 재현율, 수식 8; 홍수 진행 위험 시간대 예측 적중률)를 0.583까지 끌어올렸다.
 </p>
 <p>
-  이 결과는 extreme peak 문제를 해결하기 위해 항상 더 복잡한 backbone이나 physics-guided core가 먼저 필요한 것은 아니라는 점을 시사한다. Output design의 변경만으로도 의미 있는 개선이 가능하다.
+  이 결과는 극한 첨두 문제를 해결하기 위해 항상 더 복잡한 기반망이나 물리 기반 핵심 모듈이 먼저 필요한 것은 아니라는 점을 시사한다. 출력 설계의 변경만으로도 의미 있는 개선이 가능하다.
 </p>
 <p>
-  단, 해석 시 중요한 한계를 인지해야 한다. Model 2는 출력 헤드(quantile head)와 손실 함수(Pinball loss)를 동시에 변경하였다. Pinball loss는 비대칭 gradient signal을 통해 backbone의 내부 표현 자체에도 영향을 줄 수 있으므로, 관측된 개선이 "output head 변경만의 효과"인지 "Pinball loss의 학습 신호 변화 효과"인지를 현 실험 설계에서 완전히 분리하기 어렵다. 두 요소를 독립적으로 평가하려면 동일 backbone에 q50 단독 Pinball loss를 적용한 ablation이 필요하며, 이는 향후 연구 과제로 남긴다.
+  단, 해석 시 중요한 한계를 인지해야 한다. Model 2는 분위수 헤드와 Pinball 손실 함수를 동시에 변경하였다. Pinball 손실은 비대칭 경사(gradient) 신호를 통해 기반망의 내부 표현 자체에도 영향을 줄 수 있으므로, 관측된 개선이 "출력 헤드 변경만의 효과"인지 "Pinball 손실의 학습 신호 변화 효과"인지를 현 실험 설계에서 완전히 분리하기 어렵다. 두 요소를 독립적으로 평가하려면 동일 기반망에 q50 단독 Pinball 손실을 적용한 분리 실험(ablation)이 필요하며, 이는 향후 연구 과제로 남긴다.
 </p>
 
-<h2 class="section" id="s52">5.2 Central Prediction과 Upper-tail Output의 역할 분리</h2>
+<h2 class="section" id="s52">5.2 중앙 예측값과 상위 꼬리 출력의 역할 분리</h2>
 
 <p>
-  q50은 central hydrograph를 담당하고, q90/q95/q99는 점점 보수적인 decision output으로 읽어야 한다. q50이 high-flow에서 under-bias를 보이는 것은 skewed streamflow distribution에서 conditional mean과 conditional median이 다르기 때문이며, upper-tail output이 필요한 이유이기도 하다.
+  q50은 중앙 수문곡선을 담당하고, q90/q95/q99는 점점 보수적인 결정 출력으로 읽어야 한다. q50이 고유량에서 과소 편향을 보이는 것은 편향된(skewed) 유량 분포에서 조건부 평균과 조건부 중앙값이 다르기 때문이며, 상위 꼬리 출력이 필요한 이유이기도 하다.
 </p>
 <p>
-  따라서 Model 2를 평가할 때 q50 하나만 Model 1과 비교하면 probabilistic head의 핵심 장점을 놓치게 된다. 올바른 비교 체계는 "q50(중앙 추정값) + q90/q95/q99(상위 꼬리 결정 기준)"을 다층 framework로 보는 것이다.
+  따라서 Model 2를 평가할 때 q50 하나만 Model 1과 비교하면 확률론적 헤드의 핵심 장점을 놓치게 된다. 올바른 비교 체계는 "q50(중앙 추정값) + q90/q95/q99(상위 꼬리 결정 기준)"을 다층 체계로 보는 것이다.
 </p>
 
 <div class="highlight-box green">
-  <strong>권장 해석 체계:</strong> Model 2 = q50(central prediction) + q90/q95/q99(upper-tail decision outputs). q50은 전통적 성능 지표(NSE, KGE)로 평가하고, upper quantile은 recall–cost trade-off로 평가한다. 이 둘을 하나의 지표로 통합하면 두 역할 모두를 정확히 평가할 수 없다.
+  <strong>권장 해석 체계:</strong> Model 2 = q50(중앙 예측값) + q90/q95/q99(상위 꼬리 결정 출력). q50은 전통적 성능 지표(NSE, KGE)로 평가하고, 상위 분위수는 재현율–비용 상충 관계로 평가한다. 이 둘을 하나의 지표로 통합하면 두 역할 모두를 정확히 평가할 수 없다.
 </div>
 
-<h2 class="section" id="s53">5.3 운영적 Trade-off</h2>
+<h2 class="section" id="s53">5.3 운영적 상충 관계</h2>
 
 <p>
-  q99는 peak underestimation을 줄이지만 false-positive cost도 증가시킨다. 이 결과는 q99를 "항상 최선의 forecast"라고 주장하기보다, risk tolerance가 높은 상황에서 사용할 수 있는 conservative alert level로 해석해야 함을 의미한다.
+  q99는 첨두 과소추정을 줄이지만 오탐지(false-positive) 비용도 증가시킨다. 이 결과는 q99를 "항상 최선의 예측"이라고 주장하기보다, 위험 허용도가 높은 상황에서 사용할 수 있는 보수적 경보 기준으로 해석해야 함을 의미한다.
 </p>
 <p>
-  실제 홍수 경보에서는 q90/q95/q99 중 어느 output을 사용할지는 missed peak cost와 false alarm cost의 상대적 중요도에 따라 달라진다. 예를 들어, 댐 운영이나 긴급 대피 발령과 같이 false negative(놓친 홍수)의 비용이 압도적으로 큰 경우에는 q99가 적합할 수 있지만, 잦은 오경보가 신뢰도 손상으로 이어지는 상황에서는 q90이나 q95가 더 균형 잡힌 선택일 수 있다.
+  실제 홍수 경보에서는 q90/q95/q99 중 어느 출력을 사용할지는 미포착(false negative) 홍수의 비용과 오경보(false alarm) 비용의 상대적 중요도에 따라 달라진다. 예를 들어, 댐 운영이나 긴급 대피 발령과 같이 미포착 홍수의 비용이 압도적으로 큰 경우에는 q99가 적합할 수 있지만, 잦은 오경보가 신뢰도 손상으로 이어지는 상황에서는 q90이나 q95가 더 균형 잡힌 선택일 수 있다.
 </p>
 
 <h2 class="section" id="s54">5.4 한계 및 향후 연구</h2>
 
-<p><strong>한계 0 — 출력 설계와 손실 함수의 결합 변경:</strong> Model 2는 quantile head와 Pinball loss를 동시에 변경하였다. 두 요소의 기여를 완전히 분리하는 ablation 실험을 수행하지 않았으므로, 관측된 peak underestimation 감소가 head 구조의 효과인지 Pinball loss의 gradient signal 변화 효과인지를 현 실험에서 단정하기 어렵다. 이 한계는 5.1절 논의에서도 명시하였으며, 향후 ablation으로 검증이 필요하다.</p>
+<p><strong>한계 0 — 출력 설계와 손실 함수의 결합 변경:</strong> Model 2는 분위수 헤드와 Pinball 손실을 동시에 변경하였다. 두 요소의 기여를 완전히 분리하는 분리 실험(ablation)을 수행하지 않았으므로, 관측된 첨두 과소추정 감소가 헤드 구조의 효과인지 Pinball 손실의 경사 신호 변화 효과인지를 현 실험에서 단정하기 어렵다. 이 한계는 5.1절 논의에서도 명시하였으며, 향후 분리 실험으로 검증이 필요하다.</p>
 
-<p><strong>한계 1 — 확률론적 보정 부족:</strong> q99의 empirical coverage(0.787)가 nominal(0.99)에 미치지 못하므로, 완전한 calibration을 주장할 수 없다. Quantile Crossing Penalty(QCP), quantile recalibration, 또는 extreme value 통계적 사후 처리를 통한 개선이 필요하다.</p>
+<p><strong>한계 1 — 확률론적 보정 부족:</strong> q99의 경험적 피복률 Coverage(q99, 수식 10)가 0.787로 명목값 0.99에 미치지 못하므로, 완전한 보정을 주장할 수 없다. 분위수 교차 페널티(QCP), 분위수 재보정(recalibration), 또는 극단값 통계적 사후 처리를 통한 개선이 필요하다.</p>
 
-<p><strong>한계 2 — Lower quantile 부재:</strong> 현재 quantile set은 q50/q90/q95/q99만 포함하므로 양방향 uncertainty evaluation(prediction interval, Winkler score)을 수행하지 않았다. Lower quantile을 포함한 full interval forecast가 후속 연구에서 필요하다.</p>
+<p><strong>한계 2 — 하위 분위수 부재:</strong> 현재 분위수 집합은 q50/q90/q95/q99만 포함하므로 양방향 불확실성 평가(예측 구간, Winkler 점수)를 수행하지 않았다. 하위 분위수를 포함한 전체 구간 예측이 후속 연구에서 필요하다.</p>
 
-<p><strong>한계 3 — Flash Flood의 잔존 한계:</strong> Flash Flood category에서는 q99에서도 α = 0.42의 residual under-deficit이 남았다. 이는 hourly forcing, basin response speed, routing/timing representation의 한계와 관련될 수 있다.</p>
+<p><strong>한계 3 — 돌발 홍수의 잔존 한계:</strong> 돌발 홍수 범주에서는 q99에서도 α = 0.42의 잔여 과소추정이 남았다. 이는 시간 단위 강제력, 유역 응답 속도, 수문 추적/시각 표현의 한계와 관련될 수 있다.</p>
 
 <p><strong>한계 4 — 단일 지역 검증:</strong> 현재 분석은 DRBC 85개 유역에 한정되므로, 산악 유역·건조 지역·대규모 유역 등 다른 지리적 조건에서의 일반화 가능성을 검증하지 않았다.</p>
 
+<p><strong>한계 5 — Model 2 과소추정의 단일 정의 부재:</strong> Model 2는 q50/q90/q95/q99 네 개의 분위수를 동시에 출력하므로, "모델이 얼마나 과소추정하는가"를 하나의 수치로 집약하는 방법이 현재로서는 정의되어 있지 않다. 각 분위수에 가중치를 부여해 단일 지표를 도출하는 방법도 이론적으로 가능하지만, 가중치 설정 기준이 자의적이 될 수 있다. 이 한계는 Model 1과 Model 2 간의 단순 비교를 어렵게 만들며, 분위수별 개별 해석이 필요하다.</p>
+
+<p><strong>한계 6 — 모델 선택 기준의 부재:</strong> Model 1(결정론적 단일 예측)과 Model 2(확률론적 분위수 예측) 중 어느 모델이 "더 낫다"는 판단은 경제성(Model 1의 단순성·계산 효율성)과 정확성(Model 2의 극한 첨두 포착 능력) 중 무엇을 우선시하느냐에 달려 있다. 두 기준을 동일 선상에서 비교하는 단일 척도가 없으므로, 운영 환경과 의사결정 목적에 따라 모델 선택 기준이 달라져야 한다. 이는 해석 기준의 명시가 중요함을 보여준다.</p>
+
 <p><strong>향후 연구 방향:</strong></p>
 <ul class="contrib">
-  <li>Lower quantile 포함 full interval forecast 및 양방향 calibration 평가</li>
-  <li>QCP 손실, quantile recalibration, 극한값 사후 처리 도입</li>
-  <li>Flash Flood timing 오차 완화: 더 높은 해상도 forcing 또는 routing 보완</li>
-  <li>Physics-guided conceptual core와의 hybrid 구조 탐색(후속 확장)</li>
+  <li>하위 분위수 포함 전체 구간 예측 및 양방향 보정 평가</li>
+  <li>분위수 교차 페널티(QCP) 손실, 분위수 재보정, 극한값 사후 처리 도입</li>
+  <li>돌발 홍수 시각 오차 완화: 더 높은 해상도 강제력 또는 수문 추적 보완</li>
+  <li>물리 기반 개념 핵심 모듈과의 혼합 구조 탐색(후속 확장)</li>
   <li>비용-편익 정량화: 오경보와 미포착 사건의 사회경제적 비용을 통한 최적 τ 선택 가이드라인</li>
 </ul>
 
@@ -1172,24 +1191,24 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 <h1 class="chapter" id="ch6">제 6장 결론</h1>
 
 <p>
-  본 연구는 CAMELSH hourly dataset과 DRBC regional holdout 조건에서 deterministic multi-basin LSTM(Model 1)과 probabilistic quantile LSTM(Model 2)을 비교하였다. 실험 설계는 backbone, 입력, basin split, temporal split, seed를 고정하고 output head와 loss function만 바꾼 공정한 비교 구조를 사용하였다.
+  본 연구는 CAMELSH 시간 단위 자료집합과 DRBC 지역 검증 보류 조건에서 결정론적 다중 유역 LSTM(Model 1)과 확률론적 분위수 LSTM(Model 2)을 비교하였다. 실험 설계는 기반망, 입력, 유역 분할, 시간 분할, 난수 시드를 고정하고 출력 헤드와 손실 함수만 바꾼 공정한 비교 구조를 사용하였다.
 </p>
 <p>
   결과적으로 네 가지 핵심 결론을 도출하였다.
 </p>
 
 <ol class="hypothesis">
-  <li><strong>다층 결정 산출값 체계의 유용성:</strong> Model 2 q50~q99 불확실성 밴드는 "더 정확한 단일 예측"이 아니라, 사용자가 위험 회피 선호도에 따라 τ를 선택할 수 있는 의사결정 지원 도구로 기능한다. q50은 central prediction 성능을 유지하고(NSE +0.149), q99는 Q99 event에서 peak underestimation을 0.018 수준까지 줄이며 recall을 0.583까지 향상시킨다.</li>
+  <li><strong>다층 결정 산출값 체계의 유용성:</strong> Model 2 q50~q99 불확실성 밴드는 "더 정확한 단일 예측"이 아니라, 사용자가 위험 회피 선호도에 따라 τ를 선택할 수 있는 의사결정 지원 도구로 기능한다. q50은 중앙 예측 성능을 유지하고(NSE +0.149, 85개 DRBC 유역 기준), q99는 Q99 사건(82개 유역, 926개 사건)에서 첨두 과소추정 비율 α를 0.018 수준까지 줄이며 Q99 재현율 δ를 0.583까지 향상시킨다. 이는 동일한 기반망 위에서 출력 설계만 바꾸어도 홍수 첨두 보호 성능을 의미 있게 높일 수 있음을 실증한다.</li>
 
-  <li><strong>상충 관계의 명시성:</strong> τ 증가에 따라 peak under-deficit은 감소하지만, false alarm rate은 23배 증가한다. 과소 간격 감소(q50 23.7 → q99 0.87 cms)와 과대 간격 등장(q99에서 3.58 cms)이 동시에 발생하는 비대칭 상충 구조는 "τ가 클수록 항상 좋다"는 단순한 주장을 부정한다.</li>
+  <li><strong>상충 관계의 명시성:</strong> τ 증가에 따라 첨두 과소추정 비율은 감소하지만, 오경보율은 23배 증가한다(q50 0.0007 → q99 0.0164). 과소 간격 감소(q50 23.7 → q99 0.87 cms)와 과대 간격 등장(q99에서 3.58 cms)이 동시에 발생하는 비대칭 상충 구조는 "τ가 클수록 항상 좋다"는 단순한 주장을 부정하며, 운영 환경에 따라 적절한 τ를 선택해야 함을 의미한다.</li>
 
-  <li><strong>극한 사건의 완전 포착 불가능성:</strong> 전체 사건 기준(event-pooled)으로 Q99 사건 첨두의 약 43%, NOAA 확인 홍수 첨두의 약 57%가 q99를 초과한다. 단일 또는 다층 신경망 기반 예측만으로는 모든 극한 첨두를 완벽히 보호할 수 없으며, 추가적 물리 기반 제약 또는 사후 조정이 필요할 수 있다.</li>
+  <li><strong>극한 사건의 완전 포착 불가능성:</strong> 전체 사건 집계 기준으로 Q99 사건 첨두의 약 43%, NOAA 확인 홍수 첨두의 약 57%가 q99를 초과한다. 즉, 현재 모델의 가장 보수적인 출력인 q99조차 상당수 극한 홍수 첨두를 과소평가한다. 단일 또는 다층 신경망 기반 예측만으로는 모든 극한 첨두를 완벽히 보호할 수 없으며, 추가적 물리 기반 제약 또는 사후 조정이 필요할 수 있다.</li>
 
-  <li><strong>Output design의 중요성:</strong> 동일한 LSTM backbone에 probabilistic quantile head만 추가해도 flood peak protection 성능을 의미 있게 개선할 수 있다. Extreme peak 문제를 해결하기 위해 항상 더 복잡한 backbone이나 physics-guided core가 먼저 필요하지 않을 수 있다.</li>
+  <li><strong>출력 설계의 중요성:</strong> 동일한 LSTM 기반망에 확률론적 분위수 헤드만 추가해도 홍수 첨두 보호 성능을 의미 있게 개선할 수 있다. 극한 첨두 문제를 해결하기 위해 항상 더 복잡한 기반망이나 물리 기반 핵심 모듈이 먼저 필요하지 않을 수 있으며, 출력 설계와 손실 함수의 변경이 하나의 효과적인 첫 번째 접근 방식이 될 수 있다.</li>
 </ol>
 
 <div class="highlight-box green">
-  <strong>최종 결론:</strong> Probabilistic quantile head는 deterministic LSTM의 extreme flood peak underestimation을 줄이는 효과적인 output design이며, q90/q95/q99는 calibration claim이 아니라 recall–cost trade-off를 조절하는 upper-tail decision outputs로 해석해야 한다.
+  <strong>최종 결론:</strong> 확률론적 분위수 헤드는 결정론적 LSTM의 극한 홍수 첨두 과소추정을 줄이는 효과적인 출력 설계 방식이며, q90/q95/q99는 통계적 보정 신뢰도 주장이 아니라 재현율–오경보 상충 관계를 조절하는 상위 꼬리 결정 출력으로 해석해야 한다.
 </div>
 
 <hr class="section-divider">
