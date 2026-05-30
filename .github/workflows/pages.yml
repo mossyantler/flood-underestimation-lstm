@@ -14,6 +14,10 @@ permissions:
   pages: write
   id-token: write
 
+# transitive Node 20 액션을 Node 24 로 강제 (2026-06-16 deprecation 대비)
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 # 동시 배포 1개만, 진행 중 run 은 취소하지 않고 대기열에서 마지막 것만 유지
 concurrency:
   group: pages
@@ -24,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Assemble publish directory
         run: |
