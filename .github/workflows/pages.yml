@@ -1,0 +1,56 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "docs/**"
+      - "draft/github_io/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 동시 배포 1개만, 진행 중 run 은 취소하지 않고 대기열에서 마지막 것만 유지
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Assemble publish directory
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site
+          # 사이트 root = docs/ 내용
+          cp -R docs/. _site/
+          # 논문 페이지 = /paper/ 하위경로 (draft/github_io/)
+          mkdir -p _site/paper
+          cp -R draft/github_io/. _site/paper/
+          # Jekyll 처리 비활성 (이미 docs/.nojekyll 있지만 보강)
+          touch _site/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -447,6 +447,7 @@
             <li><a href="#s253">2.5.3 확률론적 보정 지표</a></li>
           </ol>
         </li>
+        <li><a href="#s26">2.6 모델 공통 하이퍼파라미터</a></li>
       </ol>
     </li>
     <li>
@@ -457,7 +458,8 @@
         <li><a href="#s33">3.3 유역 분할과 Subset300 학습 설계</a></li>
         <li><a href="#s34">3.4 시간 분할과 난수 시드 규약</a></li>
         <li><a href="#s35">3.5 기본 체크포인트 선택</a></li>
-        <li><a href="#s36">3.6 결과 분석 질문 (Research Questions)</a></li>
+        <li><a href="#s36">3.6 NOAA 확인 홍수 보조 검증 데이터</a></li>
+        <li><a href="#s37">3.7 결과 분석 질문 (Research Questions)</a></li>
       </ol>
     </li>
     <li>
@@ -558,6 +560,56 @@
 </p>
 
 <p>
+  시각 \(t\)에서 LSTM 셀의 연산은 다음과 같이 정의된다.
+</p>
+
+\[
+\begin{aligned}
+\mathbf{i}_t &= \sigma(\mathbf{W}_i\,[\mathbf{x}_t;\,\mathbf{h}_{t-1}] + \mathbf{b}_i) \\
+\mathbf{f}_t &= \sigma(\mathbf{W}_f\,[\mathbf{x}_t;\,\mathbf{h}_{t-1}] + \mathbf{b}_f + b_0) \\
+\mathbf{g}_t &= \tanh(\mathbf{W}_g\,[\mathbf{x}_t;\,\mathbf{h}_{t-1}] + \mathbf{b}_g) \\
+\mathbf{o}_t &= \sigma(\mathbf{W}_o\,[\mathbf{x}_t;\,\mathbf{h}_{t-1}] + \mathbf{b}_o) \\
+\mathbf{c}_t &= \mathbf{f}_t \odot \mathbf{c}_{t-1} + \mathbf{i}_t \odot \mathbf{g}_t \\
+\mathbf{h}_t &= \mathbf{o}_t \odot \tanh(\mathbf{c}_t)
+\end{aligned}
+\tag{12}
+\]
+
+<p>
+  여기서 \(\mathbf{i}_t,\,\mathbf{f}_t,\,\mathbf{o}_t\)는 각각 입력·망각·출력 게이트, \(\mathbf{g}_t\)는 셀 입력 후보, \(\mathbf{c}_t\)는 셀 상태, \(\mathbf{h}_t \in \mathbb{R}^H\)는 은닉 상태(H = 128)이다.
+  \(\sigma\)는 시그모이드, \(\odot\)은 원소별 곱셈, \(b_0 = 3\)은 초기 망각 편향(initial forget bias)으로 학습 초기 장기 의존성 보존을 돕는다.
+</p>
+
+<p>
+  입력 벡터 \(\mathbf{x}_t = [\mathbf{d}_t;\,\mathbf{s}]\)는 시각 \(t\)의 동적 강제력 \(\mathbf{d}_t \in \mathbb{R}^{11}\)과 유역 정적 속성 \(\mathbf{s} \in \mathbb{R}^8\)의 연결(concatenation)이다. 정적 속성은 모든 시간 스텝에 동일하게 복사되어 입력된다.
+</p>
+
+<div class="table-container">
+<table>
+  <thead>
+    <tr><th>유형</th><th>변수</th><th>차원</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>동적 강제력 \(\mathbf{d}_t\)</td>
+      <td>Rainf (강수량), Tair (기온), PotEvap (잠재증발량), SWdown (단파복사), Qair (비습), PSurf (지표기압), Wind_E (동서풍), Wind_N (남북풍), LWdown (장파복사), CAPE (대기불안정 에너지), CRainf_frac (대류성 강수 비율)</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <td>정적 속성 \(\mathbf{s}\)</td>
+      <td>area (면적), slope (경사), aridity (건조도), snow_fraction (적설 비율), soil_depth (토심), permeability (투수율), forest_fraction (산림 비율), baseflow_index (기저유출 지수)</td>
+      <td>8</td>
+    </tr>
+  </tbody>
+</table>
+<div class="table-caption">표 A-1. 모델 공통 입력 변수. 두 모델에 동일하게 적용된다.</div>
+</div>
+
+<p>
+  입력 시퀀스 길이는 336시간(14일)이며, 모델은 시퀀스의 마지막 24시간(predict_last_n = 24)에 대한 예측값을 출력한다. 학습·검증 시에는 이 마지막 24시간 예측에 대해서만 손실이 계산된다.
+</p>
+
+<p>
   그림 1은 두 모델의 아키텍처를 비교한다. 두 모델은 동일한 다중 유역 CudaLSTM 기반망(은닉 크기 128, 참조 기간(lookback) 336시간)을 공유하며, 차이는 출력 헤드와 학습 목적함수뿐이다. Model 1은 회귀 헤드와 NSE 손실을, Model 2는 분위수 헤드와 Pinball 손실을 사용한다.
 </p>
 
@@ -585,12 +637,52 @@
   Model 1은 매 시점 하나의 유량 값을 예측하는 결정론적 회귀 모델이다. 전체 수문곡선의 평균적 적합도를 잘 확보할 수 있지만, 드문 고유량 첨두에서는 조건부 평균 쪽으로 수축하면서 과소추정이 발생할 수 있다.
 </p>
 
+<p>
+  은닉 상태 \(\mathbf{h}_t\)에서 최종 유량 예측값은 선형 회귀 헤드로 계산된다.
+</p>
+
+\[
+\hat{Q}_t = \max\!\bigl(0,\; \mathbf{w}_r^\top \mathbf{h}_t + b_r\bigr)
+\tag{13}
+\]
+
+<p>
+  여기서 \(\mathbf{w}_r \in \mathbb{R}^H\)와 \(b_r\)은 학습되는 회귀 헤드 파라미터이며, \(\max(0,\cdot)\)은 유량의 비음수 제약을 구현한다.
+  Model 1의 학습 목적함수는 NSE 기반 정규화 제곱오차이다.
+</p>
+
+\[
+\mathcal{L}_{\text{NSE}} = \frac{\displaystyle\sum_{t=1}^{T}(y_t - \hat{Q}_t)^2}{\displaystyle\sum_{t=1}^{T}(y_t - \bar{y})^2}
+\tag{14}
+\]
+
+<p>
+  이 손실을 최소화하는 것은 NSE(수식 3)를 최대화하는 것과 동치이다. 분모의 관측 분산이 정규화 항으로 작동하여 유역 간 유량 규모 차이를 완화한다.
+</p>
+
 <p style="color:#4a5568;font-size:10pt;font-style:italic;">→ 그림 1 (Model 1 vs. Model 2 아키텍처) 참조.</p>
 
 <h2 class="section" id="s23">2.3 Model 2: 확률론적 분위수 확장</h2>
 
 <p>
   Model 2는 Model 1과 같은 기반망을 사용하되, 헤드만 분위수 출력으로 바꾼다. 출력 분위수 집합은 τ ∈ {0.50, 0.90, 0.95, 0.99}이다.
+</p>
+
+<p>
+  분위수 헤드는 동일한 은닉 상태 \(\mathbf{h}_t\)에서 4개 분위수를 동시에 출력하는 선형 층이다.
+</p>
+
+\[
+\begin{bmatrix}
+  \hat{Q}_{t,0.50} \\ \hat{Q}_{t,0.90} \\ \hat{Q}_{t,0.95} \\ \hat{Q}_{t,0.99}
+\end{bmatrix}
+= \max\!\bigl(0,\; \mathbf{W}_q\,\mathbf{h}_t + \mathbf{b}_q\bigr)
+\tag{15}
+\]
+
+<p>
+  여기서 \(\mathbf{W}_q \in \mathbb{R}^{4 \times H}\)와 \(\mathbf{b}_q \in \mathbb{R}^4\)는 분위수 헤드의 학습 파라미터이다.
+  4개 분위수에 균등 가중치(각 1.0)를 부여하여 Pinball 손실(수식 1–2)을 합산한다. 분위수 교차(crossing) 페널티는 현재 설계에 포함하지 않았다.
 </p>
 
 <p style="color:#4a5568;font-size:10pt;font-style:italic;">→ 그림 1 (Model 1 vs. Model 2 아키텍처) 참조.</p>
@@ -790,6 +882,34 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 <div class="table-caption">표 A. 본 연구에서 사용하는 평가 지표 요약.</div>
 </div>
 
+<h2 class="section" id="s26">2.6 모델 공통 하이퍼파라미터</h2>
+
+<p>
+  두 모델은 출력 헤드와 손실 함수를 제외한 모든 하이퍼파라미터를 동일하게 설정하여, 관측된 성능 차이가 출력 설계에 의한 것임을 분리할 수 있도록 하였다.
+</p>
+
+<div class="table-container">
+<table>
+  <thead>
+    <tr><th>항목</th><th>값</th><th>비고</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>은닉 크기 (hidden_size)</td><td>128</td><td>단일 LSTM 층</td></tr>
+    <tr><td>참조 기간 (seq_length)</td><td>336시간 (14일)</td><td>시간 단위 입력 창</td></tr>
+    <tr><td>예측 대상 구간 (predict_last_n)</td><td>24시간</td><td>마지막 24 스텝에 손실 계산</td></tr>
+    <tr><td>출력 드롭아웃 (output_dropout)</td><td>0.3</td><td>헤드 직전 적용</td></tr>
+    <tr><td>초기 망각 편향 (initial_forget_bias)</td><td>3</td><td>장기 의존성 초기화</td></tr>
+    <tr><td>옵티마이저</td><td>Adam</td><td>—</td></tr>
+    <tr><td>학습률 스케줄</td><td>1×10⁻³ → 5×10⁻⁴ → 1×10⁻⁴</td><td>epoch 0 / 10 / 20에서 변경</td></tr>
+    <tr><td>배치 크기 (batch_size)</td><td>256</td><td>—</td></tr>
+    <tr><td>총 학습 에폭 (epochs)</td><td>30</td><td>—</td></tr>
+    <tr><td>경사 클리핑 (clip_gradient_norm)</td><td>1</td><td>—</td></tr>
+    <tr><td>분위수 손실 가중치 (Model 2)</td><td>균등 (각 1.0)</td><td>τ별 불균등 강조 없음</td></tr>
+  </tbody>
+</table>
+<div class="table-caption">표 A-2. 공통 하이퍼파라미터. Model 1과 Model 2에 동일하게 적용되며, 차이는 head/loss 행만이다.</div>
+</div>
+
 <!-- ============================ CHAPTER 3 ================================ -->
 <h1 class="chapter" id="ch3">제 3장 데이터와 실험 방법</h1>
 
@@ -811,7 +931,7 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 <div class="figure-container">
   <img src="docx_images/image3.png" alt="Fixed Subset300 Basin Splits for Model 1 / Model 2">
   <div class="figure-caption">
-    <strong>그림 3.</strong> 고정 Subset300 유역 분할 (Model 1 / Model 2 공통). 학습 269개 유역(청록), 검증 31개(주황), DRBC 테스트 38개(적색). 모델은 학습 유역에서만 학습하고, DRBC 경계 내 검증 보류 유역에서 평가된다.
+    <strong>그림 3.</strong> 고정 Subset300 유역 분할 (Model 1 / Model 2 공통). 학습 269개 유역(청록), 검증 31개(주황), DRBC 테스트 85개(적색). 모델은 학습 유역에서만 학습하고, DRBC 경계 내 검증 보류 유역에서 평가된다.
   </div>
 </div>
 
@@ -821,7 +941,7 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
   학습 풀(training pool)은 배출구가 DRBC 밖에 있고 DRBC 다각형 중첩 비율이 0.1 이하인 품질 기준 통과 비(非)DRBC 유역으로 구성하였다(outlet_in_drbc == False AND overlap_ratio ≤ 0.1, 품질 기준 통과 → 1,923개). 규모 파일럿 실험에서는 유역 수 100/300/600을 비교했고, 비DRBC 검증 성능, 정적 속성 분포, 관측 유량 사건 반응 진단, 동일 크기 임의 서브셋 기준선, 계산 비용을 함께 고려해 <strong>subset300을 채택</strong>하였다. 이 선택은 DRBC 테스트 지표를 보고 결정하지 않았다.
 </p>
 <p>
-  확장 DRBC 관측 테스트 분할은 품질 기준과 2014–2016 기간 포함 조건을 통과한 <strong>DRBC 85개 유역</strong>을 공식 평가 기준으로 사용한다. 기존 DRBC-38 보류 세트는 보관 비교 맥락으로만 둔다.
+  확장 DRBC 관측 테스트 분할은 품질 기준과 2014–2016 기간 포함 조건을 통과한 <strong>DRBC 85개 유역</strong>을 공식 평가 기준으로 사용한다. 기존 pre-expanded DRBC 보류 세트는 보관 비교 맥락으로만 둔다.
 </p>
 
 <div class="figure-container">
@@ -861,7 +981,41 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
   Model 1의 손실 함수는 NSE 계열이고 Model 2의 손실 함수는 Pinball 손실이므로, 원시 검증 손실을 모델 간 체크포인트 선택 기준으로 직접 비교할 수 없다. 따라서 기본 체크포인트는 비DRBC 검증 중앙값 NSE를 기준으로 선택하였다. DRBC 테스트 결과를 보고 체크포인트를 다시 고르지 않았다.
 </p>
 
-<h2 class="section" id="s36">3.6 결과 분석 질문 (Research Questions)</h2>
+<h2 class="section" id="s36">3.6 NOAA 확인 홍수 보조 검증 데이터</h2>
+
+<p>
+  Q99 초과 사건 분석(RQ-2)의 외부 독립 검증을 위해 NOAA/NWS 확인 홍수 부분집합을 보조적으로 구성하였다. 이 부분집합은 두 출처를 결합하여 만들어지며, 해석 시 두 출처의 공간 단위 차이를 반드시 고려해야 한다.
+</p>
+
+<h3 class="subsection">3.6.1 데이터 출처</h3>
+
+<p><strong>① NWS 홍수 단계 초과 이벤트.</strong>
+  NWS(National Weather Service)가 각 USGS 관측소에 대해 지정한 minor flood stage(소규모 홍수 경보 기준 수위)를 실제 관측 유량이 초과한 구간을 CAMELSH 시계열에서 추출하였다. 초과 구간 내 독립 이벤트는 peak 간 72시간 분리 기준을 적용하여 확정하였다. 이 이벤트는 USGS gauge ID를 통해 유역과 직접 연결된다.
+</p>
+
+<p><strong>② NOAA Storm Events 보강 주석.</strong>
+  NOAA NCEI(National Centers for Environmental Information) Storm Events Database에서 Flood·Flash Flood·Coastal Flood 유형 기록을 내려받아 NWS 이벤트에 보강 주석으로 활용하였다. 이벤트 peak 시각을 기준으로 설정한 시간 창(±EVENT_WINDOW_HOURS) 안에 Storm Events 기록이 존재하면 해당 이벤트를 NOAA-보강(corroborated)으로 표시하고 홍수 유형(Flash Flood / Flood / Coastal Flood)을 분류하였다.
+</p>
+
+<h3 class="subsection">3.6.2 NOAA-GAGES-II 공간 경계 불일치</h3>
+
+<p>
+  <strong>주요 한계:</strong> NOAA Storm Events는 county(군·행정구역) 단위 공간 보고를 사용하는 반면, GAGES-II/CAMELSH 유역 경계는 수문학적 분수령(hydrological watershed)을 따른다. 행정구역과 유역 경계는 원칙적으로 일치하지 않으므로, 동일한 county에 복수의 유역이 포함되거나 하나의 유역이 복수의 county에 걸칠 수 있다. 따라서 NOAA 주석은 "해당 시기에 해당 county에서 공식 홍수 기록이 존재하였다"는 보강 근거이지, "해당 수문 유역의 gauge에서 NWS 기준이 초과되었다"는 직접 확인은 아니다.
+</p>
+
+<h3 class="subsection">3.6.3 결합 방법</h3>
+
+<p>
+  NOAA 카탈로그의 USGS ID와 확장 DRBC 85개 유역 ID를 8자리 zero-padding으로 정규화한 뒤 교집합을 구하였다. NOAA 카탈로그에 포함된 49개 유역 중 46개(94%)가 확장 DRBC 85개 유역 목록과 일치하였다. 이 46개 교집합 유역 내에서 테스트 기간(2014–2016)에 속하는 NOAA-보강 이벤트를 대상으로 강제력 및 유량 관측 커버리지 조건(각 90% 이상)을 적용하여 최종 <strong>21개 유역 65개 이벤트</strong>로 구성된 독립 검증 부분집합을 확정하였다.
+</p>
+
+<h3 class="subsection">3.6.4 해석 지침</h3>
+
+<p>
+  NOAA 확인 홍수 결과는 Q99 사건 분석(RQ-2)을 외부에서 보강하는 방향성 일관성(directional consistency) 검사로 해석한다. 공간 경계 불일치로 인해 이 부분집합을 DRBC 내 모든 official flood stage 초과 사건의 완전한 목록으로 취급하지 않으며, Q99 사건 범위의 결론이 외부 공식 기록 기반 극한 사건에서도 재현되는지 확인하는 보조 근거로 활용한다.
+</p>
+
+<h2 class="section" id="s37">3.7 결과 분석 질문 (Research Questions)</h2>
 
 <div class="table-container">
 <table class="rq-table">

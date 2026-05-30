@@ -558,14 +558,14 @@
 </p>
 
 <div class="figure-container">
-  <img src="docx_images/image1.png" alt="Model 1 vs Model 2 Architecture">
+  <img src="../docx_images/image1.png" alt="Model 1 vs Model 2 Architecture">
   <div class="figure-caption">
     <strong>그림 1.</strong> Model 1 vs. Model 2 아키텍처 비교. 두 모델은 동일한 shared multi-basin CudaLSTM backbone(hidden size 128, 336h lookback)을 사용한다. 차이는 output head와 training objective뿐이다 — Model 1은 regression head + NSE loss, Model 2는 quantile head + pinball loss.
   </div>
 </div>
 
 <div class="figure-container">
-  <img src="docx_images/image2.png" alt="Single 336-hour sequence input-output structure">
+  <img src="../docx_images/image2.png" alt="Single 336-hour sequence input-output structure">
   <div class="figure-caption">
     <strong>그림 2.</strong> 단일 336시간 시퀀스 입력-출력 구조. Dynamic inputs + static attributes를 336시간 lookback으로 소비하고, 마지막 시점에서 Model 1은 point estimate, Model 2는 q50/q90/q95/q99를 동시에 출력한다.
   </div>
@@ -801,7 +801,7 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 </p>
 
 <div class="figure-container">
-  <img src="docx_images/image3.png" alt="Fixed Subset300 Basin Splits for Model 1 / Model 2">
+  <img src="../docx_images/image3.png" alt="Fixed Subset300 Basin Splits for Model 1 / Model 2">
   <div class="figure-caption">
     <strong>그림 3.</strong> Fixed Subset300 Basin Splits (Model 1 / Model 2 공통). Train 269개 basin(청록), Validation 31개(주황), DRBC test 38개(적색). 모델은 Train basin에서만 학습하고, DRBC 경계 내 holdout basin에서 평가된다.
   </div>
@@ -817,7 +817,7 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 </p>
 
 <div class="figure-container">
-  <img src="docx_images/image5.png" alt="Attribute-Level Bias by Scope heatmap">
+  <img src="../docx_images/image5.png" alt="Attribute-Level Bias by Scope heatmap">
   <div class="figure-caption">
     <strong>그림 4.</strong> Subset size(100/300/600) × Split(Combined/Train/Validation)별 static attribute standardized mean bias. Subset300(가운데 열)은 대부분 속성에서 |bias| &lt; 0.1로 전체 pool 대비 대표성이 양호함을 보여준다.
   </div>
@@ -898,11 +898,11 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 
 <div class="figure-row">
   <div class="figure-item">
-    <img src="figures/rq1_central_metric_boxplots.png" alt="RQ-1 central metric boxplots">
+    <img src="../figures/rq1_central_metric_boxplots.png" alt="RQ-1 central metric boxplots">
     <div class="figure-caption"><strong>그림 3a.</strong> Model 1 vs Model 2 q50 중앙 성능 지표 boxplot. 85개 DRBC basin 기준 NSE, KGE, Bias, MAE, RMSE 분포.</div>
   </div>
   <div class="figure-item">
-    <img src="figures/rq1_paired_delta_scatter.png" alt="RQ-1 paired delta scatter">
+    <img src="../figures/rq1_paired_delta_scatter.png" alt="RQ-1 paired delta scatter">
     <div class="figure-caption"><strong>그림 3b.</strong> Paired seed delta scatter. 각 점은 유역, x축은 Model 1 NSE, y축은 q50-M1 NSE delta. 대부분 유역에서 q50이 개선됨을 보여준다.</div>
   </div>
 </div>
@@ -934,15 +934,15 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 
 <div class="figure-row">
   <div class="figure-item">
-    <img src="figures/rq2_alpha_by_tau.png" alt="alpha by tau">
+    <img src="../figures/rq2_alpha_by_tau.png" alt="alpha by tau">
     <div class="figure-caption"><strong>그림 4a.</strong> τ별 event peak under-deficit (α). τ가 커질수록 단조 감소.</div>
   </div>
   <div class="figure-item">
-    <img src="figures/rq2_beta_by_tau.png" alt="beta by tau">
+    <img src="../figures/rq2_beta_by_tau.png" alt="beta by tau">
     <div class="figure-caption"><strong>그림 4b.</strong> τ별 ±6시간 window capture rate (β). q99에서 1.306 — 관측 첨두 초과.</div>
   </div>
   <div class="figure-item">
-    <img src="figures/rq2_delta_recall_by_tau.png" alt="delta recall by tau">
+    <img src="../figures/rq2_delta_recall_by_tau.png" alt="delta recall by tau">
     <div class="figure-caption"><strong>그림 4c.</strong> τ별 Q99 threshold recall (δ). q50 0.069 → q99 0.583, 약 8배 증가.</div>
   </div>
 </div>
@@ -954,7 +954,7 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 </p>
 
 <div class="figure-container">
-  <img src="figures/ub_location_class_bar.png" alt="uncertainty band location class bar">
+  <img src="../figures/ub_location_class_bar.png" alt="uncertainty band location class bar">
   <div class="figure-caption">
     <strong>그림 5.</strong> Q99 사건 첨두 시각에서의 관측 유량 위치 분포 (event-pooled). below_q50: 11%, q50–q90: 17%, q90–q95: 8%, q95–q99: 20%, above_q99: 43%. 합계 = 100%. NOAA 범위는 above_q99 57%로 더 극단적이다.
   </div>
@@ -967,7 +967,7 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 </p>
 
 <div class="figure-container">
-  <img src="figures/ub_gap_trajectory.png" alt="uncertainty band gap trajectory">
+  <img src="../figures/ub_gap_trajectory.png" alt="uncertainty band gap trajectory">
   <div class="figure-caption">
     <strong>그림 6.</strong> 불확실성 밴드 간격 궤적 (gap trajectory). 파란색: 과소 간격(under-gap, cms), 빨간색: 과대 간격(over-gap, cms). q99에서 과소 간격이 0.87 cms로 최소화되는 동시에 과대 간격 3.58 cms가 처음으로 등장한다.
   </div>
@@ -1004,7 +1004,7 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 </div>
 
 <div class="figure-container">
-  <img src="figures/rq3_cost_recall_tradeoff.png" alt="RQ-3 recall-cost tradeoff">
+  <img src="../figures/rq3_cost_recall_tradeoff.png" alt="RQ-3 recall-cost tradeoff">
   <div class="figure-caption">
     <strong>그림 7.</strong> Recall–Cost trade-off 곡선. x축은 Q99 threshold recall(δ), y축은 False Alarm Rate(FAR). q50, q90, q95, q99 각 점이 표시된다. τ 증가에 따라 recall 향상과 FAR 증가가 비선형적으로 동시에 일어난다.
   </div>
@@ -1037,7 +1037,7 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 </div>
 
 <div class="figure-container">
-  <img src="figures/rq4a_tier_metric_heatmap.png" alt="RQ-4a tier metric heatmap">
+  <img src="../figures/rq4a_tier_metric_heatmap.png" alt="RQ-4a tier metric heatmap">
   <div class="figure-caption">
     <strong>그림 8.</strong> Basin tier별 성능 지표 heatmap. Model 1 NSE 기준 bottom/mid/top tier 각각에서 α, β, δ, FAR의 τ별 분포를 보여준다.
   </div>
@@ -1050,7 +1050,7 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 </p>
 
 <div class="figure-container">
-  <img src="figures/rq4b_event_type_bar.png" alt="RQ-4b event type bar">
+  <img src="../figures/rq4b_event_type_bar.png" alt="RQ-4b event type bar">
   <div class="figure-caption">
     <strong>그림 9.</strong> NOAA event type별 q99 성능 비교. Flash Flood, Flood, Unknown(NOAA 미확인) 각 유형에서 q99의 α와 β를 보여준다. Flash Flood는 q99에서도 α = 0.42로 잔존 underestimation이 크다.
   </div>
@@ -1082,7 +1082,7 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 </div>
 
 <div class="figure-container">
-  <img src="figures/primary_all_quantile_calibration.png" alt="quantile calibration">
+  <img src="../figures/primary_all_quantile_calibration.png" alt="quantile calibration">
   <div class="figure-caption">
     <strong>그림 10.</strong> All-hour one-sided quantile calibration. 점선은 완전 보정(nominal = empirical) 기준선. 모든 분위수에서 실제 포함률이 nominal보다 낮아 하향 편차를 보인다.
   </div>
@@ -1097,11 +1097,11 @@ L_\tau(y_t,\, \hat{y}_{t,\tau}) =
 
 <div class="figure-row">
   <div class="figure-item">
-    <img src="figures/primary_pinball_by_stratum.png" alt="pinball by stratum">
+    <img src="../figures/primary_pinball_by_stratum.png" alt="pinball by stratum">
     <div class="figure-caption"><strong>그림 11a.</strong> Flow stratum별 pinball loss. 고유량 구간에서 τ별 loss 패턴을 보여준다.</div>
   </div>
   <div class="figure-item">
-    <img src="figures/primary_q99_q50_spread_by_stratum.png" alt="q99-q50 spread">
+    <img src="../figures/primary_q99_q50_spread_by_stratum.png" alt="q99-q50 spread">
     <div class="figure-caption"><strong>그림 11b.</strong> q99–q50 밴드 폭 by flow stratum. 고유량 구간에서 불확실성 밴드가 넓어지는 패턴을 보여준다.</div>
   </div>
 </div>

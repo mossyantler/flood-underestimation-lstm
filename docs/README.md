@@ -20,9 +20,10 @@ docs/
 │   └── analysis/
 │       ├── basin/
 │       └── model/
-├── paper/                   # proposal, defense playbook, manuscript 재료
 └── explain/                 # 학부생/입문자용 설명
 ```
+
+논문 초안·proposal·defense 자료는 docs 밖 루트 [`draft/`](../draft/)로 이동했다.
 
 ## Main Entry Points
 
@@ -32,9 +33,9 @@ docs/
 - [`experiment/method/model/result_analysis_protocol.md`](experiment/method/model/result_analysis_protocol.md): Model 1/2 결과 비교와 해석 순서
 - [`experiment/method/basin/event_response_spec.md`](experiment/method/basin/event_response_spec.md): hourly observed high-flow event candidate 생성 규칙
 - [`experiment/analysis/model/README.md`](experiment/analysis/model/README.md): Model 1/2 분석 축별 결과 문서
-- [`paper/proposal/imrad_proposal.md`](paper/proposal/imrad_proposal.md): 영문 IMRaD proposal
-- [`paper/proposal/imrad_proposal_ko.md`](paper/proposal/imrad_proposal_ko.md): 한국어 IMRaD proposal
-- [`paper/defense_playbook.md`](paper/defense_playbook.md): 설계 방어용 예상 질문과 답변
+- [`../draft/proposal/imrad_proposal.md`](../draft/proposal/imrad_proposal.md): 영문 IMRaD proposal
+- [`../draft/proposal/imrad_proposal_ko.md`](../draft/proposal/imrad_proposal_ko.md): 한국어 IMRaD proposal
+- [`../draft/defense_playbook.md`](../draft/defense_playbook.md): 설계 방어용 예상 질문과 답변
 
 ## Folder Roles
 
@@ -44,7 +45,7 @@ docs/
 
 `references/`는 외부 문헌, 개념 정리, glossary를 보관한다. 좋은 아이디어가 공식 방법으로 승격되면 `experiment/method/`에 다시 반영한다.
 
-`paper/`는 proposal, defense, manuscript-facing 문장을 둔다. 실행 규칙의 source of truth는 아니며, 필요하면 `experiment/method/`를 참조한다.
+루트 `draft/`는 proposal, defense, manuscript-facing 문장을 둔다. 실행 규칙의 source of truth는 아니며, 필요하면 `experiment/method/`를 참조한다.
 
 `explain/`은 CAMELS 연구를 처음 읽는 독자를 위한 쉬운 설명이다. 정확한 규칙보다 큰 그림과 직관을 우선한다.
 

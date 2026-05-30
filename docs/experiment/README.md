@@ -1,6 +1,6 @@
 # Experiment Docs
 
-이 폴더는 현재 CAMELSH Model 1/2 연구의 공식 방법과 분석 문서를 둔다. 논문 문장이나 방어용 답변은 [`../paper/`](../paper/)에 두고, 외부 문헌 메모는 [`../references/`](../references/)에 둔다.
+이 폴더는 현재 CAMELSH Model 1/2 연구의 공식 방법과 분석 문서를 둔다. 논문 문장이나 방어용 답변은 루트 [`../../draft/`](../../draft/)에 두고, 외부 문헌 메모는 [`../references/`](../references/)에 둔다.
 
 ## Structure
 
