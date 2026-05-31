@@ -1,8 +1,8 @@
 # 05. 유역 분석 방법
 
-이 연구의 유역 분석은 두 질문을 분리해서 다룬다. 첫째, 모델을 어디에서 학습할 것인가. 둘째, 모델을 어디에서 평가(채점)할 것인가. 현재 기준에서는 DRBC(Delaware River Basin Commission, 델라웨어 강 유역 위원회) 경계 **밖**의 유역으로 모델을 학습하고, DRBC 경계 **안**의 유역에서 평가한다. 이렇게 학습에는 쓰지 않고 채점 전용으로 떼어둔 유역을 holdout(평가 전용 유역)이라고 부른다.
+유역 분석은 두 질문을 분리한다. 학습 유역을 어디에 둘 것인가, 평가 유역을 어디에 둘 것인가. 현재 기준은 DRBC(Delaware River Basin Commission) 경계 **밖** 유역으로 학습하고, DRBC 경계 **안** 유역에서 평가한다. 학습에 쓰지 않고 채점 전용으로 떼어둔 유역이 holdout(평가 전용 유역)이다.
 
-이 문서는 비전공 독자를 기준으로, "어떤 유역을 어떤 역할로 쓰는가", "그 기준이 코드 어디에서 어떻게 정해지는가", "기준값은 무엇인가"를 차례로 설명한다. 숫자와 기준값은 모두 저장소 안의 실제 설정 파일과 산출물에서 확인한 값이다.
+이 문서는 어떤 유역을 어떤 역할로 쓰는가, 그 기준이 어디에서 정해지는가, 기준값은 무엇인가를 다룬다. 모든 수치와 기준값은 저장소 설정 파일과 산출물에서 확인한 값이다.
 
 ```mermaid
 flowchart TD
@@ -19,9 +19,9 @@ flowchart TD
     K --> L["사후 해석과 최종 선별 보강"]
 ```
 
-## 한눈에 보는 구현 위치
+## 구현 위치
 
-아래는 위 흐름의 각 단계가 저장소 어디에서 정해지는지 묶은 것이다. 자세한 기준값과 의미는 이어지는 절에서 설명한다.
+위 흐름의 각 단계가 저장소 어디에서 정해지는지 정리한다. 기준값과 의미는 이어지는 절에서 다룬다.
 
 - 공식 study region(연구권역) 경계 파일: `basins/drbc_boundary/drb_bnd_polygon.shp`
 - 전체 유역 ↔ DRBC 공간 관계 매핑표: `output/basin/drbc/basin_define/camelsh_drbc_mapping.csv` (생성 스크립트 `scripts/basin/drbc/build_drbc_camelsh_tables.py`)
@@ -29,9 +29,9 @@ flowchart TD
 - 평가 전용 DRBC test 85개 구성: `scripts/basin/drbc/build_drbc_expanded_observed_test_split.py`, 산출 폴더 `configs/basin_splits/drbc_expanded_observed_test/`
 - 고정 학습 subset(scaling_300) 구성: `scripts/scaling/build_scaling_pilot_splits.py`, 산출 폴더 `configs/pilot/basin_splits/scaling_300/`
 
-## 기준값 한눈 표
+## 기준값 표
 
-유역을 고르고 거를 때 쓰는 임계값을 먼저 한곳에 모은다. 각 기준의 자세한 뜻과 왜 그렇게 두는지는 표 아래 H3 상세 절에서 다룬다.
+유역을 고르고 거르는 임계값. 각 기준의 뜻은 표 아래 상세 절에서 다룬다.
 
 | 심볼/기준 | 변수명 | 범위/값 | 방향/의미 |
 | --- | --- | --- | --- |
@@ -50,11 +50,11 @@ flowchart TD
 
 ### 연 관측 충분 기준과 쓸 만한 관측 연수 (usable years)
 
-한 해에 관측값이 단 1시간만 있어도 "관측 1년"으로 세면 자료 품질을 부풀리게 된다. 그래서 한 해의 관측 시간 비율(그 해에 실제 관측이 있던 시간 수 ÷ 그 해 전체 시간 수)이 0.8 이상인 해만 "쓸 만한 해"로 센다. 이렇게 센 해가 10년 이상이어야 통계적으로 믿을 만하다고 본다.
+한 해 관측 시간 비율(그 해 실제 관측 시간 수 ÷ 그 해 전체 시간 수)이 0.8 이상인 해만 "쓸 만한 해"로 센다. 1시간만 관측돼도 1년으로 세면 품질이 부풀려지기 때문이다. 이렇게 센 해가 10년 이상이어야 통계적으로 믿을 만하다.
 
 ### 추정유량 비율 상한 (`FLOW_PCT_EST_VALUES`)
 
-`FLOW_PCT_EST_VALUES`는 실제 측정이 아니라 추정으로 채운 유량의 비율이다. 이 비율이 높으면 관측 target(모델이 맞혀야 하는 정답값)이 사람이 보정한 값에 가까워져, 모델 성능 차이를 자연 현상으로 해석하기 어렵다. 그래서 15%를 넘으면 제외한다.
+`FLOW_PCT_EST_VALUES`는 측정이 아니라 추정으로 채운 유량의 비율이다. 비율이 높으면 관측 target(모델이 맞혀야 하는 정답값)이 사람이 보정한 값에 가까워져, 모델 성능 차이를 자연 현상으로 해석하기 어렵다. 15%를 넘으면 제외한다.
 
 ### 유역경계 신뢰도 (`BASIN_BOUNDARY_CONFIDENCE`)
 
@@ -68,36 +68,46 @@ flowchart TD
 
 큰 유량 event를 잡을 때는 그 유역 전체 시간 중 상위 1% 유량(Q99)을 기본 기준선으로 쓴다. 그런데 어떤 유역은 Q99를 넘는 독립 event가 너무 적을 수 있어서, event 수가 부족하면 Q98(상위 2%), 그래도 부족하면 Q95(상위 5%)로 한 단계씩 완화한다.
 
-## 평가 유역을 38개에서 85개로 늘린 과정
+## 평가 유역 확장: 38개에서 85개
 
-이 연구에서 모델 성능을 채점하는 곳은 DRBC 경계 안의 유역이다. 무엇을 했는가. 처음에는 평가 전용 유역을 비교적 적은 수만 골라서 썼다. 이후 같은 DRBC 경계 안에서 조건에 맞는 유역을 더 찾아내, 최종적으로 평가 유역을 **85개**까지 늘렸다.
+모델 성능을 채점하는 곳은 DRBC 경계 안 유역이다. 처음에는 평가 전용 유역을 적은 수만 썼고, 이후 같은 경계 안에서 조건에 맞는 유역을 더 찾아 최종 **85개**로 늘렸다.
 
-초기 단계의 정확한 수는 `configs/basin_splits/drbc_expanded_observed_test/summary.json`에 기록돼 있다. 거기에는 이전 품질 기준 평가 유역 수(`old_quality_test_count`)가 **38개**, 새로 확장한 선택 수(`selected_count`)가 **85개**로 적혀 있다. 즉 38개와 85개는 겹치는 36개를 공유하면서, 새 기준에서 49개가 추가로 들어온 결과다(`overlap_with_old_quality_test_count: 36`, `new_vs_old_quality_test_count: 49`).
+초기 수는 `configs/basin_splits/drbc_expanded_observed_test/summary.json`에 기록돼 있다. 이전 품질 기준 평가 유역 수(`old_quality_test_count`)가 **38개**, 새로 확장한 선택 수(`selected_count`)가 **85개**다. 두 집합은 겹치는 36개를 공유하고, 새 기준에서 49개가 추가됐다(`overlap_with_old_quality_test_count: 36`, `new_vs_old_quality_test_count: 49`).
 
-왜 늘렸는가. 평가 유역이 적으면 "이 모델이 정말 더 낫다"는 결론이 우연히 뽑힌 몇 개 유역 때문일 위험이 있다. 평가 대상을 늘리면 결과가 특정 유역에 휘둘리지 않고, 더 다양한 유역에서 모델을 시험할 수 있다.
+확장 이유는 표본 안정성이다. 평가 유역이 적으면 모델 우위 결론이 우연히 뽑힌 몇 개 유역에 좌우될 수 있다. 평가 대상을 늘리면 결과가 특정 유역에 휘둘리지 않고 더 다양한 유역에서 모델을 시험한다.
 
-어떻게 늘렸는가. 늘어난 유역은 새로 만든 데이터가 아니라, 원래 DRBC 경계 안에 있으면서 그동안 빠져 있던 유역에서 왔다. 구성 스크립트는 `scripts/basin/drbc/build_drbc_expanded_observed_test_split.py`이며, 이 스크립트의 머리말 설명에도 "기존 subset300 Model 1/2 실행을 위한 test 전용 확장이고, 학습 split은 바꾸지 않는다"고 못 박혀 있다. 절차는 이렇다. 먼저 DRBC holdout 후보 154개에서 시작한다. 그다음 메타데이터 품질 기준(추정유량 비율 상한, 유역경계 신뢰도)과 2014–2016 채점 구간 관측 충실도 기준을 함께 적용한다. 두 기준과 위치 조건을 모두 통과한 유역을 골라 기존 시간별 유량 시계열 데이터셋(CAMELSH hourly)과 묶어 최종 평가 세트 85개를 완성했다.
+늘어난 유역은 새 데이터가 아니라 원래 DRBC 경계 안에 있으면서 빠져 있던 유역이다. 구성 스크립트의 머리말에도 "기존 subset300 Model 1/2 실행을 위한 test 전용 확장이고, 학습 split은 바꾸지 않는다"고 명시돼 있다. 절차는 DRBC holdout 후보 154개에서 시작해, 메타데이터 품질 기준(추정유량 비율 상한, 유역경계 신뢰도)과 2014–2016 채점 구간 관측 충실도 기준을 함께 적용한다. 두 기준과 위치 조건을 모두 통과한 유역을 시간별 유량 시계열 데이터셋(CAMELSH hourly)과 묶어 최종 평가 세트 85개를 완성한다.
 
-이 과정에서 무엇 때문에 빠졌는지도 같은 `summary.json`에 기록돼 있다(`exclusion_reason_counts`). 154개 후보 중 통과 85개, 채점 구간 관측 충실도 80% 미달로 제외 55개, 추정유량 비율 15% 초과로 제외 9개, 유역경계 신뢰도 7 미만으로 제외 5개다. 즉 가장 많이 빠진 이유는 "채점 기간에 관측이 부족해서"다.
+제외 사유도 같은 `summary.json`에 기록돼 있다(`exclusion_reason_counts`). 154개 후보 중 통과 85개, 채점 구간 관측 충실도 80% 미달 제외 55개, 추정유량 비율 15% 초과 제외 9개, 유역경계 신뢰도 7 미만 제외 5개다. 가장 큰 제외 사유는 채점 기간 관측 부족이다.
 
-어떻게 해석해야 하는가. 85개라는 숫자는 "DRBC 안의 모든 유역"이 아니라 "그중 자료 품질을 믿을 만한 유역"만 추린 결과다. 그래서 결론은 DRBC 전체가 아니라 이 85개 유역에서 확인된 것으로 읽어야 한다.
+85개는 DRBC 안 전체 유역이 아니라 자료 품질을 믿을 만한 유역만 추린 결과다. 따라서 결론은 DRBC 전체가 아니라 이 85개 유역에서 확인된 것으로 읽는다.
 
-## 학습·검증에 전체 유역을 다 쓰지 못한 이유
+구현:
 
-무엇을 못 했는가. 모델 학습(train)과 검증(validation)에는 쓸 수 있는 유역 전부를 사용하지는 못했다. 조건과 품질 기준을 통과한 학습용 유역 풀(training pool)은 약 **1923개**까지 모였지만, 실제 학습·검증에는 이 중 고정된 일부인 **300개**만 썼다. 이 고정 300개 묶음을 `scaling_300`이라고 부르며, 학습용 269개와 검증용 31개로 나뉜다(파일 `configs/pilot/basin_splits/scaling_300/train.txt` 269줄, `validation.txt` 31줄로 확인되며, `summary.json`의 `train_count: 269`, `validation_count: 31`과 일치한다).
+- 구성 스크립트: `scripts/basin/drbc/build_drbc_expanded_observed_test_split.py`
+- 산출 폴더: `configs/basin_splits/drbc_expanded_observed_test/`
 
-이 subset을 만드는 스크립트는 `scripts/scaling/build_scaling_pilot_splits.py`다. 단순히 아무 300개나 고른 것이 아니라, 전국 범위를 대표하도록 미국 표준 권역 코드(HUC02)별 비율을 맞춰 뽑는다(`summary.json`의 `stratify_col: camelsh_huc02`). 그래서 `summary.json`에는 권역(`01`, `02`, … `18`)마다 train/validation 유역 수가 따로 적혀 있다.
+## 학습·검증 유역을 300개로 고정한 근거
 
-왜 일부만 썼는가. 이유는 크게 두 가지다.
+학습(train)과 검증(validation)에는 가용 유역 전부를 쓰지 않는다. 조건과 품질 기준을 통과한 학습용 유역 풀(training pool)은 약 **1923개**지만, 실제 학습·검증에는 고정된 **300개**만 쓴다. 이 고정 묶음이 `scaling_300`이며, 학습용 269개와 검증용 31개로 나뉜다(`configs/pilot/basin_splits/scaling_300/train.txt` 269줄, `validation.txt` 31줄, `summary.json`의 `train_count: 269`, `validation_count: 31`과 일치).
 
-1. 계산 자원과 시간의 한계. 유역 1923개를 모두 넣고 여러 모델을 학습시키려면 GPU 계산량과 시간이 많이 든다. 현실적으로 감당할 수 있는 규모로 줄여야 했다.
-2. 공정한 비교를 위한 표본 고정. 이 연구는 Model 1(결정론적 LSTM)과 Model 2(확률적 quantile LSTM)를 여러 seed(난수 초기값) `111 / 222 / 444`로 반복 학습해 비교한다. 만약 실험마다 학습 유역이 달라지면, 성능 차이가 모델 때문인지 유역 구성 때문인지 구분할 수 없다. 그래서 같은 300개 유역으로 모든 실험을 똑같이 돌려, 차이가 오직 모델 구조에서 오도록 했다.
+300개는 임의 추출이 아니라 전국 범위를 대표하도록 미국 표준 권역 코드(HUC02)별 비율을 맞춰 뽑는다(`summary.json`의 `stratify_col: camelsh_huc02`). `summary.json`에는 권역(`01`, `02`, … `18`)마다 train/validation 유역 수가 적혀 있다.
 
-300개가 전국 분포를 잘 대표하는지는 별도 진단으로 확인했다. 관측유량 event 기준으로 전체 풀과 비교한 표준화 평균차(서로 다른 두 집단의 평균이 얼마나 벌어졌는지 표준편차 단위로 잰 값)가 0.10보다 한참 작았고, 같은 크기로 무작위로 뽑은 표본들과 비교해도 검증셋의 어긋남이 대부분의 무작위 표본보다 작았다. 이 진단을 근거로 300개를 본 실험의 고정 subset으로 채택했다.
+일부만 쓰는 이유는 두 가지다.
 
-어떻게 해석해야 하는가. 이 한계는 결과를 읽을 때 꼭 염두에 둬야 한다. 만약 1923개 유역 전부로 학습했다면 모델이 더 다양한 유역을 학습해 결과가 달라졌을 수 있다. 따라서 이 연구의 결론은 "전국의 모든 유역으로 학습한 모델"이 아니라 "고정된 300개 유역으로 학습한 모델"에서 나온 것이며, 일반화 범위(다른 유역에도 그대로 적용된다는 보장)는 그만큼 제한적으로 받아들여야 한다.
+1. 계산 자원과 시간 한계. 1923개 전부로 여러 모델을 학습하면 GPU 계산량과 시간이 과도하다. 감당 가능한 규모로 줄여야 했다.
+2. 공정한 비교를 위한 표본 고정. 이 연구는 Model 1(결정론적 LSTM)과 Model 2(확률적 quantile LSTM)를 여러 seed(난수 초기값) `111 / 222 / 444`로 반복 학습해 비교한다. 실험마다 학습 유역이 달라지면 성능 차이가 모델 탓인지 유역 구성 탓인지 구분할 수 없다. 같은 300개 유역으로 모든 실험을 돌려야 차이가 모델 구조에서만 온다.
 
-## DRBC holdout 유역을 고르는 방법
+300개의 전국 대표성은 별도 진단으로 확인했다. 관측유량 event 기준으로 전체 풀과 비교한 표준화 평균차(두 집단 평균이 표준편차 단위로 얼마나 벌어졌는지)가 0.10보다 한참 작았고, 같은 크기 무작위 표본과 비교해도 검증셋 어긋남이 대부분의 무작위 표본보다 작았다. 이 진단을 근거로 300개를 고정 subset으로 채택했다.
+
+이 한계는 결과 해석에 반영해야 한다. 1923개 전부로 학습했다면 모델이 더 다양한 유역을 학습해 결과가 달라졌을 수 있다. 따라서 결론은 전국 모든 유역이 아니라 고정 300개 유역으로 학습한 모델에서 나온 것이며, 일반화 범위(다른 유역에도 그대로 적용된다는 보장)는 그만큼 제한적이다.
+
+구현:
+
+- 구성 스크립트: `scripts/scaling/build_scaling_pilot_splits.py`
+- 산출 폴더: `configs/pilot/basin_splits/scaling_300/`
+
+## DRBC holdout 유역 선정
 
 DRBC는 Delaware River Basin Commission의 공식 경계를 기준으로 한다. 기준 파일은 `basins/drbc_boundary/drb_bnd_polygon.shp`다. 이 경계와 CAMELSH 전체 9008개 유역의 공간 관계를 계산하는 스크립트가 `scripts/basin/drbc/build_drbc_camelsh_tables.py`이고, 그 결과 매핑표가 `output/basin/drbc/basin_define/camelsh_drbc_mapping.csv`에 저장된다. 최종 후보만 추린 표는 같은 폴더의 `camelsh_drbc_selected.csv`다.
 
@@ -107,7 +117,7 @@ CAMELSH 유역이 DRBC 평가 후보가 되려면 두 조건을 동시에 만족
 
 현재 이 기준으로 선택된 DRBC 유역은 154개다. 출구만 기준으로 보면 192개지만, 겹침 기준까지 적용하면 154개로 줄어든다. polygon은 겹치지만 출구가 밖인 경계 사례(edge case)는 61개이며, `camelsh_drbc_intersect_only.csv`에 따로 정리한다.
 
-## 학습용 non-DRBC 유역을 고르는 방법
+## 학습용 non-DRBC 유역 선정
 
 모델 학습에는 DRBC와 겹치지 않는 유역을 사용한다. 구성 스크립트는 `scripts/basin/all/build_camelsh_non_drbc_training_pool.py`이고, 산출 목록은 `output/basin/all/screening/training_non_drbc/camelsh_non_drbc_training_selected.csv`, 요약은 같은 폴더의 `camelsh_non_drbc_training_summary.json`이다.
 
@@ -217,10 +227,12 @@ Python은 먼저 `time_series` 폴더에서 `.nc` 파일 이름을 읽어 유역
 
 가장 먼저 Python은 유역마다 큰 유량 임계값을 고른다. 기본은 그 유역의 hourly Streamflow `Q99`다. 여기서 `Q99`는 전체 시간 중 상위 1%에 해당하는 유량 기준값이다. 그런데 어떤 유역은 Q99를 넘는 독립 event가 너무 적을 수 있다. 그래서 Python은 다음 순서로 완화한다.
 
-```text
-Q99로 독립 event가 5개 이상이면 Q99 사용
-아니면 Q98 검사
-그래도 5개 미만이면 Q95 사용
+```mermaid
+flowchart TD
+    A["Q99 기준"] -->|독립 event >= 5| B["Q99 사용"]
+    A -->|event < 5| C["Q98 기준"]
+    C -->|독립 event >= 5| D["Q98 사용"]
+    C -->|event < 5| E["Q95 사용"]
 ```
 
 이렇게 하는 이유는 극한 event를 보고 싶지만, event가 1개나 2개뿐이면 유역을 요약하기 어렵기 때문이다. 즉 임계를 너무 낮추지는 않되, 최소한 해석 가능한 event 수를 확보하려는 타협이다. 다만 이 단계의 결과는 홍수 확정 목록이 아니라 관측 유량이 크게 반응한 후보 목록으로 읽어야 한다.
@@ -276,20 +288,23 @@ Python script 이름은 `build_camelsh_flood_generation_typing.py`다(`scripts/b
 
 직전과 선행이 동시에 조건을 만족하면, 각 강수가 자기 p90에 비해 얼마나 큰지 비율을 비교해 더 큰 쪽을 고른다. 차이가 10% 미만이면 `low_confidence_type_flag=True`를 남긴다.
 
-```text
-눈 조건을 만족하면 snowmelt_or_rain_on_snow
-아니면 직전 강수 조건을 만족하면 recent_precipitation
-아니면 선행 강수 조건을 만족하면 antecedent_precipitation
-아무 조건도 방어 가능하게 만족하지 않으면 uncertain_high_flow_candidate
+```mermaid
+flowchart TD
+    A["event"] -->|눈 조건 충족| B["snowmelt_or_rain_on_snow"]
+    A -->|미충족| C{"직전 강수 조건"}
+    C -->|충족| D["recent_precipitation"]
+    C -->|미충족| E{"선행 강수 조건"}
+    E -->|충족| F["antecedent_precipitation"]
+    E -->|미충족| G["uncertain_high_flow_candidate"]
 ```
 
 여기서 `uncertain_high_flow_candidate`는 event가 중요하지 않다는 뜻이 아니다. 관측 큰 유량 event 후보는 맞지만, 지금 가진 CAMELSH 강수/온도 근사값만으로 발생 메커니즘을 안전하게 특정하지 못했다는 뜻이다.
 
 마지막으로 유역별 요약을 만든다. 어떤 유역에서 직전 강수 event가 70%라면 그 유역은 직전 강수 우세 유역으로 볼 수 있다. 현재 기준은 특정 유형 비율이 0.6 이상이면 우세, 아니면 혼합이다. 예를 들어 가장 많은 유형이 54%라면 1등 유형은 기록하지만 유역 라벨은 혼합으로 둔다. 하나의 유역에서도 여러 방식의 큰 유량 event가 생길 수 있기 때문이다.
 
-## Python 결과 해석 방법
+## Python 결과 해석
 
-이 알고리즘의 결과는 "정답 라벨"이라기보다 "일관된 규칙으로 만든 해석용 라벨"이다. 특히 홍수 발생 유형 분류는 사람이 납득할 수 있는 규칙 기반 점수로 시작한 것이지, 모든 event의 실제 물리 메커니즘을 완벽하게 판정한다는 뜻은 아니다.
+이 알고리즘의 결과는 정답 라벨이 아니라 일관된 규칙으로 만든 해석용 라벨이다. 특히 홍수 발생 유형 분류는 사람이 납득할 수 있는 규칙 기반 점수로 시작한 것이지, 모든 event의 실제 물리 메커니즘을 완벽하게 판정한다는 뜻은 아니다.
 
 따라서 해석할 때는 아래처럼 읽는 것이 안전하다.
 

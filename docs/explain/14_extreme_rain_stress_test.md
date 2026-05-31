@@ -1,12 +1,13 @@
 # 14. 극한호우 stress test 읽기
 
-이 문서는 `subset300` Model 1 / Model 2 결과에 새로 붙인 극한호우 stress test를 비전공 대학생 기준으로 설명한다. 앞 장의 hydrograph 분석이 "큰 유량 시간대에서 모델이 얼마나 낮게 예측하는가"를 본다면, 이 장의 stress test는 "큰 비가 왔을 때 모델이 유량을 충분히 올리는가"를 본다.
+이 문서는 공식 300개 train subset으로 학습한 Model 1 / Model 2 결과에 새로 붙인 극한호우 stress test를 비전공 대학생 기준으로 설명한다. 앞 장의 hydrograph 분석이 "큰 유량 시간대에서 모델이 얼마나 낮게 예측하는가"를 본다면, 이 장의 stress test는 "큰 비가 왔을 때 모델이 유량을 충분히 올리는가"를 본다.
 
 미리 못 박아 둘 점이 하나 있다. 이 stress test는 공식 결론을 내는 primary DRBC test(2014-2016년, 관측 기준 85개 basin)를 **대체하지 않는다**. 그 자리를 메우는 보조 진단이다. 왜 보조 진단으로만 읽어야 하는지는 마지막 절에서 다시 정리한다.
 
 - **이 문서의 역할**: 강수에서 출발하는 보조 진단의 설계와 읽는 법을 비전공 독자에게 풀어 쓴다.
 - **다루는 범위**: 강수 event catalog 생성, 노출 여부, stress 반응, primary/all-validation checkpoint 진단.
 - **다루지 않는 범위**: 공식 결론(2014-2016 DRBC 85개 basin primary test)은 다른 문서가 맡는다.
+- **고정 조건**: 다른 장과 같이 seed `111 / 222 / 444`로 학습한 기존 checkpoint를 그대로 재추론한다. 새로 학습하지 않는다.
 
 ---
 
@@ -117,7 +118,7 @@ out[f"max_prec_ari{period}_ratio"] = ratios.max(axis=1, skipna=True)
 
 ---
 
-## event를 고르는 방법
+## event 선정 방법
 
 먼저 어느 시점들을 "비가 큰 시점"으로 켤지(active) 정한다. catalog 단계는 25년급 기준을 넘었거나, 100년급 기준의 일정 비율(셸 변수 `near_ari100_ratio`, 기본값 0.80) 이상까지 올라온 시점을 active로 본다.
 
@@ -291,7 +292,7 @@ $$
 
 ---
 
-## 현재 primary 결과를 쉬운 말로 읽기
+## primary 결과 해설
 
 primary run 기준으로 train/validation 노출은 실제로 있었다. train split에는 ARI100급 rain event가 156개, validation split에는 8개가 잡혔다. 즉 모델이 학습과 checkpoint 선택 과정에서 극한호우 forcing을 전혀 못 본 것은 아니다.
 
@@ -319,7 +320,7 @@ all-validation-epoch sensitivity도 공식 관측 DRBC 85개 기준과 분리해
 
 ---
 
-## 결론을 쓰는 법
+## 결론 작성 기준
 
 비전공 독자 기준으로 가장 중요한 결론은 이렇다.
 
@@ -330,7 +331,7 @@ Model 2는 중앙예측(q50)을 더 좋게 만든 모델이라기보다,
 
 따라서 논문에서 "q99가 정확한 99% 예측구간이다"라고 쓰면 안 된다. 지금의 `q99`는 보정된 확률(calibrated probability)이라기보다, 극단 첨두 과소예측을 줄여 주는 위쪽 판단선(upper-tail decision output)에 가깝다.
 
-또한 이 과거 stress test는 primary DRBC test를 대체하지 않는다. DRBC basin은 학습에서 빠져 있으므로 basin holdout 조건은 유지된다. 그러나 과거 전체 기간(1980-2024)을 보다 보면 train(2000-2010)이나 validation(2011-2013) 연도와 겹치는 event가 섞여 들어올 수 있다. 실제로 catalog 단계는 각 event가 어느 공식 기간과 겹치는지 표시까지 남긴다.
+또한 이 과거 stress test는 primary DRBC test를 대체하지 않는다. DRBC basin은 학습에서 빠져 있으므로 basin holdout 조건은 유지된다. 그러나 자료가 닿는 과거 전체 기간을 보다 보면 train(2000-2010)이나 validation(2011-2013) 연도와 겹치는 event가 섞여 들어올 수 있다. 실제로 catalog 단계는 각 event가 어느 공식 기간과 겹치는지 표시까지 남긴다.
 
 ```python
 # scripts/model/extreme_rain/build_subset300_extreme_rain_event_catalog.py: main()

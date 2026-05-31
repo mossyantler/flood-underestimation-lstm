@@ -68,4 +68,4 @@ flowchart TD
 
 ## 작성 원칙
 
-이 폴더 문서를 새로 쓰거나 고칠 때는 [`../templates/writing_guide.md`](../templates/writing_guide.md)의 "explain 입문 문서 작성 원칙"을 따른다. 대상(비전공 대학생), 헤딩(명사구), 구현 포인터(코드 인용 + 출처 주석), 지표 표기(간결 카드 + math block), 그림 삽입, 정확성 규칙이 정리돼 있다.
+이 폴더 문서를 새로 쓰거나 고칠 때는 [`../templates/writing_guide.md`](../templates/writing_guide.md)의 "explain 문서 작성 원칙"을 따른다. 대상(수문학 전공 대학생: 수문학 기본 개념은 전제, 기계학습 배경은 비전제), 헤딩(명사구), 구현 포인터(코드 인용 + 출처 주석), 지표 표기(간결 카드 + math block), 그림 삽입, 정확성 규칙이 정리돼 있다.

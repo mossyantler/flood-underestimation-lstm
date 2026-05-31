@@ -5,7 +5,7 @@
 읽는 방법을 먼저 정리한다.
 
 - **일반 용어**(데이터, 모델, 실험, 유역 특성, event 분석)는 `용어 | 쉬운 설명` 표로 간단히 본다.
-- **지표성 용어**(NSE, coverage, calibration, α/β/δ, FAR 등 숫자로 모델 성능을 재는 값)는 먼저 **참조 카드** 표로 한눈에 보고, 표 바로 아래 H3(`###`) 항목에서 정의·직관·비유·해석을 상세히 본다. 참조 카드 표에는 핵심 4개 컬럼만 둔다: `심볼 | 변수명 | 범위 | 최적화 방향`.
+- **지표성 용어**(NSE, coverage, calibration, α/β/δ, FAR 등 숫자로 모델 성능을 재는 값)는 먼저 **참조 카드** 표로 한눈에 보고, 표 바로 아래 H3(`###`) 항목에서 정의·직관·비유·해석을 상세히 본다. 참조 카드 표의 열 순서는 `지표 | 변수명 | 심볼 | 범위 | 최적화 방향`이며, 맨 앞은 지표 정식 이름이다.
 
 여기서 "변수명"은 산출물 표(`output/model_analysis/...`)의 컬럼명이나 분석 스크립트가 출력하는 이름이다. 어떤 분석에서 나온 값인지 추적할 수 있도록 가능한 곳에 출처를 가볍게 적어 둔다.
 
@@ -66,12 +66,14 @@
 
 ## 유역 특성 변수
 
+모델 입력 static은 8개이고, 나머지는 분석용 특성이다.
+
 | 변수 | 쉬운 설명 |
 | --- | --- |
 | area | 유역 면적이다. 같은 유량이라도 큰 유역과 작은 유역에서 의미가 다르므로 중요하다. |
 | slope | 유역 평균 경사다. 클수록 물이 빨리 모일 가능성이 커진다. |
 | aridity | 건조도를 나타낸다. 강수와 증발산의 균형을 이해하는 데 쓴다. |
-| snow_fraction 또는 frac_snow | 강수 중 snow와 관련된 비중이다. snowmelt나 rain-on-snow 가능성을 볼 때 중요하다. |
+| snow_fraction | 강수 중 snow와 관련된 비중이다. snowmelt나 rain-on-snow 가능성을 볼 때 중요하다. |
 | soil_depth | 토양 깊이다. 깊을수록 물을 저장할 공간이 커질 수 있다. |
 | permeability | 물이 토양이나 지층으로 스며드는 쉬운 정도다. 클수록 직접유출이 줄 수 있다. |
 | forest_fraction | 산림 비율이다. 식생과 토양 저장 효과를 통해 홍수 반응을 완충할 수 있다. |
@@ -86,16 +88,16 @@
 
 식에서 쓰는 기호를 먼저 약속한다. $y_t$는 시간 $t$의 실제 관측 유량, $\hat{y}_t$는 모델 예측 유량이다. Model 1에서는 $\hat{y}_t = \hat{Q}_t$이고, Model 2를 한 점짜리 예측처럼 비교할 때는 보통 $\hat{y}_t = q50_t$로 둔다. $T$는 평가에 쓰는 전체 시간 수, $\bar{y}$는 관측 유량 평균이다.
 
-| 심볼 | 변수명 | 범위 | 최적화 방향 |
-| --- | --- | --- | --- |
-| NSE | `nse` | 1 이하 (1이 완벽, 0이면 평균 예측 수준) | 클수록 좋음 ↑ |
-| KGE | `kge` | 1 이하 (1이 완벽) | 클수록 좋음 ↑ |
-| NSElog | `nselog` | 1 이하 (1이 완벽) | 클수록 좋음 ↑ |
-| FHV | `fhv` (%) | 음수~양수 (0이 최선) | 0에 가깝게 ↕ |
-| PRE | `peak_relative_error` (%) | 음수~양수 (0이 최선) | 0에 가깝게 ↕ |
-| PTE | `peak_timing_error` (hr) | 음수~양수 (0이 최선) | 0에 가깝게 ↕ |
-| Recall₁% | `top1pct_recall` | 0~1 | 클수록 좋음 ↑ |
-| RMSEₑ | `event_rmse` | 0 이상 (0이 최선) | 작을수록 좋음 ↓ |
+| 지표 | 변수명 | 심볼 | 범위 | 최적화 방향 |
+| --- | --- | --- | --- | --- |
+| 전체 유량 적합도 | `nse` | NSE | 1 이하 (1이 완벽, 0이면 평균 예측 수준) | 클수록 좋음 ↑ |
+| 균형 성능 | `kge` | KGE | 1 이하 (1이 완벽) | 클수록 좋음 ↑ |
+| 작은 유량 적합도 | `nselog` | NSElog | 1 이하 (1이 완벽) | 클수록 좋음 ↑ |
+| 고유량 총량 편향 | `fhv` (%) | FHV | 음수~양수 (0이 최선) | 0에 가깝게 ↕ |
+| 첨두 상대 오차 | `peak_relative_error` (%) | PRE | 음수~양수 (0이 최선) | 0에 가깝게 ↕ |
+| 첨두 시점 오차 | `peak_timing_error` (hr) | PTE | 음수~양수 (0이 최선) | 0에 가깝게 ↕ |
+| 상위 1% 유량 재현율 | `top1pct_recall` | Recall₁% | 0~1 | 클수록 좋음 ↑ |
+| event 전체 모양 오차 | `event_rmse` | RMSEₑ | 0 이상 (0이 최선) | 작을수록 좋음 ↓ |
 
 ### NSE — 전체 유량 적합도 (Nash–Sutcliffe Efficiency)
 
@@ -207,16 +209,16 @@ $$
 
 Model 2처럼 여러 quantile을 내는 모델이 "확률 예측으로서" 얼마나 믿을 만한지 재는 지표다. quantile level은 $\tau$(예: 0.95), 그 예측값을 $q_{\tau,t}$로 쓴다.
 
-| 심볼 | 변수명 | 범위 | 최적화 방향 |
-| --- | --- | --- | --- |
-| L_τ | `pinball` | 0 이상 (0이 최선) | 작을수록 좋음 ↓ |
-| Coverage_τ | `coverage_fraction` | 0~1 (목표는 $\tau$값) | $\tau$에 가깝게 ↕ |
-| CalErr | `calibration_error` | 0 이상 (0이 최선) | 작을수록 좋음 ↓ |
-| Width | `upper_tail_spread` (q99−q50 등) | 0 이상 | 좁되 calibration과 함께 ↕ |
+| 지표 | 변수명 | 심볼 | 범위 | 최적화 방향 |
+| --- | --- | --- | --- | --- |
+| pinball loss | `pinball` | L_τ | 0 이상 (0이 최선) | 작을수록 좋음 ↓ |
+| 포함 비율 | `coverage_fraction` | Coverage_τ | 0~1 (목표는 $\tau$값) | $\tau$에 가깝게 ↕ |
+| 보정 오차 | `calibration_error` | CalErr | 0 이상 (0이 최선) | 작을수록 좋음 ↓ |
+| 예측 폭 | `upper_tail_spread` (q99−q50 등) | Width | 0 이상 | 좁되 calibration과 함께 ↕ |
 
 ### pinball loss — quantile 학습·평가 손실
 
-**정의.** quantile 예측의 품질을 보는 비대칭 손실이다.
+**정의.** quantile 예측의 품질을 보는 비대칭 손실.
 
 $$
 L_{\tau}(y_t, q_{\tau,t}) = \max\left(\tau(y_t-q_{\tau,t}),\ (\tau-1)(y_t-q_{\tau,t})\right)
@@ -246,7 +248,7 @@ $$
 
 ### calibration error — 보정 오차
 
-**정의.** 목표 quantile level과 실제 coverage가 얼마나 가까운지 본다. 간단한 요약값은,
+**정의.** 목표 quantile level $\tau$와 실제 coverage 사이 절대 차이를 quantile 전체에 대해 평균한 요약값.
 
 $$
 \mathrm{CalErr} = \frac{1}{|\mathcal{Q}|}\sum_{\tau \in \mathcal{Q}}\left|\mathrm{Coverage}_{\tau} - \tau\right|
@@ -258,7 +260,7 @@ $$
 
 ### quantile interval width — 예측 폭 (sharpness)
 
-**정의.** Model 2의 상위선이 중심선보다 위쪽 가능성을 얼마나 열어 두는지 보는 폭이다.
+**정의.** Model 2의 상위선이 중심선보다 위쪽 가능성을 얼마나 열어 두는지 보는 폭.
 
 $$
 \mathrm{Width}_{95,t} = q95_t - q50_t, \qquad \mathrm{Width}_{99,t} = q99_t - q50_t
@@ -270,17 +272,17 @@ $$
 
 ## 상위 quantile 이득·비용 측정 지표 (RQ-2 / RQ-3)
 
-Model 2의 상위 예측선(`q90 / q95 / q99`)이 홍수 첨두를 얼마나 잘 잡는지(이득)와 그 대가로 얼마나 헛경보·과대예측을 내는지(비용)를 event·시각 단위로 재는 지표다. 앞 세 개(α, β, δ)는 이득 쪽, 뒤 두 개(FAR, over-prediction magnitude)는 비용 쪽이다.
+Model 2의 상위 예측선(`q90 / q95 / q99`)이 홍수 첨두를 얼마나 잘 잡는지(이득)와 그 대가로 얼마나 위경보·과대예측을 내는지(비용)를 event·시각 단위로 재는 지표다. 앞 세 개(α, β, δ)는 이득 쪽, 뒤 두 개(FAR, over-prediction magnitude)는 비용 쪽이다.
 
 식에서 $\tau$는 quantile level, $q_\tau$는 그 예측값, `obs`는 관측 유량, `obs_peak`는 event 첨두 관측값, $Q99_{\mathrm{basin}}$은 각 basin의 고유량 기준선(관측 상위 1% 값)이다.
 
-| 심볼 | 변수명 | 범위 | 최적화 방향 |
-| --- | --- | --- | --- |
-| α | `rq2_alpha_event_peak_deficit` | 0~1 (0이 최선) | 작을수록 좋음 ↓ |
-| β | `rq2_beta_window_capture` | 0 이상 (1=딱 맞음, >1=과대) | 1 근처/↑ |
-| δ | `rq2_delta_threshold_recall` | 0~1 | 클수록 좋음 ↑ |
-| FAR | `rq3_far` | 0~1 (0이 최선) | 작을수록 좋음 ↓ |
-| OverPred | `rq3_over_prediction_magnitude` | 0 이상 | 작을수록 좋음 ↓ |
+| 지표 | 변수명 | 심볼 | 범위 | 최적화 방향 |
+| --- | --- | --- | --- | --- |
+| 첨두 부족분 | `rq2_alpha_event_peak_deficit` | α | 0~1 (0이 최선) | 작을수록 좋음 ↓ |
+| ±6시간 창 포착 | `rq2_beta_window_capture` | β | 0 이상 (1=딱 맞음, >1=과대) | 1 근처/↑ |
+| 기준 초과 재현율 | `rq2_delta_threshold_recall` | δ | 0~1 | 클수록 좋음 ↑ |
+| 위경보 비율 | `rq3_far` | FAR | 0~1 (0이 최선) | 작을수록 좋음 ↓ |
+| 과대예측 크기 | `rq3_over_prediction_magnitude` | OverPred | 0 이상 | 작을수록 좋음 ↓ |
 
 ### α — 첨두 부족분 (event peak under-deficit)
 
@@ -310,7 +312,7 @@ $$
 
 ### δ — 기준 초과 재현율 (Q99 threshold recall)
 
-**정의.** 실제로 고유량 기준선 $Q99_{\mathrm{basin}}$을 넘은 시각 중 모델 상위선도 그 기준을 넘는다고 본 비율(재현율)이다.
+**정의.** 실제로 고유량 기준선 $Q99_{\mathrm{basin}}$을 넘은 시각 중 모델 상위선도 그 기준을 넘는다고 본 비율(재현율).
 
 $$
 \delta_\tau = P\left(q_\tau \ge \mathrm{obs} \mid \mathrm{obs} \ge Q99_{\mathrm{basin}}\right)
@@ -320,15 +322,15 @@ $$
 
 **해석.** 0~1이며 클수록 좋다. RQ-2 분석(`compute_rq2_delta_threshold_recall.py`)에서 Q99 scope basin median recall은 q50 0.069 → q99 0.583으로, q99이 고유량 시각의 약 58%를 잡는다(나머지 42%는 여전히 놓침). RQ-5의 tail hit-rate 0.563과 일치하는 신호다.
 
-### FAR — 헛경보 비율 (false alarm rate)
+### FAR — 위경보 비율 (false alarm rate)
 
-**정의.** 실제로는 고유량 기준을 넘지 않았는데 모델이 넘는다고 잘못 본 시각의 비율이다.
+**정의.** 실제로는 고유량 기준을 넘지 않았는데 모델이 넘는다고 잘못 본 시각의 비율.
 
 $$
 \mathrm{FAR}_\tau = P\left(q_\tau > Q99_{\mathrm{basin}} \mid \mathrm{obs} < Q99_{\mathrm{basin}}\right)
 $$
 
-**직관·비유.** 화재 경보기가 불이 안 났는데 울린 비율과 같다. 상위 quantile을 올려 δ(이득)를 키우면 이 헛경보(비용)도 같이 커진다.
+**직관·비유.** 화재 경보기가 불이 안 났는데 울린 비율과 같다. 상위 quantile을 올려 δ(이득)를 키우면 이 위경보(비용)도 같이 커진다.
 
 **해석.** 0~1이며 작을수록 좋다. 분모가 전체 시간의 약 99%(기준 미만 시각)라 절댓값은 작게 보인다. RQ-3 분석(`compute_rq3_cost.py`, 산출물 `rq3_far_summary.csv`)에서 basin median FAR은 q50 0.0007 → q99 0.0164다. δ-recall은 q50→q99에서 약 8배 늘지만 FAR은 약 23배 늘어, 이득보다 비용이 더 가파르게 증가하는 비대칭 trade-off를 보인다.
 
@@ -340,13 +342,13 @@ $$
 \mathrm{OverPred}_\tau = \mathrm{mean}\left(q_\tau - \mathrm{obs} \mid q_\tau > \mathrm{obs}\right)
 $$
 
-**직관·비유.** 헛경보가 "얼마나 자주" 울리는지(FAR)와 달리, 이 값은 "한 번 넘게 예측할 때 얼마나 크게 넘치는지"를 본다. 경보기가 울릴 때마다 얼마나 과하게 울리는지에 해당한다.
+**직관·비유.** 위경보가 "얼마나 자주" 울리는지(FAR)와 달리, 이 값은 "한 번 넘게 예측할 때 얼마나 크게 넘치는지"를 본다. 경보기가 울릴 때마다 얼마나 과하게 울리는지에 해당한다.
 
 **해석.** 0 이상이며(관측 단위, mm/hr) 작을수록 좋다. 첨두를 잡으려 상위 quantile을 올리면 이 값도 같이 커진다. RQ-3 분석(산출물 `rq3_over_prediction_magnitude_summary.csv`)에서 basin median은 q50 1.47 → q99 3.44다. 절댓값은 basin 규모에 종속적이므로 basin 간 비교 시 상대 척도도 함께 본다.
 
 ## event 분석 용어
 
-| 용어 | 쉬운 설명 |
+| 용어 | 설명 |
 | --- | --- |
 | flood event | 유량이 일정 기준 이상으로 커지는 하나의 독립 홍수 사건이다. |
 | NOAA event type | 미국 기상청(NOAA)이 분류한 홍수 유형이다. 돌발홍수(Flash Flood), 일반홍수(Flood), 해안홍수(Coastal Flood) 등으로 나뉜다. 같은 큰 물이라도 생기는 방식이 달라, 모델이 어떤 유형에서 잘하고 못하는지 볼 때 쓴다. |
