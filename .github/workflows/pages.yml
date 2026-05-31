@@ -4,7 +4,6 @@ on:
   push:
     branches: [master]
     paths:
-      - "docs/**"
       - "draft/github_io/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
@@ -35,12 +34,9 @@ jobs:
           set -euo pipefail
           rm -rf _site
           mkdir -p _site
-          # 사이트 root = docs/ 내용
-          cp -R docs/. _site/
-          # 논문 페이지 = /paper/ 하위경로 (draft/github_io/)
-          mkdir -p _site/paper
-          cp -R draft/github_io/. _site/paper/
-          # Jekyll 처리 비활성 (이미 docs/.nojekyll 있지만 보강)
+          # 사이트 root = draft/github_io/ 내용 (index.html, paper_draft.html, versions/, figures/, docx_images/)
+          cp -R draft/github_io/. _site/
+          # Jekyll 처리 비활성 (이미 .nojekyll 있지만 보강)
           touch _site/.nojekyll
 
       - name: Upload Pages artifact
