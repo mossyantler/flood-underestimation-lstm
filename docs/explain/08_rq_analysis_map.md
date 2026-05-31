@@ -208,18 +208,20 @@ delta = (right - left).rename("delta").reset_index()   # right=Model 2, left=Mod
 | RMSE     | 0 이상 (0이 최선)      | 작을수록 좋음 ↓ |
 | MAE      | 0 이상 (0이 최선)      | 작을수록 좋음 ↓ |
 
+아래 수식에서 $Q$는 유량(streamflow)을 뜻하고, 아래첨자 $\text{sim}$은 모델 예측, $\text{obs}$는 실제 관측을 가리킨다. $t$는 시점, $\tau$는 분위(예: 0.99)를 나타낸다. 이 표기는 이 문서의 모든 수식에서 같다.
+
 ##### NSE — 적합도 지표 (Nash-Sutcliffe Efficiency)
 
 $$
-\text{NSE} = 1 - \frac{\sum_t (\text{Sim}_t - \text{Obs}_t)^2}{\sum_t (\text{Obs}_t - \overline{\text{Obs}})^2}
+\text{NSE} = 1 - \frac{\sum_t (Q_{\text{sim},t} - Q_{\text{obs},t})^2}{\sum_t (Q_{\text{obs},t} - \overline{Q_{\text{obs}}})^2}
 $$
 
-분자는 모델이 낸 오차의 제곱 합이고, 분모는 "그냥 관측 전체 평균($\overline{\text{Obs}}$)을 예측값으로 썼을 때"의 오차 제곱 합이다. 즉 모델 오차를 평균 예측의 오차로 나눠 1에서 뺀 것이라, NSE가 1이면 오차가 0인 완벽한 예측, 0이면 그냥 평균을 찍은 것과 같고, 음수면 평균을 찍는 것보다도 나쁘다는 뜻이다. NSE 0.7은 "평균 예측보다 오차를 70% 줄였다"로 읽는다. 수문 모델에서 가장 표준적으로 쓰는 점수다.
+분자는 모델이 낸 오차의 제곱 합이고, 분모는 "그냥 관측 전체 평균($\overline{Q_{\text{obs}}}$)을 예측값으로 썼을 때"의 오차 제곱 합이다. 즉 모델 오차를 평균 예측의 오차로 나눠 1에서 뺀 것이라, NSE가 1이면 오차가 0인 완벽한 예측, 0이면 그냥 평균을 찍은 것과 같고, 음수면 평균을 찍는 것보다도 나쁘다는 뜻이다. NSE 0.7은 "평균 예측보다 오차를 70% 줄였다"로 읽는다. 수문 모델에서 가장 표준적으로 쓰는 점수다.
 
 ##### RMSE — 평균 제곱근 오차 (Root Mean Square Error)
 
 $$
-\text{RMSE} = \sqrt{\frac{1}{N}\sum_t (\text{Sim}_t - \text{Obs}_t)^2}
+\text{RMSE} = \sqrt{\frac{1}{N}\sum_t (Q_{\text{sim},t} - Q_{\text{obs},t})^2}
 $$
 
 각 시점의 예측-관측 차이를 제곱해 평균한 뒤 다시 제곱근을 씌운 값이다. 제곱근을 씌우기 때문에 유량과 같은 단위로 읽힌다. 차이를 제곱하는 과정에서 큰 오차가 훨씬 무겁게 반영되므로, 가끔씩 크게 빗나가는 예측에 민감하다. 작을수록 좋다.
@@ -227,7 +229,7 @@ $$
 ##### MAE — 평균 절대 오차 (Mean Absolute Error)
 
 $$
-\text{MAE} = \frac{1}{N}\sum_t \lvert \text{Sim}_t - \text{Obs}_t \rvert
+\text{MAE} = \frac{1}{N}\sum_t \lvert Q_{\text{sim},t} - Q_{\text{obs},t} \rvert
 $$
 
 예측-관측 차이의 절댓값을 단순 평균한 값이다. 제곱하지 않으므로 RMSE와 달리 큰 오차에 특별히 더 벌점을 주지 않아, "평소에 얼마나 빗나가는가"를 더 고르게 보여 준다. 작을수록 좋다.
@@ -291,7 +293,7 @@ if gap_h <= merge_gap_hours:   # merge_gap_hours = 12 (EVENT_MERGE_GAP_HOURS)
 각 사건에서 "예측 꼭대기가 실제 꼭대기보다 얼마나 낮은가"를 비율로 잰다.
 
 $$
-\alpha = \frac{\max(0,\ \text{Obs}_{\text{peak}} - \text{Sim}_{\text{peak}})}{\text{Obs}_{\text{peak}}}
+\alpha = \frac{\max(0,\ Q_{\text{obs}}^{\text{peak}} - Q_{\text{sim}}^{\text{peak}})}{Q_{\text{obs}}^{\text{peak}}}
 $$
 
 ```python
@@ -306,7 +308,7 @@ deficit = max(0.0, (obs - float(pred))) / obs
 실제 꼭대기 발생 시점 앞뒤 ±6시간이라는 시간 창 안에서, "그 창 안 예측 최댓값이 그 창 안 실제 최댓값의 몇 배인가"를 비율로 잰다.
 
 $$
-\beta = \frac{\max(\text{Sim}_{\text{win}})}{\max(\text{Obs}_{\text{win}})}
+\beta = \frac{\max(Q_{\text{sim}}^{\text{win}})}{\max(Q_{\text{obs}}^{\text{win}})}
 $$
 
 ```python
@@ -321,7 +323,7 @@ ratio = float(pred_max) / float(obs_max)   # 창 = [꼭대기 − 6h, 꼭대기 
 실제로 유량이 Q99를 넘은 모든 시점만 모은 다음, 그중에서 예측 분위 값이 실제 관측값 이상으로 따라 올라간 시점의 비율이다.
 
 $$
-\delta = P(\text{Sim}_\tau \geq \text{Obs} \mid \text{Obs} \geq Q99)
+\delta = P(Q_{\text{sim},\tau} \geq Q_{\text{obs}} \mid Q_{\text{obs}} \geq Q99)
 $$
 
 ```python
@@ -380,7 +382,7 @@ RQ-2에서 "상위 예측선으로 갈수록 첨두 과소추정이 줄어든다
 실제로는 유량이 Q99 아래였는데 예측이 Q99를 넘었다고 알린 비율이다.
 
 $$
-\text{FAR} = P(\text{Sim}_\tau > Q99 \mid \text{Obs} < Q99)
+\text{FAR} = P(Q_{\text{sim},\tau} > Q99 \mid Q_{\text{obs}} < Q99)
 $$
 
 ```python
@@ -396,7 +398,7 @@ far = float((below[tau] > q99).sum()) / n_below     # 그중 예측이 Q99 넘�
 예측이 실제 관측보다 클 때, 그 초과분의 평균이다.
 
 $$
-\text{과대예측 크기} = \operatorname{mean}\big(\text{Sim}_\tau - \text{Obs} \;\big|\; \text{Sim}_\tau > \text{Obs}\big)
+\text{과대예측 크기} = \operatorname{mean}\big(Q_{\text{sim},\tau} - Q_{\text{obs}} \;\big|\; Q_{\text{sim},\tau} > Q_{\text{obs}}\big)
 $$
 
 ```python
@@ -552,7 +554,7 @@ RQ-2와 RQ-3이 "운영상 도움이 되는가"(실용적 관점)를 봤다면, 
 ##### 실제 포함 비율 (empirical coverage)
 
 $$
-\text{실제 포함 비율} = P(\text{Obs} \leq \text{Sim}_\tau)
+\text{실제 포함 비율} = P(Q_{\text{obs}} \leq Q_{\text{sim},\tau})
 $$
 
 관측값이 실제로 그 예측선 아래에 들어온 비율이다. 예를 들어 `q99`에 대한 실제 포함 비율이 0.99라면, 관측값의 99%가 `q99` 아래에 들어온다는 뜻이다. 이것이 명목 확률(`q99`라면 99%)과 일치할수록 잘 보정된 것이다. 명목값보다 낮으면 과소포함(undercoverage), 즉 예측선이 충분히 높지 않다는 신호다.
