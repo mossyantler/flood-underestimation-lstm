@@ -92,9 +92,9 @@ Model 1은 매 시간 하나의 `Streamflow` 예측값을 낸다. Model 2는 같
 
 이 연구에서는 train, validation, test를 단순히 시간으로만 나누지 않는다. 유역 자체도 나누어 생각한다.
 
-학습은 DRBC 밖의 non-DRBC basin에서 한다. DRBC 내부 basin은 holdout test region으로 둔다. 현재 compute 제약을 반영한 main comparison에서는 `configs/pilot/basin_splits/scaling_300/`의 basin file을 사용한다. 직접 실행 split은 train 269개, validation 31개, test 38개 구조다.
+학습은 DRBC 밖의 non-DRBC basin에서 한다. DRBC 내부 basin은 holdout test region으로 둔다. 현재 compute 제약을 반영한 main comparison에서는 `configs/pilot/basin_splits/scaling_300/`의 basin file을 사용한다. 직접 실행 split은 train 269개, validation 31개, test 85개 구조다.
 
-여기서 test 38개는 DRBC quality-pass basin이다. 즉 모델은 DRBC를 학습 중에 보지 않고, 최종적으로 DRBC에서 얼마나 잘 일반화되는지 평가받는다.
+여기서 test 85개는 expanded observed DRBC basin이다. 즉 모델은 DRBC를 학습 중에 보지 않고, 최종적으로 DRBC에서 얼마나 잘 일반화되는지 평가받는다.
 
 ## prepared dataset의 형태
 

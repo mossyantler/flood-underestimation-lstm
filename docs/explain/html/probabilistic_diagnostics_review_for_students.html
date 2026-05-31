@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Model 2 확률 예측 진단 분석 | 학부생 설명용</title>
+  <style>
+    :root {
+      --blue:   #2563eb;
+      --indigo: #4f46e5;
+      --green:  #16a34a;
+      --amber:  #d97706;
+      --red:    #dc2626;
+      --slate:  #475569;
+      --purple: #7c3aed;
+      --cyan:   #0891b2;
+      --bg:     #f8fafc;
+      --card:   #ffffff;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+      background: var(--bg);
+      color: #1e293b;
+      line-height: 1.8;
+      font-size: 15px;
+    }
+    .page { max-width: 920px; margin: 0 auto; padding: 2.5rem 1.5rem 6rem; }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #0f2044 0%, #1e40af 55%, #4f46e5 100%);
+      color: #fff;
+      border-radius: 16px;
+      padding: 2.8rem 2.2rem 2.2rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 999px;
+      padding: 0.2rem 0.85rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.9rem;
+      font-weight: 600;
+    }
+    .hero h1 { font-size: 1.85rem; font-weight: 800; margin-bottom: 0.55rem; line-height: 1.3; position: relative; }
+    .hero .subtitle { opacity: 0.8; font-size: 0.95rem; max-width: 660px; position: relative; }
+    .hero .meta {
+      display: flex; gap: 1.4rem; flex-wrap: wrap;
+      margin-top: 1.4rem;
+      font-size: 0.82rem; opacity: 0.7; position: relative;
+    }
+    .hero .meta span::before { content: '▸ '; }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.3rem 1.6rem;
+      margin-bottom: 2.5rem;
+    }
+    .toc-title { font-size: 0.85rem; font-weight: 700; color: var(--slate); margin-bottom: 0.7rem; letter-spacing: 0.04em; }
+    .toc ol { padding-left: 1.3rem; }
+    .toc li { font-size: 0.9rem; margin-bottom: 0.3rem; }
+    .toc a { color: var(--blue); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ── Section ── */
+    section { margin-bottom: 3rem; scroll-margin-top: 1.5rem; }
+    .section-title {
+      font-size: 1.25rem; font-weight: 800;
+      color: var(--indigo);
+      border-left: 4px solid var(--indigo);
+      padding-left: 0.8rem;
+      margin-bottom: 1.4rem;
+    }
+    .sub-title {
+      font-size: 1rem; font-weight: 700;
+      color: #1e293b;
+      margin: 1.4rem 0 0.7rem;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .card-title {
+      font-size: 0.95rem; font-weight: 700;
+      margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    /* ── Concept box ── */
+    .concept {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-left: 4px solid var(--blue);
+      border-radius: 0 10px 10px 0;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1rem;
+      font-size: 0.92rem;
+    }
+    .concept strong { color: var(--blue); }
+
+    .warn-box {
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid var(--amber);
+      border-radius: 0 10px 10px 0;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    .warn-box strong { color: #92400e; }
+
+    .result-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid var(--green);
+      border-radius: 0 10px 10px 0;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1rem;
+      font-size: 0.92rem;
+    }
+    .result-box strong { color: #14532d; }
+
+    /* ── Pill ── */
+    .pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 0.15rem 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .pill-blue   { background: #dbeafe; color: var(--blue); }
+    .pill-green  { background: #dcfce7; color: var(--green); }
+    .pill-amber  { background: #fef3c7; color: var(--amber); }
+    .pill-red    { background: #fee2e2; color: var(--red); }
+    .pill-indigo { background: #e0e7ff; color: var(--indigo); }
+    .pill-gray   { background: #f1f5f9; color: var(--slate); }
+
+    /* ── Table ── */
+    .tbl-wrap { overflow-x: auto; margin-bottom: 1rem; }
+    table {
+      width: 100%; border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    th {
+      background: #f1f5f9;
+      padding: 0.55rem 0.9rem;
+      text-align: left;
+      font-weight: 700;
+      color: var(--slate);
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 0.5rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+    .num { font-variant-numeric: tabular-nums; font-weight: 600; }
+    .good { color: var(--green); }
+    .bad  { color: var(--red); }
+    .warn { color: var(--amber); }
+
+    /* ── Coverage bar ── */
+    .cov-bar-wrap { width: 180px; position: relative; background: #e2e8f0; border-radius: 4px; height: 14px; display: inline-block; vertical-align: middle; }
+    .cov-bar-nominal { position: absolute; top: 0; left: 0; height: 100%; background: #bfdbfe; border-radius: 4px; }
+    .cov-bar-actual  { position: absolute; top: 0; left: 0; height: 100%; background: var(--blue); border-radius: 4px; }
+    .cov-bar-gap     { position: absolute; top: 0; height: 100%; background: #fca5a5; opacity: 0.6; border-radius: 0 4px 4px 0; }
+
+    /* ── Stat grid ── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1rem;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .stat-label { font-size: 0.75rem; color: var(--slate); margin-bottom: 0.3rem; font-weight: 600; }
+    .stat-value { font-size: 1.6rem; font-weight: 800; line-height: 1.1; }
+    .stat-sub   { font-size: 0.72rem; color: var(--slate); margin-top: 0.2rem; }
+
+    /* ── Calibration SVG chart ── */
+    .chart-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.4rem; margin-bottom: 1rem; }
+    .chart-title { font-size: 0.85rem; font-weight: 700; color: var(--slate); margin-bottom: 0.8rem; }
+
+    /* ── Two col ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 620px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ── Key finding ── */
+    .finding {
+      display: flex; gap: 0.75rem; align-items: flex-start;
+      margin-bottom: 0.8rem;
+    }
+    .finding-num {
+      min-width: 1.6rem; height: 1.6rem;
+      background: var(--indigo); color: #fff;
+      border-radius: 50%;
+      font-size: 0.75rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 0.15rem;
+    }
+    .finding-text { font-size: 0.93rem; line-height: 1.7; }
+
+    /* ── Progress bar (skill) ── */
+    .skill-row { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.55rem; }
+    .skill-label { width: 30px; font-size: 0.8rem; font-weight: 700; }
+    .skill-track { flex: 1; background: #e2e8f0; border-radius: 4px; height: 18px; position: relative; overflow: visible; }
+    .skill-bar-pos { position: absolute; top: 0; left: 50%; height: 100%; background: var(--green); border-radius: 0 4px 4px 0; }
+    .skill-bar-neg { position: absolute; top: 0; height: 100%; background: var(--red); border-radius: 4px 0 0 4px; right: 50%; }
+    .skill-center { position: absolute; top: 0; left: 50%; width: 2px; height: 100%; background: #94a3b8; transform: translateX(-50%); }
+    .skill-val { width: 50px; font-size: 0.82rem; font-weight: 700; text-align: right; }
+
+    /* ── Tier table colors ── */
+    .tier-near { background: #f0fdf4; }
+    .tier-shoulder { background: #fffbeb; }
+    .tier-far { background: #fff7ed; }
+    .tier-extreme { background: #fff1f2; }
+
+    /* ── Summary big box ── */
+    .summary-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .summary-item {
+      border-radius: 10px;
+      padding: 1.1rem 1.2rem;
+      border: 1px solid var(--border);
+    }
+    .si-green  { background: #f0fdf4; border-color: #86efac; }
+    .si-amber  { background: #fffbeb; border-color: #fcd34d; }
+    .si-red    { background: #fff1f2; border-color: #fca5a5; }
+    .si-blue   { background: #eff6ff; border-color: #93c5fd; }
+    .si-indigo { background: #eef2ff; border-color: #c7d2fe; }
+    .si-label  { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 0.35rem; }
+    .si-val    { font-size: 1.25rem; font-weight: 800; }
+    .si-desc   { font-size: 0.78rem; color: var(--slate); margin-top: 0.25rem; }
+
+    /* ── Footer ── */
+    .footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--slate); }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ──────────── HERO ──────────── -->
+  <div class="hero">
+    <div class="hero-badge">CAMELS-H · Model 2 · Expanded DRBC Test</div>
+    <h1>Model 2의 확률 예측,<br>얼마나 믿을 수 있을까?</h1>
+    <p class="subtitle">
+      "q50/q90/q95/q99 분위수 예측이 실제로 얼마나 정확한지" 를 다각도로 측정한
+      확률적 진단 분석 결과입니다. 비전공 대학생도 이해할 수 있도록 개념부터 차근차근 설명합니다.
+    </p>
+    <div class="meta">
+      <span>분석 대상: DRBC 확장 테스트 (85개 유역)</span>
+      <span>테스트 기간: 2014–2016</span>
+      <span>seed: 111 / 222 / 444</span>
+      <span>관측 행: 약 206만 행 / seed</span>
+    </div>
+  </div>
+
+  <!-- ──────────── TOC ──────────── -->
+  <div class="toc">
+    <div class="toc-title">목차</div>
+    <ol>
+      <li><a href="#bg">이 분석을 왜 하는가?</a></li>
+      <li><a href="#concept">핵심 개념 먼저 이해하기</a></li>
+      <li><a href="#calibration">전체 시간대 보정 (Calibration)</a></li>
+      <li><a href="#tail">홍수 구간 꼬리 적중률</a></li>
+      <li><a href="#peak">홍수 첨두 포착률</a></li>
+      <li><a href="#pinball">Pinball 손실 &amp; AQS</a></li>
+      <li><a href="#skill">기후 기준선 대비 기술 점수</a></li>
+      <li><a href="#crossing">분위수 단조성 검사</a></li>
+      <li><a href="#tier">오차 단계별 보정 진단</a></li>
+      <li><a href="#crps">CRPS 상위 근사치</a></li>
+      <li><a href="#summary">종합 해석 &amp; 논문에서 어떻게 쓸까?</a></li>
+    </ol>
+  </div>
+
+  <!-- ──────────── 1. 배경 ──────────── -->
+  <section id="bg">
+    <div class="section-title">① 이 분석을 왜 하는가?</div>
+
+    <div class="card">
+      <p>
+        Model 2는 강수량 등 입력 데이터를 받아 미래 유량(강의 유량, m³/s)을 예측하는 딥러닝 모델입니다.
+        일반적인 모델이 <strong>"유량은 100 m³/s일 것이다"</strong> 처럼 하나의 숫자를 내놓는 것과 달리,
+        Model 2는 <strong>"유량이 이 값 이하일 확률이 90%인 상한선"</strong>(q90) 같은 <em>분위수 예측</em>을 냅니다.
+      </p>
+      <br/>
+      <p>
+        분위수 예측을 이용하면 "강이 범람할 위험이 얼마나 되는지"를 확률로 표현할 수 있습니다.
+        그런데 이 분위수가 <strong>실제로 제대로 된 확률을 나타내는지</strong>는 별도로 검증해야 합니다.
+        예를 들어 "90% 상한선"이라고 했는데 실제로는 관측값이 그 선을 70%만 넘지 않는다면
+        모델이 과도하게 보수적이거나 잘못 보정된 것입니다.
+      </p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">📌 분석 목적</div>
+        <ul style="padding-left:1.3rem; font-size:0.9rem; line-height:2;">
+          <li>분위수가 "명목 확률대로 보정(calibrated)"되어 있는지 확인</li>
+          <li>홍수 고유량 구간에서 분위수가 실제 관측값을 얼마나 잡는지 측정</li>
+          <li>단순 기후 평균 대비 예측이 얼마나 나은지 비교</li>
+          <li>분위수의 단조성(q50 ≤ q90 ≤ q95 ≤ q99) 위반 여부 점검</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">📦 사용 데이터</div>
+        <table>
+          <tr><th>항목</th><th>값</th></tr>
+          <tr><td>유역 수</td><td class="num">85개</td></tr>
+          <tr><td>기간</td><td>2014 – 2016</td></tr>
+          <tr><td>총 관측 시각</td><td class="num">약 206만 시간 × seed</td></tr>
+          <tr><td>NaN 관측값 비율</td><td class="num warn">7.70% 제거</td></tr>
+          <tr><td>분위수 출력</td><td>q50 / q90 / q95 / q99</td></tr>
+          <tr><td>seed</td><td>111 · 222 · 444</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────── 2. 개념 ──────────── -->
+  <section id="concept">
+    <div class="section-title">② 핵심 개념 먼저 이해하기</div>
+
+    <div class="concept">
+      <strong>분위수 예측(Quantile Forecast)이란?</strong><br/>
+      예를 들어 q90 = 150 m³/s라면 "이 시각의 유량이 150 이하일 확률이 90%"라는 뜻입니다.
+      실제로 100번 중 90번은 관측값이 150 이하여야 제대로 보정된 예측이라고 할 수 있습니다.
+    </div>
+
+    <div class="concept">
+      <strong>보정(Calibration)이란?</strong><br/>
+      "90% 상한선을 예측했을 때 실제로 90%의 시각에서 관측값이 그 선 아래 있는가?"를 확인하는 것입니다.
+      실제 비율이 낮으면 <em>과소보정(undercoverage)</em> — 모델이 너무 낮게 예측했다는 뜻입니다.
+    </div>
+
+    <div class="concept">
+      <strong>Pinball 손실이란?</strong><br/>
+      분위수 예측의 정확도를 수치로 나타낸 것입니다. 관측값이 예측 분위수 위에 있으면 크게 벌점,
+      아래에 있으면 작게 벌점을 줍니다. 숫자가 작을수록 좋습니다.
+      <br/><em>AQS(Asymmetric Quantile Score) = Pinball × 2</em>
+    </div>
+
+    <div class="concept">
+      <strong>기술 점수(Skill Score)란?</strong><br/>
+      "단순 기후 평균 예측 대비 Model 2가 얼마나 나은가?"를 −1 ~ +1 사이 숫자로 나타냅니다.
+      0보다 크면 기후 평균보다 낫고, 0보다 작으면 기후 평균보다 못하다는 의미입니다.
+    </div>
+
+    <div class="warn-box">
+      <strong>⚠️ 중요 주의사항:</strong> Model 2는 하위 분위수(q05, q10, q25)가 없습니다.
+      상위 꼬리(q50~q99)만 출력하므로, 이 분석은 <strong>"상위 분위수 전용 진단"</strong>입니다.
+      "양방향 예측 구간(Prediction Interval)" 계산은 불가합니다.
+    </div>
+  </section>
+
+  <!-- ──────────── 3. 보정 ──────────── -->
+  <section id="calibration">
+    <div class="section-title">③ 전체 시간대 보정 (Calibration)</div>
+
+    <p style="margin-bottom:1rem; font-size:0.93rem;">
+      <strong>전체 테스트 기간(약 206만 시각)에서</strong> 각 분위수가 "명목 확률만큼 관측값을 덮는가"를 봅니다.
+      완벽히 보정된 모델이라면 아래 표의 <em>명목(τ)</em>과 <em>실제 비율</em>이 일치해야 합니다.
+    </p>
+
+    <div class="chart-wrap">
+      <div class="chart-title">분위수별 명목 확률 vs 실제 관측 비율 (전체 시간대)</div>
+      <!-- SVG calibration plot -->
+      <svg viewBox="0 0 480 240" style="width:100%;max-width:480px;display:block;margin:0 auto;">
+        <!-- axes -->
+        <line x1="50" y1="200" x2="440" y2="200" stroke="#94a3b8" stroke-width="1.2"/>
+        <line x1="50" y1="20"  x2="50"  y2="200" stroke="#94a3b8" stroke-width="1.2"/>
+        <!-- perfect calibration diagonal -->
+        <line x1="50" y1="200" x2="440" y2="20" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="5,4"/>
+        <!-- x-axis labels -->
+        <text x="50"  y="215" text-anchor="middle" fill="#64748b" font-size="11">0</text>
+        <text x="245" y="215" text-anchor="middle" fill="#64748b" font-size="11">0.5</text>
+        <text x="440" y="215" text-anchor="middle" fill="#64748b" font-size="11">1.0</text>
+        <text x="245" y="232" text-anchor="middle" fill="#94a3b8" font-size="10">명목 분위 수준 (τ)</text>
+        <!-- y-axis labels -->
+        <text x="44" y="204" text-anchor="end" fill="#64748b" font-size="11">0</text>
+        <text x="44" y="114" text-anchor="end" fill="#64748b" font-size="11">0.5</text>
+        <text x="44" y="24"  text-anchor="end" fill="#64748b" font-size="11">1.0</text>
+        <text x="16" y="110" text-anchor="middle" fill="#94a3b8" font-size="10" transform="rotate(-90,16,110)">실제 관측 비율</text>
+        <!-- Data points: x = 50 + tau*390, y = 200 - coverage*180 -->
+        <!-- q50: tau=0.50 cov=0.339 → x=245 y=138.98 -->
+        <!-- q90: tau=0.90 cov=0.506 → x=401 y=108.92 -->
+        <!-- q95: tau=0.95 cov=0.638 → x=420.5 y=85.16 -->
+        <!-- q99: tau=0.99 cov=0.787 → x=436.1 y=58.34 -->
+        <!-- perfect reference points for those taus -->
+        <circle cx="245"   cy="101" r="5" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.5"/> <!-- q50 nominal -->
+        <circle cx="401"   cy="38"  r="5" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.5"/> <!-- q90 nominal -->
+        <circle cx="420.5" cy="29"  r="5" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.5"/> <!-- q95 nominal -->
+        <circle cx="436.1" cy="22"  r="5" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.5"/> <!-- q99 nominal -->
+        <!-- actual lines from nominal to actual -->
+        <line x1="245"   y1="101"   x2="245"   y2="139" stroke="#fca5a5" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <line x1="401"   y1="38"    x2="401"   y2="109" stroke="#fca5a5" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <line x1="420.5" y1="29"    x2="420.5" y2="85"  stroke="#fca5a5" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <line x1="436.1" y1="22"    x2="436.1" y2="58"  stroke="#fca5a5" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <!-- actual data points -->
+        <circle cx="245"   cy="139" r="6" fill="#dc2626"/>
+        <circle cx="401"   cy="109" r="6" fill="#dc2626"/>
+        <circle cx="420.5" cy="85"  r="6" fill="#dc2626"/>
+        <circle cx="436.1" cy="58"  r="6" fill="#dc2626"/>
+        <!-- labels -->
+        <text x="232" y="153" fill="#dc2626" font-size="10" font-weight="700">q50</text>
+        <text x="388" y="123" fill="#dc2626" font-size="10" font-weight="700">q90</text>
+        <text x="407" y="99"  fill="#dc2626" font-size="10" font-weight="700">q95</text>
+        <text x="423" y="72"  fill="#dc2626" font-size="10" font-weight="700">q99</text>
+        <!-- legend -->
+        <circle cx="58" cy="35" r="5" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="67" y="39" fill="#64748b" font-size="10">완벽 보정 기준선</text>
+        <circle cx="58" cy="52" r="5" fill="#dc2626"/>
+        <text x="67" y="56" fill="#64748b" font-size="10">실제 관측 비율</text>
+        <line x1="54" y1="68" x2="68" y2="68" stroke="#fca5a5" stroke-width="2" stroke-dasharray="3,2"/>
+        <text x="72" y="72" fill="#64748b" font-size="10">과소보정 간격</text>
+      </svg>
+      <p style="font-size:0.8rem;color:var(--slate);text-align:center;margin-top:0.4rem;">
+        빨간 점이 파란 점(이상적 위치)보다 아래에 있을수록 과소보정이 심함
+      </p>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>분위수</th>
+            <th>명목 τ</th>
+            <th>실제 비율 (median)</th>
+            <th>오차 (실제 − 명목)</th>
+            <th>과소추정 비율</th>
+            <th>시각화</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>q50</strong></td>
+            <td class="num">0.500</td>
+            <td class="num bad">0.339</td>
+            <td class="num bad">−0.161</td>
+            <td class="num bad">66.1%</td>
+            <td>
+              <div class="cov-bar-wrap">
+                <div class="cov-bar-nominal" style="width:100%;"></div>
+                <div class="cov-bar-actual" style="width:67.8%;"></div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>q90</strong></td>
+            <td class="num">0.900</td>
+            <td class="num bad">0.506</td>
+            <td class="num bad">−0.394</td>
+            <td class="num bad">49.4%</td>
+            <td>
+              <div class="cov-bar-wrap">
+                <div class="cov-bar-nominal" style="width:100%;"></div>
+                <div class="cov-bar-actual" style="width:56.2%;"></div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>q95</strong></td>
+            <td class="num">0.950</td>
+            <td class="num warn">0.638</td>
+            <td class="num warn">−0.312</td>
+            <td class="num warn">36.2%</td>
+            <td>
+              <div class="cov-bar-wrap">
+                <div class="cov-bar-nominal" style="width:100%;"></div>
+                <div class="cov-bar-actual" style="width:67.2%;"></div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>q99</strong></td>
+            <td class="num">0.990</td>
+            <td class="num warn">0.787</td>
+            <td class="num warn">−0.203</td>
+            <td class="num warn">21.3%</td>
+            <td>
+              <div class="cov-bar-wrap">
+                <div class="cov-bar-nominal" style="width:100%;"></div>
+                <div class="cov-bar-actual" style="width:79.5%;"></div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="warn-box">
+      <strong>💡 해석:</strong>
+      모든 분위수에서 실제 비율이 명목 τ보다 <strong>낮습니다(과소보정)</strong>.
+      가장 중요한 것: <strong>q99의 실제 coverage = 0.787</strong> —
+      "99% 상한선"이라고 만들었는데 실제로는 약 79%의 시각만 덮습니다.
+      따라서 q99을 "보정된 99% 예측 분위수"라고 부르면 <strong>안 됩니다</strong>.
+      논문에서는 "상위 꼬리 결정 출력(upper-tail decision output)"이라는 표현을 씁니다.
+    </div>
+  </section>
+
+  <!-- ──────────── 4. 꼬리 적중률 ──────────── -->
+  <section id="tail">
+    <div class="section-title">④ 홍수 구간 꼬리 적중률</div>
+
+    <div class="concept">
+      <strong>꼬리 적중률(Tail Hit-Rate)이란?</strong><br/>
+      "관측값이 유역별 Q99 이상인 극한 고유량 시각" 만을 골라,
+      분위수 예측이 그 시각의 관측값을 덮은 비율입니다.
+      전체 평균 보정과 다르게, <em>홍수 때 얼마나 잘 맞추는지</em>를 봅니다.
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>분위수</th>
+            <th>Q99 초과 구간 적중률</th>
+            <th>해석</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>q50</strong></td>
+            <td class="num bad">21.8%</td>
+            <td>극한 고유량 시각 5번 중 1번만 포착</td>
+          </tr>
+          <tr>
+            <td><strong>q90</strong></td>
+            <td class="num warn">37.1%</td>
+            <td>3번 중 1번 정도 포착</td>
+          </tr>
+          <tr>
+            <td><strong>q95</strong></td>
+            <td class="num warn">42.4%</td>
+            <td>약 2.4번 중 1번 포착</td>
+          </tr>
+          <tr>
+            <td><strong>q99</strong></td>
+            <td class="num" style="color:var(--amber);">56.3%</td>
+            <td>극한 고유량 시각 <strong>절반 이상</strong> 포착</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="result-box">
+      <strong>✅ 핵심 결과:</strong>
+      q99은 극한 고유량 시각의 <strong>56.3%를 포착</strong>합니다. 나머지 43.7%는 q99도 과소추정하는 구간입니다.
+      이는 Model 2의 핵심 목표인 "극한 홍수 첨두 과소추정 감소"와 직접 연결됩니다.
+    </div>
+  </section>
+
+  <!-- ──────────── 5. 첨두 포착률 ──────────── -->
+  <section id="peak">
+    <div class="section-title">⑤ 홍수 첨두 포착률</div>
+
+    <div class="concept">
+      <strong>첨두 포착률이란?</strong><br/>
+      각 유역에서 <strong>관측 유량이 가장 높은 시각(홍수 첨두)</strong>에 분위수 예측이
+      그 값을 덮고 있는지 확인합니다. ±6시간 창(window)까지 허용하는 경우도 함께 봅니다.
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">q99 · 첨두 시각 포착률</div>
+        <div class="stat-value" style="color:var(--amber);">52.2%</div>
+        <div class="stat-sub">홍수 최고점 시각 기준</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">q99 · ±6h 창 포착률</div>
+        <div class="stat-value" style="color:var(--green);">64.3%</div>
+        <div class="stat-sub">첨두 전후 6시간 허용</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">q90 · 첨두 시각 포착률</div>
+        <div class="stat-value" style="color:var(--red);">36.1%</div>
+        <div class="stat-sub">홍수 최고점 시각 기준</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">q50 · 첨두 시각 포착률</div>
+        <div class="stat-value" style="color:var(--red);">19.2%</div>
+        <div class="stat-sub">홍수 최고점 시각 기준</div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>분위수</th>
+            <th>첨두 시각 포착률</th>
+            <th>±6h 창 포착률</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>q50</strong></td><td class="num bad">19.2%</td><td class="num bad">25.1%</td></tr>
+          <tr><td><strong>q90</strong></td><td class="num warn">36.1%</td><td class="num warn">42.7%</td></tr>
+          <tr><td><strong>q95</strong></td><td class="num warn">42.4%</td><td class="num warn">48.6%</td></tr>
+          <tr><td><strong>q99</strong></td><td class="num" style="color:var(--amber);">52.2%</td><td class="num good">64.3%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="warn-box">
+      <strong>💡 해석:</strong>
+      q99도 홍수 첨두의 절반 정도만 직접 포착합니다.
+      하지만 ±6시간을 허용하면 64%까지 올라갑니다 — 타이밍이 약간 어긋나도 큰 흐름은 잡는다는 의미입니다.
+      이 숫자 자체는 "개선됐다"고 말하기 위한 수치가 아니라,
+      <em>Model 2가 얼마나 보수적인 상한선을 제공하는지</em>를 보여주는 진단 지표입니다.
+    </div>
+  </section>
+
+  <!-- ──────────── 6. Pinball ──────────── -->
+  <section id="pinball">
+    <div class="section-title">⑥ Pinball 손실 &amp; AQS</div>
+
+    <div class="concept">
+      <strong>Pinball 손실 계산 방법:</strong><br/>
+      예측 분위수보다 관측값이 위에 있으면 <code>(1 − τ) × 차이</code>,
+      아래에 있으면 <code>τ × 차이</code>로 벌점을 줍니다.
+      예측이 정확할수록 숫자가 작아집니다.
+      AQS = Pinball × 2 (다른 논문과 비교할 때 쓰는 척도)
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>분위수</th>
+            <th>평균 Pinball</th>
+            <th>AQS</th>
+            <th>평균 관측값 대비 (%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>q50</strong></td>
+            <td class="num">4.656</td>
+            <td class="num">9.312</td>
+            <td class="num warn">25.1%</td>
+          </tr>
+          <tr>
+            <td><strong>q90</strong></td>
+            <td class="num">3.658</td>
+            <td class="num">7.316</td>
+            <td class="num warn">19.8%</td>
+          </tr>
+          <tr>
+            <td><strong>q95</strong></td>
+            <td class="num">2.858</td>
+            <td class="num">5.715</td>
+            <td class="num good">15.4%</td>
+          </tr>
+          <tr>
+            <td><strong>q99</strong></td>
+            <td class="num good">1.638</td>
+            <td class="num good">3.276</td>
+            <td class="num good">8.8%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="warn-box">
+      <strong>💡 해석:</strong>
+      Pinball 손실만 보면 q99이 가장 작아 "가장 좋은" 것처럼 보입니다.
+      그러나 이것은 비대칭 손실 함수의 특성 때문입니다 —
+      q99는 관측값 위에 있을 때 벌점이 작고(τ=0.99 구간이 좁음), 보정 미달인 상태에서도 낮게 나옵니다.
+      따라서 Pinball을 보정 결과와 <strong>함께</strong> 읽어야 합니다.
+    </div>
+  </section>
+
+  <!-- ──────────── 7. Skill Score ──────────── -->
+  <section id="skill">
+    <div class="section-title">⑦ 기후 기준선 대비 기술 점수 (Skill Score)</div>
+
+    <div class="concept">
+      <strong>기후 기준선이란?</strong><br/>
+      "훈련 기간(2000–2010)의 유역별 관측 유량 분위수"를 그대로 테스트에 사용하는 단순 예측입니다.
+      과거 기후 패턴만 쓰고 아무 모델도 쓰지 않은 것입니다.
+      Skill Score = 1 − (모델 Pinball) / (기준선 Pinball).
+      양수 → 모델이 기준선보다 좋음, 음수 → 모델이 기준선보다 나쁨.
+    </div>
+
+    <div class="card">
+      <div class="card-title">분위수별 기술 점수</div>
+      <div class="skill-row">
+        <div class="skill-label">q50</div>
+        <div class="skill-track">
+          <div class="skill-center"></div>
+          <div class="skill-bar-pos" style="width:10.4%;"></div>
+        </div>
+        <div class="skill-val good">+0.104</div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-label">q90</div>
+        <div class="skill-track">
+          <div class="skill-center"></div>
+          <div class="skill-bar-pos" style="width:21.7%;"></div>
+        </div>
+        <div class="skill-val good">+0.217</div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-label">q95</div>
+        <div class="skill-track">
+          <div class="skill-center"></div>
+          <div class="skill-bar-pos" style="width:13.2%;"></div>
+        </div>
+        <div class="skill-val good">+0.132</div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-label">q99</div>
+        <div class="skill-track">
+          <div class="skill-center"></div>
+          <div class="skill-bar-neg" style="width:27.1%;"></div>
+        </div>
+        <div class="skill-val bad">−0.271</div>
+      </div>
+      <p style="font-size:0.8rem; color:var(--slate); margin-top:0.5rem;">
+        막대가 오른쪽(초록) → 기준선보다 좋음 / 왼쪽(빨강) → 기준선보다 나쁨
+      </p>
+    </div>
+
+    <div class="two-col">
+      <div class="result-box">
+        <strong>✅ q90 기술 점수 +0.217</strong><br/>
+        기후 평균 대비 약 22% 더 정확합니다. q50/q90/q95 모두 양의 기술 점수입니다.
+      </div>
+      <div class="warn-box">
+        <strong>⚠️ q99 기술 점수 −0.271</strong><br/>
+        q99는 단순 기후 평균보다 Pinball 손실이 <em>더 큽니다</em>.
+        극단적 분위수는 훈련 데이터에서 보기 드문 사건을 맞추기 어렵기 때문입니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────── 8. Crossing ──────────── -->
+  <section id="crossing">
+    <div class="section-title">⑧ 분위수 단조성 검사 (Quantile Crossing)</div>
+
+    <div class="concept">
+      <strong>왜 이 검사를 하는가?</strong><br/>
+      논리적으로 q50 ≤ q90 ≤ q95 ≤ q99 이어야 합니다.
+      (50% 상한선이 90% 상한선보다 클 수는 없습니다.)
+      딥러닝 모델에서 이 순서가 역전(교차)되면 예측 자체가 무의미해집니다.
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">q90 &lt; q50 위반 행</div>
+        <div class="stat-value good">0</div>
+        <div class="stat-sub">✅ 위반 없음</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">q95 &lt; q90 위반 행</div>
+        <div class="stat-value good">0</div>
+        <div class="stat-sub">✅ 위반 없음</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">q99 &lt; q95 위반 행</div>
+        <div class="stat-value good">0</div>
+        <div class="stat-sub">✅ 위반 없음</div>
+      </div>
+    </div>
+
+    <div class="result-box">
+      <strong>✅ 완벽 통과:</strong>
+      전체 약 206만 × 3 seed = 약 618만 행 중 단조성 위반이 단 1건도 없습니다.
+      Model 2의 분위수 출력이 논리적으로 일관됩니다.
+    </div>
+  </section>
+
+  <!-- ──────────── 9. Tier ──────────── -->
+  <section id="tier">
+    <div class="section-title">⑨ 오차 단계별 보정 진단</div>
+
+    <div class="concept">
+      <strong>오차 단계(IQR 거리 tier)란?</strong><br/>
+      각 유역을 "Model 2의 오차가 얼마나 극단적인가"에 따라 4단계로 분류했습니다.
+      IQR(사분위수 범위)를 기준으로, 오차가 IQR의 0.5배 미만이면 "근접(near)",
+      3배 이상이면 "극단(extreme)"입니다.
+      이 단계별로 보정이 어떻게 달라지는지 봅니다.
+    </div>
+
+    <div class="warn-box">
+      <strong>⚠️ 주의:</strong> 이 tier는 오차에서 파생된 분류이므로 "오차가 큰 유역의 coverage가 높다"는
+      결과가 나오면 일부 순환 논리가 포함될 수 있습니다. 독립적인 보정 검증이 아닌 <strong>보조 진단</strong>으로만 씁니다.
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>오차 단계</th>
+            <th>q99 실제 비율</th>
+            <th>설명</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="tier-near">
+            <td><span class="pill pill-green">&lt;0.5 IQR</span> 근접</td>
+            <td class="num warn">74.5%</td>
+            <td>오차 작은 유역. 그래도 99%에 미달</td>
+          </tr>
+          <tr class="tier-shoulder">
+            <td><span class="pill pill-blue">0.5–1.5 IQR</span> 어깨</td>
+            <td class="num warn">77.0%</td>
+            <td>중간 오차 유역</td>
+          </tr>
+          <tr class="tier-far">
+            <td><span class="pill pill-amber">1.5–3 IQR</span> 원거리</td>
+            <td class="num good">99.9%</td>
+            <td>오차 큰 유역 — q99가 거의 다 포함 (순환성 주의)</td>
+          </tr>
+          <tr class="tier-extreme">
+            <td><span class="pill pill-red">≥3 IQR</span> 극단</td>
+            <td class="num good">99.0%</td>
+            <td>오차 매우 큰 유역 — q99가 거의 다 포함 (순환성 주의)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--slate);">
+      오차가 큰 유역에서 q99 비율이 매우 높은 이유: 오차가 크다는 것 자체가 q99이 아주 높게 예측됐다는 뜻이기도 합니다.
+      즉, "모델이 과도하게 높이 예측한 유역에서는 당연히 관측값이 그 아래에 들어온다"는 효과입니다.
+    </p>
+  </section>
+
+  <!-- ──────────── 10. CRPS ──────────── -->
+  <section id="crps">
+    <div class="section-title">⑩ CRPS 상위 근사치 (보조 지표)</div>
+
+    <div class="concept">
+      <strong>CRPS(연속 등위 확률 점수)란?</strong><br/>
+      확률 예측 전체의 품질을 하나의 숫자로 요약하는 대표적인 점수입니다.
+      예측 확률 분포가 관측값에 얼마나 "집중"되어 있는지를 측정합니다.
+      숫자가 작을수록 좋습니다.
+    </div>
+
+    <div class="warn-box">
+      <strong>⚠️ 중요 한계:</strong>
+      CRPS 본래 계산은 전체 확률 분포(0~100%)가 필요하지만, Model 2는 q50~q99 상위 4개 분위수만 있습니다.
+      여기서는 <strong>4-분위 상위 근사식</strong>을 사용합니다:
+      <br/><code style="background:#fff3cd; padding:0.1rem 0.4rem; border-radius:4px;">CRPS_근사 = 2 × 평균_Pinball(q50/q90/q95/q99)</code><br/>
+      하위 꼬리가 없으므로 실제 CRPS보다 작게 추정됩니다.
+      <strong>참고용 보조 지표</strong>로만 사용합니다.
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>분석 구간</th>
+            <th>CRPS 근사값</th>
+            <th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>전체 시간대</td>
+            <td class="num">6.671</td>
+            <td>기준 비교용</td>
+          </tr>
+          <tr>
+            <td>Basin Q99.9 초과</td>
+            <td class="num bad">122.239</td>
+            <td>극한 고유량에서 크게 증가</td>
+          </tr>
+          <tr>
+            <td>Basin Q99 초과</td>
+            <td class="num bad">54.715</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>Basin Q90 초과</td>
+            <td class="num warn">22.399</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>관측 첨두 시각</td>
+            <td class="num bad">169.564</td>
+            <td>홍수 최고점에서 가장 크게 증가</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--slate);">
+      전체 평균은 6.7로 낮지만, 관측 첨두 시각에서는 169.6으로 약 25배 증가합니다.
+      모델이 홍수 첨두를 예측하는 것이 얼마나 어려운지를 잘 보여줍니다.
+    </p>
+  </section>
+
+  <!-- ──────────── 11. 종합 ──────────── -->
+  <section id="summary">
+    <div class="section-title">⑪ 종합 해석 &amp; 논문에서 어떻게 쓸까?</div>
+
+    <div class="summary-grid">
+      <div class="summary-item si-red">
+        <div class="si-label">📉 보정 상태</div>
+        <div class="si-val">과소보정</div>
+        <div class="si-desc">모든 분위수에서 명목 τ 미달. q99 실제 비율 = 79%</div>
+      </div>
+      <div class="summary-item si-amber">
+        <div class="si-label">🎯 q99 꼬리 적중률</div>
+        <div class="si-val">56.3%</div>
+        <div class="si-desc">극한 고유량 시각의 절반 이상 포착</div>
+      </div>
+      <div class="summary-item si-green">
+        <div class="si-label">🏔 첨두 ±6h 포착</div>
+        <div class="si-val">64.3%</div>
+        <div class="si-desc">홍수 첨두 전후 6시간 허용 시 포착률</div>
+      </div>
+      <div class="summary-item si-blue">
+        <div class="si-label">📊 q90 기술 점수</div>
+        <div class="si-val">+0.217</div>
+        <div class="si-desc">기후 기준선 대비 22% 개선</div>
+      </div>
+      <div class="summary-item si-red">
+        <div class="si-label">⚡ q99 기술 점수</div>
+        <div class="si-val">−0.271</div>
+        <div class="si-desc">기후 기준선보다 Pinball 손실 더 큼</div>
+      </div>
+      <div class="summary-item si-indigo">
+        <div class="si-label">✅ 단조성 검사</div>
+        <div class="si-val">0 위반</div>
+        <div class="si-desc">618만 행 중 단조성 위반 0건</div>
+      </div>
+    </div>
+
+    <div class="sub-title">핵심 결론</div>
+
+    <div class="finding">
+      <div class="finding-num">1</div>
+      <div class="finding-text">
+        <strong>Model 2의 분위수 출력은 완전히 보정된 확률적 예측이 아닙니다.</strong>
+        모든 분위수에서 명목 τ보다 낮은 실제 비율을 보입니다.
+        논문에서 q99를 "99% 예측 분위수"라고 표현하면 안 됩니다.
+        <span class="pill pill-blue">상위 꼬리 결정 출력</span>이라는 표현을 사용합니다.
+      </div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-num">2</div>
+      <div class="finding-text">
+        <strong>q99은 극한 홍수 구간에서 q50 대비 훨씬 높은 적중률을 보입니다</strong>
+        (56.3% vs 21.8%). 이는 Model 2가 "보정은 미달이지만 고유량 꼬리를 더 잘 잡는
+        결정 출력"임을 뒷받침합니다. RQ-2 분석(δ-recall 0.583)과 일치합니다.
+      </div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-num">3</div>
+      <div class="finding-text">
+        <strong>q90/q95는 기후 기준선 대비 양의 기술 점수</strong>를 갖습니다(+0.217, +0.132).
+        반면 q99은 음의 기술 점수(−0.271)입니다 — 극단 분위수의 예측이 단순 기후 평균보다
+        Pinball 관점에서 더 나쁩니다. 이 트레이드오프를 논문에서 명시해야 합니다.
+      </div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-num">4</div>
+      <div class="finding-text">
+        <strong>분위수 단조성은 완벽합니다</strong> — 618만 행 중 위반 0건.
+        모델 출력이 수학적으로 일관됩니다.
+      </div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-num">5</div>
+      <div class="finding-text">
+        <strong>154개 유역(기존 DRBC) vs 85개 유역(확장 DRBC) 비교는 보류</strong>됩니다.
+        기존 진단 산출물이 현재 디스크에 없기 때문입니다.
+        <code>output/model_analysis/legacy/quantile_analysis/</code> 데이터 복원 후 비교 가능합니다.
+      </div>
+    </div>
+
+    <div class="sub-title">논문에서 어떻게 쓸까?</div>
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th>섹션</th><th>어떤 결과를 어떻게 사용</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>본문 (Main)</strong></td>
+            <td>All-hour calibration plot + Q99-exceedance tail hit-rate compact table만 사용</td>
+          </tr>
+          <tr>
+            <td><strong>보조 자료 (Supplement)</strong></td>
+            <td>same-epoch sensitivity / stratum별 세부 표 / tier calibration / CRPS 근사</td>
+          </tr>
+          <tr>
+            <td><strong>금지 표현</strong></td>
+            <td>"calibrated 99% quantile", "99% prediction interval", "q99 = 100년 홍수 분위수"</td>
+          </tr>
+          <tr>
+            <td><strong>권장 표현</strong></td>
+            <td>"upper-tail decision output", "tail-aware output", "보정 caveat 포함 방어용 분석"</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ──────────── 주의사항 ──────────── -->
+  <section>
+    <div class="section-title">분석 한계 및 주의사항</div>
+    <div class="card">
+      <ul style="padding-left:1.3rem; font-size:0.9rem; line-height:2.1;">
+        <li><strong>NaN 관측값 7.70% 제거:</strong> 결측 시간대가 제거되어 분모가 "관측 가능한 시각"만입니다.</li>
+        <li><strong>유역별 상대 임계값:</strong> "Q99 초과 구간"의 기준이 유역마다 다릅니다. 서로 다른 유역 집합 간 직접 비교 불가.</li>
+        <li><strong>단방향 분위수만 존재:</strong> q50/q90/q95/q99는 모두 상위 꼬리만 있습니다. 예측 구간 / Winkler score / 양방향 CRPS 계산 불가.</li>
+        <li><strong>IQR-tier 순환성:</strong> 오차 단계별 보정 진단은 부분적으로 순환 논리를 포함합니다 (보조 진단으로만 사용).</li>
+        <li><strong>154 vs 85 유역 비교 보류:</strong> legacy 진단 산출물 없어 직접 비교 불가 상태입니다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="footer">
+    <p>산출물 경로: <code>output/model_analysis/expanded_drbc_test/probabilistic_diagnostics/</code></p>
+    <p style="margin-top:0.3rem;">생성 스크립트: <code>scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py</code> (Phase 1)</p>
+    <p style="margin-top:0.3rem;">참조 문서: <code>docs/experiment/analysis/model/05_calibration_sharpness.md</code></p>
+  </div>
+
+</div>
+</body>
+</html>

@@ -25,7 +25,7 @@ flowchart TD
 
 DRBC는 학습 지역이 아니라 holdout 평가 지역이다. DRBC 공식 경계와 CAMELSH outlet, basin polygon overlap을 이용해 평가 후보를 고른다.
 
-현재 DRBC selected basin은 154개이고, 품질 gate를 통과한 test basin은 38개다. 이 구조 덕분에 모델이 학습 중 보지 않은 지역에서 얼마나 잘 작동하는지 확인할 수 있다.
+현재 DRBC selected basin은 154개이고, expanded observed test 기준을 통과한 test basin은 85개다. 이 구조 덕분에 모델이 학습 중 보지 않은 지역에서 얼마나 잘 작동하는지 확인할 수 있다.
 
 ## 3단계: non-DRBC training pool 확정
 

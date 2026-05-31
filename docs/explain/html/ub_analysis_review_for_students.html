@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UB + 상승 경사 분석 리뷰 — M4 강수 anchor onset</title>
+  <style>
+    :root {
+      --blue:   #2563eb;
+      --indigo: #4f46e5;
+      --green:  #16a34a;
+      --amber:  #d97706;
+      --red:    #dc2626;
+      --slate:  #475569;
+      --bg:     #f8fafc;
+      --card:   #ffffff;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      background: var(--bg); color: #1e293b;
+      line-height: 1.75; font-size: 15px;
+    }
+    .page { max-width: 940px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #0f2850 0%, #1e3a5f 30%, #4f46e5 70%, #7c3aed 100%);
+      color: #fff; border-radius: 16px;
+      padding: 2.5rem 2rem 2rem; margin-bottom: 2.5rem;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 999px; padding: 0.2rem 0.8rem;
+      font-size: 0.75rem; letter-spacing: 0.04em; margin-bottom: 0.8rem;
+    }
+    .hero h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.3; }
+    .hero p  { opacity: 0.85; font-size: 0.95rem; max-width: 680px; }
+    .hero-meta { display: flex; gap: 1.5rem; margin-top: 1rem; flex-wrap: wrap; }
+    .hero-stat { background: rgba(255,255,255,0.15); border-radius: 8px; padding: 0.5rem 1rem; text-align: center; }
+    .hero-stat-n { font-size: 1.4rem; font-weight: 700; }
+    .hero-stat-l { font-size: 0.72rem; opacity: 0.8; }
+
+    /* ── Section ── */
+    section { margin-bottom: 2.5rem; }
+    .section-title {
+      font-size: 1.2rem; font-weight: 700;
+      color: var(--indigo);
+      border-left: 4px solid var(--indigo);
+      padding-left: 0.75rem; margin-bottom: 1.2rem;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;
+    }
+    .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.6rem; }
+
+    /* ── Alert ── */
+    .alert {
+      border-radius: 10px; padding: 1rem 1.2rem;
+      font-size: 0.88rem; margin-bottom: 0.8rem;
+      display: flex; gap: 0.7rem; align-items: flex-start;
+    }
+    .alert-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
+    .alert-green  { background: #f0fdf4; border: 1px solid #86efac; }
+    .alert-amber  { background: #fffbeb; border: 1px solid #fcd34d; }
+    .alert-red    { background: #fff1f2; border: 1px solid #fca5a5; }
+    .alert-blue   { background: #eff6ff; border: 1px solid #93c5fd; }
+    .alert-purple { background: #f5f3ff; border: 1px solid #c4b5fd; }
+    .alert-slate  { background: #f8fafc; border: 1px solid #cbd5e1; }
+
+    /* ── Table ── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.87rem; margin-bottom: 0.8rem; }
+    th {
+      background: #f1f5f9; text-align: left;
+      padding: 0.55rem 0.75rem;
+      border-bottom: 2px solid var(--border);
+      font-weight: 600; color: var(--slate);
+    }
+    td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .hi { font-weight: 700; color: var(--indigo); }
+    .warn-val { font-weight: 700; color: var(--red); }
+    .ok-val { font-weight: 700; color: var(--green); }
+    .amber-val { font-weight: 700; color: var(--amber); }
+
+    /* ── Band diagram ── */
+    .band-diagram {
+      border: 1px solid var(--border); border-radius: 10px;
+      overflow: hidden; margin: 0.8rem 0;
+    }
+    .band-row {
+      display: flex; align-items: center;
+      padding: 0.5rem 1rem; gap: 1rem;
+      font-size: 0.85rem;
+    }
+    .band-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+    .band-swatch {
+      width: 18px; height: 18px; border-radius: 3px; flex-shrink: 0;
+    }
+    .band-label { font-weight: 600; width: 130px; flex-shrink: 0; }
+    .band-frac { font-variant-numeric: tabular-nums; font-weight: 700; width: 60px; flex-shrink: 0; }
+    .band-bar-bg { flex: 1; height: 10px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+    .band-bar { height: 100%; border-radius: 4px; }
+    .band-desc { color: var(--slate); font-size: 0.8rem; min-width: 150px; }
+
+    /* ── Gap trajectory viz ── */
+    .gap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 0.8rem 0; }
+    @media (max-width: 600px) { .gap-grid { grid-template-columns: 1fr; } }
+    .gap-cell { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; }
+    .gap-title { font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--slate); }
+    .gap-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; font-size: 0.82rem; }
+    .gap-tau { width: 28px; font-weight: 600; color: var(--indigo); }
+    .gap-bar-bg { flex: 1; height: 10px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+    .gap-bar { height: 100%; border-radius: 4px; }
+    .under { background: #f87171; }
+    .over  { background: #60a5fa; }
+    .gap-val { width: 42px; font-variant-numeric: tabular-nums; font-size: 0.78rem; text-align: right; }
+
+    /* ── Spearman result ── */
+    .spearman-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 0.8rem 0; }
+    .spearman-grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.8rem; margin: 0.8rem 0; }
+    @media (max-width: 700px) { .spearman-grid { grid-template-columns: 1fr; }
+                                 .spearman-grid-4 { grid-template-columns: 1fr 1fr; } }
+    .sp-card {
+      border-radius: 10px; padding: 1rem;
+      border: 2px solid var(--border); text-align: center;
+    }
+    .sp-card.fail { border-color: #fca5a5; background: #fff1f2; }
+    .sp-card.weak { border-color: #fcd34d; background: #fffbeb; }
+    .sp-card.pass { border-color: #86efac; background: #f0fdf4; }
+    .sp-card.strong { border-color: #4f46e5; background: #f5f3ff; }
+    .sp-metric { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; color: var(--slate); }
+    .sp-scope  { font-size: 0.7rem; color: var(--slate); margin-bottom: 0.5rem; }
+    .sp-r { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .sp-r.fail { color: var(--red); }
+    .sp-r.weak { color: var(--amber); }
+    .sp-r.pass { color: var(--green); }
+    .sp-r.strong { color: var(--indigo); }
+    .sp-p { font-size: 0.78rem; color: var(--slate); }
+    .sp-verdict { font-size: 0.72rem; font-weight: 700; margin-top: 0.4rem; padding: 0.15rem 0.5rem; border-radius: 999px; display: inline-block; }
+    .sp-verdict.fail { background: #fee2e2; color: var(--red); }
+    .sp-verdict.weak { background: #fef3c7; color: var(--amber); }
+    .sp-verdict.pass { background: #dcfce7; color: var(--green); }
+    .sp-verdict.strong { background: #ede9fe; color: var(--indigo); }
+
+    /* ── Method flow ── */
+    .method-flow { display: flex; flex-direction: column; gap: 0.5rem; margin: 1rem 0; }
+    .method-step {
+      display: flex; gap: 1rem; align-items: flex-start;
+      background: #f8fafc; border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.9rem 1rem;
+    }
+    .method-step-num {
+      background: var(--indigo); color: white;
+      border-radius: 50%; width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.85rem; flex-shrink: 0; margin-top: 0.1rem;
+    }
+    .method-step-body { flex: 1; }
+    .method-step-title { font-weight: 700; margin-bottom: 0.2rem; font-size: 0.92rem; }
+    .method-step-desc { font-size: 0.84rem; color: var(--slate); }
+    .method-step-param { font-size: 0.8rem; margin-top: 0.3rem; background: white;
+                         border-radius: 6px; padding: 0.3rem 0.6rem;
+                         border: 1px solid var(--border); display: inline-block; }
+
+    /* ── Flag badges ── */
+    .flag-hard { background: #fee2e2; color: #991b1b; border-radius: 999px;
+                 padding: 0.1rem 0.55rem; font-size: 0.72rem; font-weight: 700;
+                 border: 1px solid #fca5a5; display: inline-block; }
+    .flag-soft { background: #fef3c7; color: #92400e; border-radius: 999px;
+                 padding: 0.1rem 0.55rem; font-size: 0.72rem; font-weight: 700;
+                 border: 1px solid #fcd34d; display: inline-block; }
+
+    /* ── Verdict ── */
+    .verdict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 600px) { .verdict-grid { grid-template-columns: 1fr; } }
+    .verdict-card { border-radius: 10px; padding: 1.2rem; font-size: 0.88rem; }
+    .verdict-ok   { background: #f0fdf4; border: 1.5px solid #86efac; }
+    .verdict-warn { background: #fffbeb; border: 1.5px solid #fcd34d; }
+    .verdict-bad  { background: #fff1f2; border: 1.5px solid #fca5a5; }
+    .verdict-title { font-weight: 700; margin-bottom: 0.5rem; }
+    .verdict-ok  .verdict-title { color: var(--green); }
+    .verdict-warn .verdict-title { color: var(--amber); }
+    .verdict-bad  .verdict-title { color: var(--red); }
+    ul.check li { margin-bottom: 0.3rem; }
+    ul.check li::marker { content: '✓  '; color: var(--green); }
+    ul.warn  li { margin-bottom: 0.3rem; }
+    ul.warn  li::marker { content: '△  '; color: var(--amber); }
+    ul.cross li { margin-bottom: 0.3rem; }
+    ul.cross li::marker { content: '✗  '; color: var(--red); }
+
+    /* ── Three component flow ── */
+    .comp-flow {
+      display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 0.5rem;
+      align-items: center; margin: 1rem 0;
+    }
+    @media (max-width: 650px) {
+      .comp-flow { grid-template-columns: 1fr; }
+      .comp-arrow { display: none; }
+    }
+    .comp-box {
+      border-radius: 10px; padding: 1rem; text-align: center;
+      border: 2px solid var(--border); font-size: 0.85rem;
+    }
+    .comp-num { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .comp-name { font-weight: 700; margin-bottom: 0.2rem; }
+    .comp-desc { font-size: 0.78rem; color: var(--slate); }
+    .comp-b10 { border-color: #93c5fd; background: #eff6ff; }
+    .comp-b11 { border-color: #86efac; background: #f0fdf4; }
+    .comp-b12 { border-color: #fcd34d; background: #fffbeb; }
+    .comp-arrow { font-size: 1.5rem; color: var(--slate); text-align: center; }
+
+    /* ── misc ── */
+    p { margin-bottom: 0.6rem; }
+    .sub { color: var(--slate); font-size: 0.85rem; margin-bottom: 0.4rem; }
+    .separator { height: 1px; background: var(--border); margin: 2rem 0; }
+    code {
+      background: #f1f5f9; border-radius: 4px;
+      padding: 0.1rem 0.35rem; font-size: 0.85em;
+      font-family: 'Menlo', 'Consolas', monospace; color: var(--indigo);
+    }
+    .footer {
+      text-align: center; font-size: 0.8rem; color: #94a3b8;
+      margin-top: 3rem; padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .analogy {
+      background: linear-gradient(135deg, #f5f3ff, #eff6ff);
+      border: 1px solid #c4b5fd; border-radius: 10px;
+      padding: 1rem 1.2rem; margin: 0.8rem 0; font-size: 0.88rem;
+    }
+    .analogy-title { font-weight: 700; color: #6d28d9; margin-bottom: 0.3rem; }
+
+    /* ── Highlight box ── */
+    .highlight-box {
+      background: linear-gradient(135deg, #f0fdf4, #eff6ff);
+      border: 2px solid #4f46e5; border-radius: 12px;
+      padding: 1.2rem 1.5rem; margin: 1rem 0;
+    }
+    .highlight-box-title { font-size: 1rem; font-weight: 700; color: var(--indigo); margin-bottom: 0.5rem; }
+
+    /* ── Param table ── */
+    .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin: 0.8rem 0; }
+    @media (max-width: 600px) { .param-grid { grid-template-columns: 1fr; } }
+    .param-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 0.7rem 0.9rem; }
+    .param-name { font-family: 'Menlo','Consolas',monospace; font-size: 0.8rem; color: var(--indigo); font-weight: 700; }
+    .param-val  { font-size: 0.9rem; font-weight: 700; color: #1e293b; }
+    .param-desc { font-size: 0.78rem; color: var(--slate); margin-top: 0.2rem; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-badge">UB 분석 + M4 상승 경사 · 비전공 대학생용 · 2026</div>
+    <h1>홍수 첨두 과소추정 분석<br>— UB 불확실성 밴드 + M4 강수 기준 상승 경사 onset</h1>
+    <p>Model 2(확률적 LSTM)의 불확실성 밴드가 홍수 관측값을 얼마나 잘 포함하는지,
+       그리고 강수 기준 onset(M4)으로 정의한 상승 경사가 Q99 초과 위험을 예측할 수 있는지 검증합니다.</p>
+    <div class="hero-meta">
+      <div class="hero-stat">
+        <div class="hero-stat-n">81</div>
+        <div class="hero-stat-l">분석 유역</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-n">926</div>
+        <div class="hero-stat-l">총 event window</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-n">813</div>
+        <div class="hero-stat-l">통계 포함 (clean)</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-n">r = +0.498</div>
+        <div class="hero-stat-l">rise_slope Spearman</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. UB란 -->
+  <section>
+    <div class="section-title">1. 불확실성 밴드(UB)란?</div>
+    <div class="card">
+      <p>Model 2(확률적 LSTM)는 q50, q90, q95, q99 네 개의 예측값을 동시에 출력합니다.
+         가장 낮은 q50부터 가장 높은 q99까지 이어지는 범위를
+         <strong>불확실성 밴드(Uncertainty Band, UB)</strong>라고 부릅니다.</p>
+      <div class="analogy">
+        <div class="analogy-title">비유: 날씨 예보의 강수 확률</div>
+        "내일 강수량 5mm" 처럼 하나의 숫자만 말하는 대신,
+        "보통 예측 5mm, 좀 비관적으로 보면 15mm, 최악의 경우 40mm" 처럼
+        여러 단계로 보여주는 것이 밴드 예측입니다.
+        UB는 q50(중앙)~q99(최상위 보수성) 사이 구간입니다.
+      </div>
+      <p>이 연구에서 UB는 세 가지 각도로 분석됩니다.</p>
+    </div>
+
+    <div class="comp-flow">
+      <div class="comp-box comp-b10">
+        <div class="comp-num" style="color:#2563eb;">B10</div>
+        <div class="comp-name">위치 분류</div>
+        <div class="comp-desc">실제 관측값이 밴드 안 어디에 위치하는가?</div>
+      </div>
+      <div class="comp-arrow">→</div>
+      <div class="comp-box comp-b11">
+        <div class="comp-num" style="color:#16a34a;">B11</div>
+        <div class="comp-name">간격 궤적</div>
+        <div class="comp-desc">τ가 올라갈수록 부족·초과가 어떻게 줄고 느는가?</div>
+      </div>
+      <div class="comp-arrow">→</div>
+      <div class="comp-box comp-b12">
+        <div class="comp-num" style="color:#d97706;">B12</div>
+        <div class="comp-name">밴드 형태 (사전 예측)</div>
+        <div class="comp-desc">관측 없이 밴드 모양만으로 위험을 예측할 수 있나?</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. B10 -->
+  <section>
+    <div class="section-title">2. B10 — 관측값이 밴드 어디에 위치하는가?</div>
+    <div class="card">
+      <p><strong>무엇을 보는가:</strong> 홍수 사건마다 실제 관측 첨두가 q50~q99 밴드의
+         5개 구간 중 어디에 위치하는지 분류합니다.</p>
+      <p><strong>왜 필요한가:</strong> 단일 q99 기준 비교보다 밴드 전체 구조를 입체적으로 확인합니다.</p>
+
+      <div class="band-diagram">
+        <div class="band-row" style="background:#f8fafc; font-size:0.78rem; color:var(--slate);">
+          <div style="width:18px"></div>
+          <div style="width:130px; font-weight:600;">관측 위치 구간</div>
+          <div style="width:60px; font-weight:600;">Q99 이벤트</div>
+          <div style="flex:1;">비율 시각화</div>
+          <div style="font-weight:600; width:150px;">뜻</div>
+        </div>
+        <div class="band-row">
+          <div class="band-swatch" style="background:#4393c3;"></div>
+          <div class="band-label">q50 아래</div>
+          <div class="band-frac ok-val">11.0%</div>
+          <div class="band-bar-bg"><div class="band-bar" style="width:11%; background:#4393c3;"></div></div>
+          <div class="band-desc">모델이 과예측 (q50도 관측보다 큼)</div>
+        </div>
+        <div class="band-row">
+          <div class="band-swatch" style="background:#92c5de;"></div>
+          <div class="band-label">q50 ~ q90</div>
+          <div class="band-frac" style="color:var(--blue);">17.0%</div>
+          <div class="band-bar-bg"><div class="band-bar" style="width:17%; background:#92c5de;"></div></div>
+          <div class="band-desc">중하위 밴드 구간 (잘 맞음)</div>
+        </div>
+        <div class="band-row">
+          <div class="band-swatch" style="background:#fddbc7;"></div>
+          <div class="band-label">q90 ~ q95</div>
+          <div class="band-frac" style="color:var(--slate);">8.5%</div>
+          <div class="band-bar-bg"><div class="band-bar" style="width:8.5%; background:#fddbc7;"></div></div>
+          <div class="band-desc">상위 밴드 안에 위치</div>
+        </div>
+        <div class="band-row">
+          <div class="band-swatch" style="background:#f4a582;"></div>
+          <div class="band-label">q95 ~ q99</div>
+          <div class="band-frac" style="color:var(--amber);">20.3%</div>
+          <div class="band-bar-bg"><div class="band-bar" style="width:20.3%; background:#f4a582;"></div></div>
+          <div class="band-desc">최상위 구간 (극단 사건)</div>
+        </div>
+        <div class="band-row" style="background:#fff5f5;">
+          <div class="band-swatch" style="background:#d6604d;"></div>
+          <div class="band-label" style="color:var(--red);">q99 초과</div>
+          <div class="band-frac warn-val">43.2%</div>
+          <div class="band-bar-bg"><div class="band-bar" style="width:43.2%; background:#d6604d;"></div></div>
+          <div class="band-desc"><strong>밴드 실패 — q99도 관측을 못 따라감</strong></div>
+        </div>
+      </div>
+
+      <div class="alert alert-red">
+        <div class="alert-icon">⚠️</div>
+        <div>
+          <strong>홍수 사건의 43.2%에서 실제 관측값이 q99을 넘습니다.</strong>
+          가장 보수적인 예측도 실제 홍수를 절반 가까이 놓칩니다.
+          NOAA 공식 홍수 기록에서는 더 심각해서 <strong>57.4%가 q99 초과</strong>입니다.
+        </div>
+      </div>
+
+      <table>
+        <thead><tr>
+          <th>관측 위치 구간</th><th class="num">Q99 이벤트 (85유역)</th><th class="num">NOAA 공식 홍수 (21유역)</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>q50 아래 (과예측)</td><td class="num">11.0%</td><td class="num">2.6%</td></tr>
+          <tr><td>q50~q90</td><td class="num">17.0%</td><td class="num">11.3%</td></tr>
+          <tr><td>q90~q95</td><td class="num">8.5%</td><td class="num">10.8%</td></tr>
+          <tr><td>q95~q99</td><td class="num">20.3%</td><td class="num">17.9%</td></tr>
+          <tr style="background:#fff5f5;"><td><strong>q99 초과 (밴드 실패)</strong></td><td class="num warn-val">43.2%</td><td class="num warn-val">57.4%</td></tr>
+        </tbody>
+      </table>
+
+      <div class="alert alert-blue">
+        <div class="alert-icon">💡</div>
+        <div>
+          <strong>왜 이렇게 많이 실패할까?</strong><br>
+          q99이 통계적으로 "99%를 보장하는 예측"이 아닌 점이 원인입니다.
+          홍수 사건은 관측값 분포의 극단 꼬리에 해당하는데,
+          모델이 그 꼬리를 충분히 크게 예측하지 못합니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. B11 -->
+  <section>
+    <div class="section-title">3. B11 — τ가 올라갈수록 간격이 어떻게 변하는가?</div>
+    <div class="card">
+      <p><strong>무엇을 보는가:</strong> 분위수 단계(τ)가 q50 → q90 → q95 → q99으로 올라갈 때
+         "부족 간격"과 "초과 간격"이 각각 어떻게 변하는지 추적합니다.</p>
+      <div class="analogy">
+        <div class="analogy-title">비유: 안전 마진</div>
+        예상 홍수가 100일 때 도로 경계를 80에 놓으면 20이 부족(부족 간격).
+        150에 놓으면 50이 넘침(초과 간격).
+        τ를 올릴수록 경계를 높이 놓는 것 → 부족은 줄고 초과는 늘어납니다.
+      </div>
+
+      <div class="gap-grid">
+        <div class="gap-cell">
+          <div class="gap-title">Q99 이벤트 (85유역) — 상대 부족 간격 (낮을수록 좋음)</div>
+          <div class="gap-row"><div class="gap-tau">q50</div><div class="gap-bar-bg"><div class="gap-bar under" style="width:100%;"></div></div><div class="gap-val">0.657</div></div>
+          <div class="gap-row"><div class="gap-tau">q90</div><div class="gap-bar-bg"><div class="gap-bar under" style="width:57%;"></div></div><div class="gap-val">0.376</div></div>
+          <div class="gap-row"><div class="gap-tau">q95</div><div class="gap-bar-bg"><div class="gap-bar under" style="width:41%;"></div></div><div class="gap-val">0.272</div></div>
+          <div class="gap-row"><div class="gap-tau">q99</div><div class="gap-bar-bg"><div class="gap-bar under" style="width:3%;"></div></div><div class="gap-val ok-val">0.018</div></div>
+          <div style="height:0.6rem;"></div>
+          <div class="gap-title">상대 초과 간격 (비용)</div>
+          <div class="gap-row"><div class="gap-tau">q50</div><div class="gap-bar-bg"><div class="gap-bar over" style="width:0%;"></div></div><div class="gap-val">0.000</div></div>
+          <div class="gap-row"><div class="gap-tau">q90</div><div class="gap-bar-bg"><div class="gap-bar over" style="width:0%;"></div></div><div class="gap-val">0.000</div></div>
+          <div class="gap-row"><div class="gap-tau">q95</div><div class="gap-bar-bg"><div class="gap-bar over" style="width:0%;"></div></div><div class="gap-val">0.000</div></div>
+          <div class="gap-row"><div class="gap-tau">q99</div><div class="gap-bar-bg"><div class="gap-bar over" style="width:18%;"></div></div><div class="gap-val warn-val">0.122</div></div>
+        </div>
+        <div class="gap-cell">
+          <div class="gap-title">NOAA 공식 홍수 (21유역) — 상대 부족 간격</div>
+          <div class="gap-row"><div class="gap-tau">q50</div><div class="gap-bar-bg"><div class="gap-bar under" style="width:100%;"></div></div><div class="gap-val">0.788</div></div>
+          <div class="gap-row"><div class="gap-tau">q90</div><div class="gap-bar-bg"><div class="gap-bar under" style="width:61%;"></div></div><div class="gap-val">0.482</div></div>
+          <div class="gap-row"><div class="gap-tau">q95</div><div class="gap-bar-bg"><div class="gap-bar under" style="width:51%;"></div></div><div class="gap-val">0.404</div></div>
+          <div class="gap-row"><div class="gap-tau">q99</div><div class="gap-bar-bg"><div class="gap-bar under" style="width:22%;"></div></div><div class="gap-val warn-val">0.172</div></div>
+          <div style="height:0.6rem;"></div>
+          <div class="gap-title">상대 초과 간격</div>
+          <div class="gap-row"><div class="gap-tau">q50</div><div class="gap-bar-bg"><div class="gap-bar over" style="width:0%;"></div></div><div class="gap-val">0.000</div></div>
+          <div class="gap-row"><div class="gap-tau">q90</div><div class="gap-bar-bg"><div class="gap-bar over" style="width:0%;"></div></div><div class="gap-val">0.000</div></div>
+          <div class="gap-row"><div class="gap-tau">q95</div><div class="gap-bar-bg"><div class="gap-bar over" style="width:0%;"></div></div><div class="gap-val">0.000</div></div>
+          <div class="gap-row"><div class="gap-tau">q99</div><div class="gap-bar-bg"><div class="gap-bar over" style="width:0%;"></div></div><div class="gap-val">0.000</div></div>
+        </div>
+      </div>
+
+      <div class="alert alert-green">
+        <div class="alert-icon">✓</div>
+        <div>
+          <strong>단조성 검증 통과:</strong>
+          τ가 올라갈수록 부족 간격은 단조 감소, 초과 간격은 단조 증가합니다.
+          q50 → q99 순서가 의미 있는 보수성 단계임을 내부적으로 확인합니다.
+        </div>
+      </div>
+      <div class="alert alert-amber">
+        <div class="alert-icon">△</div>
+        <div>
+          <strong>NOAA에서 q99 부족 간격 17% 잔존:</strong>
+          Q99 이벤트(2%)보다 NOAA 공식 홍수(17%)에서 더 많이 놓칩니다.
+          NOAA 사건이 더 극단적인 홍수임을 반영합니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. B12 -->
+  <section>
+    <div class="section-title">4. B12 — 관측 없이 밴드 모양만으로 위험을 예측할 수 있나?</div>
+    <div class="card">
+      <p><strong>무엇을 보는가:</strong> 실제 관측값이 없어도 모델이 출력한 q50~q99 밴드 모양만 보고
+         "이 사건에서 관측이 q99를 초과할 것인가"를 예측할 수 있는지 검증합니다.</p>
+      <p><strong>왜 중요한가:</strong> 만약 가능하다면 실시간 운영에서
+         "지금 밴드가 넓고 극단 꼬리가 크다 → 위험 경보" 식으로 활용할 수 있습니다.</p>
+
+      <div class="card" style="background:#f8fafc;">
+        <div class="card-title">두 가지 밴드 형태 지표 (관측 없이 계산 가능)</div>
+        <table>
+          <thead><tr><th>지표</th><th>수식</th><th>의미</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>상대 폭 (rel_width)</strong></td>
+              <td><code>(q99 − q50) / q50</code></td>
+              <td>밴드가 q50 대비 얼마나 넓은가. 넓을수록 모델이 불확실하다는 신호.</td>
+            </tr>
+            <tr>
+              <td><strong>극단 꼬리 비중 (g3_ratio)</strong></td>
+              <td><code>(q99 − q95) / (q99 − q50)</code></td>
+              <td>불확실성 중 맨 위 구간(q95~q99)의 비중. 높을수록 극단 예측에 집중.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="sub" style="margin-top:0.5rem;">두 지표 모두 관측값 불필요 → 모델 출력만으로 계산 가능.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">4-1. 이벤트 첨두(peak) 기준 — Spearman r</div>
+      <p class="sub">각 홍수 사건의 가장 높은 시각만 추출. Q99: 85유역, n=2,770 / NOAA: 21유역, n=194.</p>
+      <div class="spearman-grid">
+        <div class="sp-card fail">
+          <div class="sp-metric">상대 폭 (rel_width)</div>
+          <div class="sp-scope">Q99 이벤트 첨두 (85유역, n=2,770)</div>
+          <div class="sp-r fail">r = −0.015</div>
+          <div class="sp-p">p = 0.433 (유의하지 않음)</div>
+          <div class="sp-verdict fail">유의하지 않음 · 기준 미달</div>
+        </div>
+        <div class="sp-card weak">
+          <div class="sp-metric">극단 꼬리 비중 (g3_ratio)</div>
+          <div class="sp-scope">Q99 이벤트 첨두 (85유역, n=2,770)</div>
+          <div class="sp-r weak">r = +0.137</div>
+          <div class="sp-p">p &lt; 0.001 (유의)</div>
+          <div class="sp-verdict weak">유의하나 기준치 미달</div>
+        </div>
+        <div class="sp-card weak">
+          <div class="sp-metric">상대 폭 (rel_width)</div>
+          <div class="sp-scope">NOAA 홍수 첨두 (21유역, n=194)</div>
+          <div class="sp-r weak">r = +0.205</div>
+          <div class="sp-p">p = 0.004 (유의)</div>
+          <div class="sp-verdict weak">유의하나 기준치 미달</div>
+        </div>
+        <div class="sp-card weak">
+          <div class="sp-metric">극단 꼬리 비중 (g3_ratio)</div>
+          <div class="sp-scope">NOAA 홍수 첨두 (21유역, n=194)</div>
+          <div class="sp-r weak">r = +0.173</div>
+          <div class="sp-p">p = 0.016 (유의)</div>
+          <div class="sp-verdict weak">유의하나 기준치 미달</div>
+        </div>
+      </div>
+      <div class="alert alert-amber">
+        <div class="alert-icon">△</div>
+        <div>
+          <strong>이벤트 첨두 기준으로는 모두 r &lt; 0.3 (기준 미달).</strong>
+          특히 Q99 이벤트에서 rel_width r = −0.015로 유의하지도 않습니다.
+          이유: 모델이 "쉬운" 유역(밴드 좁음)에서 오히려 더 극단적인 홍수가 발생하거나,
+          밴드 폭이 홍수 강도보다 모델 학습 패턴에 더 의존하기 때문입니다.
+        </div>
+      </div>
+      <img src="../output/model_analysis/expanded_drbc_test/figures/ub_band_shape_lookup_2014_2015.png"
+           alt="이벤트 첨두 기준 밴드 형태 조건부 분포"
+           style="width:100%; border-radius:8px; border:1px solid var(--border); margin-top:0.5rem;" />
+
+      <div class="card" style="background:#eff6ff; border-color:#93c5fd; margin-top:1.2rem;">
+        <div class="card-title">4-1-보충. 절대 간격으로 보면 어떻게 다른가?</div>
+        <p style="font-size:0.88rem; margin-bottom:0.8rem;">
+          상대 비율(rel_width) 대신 <strong>절대 간격 [m³/s]</strong>으로 같은 분석을 하면 r이 기준치 0.3을 넘는다.
+          그런데 방향이 <em>반대(음수)</em>다 — 이것이 핵심이다.
+        </p>
+        <table style="font-size:0.85rem;">
+          <thead>
+            <tr>
+              <th>지표</th><th>수식</th><th class="num">r</th><th>비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>abs_width</strong></td>
+              <td><code>q99 − q50 [m³/s]</code></td>
+              <td class="num warn-val">−0.350</td>
+              <td>기준치 0.3 초과, 그러나 <strong>음수</strong></td>
+            </tr>
+            <tr>
+              <td><strong>abs_tail</strong></td>
+              <td><code>q99 − q95 [m³/s]</code></td>
+              <td class="num warn-val">−0.361</td>
+              <td>기준치 0.3 초과, 그러나 <strong>음수</strong></td>
+            </tr>
+            <tr>
+              <td><span style="color:var(--slate)">(참고) rel_width</span></td>
+              <td><code>(q99 − q50) / q50</code></td>
+              <td class="num" style="color:var(--slate)">−0.015</td>
+              <td style="color:var(--slate)">유의하지 않음</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="alert alert-blue" style="margin-top:0.8rem;">
+          <div class="alert-icon">💡</div>
+          <div>
+            <strong>왜 절대 간격이 넓을수록 관측값이 낮은 구간에 위치하는가?</strong><br>
+            절대 간격이 큰 이벤트 = <strong>큰 유역</strong>에서 발생한 이벤트다.
+            큰 유역은 기저유량(baseflow)이 크기 때문에 q50 자체가 크다 → q99 − q50 절대값도 크다.
+            하지만 상대적 홍수 배율(obs / q50)은 작은 유역보다 낮아 obs가 q99를 초과하기 어렵다.
+            <br><br>
+            즉, <strong>abs_width는 밴드 형태 신호가 아니라 유역 규모(basin scale)의 proxy</strong>다.
+            rel_width = (q99−q50)/q50는 이 유역 규모 혼란변수를 정규화하기 때문에 r이 −0.015로 떨어지는 것이며,
+            이것이 오히려 올바른 설계임을 역으로 확인해준다.
+          </div>
+        </div>
+        <img src="../output/model_analysis/expanded_drbc_test/figures/ub_band_shape_scatter_absolute.png"
+             alt="Absolute-interval scatter: abs_width / abs_tail / abs_mid vs obs gap class at event peaks"
+             style="width:100%; border-radius:8px; border:1px solid var(--border); margin-top:0.8rem;" />
+        <img src="../output/model_analysis/expanded_drbc_test/figures/ub_band_shape_lookup_absolute.png"
+             alt="Conditional obs gap class distribution by absolute-interval quartile bins"
+             style="width:100%; border-radius:8px; border:1px solid var(--border); margin-top:0.6rem;" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">4-2. 전체 시각열 기준 (allts) — 더 많은 데이터로 확인</div>
+      <p><strong>무엇이 다른가:</strong> 홍수 첨두 시각만 보는 대신 2014~2015년
+         <strong>모든 시각(~100만 개)</strong>의 밴드 형태와 관측 위치를 비교합니다.</p>
+      <img src="../output/model_analysis/expanded_drbc_test/figures/ub_band_shape_scatter_allts.png"
+           alt="전체 시각열 기준 밴드 형태 산점도"
+           style="width:100%; border-radius:8px; border:1px solid var(--border); margin:0.6rem 0;" />
+      <p class="sub">왼쪽: rel_width r=0.092 (p&lt;0.001, n=401k) / 오른쪽: g3_ratio r=0.147 (p&lt;0.001, n=401k).</p>
+      <div class="alert alert-blue">
+        <div class="alert-icon">💡</div>
+        <div>
+          표본이 400배 커지니 두 지표 모두 통계적으로 유의해졌습니다.
+          하지만 r=0.092~0.147 — 여전히 기준치 0.3 미달이며 실용적 예측력으로 보기 어렵습니다.
+        </div>
+      </div>
+      <img src="../output/model_analysis/expanded_drbc_test/figures/ub_band_shape_lookup_allts_2014_2015.png"
+           alt="전체 시각열 기준 밴드 형태 조건부 분포"
+           style="width:100%; border-radius:8px; border:1px solid var(--border); margin-top:0.5rem;" />
+      <div class="alert alert-green" style="margin-top:0.8rem;">
+        <div class="alert-icon">✓</div>
+        <div>
+          <strong>전체 시각열에서는 단조 패턴이 시각적으로 명확합니다.</strong>
+          가장 넓은 밴드(Q4) → q99 초과 비율 증가, 가장 좁은 밴드(Q1) → q50 미만 비율 증가.
+          이벤트 첨두에서 사라지던 패턴이 전체 시각열에서는 살아납니다.
+          단, r이 0.3 미만이므로 "위험 예측 도구"로 쓰기엔 신호가 약합니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">4-3. 일반화 검증 — 2014~2015 기준이 2016에도 통하는가?</div>
+      <p><strong>무엇을 보는가:</strong> 2014~2015년 데이터로 밴드 폭 구간(Q1~Q4)을 정의한 뒤
+         그 경계를 2016년에 적용해도 같은 패턴이 나오는지 확인합니다.</p>
+      <img src="../output/model_analysis/expanded_drbc_test/figures/ub_band_shape_lookup_calval.png"
+           alt="calval 비교"
+           style="width:100%; border-radius:8px; border:1px solid var(--border); margin:0.6rem 0;" />
+      <div class="alert alert-green">
+        <div class="alert-icon">✓</div>
+        <div>
+          <strong>시간적 일반화 확인:</strong> "넓은 밴드 → q99 초과 많음" 패턴이
+          2016년에도 비슷하게 재현됩니다. 신호는 약하지만 시간적으로 안정적입니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="separator"></div>
+
+  <!-- 5. M4 방법론 -->
+  <section>
+    <div class="section-title">5. M4 onset 방법론 — 강수 기준 상승 경사</div>
+
+    <!-- 용어 정의 -->
+    <div class="card" style="background:#f8fafc; border-color:#c4b5fd;">
+      <div class="card-title" style="color:#6d28d9;">📖 주요 용어 정의</div>
+      <table style="font-size:0.85rem;">
+        <thead><tr><th style="width:160px;">용어</th><th style="width:200px;">원어 / 코드명</th><th>의미</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>강수 burst</strong></td>
+            <td><code>burst</code></td>
+            <td>MIT로 묶은 하나의 연속 강수 단위. "이번 비"에 해당하는 구간.</td>
+          </tr>
+          <tr>
+            <td><strong>MIT</strong></td>
+            <td>Minimum Inter-event Time<br>최소 사건 간격</td>
+            <td>강수가 멈춘 뒤 얼마나 길어야 "다른 사건"으로 보는지 기준 시간.
+                M4에서는 <strong>6시간</strong> — 6h 미만 무강수는 같은 burst로 병합.</td>
+          </tr>
+          <tr>
+            <td><strong>causative burst</strong></td>
+            <td>유발 강수 사건</td>
+            <td>여러 burst 중 실제로 이 홍수 첨두를 만든 강수.
+                첨두와 시간 간격(lag)이 가장 짧고 120h 이내인 burst.</td>
+          </tr>
+          <tr>
+            <td><strong>onset</strong></td>
+            <td>상승 시작점</td>
+            <td>홍수 상승 경사의 기준점. M4에서는 causative burst 시작 직전의
+                유량 극솟값 — "비 오기 직전의 기저유량 수준".</td>
+          </tr>
+          <tr>
+            <td><strong>onset_q</strong></td>
+            <td>onset 유량</td>
+            <td>onset 시각의 실제 관측 유량 [m³/s]. rise_slope 계산의 분자 기준값.</td>
+          </tr>
+          <tr>
+            <td><strong>lag</strong></td>
+            <td>강수→첨두 시간 간격</td>
+            <td>causative burst 시작부터 유량 첨두까지 걸린 시간 [h].
+                유역 반응 속도를 나타냄.</td>
+          </tr>
+          <tr>
+            <td><strong>T_cap</strong></td>
+            <td>유역별 최대 window 길이</td>
+            <td>onset→peak 구간의 허용 상한. 유역마다 반응 시간이 달라
+                <code>clip(3 × median_lag, 24h, 168h)</code>로 유역별로 계산.
+                초과 시 <span class="flag-hard">too_long</span> 플래그.</td>
+          </tr>
+          <tr>
+            <td><strong>rising limb</strong></td>
+            <td>상승 경사</td>
+            <td>수문곡선에서 onset부터 첨두까지 유량이 올라오는 구간.</td>
+          </tr>
+          <tr>
+            <td><strong>obs_class</strong></td>
+            <td>관측 위치 구간</td>
+            <td>첨두 관측값이 q50~q99 밴드 내 어느 구간에 위치하는지 분류.
+                0(q50 미만) ~ 4(q99 초과) 서수형.</td>
+          </tr>
+          <tr>
+            <td><strong>HARD flag</strong></td>
+            <td>제외 플래그</td>
+            <td>분석 조건 미충족 — 해당 window를 Spearman 통계에서 제외.
+                <span class="flag-hard">data_gap</span> · <span class="flag-hard">no_rain_trigger</span> · <span class="flag-hard">too_long</span></td>
+          </tr>
+          <tr>
+            <td><strong>SOFT flag</strong></td>
+            <td>주의 플래그</td>
+            <td>유효하나 해석 시 주의 필요 — 통계에는 포함.
+                <span class="flag-soft">prior_event_recession</span> · <span class="flag-soft">peak_below_q99</span></td>
+          </tr>
+          <tr>
+            <td><strong>유역 기후 Q99</strong></td>
+            <td>climatological Q99</td>
+            <td>해당 유역의 <strong>장기 전체 유량 기록</strong>에서 뽑은 99번째 백분위수.
+                "지금 첨두가 이 유역의 역사적 상위 1% 수준을 넘는가"의 기준값.
+                단일 사건이 아닌 기후 통계값이라 "기후"라는 표현을 씀.
+                <span class="flag-soft">peak_below_q99</span> 플래그는
+                이번 홍수 첨두 &lt; 유역 기후 Q99 일 때 부여.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">5-1. 왜 강수를 기준으로 onset을 정의하는가?</div>
+      <p>홍수 수문곡선에서 "상승 경사(rising limb)"는
+         <em>유량이 저유량 상태에서 첨두로 올라오는 구간</em>입니다.
+         이 상승이 어디서 시작하는지(onset)를 정확히 정의해야만 "얼마나 빠르게 올라왔나"를 의미 있게 계산할 수 있습니다.</p>
+
+      <div class="analogy">
+        <div class="analogy-title">비유: 달리기 스타트 라인</div>
+        100m 기록을 재려면 "출발 라인"이 정확해야 합니다.
+        출발점을 너무 앞에 잡으면 기록이 짧아 보이고, 너무 뒤에 잡으면 길어 보입니다.
+        M4는 "비가 오기 시작하기 직전"을 출발 라인으로 삼습니다.
+        비로 인해 유량이 올라오기 이전의 안정된 유량 상태가 진짜 시작점이기 때문입니다.
+      </div>
+
+      <p>연구 표준(Blume, Zehe &amp; Bronstert 2007; Mei &amp; Anagnostou 2015; Koskelo 2012)에서는
+         onset을 "사건을 유발한 강수 burst 바로 직전의 유량 극솟값(pre-event baseline)"으로 정의합니다.
+         강수가 내리는 도중에 onset을 잡지 않으며, onset의 값(높이)은 비 오기 전 기저유량 수준을 나타내야 합니다.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">5-2. M4 onset 탐지 5단계</div>
+
+      <div class="method-flow">
+        <div class="method-step">
+          <div class="method-step-num">1</div>
+          <div class="method-step-body">
+            <div class="method-step-title">강수 burst 검출 (MIT 병합)</div>
+            <div class="method-step-desc">
+              시간당 강수량이 0.2mm/h 이상이면 "강수 중"으로 판단합니다.
+              무강수 구간이 6시간 미만이면 같은 burst로 병합합니다(최소 사건 간격, MIT).
+              burst가 누적 5mm 이상이어야 홍수 유발 강수로 인정합니다.
+            </div>
+            <div class="method-step-param">RAIN_ON = 0.2 mm/h &nbsp;|&nbsp; MIT = 6h &nbsp;|&nbsp; MIN_BURST_RAIN = 5mm</div>
+          </div>
+        </div>
+
+        <div class="method-step">
+          <div class="method-step-num">2</div>
+          <div class="method-step-body">
+            <div class="method-step-title">causative burst 식별 (첨두를 유발한 강수)</div>
+            <div class="method-step-desc">
+              첨두 이전 168시간을 탐색해, 첨두와의 시간 간격(lag)이 120시간 이내인
+              burst 중 가장 가까운 것을 causative burst(사건 유발 강수)로 선정합니다.
+              lag이 120시간을 초과하거나 탐색 범위 내 유효 burst가 없으면
+              <span class="flag-hard">no_rain_trigger</span> 플래그 → 통계 제외.
+            </div>
+            <div class="method-step-param">LOOKBACK_H = 168h &nbsp;|&nbsp; MAX_LAG_H = 120h</div>
+          </div>
+        </div>
+
+        <div class="method-step">
+          <div class="method-step-num">3</div>
+          <div class="method-step-body">
+            <div class="method-step-title">onset trough 탐색 (강수 전 유량 극솟값)</div>
+            <div class="method-step-desc">
+              탐색 구간 <code>[rain_start − 2h, min(peak_t, rain_start + 120h)]</code> 안에서
+              관측 유량의 최솟값을 onset으로 정합니다.
+              onset의 시각(onset_t)은 대부분 rain_start와 일치하거나 직전 2시간 이내입니다.
+              <em>onset의 값(onset_q)이 비 오기 전 기저유량 수준</em>을 나타내는 것이 핵심입니다.
+            </div>
+            <div class="method-step-param">ONSET_TOL_H = 2h (rain_start 이전 허용 범위)</div>
+          </div>
+        </div>
+
+        <div class="method-step">
+          <div class="method-step-num">4</div>
+          <div class="method-step-body">
+            <div class="method-step-title">적응적 T_cap (유역별 최대 window 길이)</div>
+            <div class="method-step-desc">
+              모든 유역에 같은 길이를 적용하면 반응이 빠른 유역(소하천)과
+              느린 유역(큰 유역)이 불공평하게 비교됩니다.
+              각 유역의 강수→첨두 시간(lag) 중앙값을 3배 한 값을 window 상한(T_cap)으로 삼고,
+              최소 24시간~최대 168시간으로 제한합니다.
+              onset→peak 시간이 T_cap을 초과하면 <span class="flag-hard">too_long</span> → 통계 제외.
+            </div>
+            <div class="method-step-param">T_cap = clip(3 × median_lag, 24h, 168h)</div>
+          </div>
+        </div>
+
+        <div class="method-step">
+          <div class="method-step-num">5</div>
+          <div class="method-step-body">
+            <div class="method-step-title">데이터 품질 점검 및 flag 판정</div>
+            <div class="method-step-desc">
+              구간 <code>[onset_t − 24h, peak_t]</code>에서 유량 데이터의 결측률이 20%를 넘거나
+              내부 연속 공백이 6시간을 초과하면 <span class="flag-hard">data_gap</span> → 통계 제외.
+              (이 데이터셋의 강수(Rainf)는 gap-fill 처리되어 결측 0%이므로 유량만 점검합니다.)
+              선행 사건이 미회복된 경우(onset_q < max(이전 72h 유량)/2.0)
+              <span class="flag-soft">prior_event_recession</span>으로 표시하되 통계에는 포함합니다.
+            </div>
+            <div class="method-step-param">GAP_MAX_H = 6h &nbsp;|&nbsp; MIN_VALID_FRAC = 0.80 &nbsp;|&nbsp; ANTECEDENT_RATIO = 2.0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">5-3. 분석 지표 정의</div>
+      <table>
+        <thead><tr><th>지표</th><th>수식</th><th>의미</th><th>관측 필요?</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>rising_hours</code><br><span style="font-size:0.78rem;color:var(--slate);">상승 시간</span></td>
+            <td><code>(peak_t − onset_t) / 1h</code></td>
+            <td>onset에서 첨두까지 걸린 시간 (시간)</td>
+            <td>필요</td>
+          </tr>
+          <tr>
+            <td><code>rise_slope_m4</code><br><span style="font-size:0.78rem;color:var(--slate);">평균 상승 속도</span></td>
+            <td><code>(peak_obs − onset_obs) / rising_hours</code></td>
+            <td>단위 시간당 평균 유량 증가량 [m³/s/h]</td>
+            <td>필요</td>
+          </tr>
+          <tr>
+            <td><code>rise_slope_max_m4</code><br><span style="font-size:0.78rem;color:var(--slate);">최대 상승 속도</span></td>
+            <td><code>max(6h rolling ΔQ/Δt)</code></td>
+            <td>rising limb 내 가장 가파른 6시간 구간의 순간 속도 [m³/s/h]</td>
+            <td>필요</td>
+          </tr>
+          <tr>
+            <td><code>rise_rel_m4</code><br><span style="font-size:0.78rem;color:var(--slate);">상대 상승 배율</span></td>
+            <td><code>(peak_obs − onset_obs) / onset_obs</code></td>
+            <td>onset 대비 상대적 증가 배수 (무차원)</td>
+            <td>필요</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="alert alert-blue">
+        <div class="alert-icon">💡</div>
+        <div>
+          <code>rise_slope_max_m4</code>는 평균 속도가 느리더라도 일시적으로 매우 급등하는
+          "flash-type" 홍수를 포착할 수 있습니다. 하지만 일부 유역(n=50 제외)에서
+          계산이 불가해 763개 window에서만 분석됩니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">5-4. 자동 flag 체계 및 분포</div>
+      <p>M4는 window마다 자동으로 품질 플래그를 부여합니다.
+         <span class="flag-hard">HARD flag</span>는 분석 조건 미충족 → <strong>통계 제외</strong>,
+         <span class="flag-soft">SOFT flag</span>는 주의 표시 → <strong>통계 포함</strong>.</p>
+
+      <table style="margin:0.8rem 0;">
+        <thead>
+          <tr><th>flag</th><th>유형</th><th>건수</th><th>발생 조건</th><th>처리</th></tr>
+        </thead>
+        <tbody>
+          <tr style="background:#fff5f5;">
+            <td><span class="flag-hard">data_gap</span></td>
+            <td>HARD</td>
+            <td class="num">58</td>
+            <td>event 구간 결측률 &gt;20% 또는 내부 공백 &gt;6h</td>
+            <td>통계 제외</td>
+          </tr>
+          <tr style="background:#fff5f5;">
+            <td><span class="flag-hard">no_rain_trigger</span></td>
+            <td>HARD</td>
+            <td class="num">33</td>
+            <td>causative burst 없음 (눈녹음·기저유량 첨두)</td>
+            <td>통계 제외</td>
+          </tr>
+          <tr style="background:#fff5f5;">
+            <td><span class="flag-hard">too_long</span></td>
+            <td>HARD</td>
+            <td class="num">25</td>
+            <td>window 길이 &gt; T_cap (여러 강수 사건 혼재 가능)</td>
+            <td>통계 제외</td>
+          </tr>
+          <tr style="background:#fffbeb;">
+            <td><span class="flag-soft">prior_event_recession</span></td>
+            <td>SOFT</td>
+            <td class="num">213</td>
+            <td>onset_q &gt; max(이전 72h 유량)/2.0 (선행 사건 미회복)</td>
+            <td>통계 포함·주의</td>
+          </tr>
+          <tr style="background:#fffbeb;">
+            <td><span class="flag-soft">peak_below_q99</span></td>
+            <td>SOFT</td>
+            <td class="num">56</td>
+            <td>첨두 관측값 &lt; 유역 기후 Q99 (사건이 극단 홍수 아님)</td>
+            <td>통계 포함·주의</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <img src="../output/model_analysis/rising_limb_comparison/figures/m4_flag_distribution.png"
+           alt="M4 flag 분포"
+           style="width:100%; border-radius:8px; border:1px solid var(--border); margin-top:0.5rem;" />
+
+      <div class="alert alert-slate" style="margin-top:0.8rem;">
+        <div class="alert-icon">ℹ️</div>
+        <div>
+          <strong>유역 수준 결측 vs window 수준 결측:</strong>
+          2014-2016 test 기간 전체 유역 streamflow 결측률은 평균 7.7%(최대 18.5%)로
+          낮아 유역 단위 스크리닝은 불필요합니다.
+          <code>data_gap</code>은 특정 event 구간에 국소 결측이 집중된 58개 window를
+          window 단위로 정밀하게 제외합니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="separator"></div>
+
+  <!-- 6. M4 결과 -->
+  <section>
+    <div class="section-title">6. M4 상승 경사 분석 결과</div>
+
+    <div class="card" style="border-color: #4f46e5; border-width: 2px;">
+      <div class="card-title" style="color:#4f46e5;">6-1. 핵심 결과: Spearman r (clean=813)</div>
+      <p class="sub">obs_class 서수형(0=q50 미만 ~ 4=q99 초과)과 각 지표의 Spearman 순위 상관계수.</p>
+
+      <div class="spearman-grid-4">
+        <div class="sp-card strong">
+          <div class="sp-metric">평균 상승 속도</div>
+          <div class="sp-scope">rise_slope_m4<br>n = 813</div>
+          <div class="sp-r strong">r = +0.498</div>
+          <div class="sp-p">p &lt; 0.001</div>
+          <div class="sp-verdict strong">기준치 0.3 초과 — 중간 이상</div>
+        </div>
+        <div class="sp-card strong">
+          <div class="sp-metric">최대 상승 속도</div>
+          <div class="sp-scope">rise_slope_max_m4<br>n = 763</div>
+          <div class="sp-r strong">r = +0.502</div>
+          <div class="sp-p">p &lt; 0.001</div>
+          <div class="sp-verdict strong">기준치 0.3 초과 — 최강 신호</div>
+        </div>
+        <div class="sp-card fail">
+          <div class="sp-metric">상대 상승 배율</div>
+          <div class="sp-scope">rise_rel_m4<br>n = 813</div>
+          <div class="sp-r fail">r = −0.093</div>
+          <div class="sp-p">p = 0.008 (유의)</div>
+          <div class="sp-verdict fail">음의 방향 — 방법론적 아티팩트</div>
+        </div>
+        <div class="sp-card fail">
+          <div class="sp-metric">상승 시간</div>
+          <div class="sp-scope">rising_hours<br>n = 813</div>
+          <div class="sp-r fail">r = +0.037</div>
+          <div class="sp-p">p = 0.29 (유의 아님)</div>
+          <div class="sp-verdict fail">신호 없음</div>
+        </div>
+      </div>
+
+      <img src="../output/model_analysis/rising_limb_comparison/figures/m4_spearman_bar.png"
+           alt="M4 Spearman r 막대 그래프"
+           style="width:100%; border-radius:8px; border:1px solid var(--border); margin-top:0.8rem;" />
+    </div>
+
+    <div class="card">
+      <div class="card-title">6-2. 위험 단계별 상승 속도 — 단조 증가 패턴</div>
+      <p>위험 단계(관측 위치 구간)가 올라갈수록 상승 속도 중앙값이 단조 증가합니다.
+         이는 물리적으로 타당한 관계입니다: <em>빠르게 급등하는 홍수일수록 q99를 초과할 가능성이 높다.</em></p>
+
+      <img src="../output/model_analysis/rising_limb_comparison/figures/m4_rise_slope_by_class.png"
+           alt="위험단계별 rise_slope 중앙값"
+           style="width:100%; border-radius:8px; border:1px solid var(--border); margin:0.6rem 0;" />
+
+      <table>
+        <thead><tr>
+          <th>관측 위치 구간</th><th class="num">사건 수</th>
+          <th class="num">rise_slope_m4 중앙값 [m³/s/h]</th>
+          <th class="num">rise_h 중앙값 [h]</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>q50 미만 (과예측)</td><td class="num">85</td><td class="num">0.216</td><td class="num">18h</td></tr>
+          <tr><td>q50 ~ q90</td><td class="num">117</td><td class="num">0.805</td><td class="num">–</td></tr>
+          <tr><td>q90 ~ q95</td><td class="num">33</td><td class="num">1.269</td><td class="num">–</td></tr>
+          <tr><td>q95 ~ q99</td><td class="num">167</td><td class="num">1.635</td><td class="num">–</td></tr>
+          <tr style="background:#f0fdf4;">
+            <td><strong>q99 초과</strong></td><td class="num"><strong>411</strong></td>
+            <td class="num ok-val"><strong>2.530</strong></td><td class="num"><strong>15h</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="alert alert-green">
+        <div class="alert-icon">✓</div>
+        <div>
+          <strong>주목할 점:</strong> q99 초과 그룹이 q50 미만 그룹보다
+          rise_slope 중앙값이 <strong>11.7배</strong> 높습니다 (2.530 vs 0.216).
+          단, 그룹 내 분산도 크므로(IQR 넓음) rise_slope 단독으로는 이진 분류가 어렵습니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">6-3. rise_slope vs obs_class 산점도</div>
+      <p class="sub">각 점 = 하나의 clean event window. 가로축 = 관측 위치 구간 (ordinal), 세로축 = 상승 속도 (log scale).</p>
+      <img src="../output/model_analysis/rising_limb_comparison/figures/m4_rise_slope_scatter.png"
+           alt="M4 rise_slope 산점도"
+           style="width:100%; border-radius:8px; border:1px solid var(--border); margin-top:0.5rem;" />
+      <p class="sub" style="margin-top:0.5rem;">
+        로그 스케일 사용 — 절대 속도가 0에 가까운 사건(기저유량 dominant)과
+        극단적으로 빠른 사건이 함께 표시됩니다.
+        rise_slope_max (오른쪽)는 평균 속도보다 더 넓은 범위를 보이며,
+        같은 obs_class에서도 큰 분산을 가집니다.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">6-4. M4 분석 과정에서 새로 발견한 사실</div>
+
+      <div class="alert alert-red">
+        <div class="alert-icon">⚠</div>
+        <div>
+          <strong>발견 1: rise_rel(상대 상승 배율)은 onset 정의에 의존한 아티팩트</strong><br>
+          <code>rise_rel = (peak − onset) / onset</code>에서 onset_q(분모)가 낮을수록 rise_rel이 커집니다.
+          Q99 초과 사건일수록 홍수 전 유량이 낮은 상태(저유량 기간)에 비가 오는 경향이 있어
+          onset_q가 자연스럽게 낮아집니다. 이것이 rise_rel과 obs_class의 상관을 인위적으로 만듭니다.
+          M4(강수 기준 onset)에서 r = −0.093 → <strong>신호 없음 확정</strong>.
+          onset 정의가 바뀌면 rise_rel 상관도 사라집니다.
+        </div>
+      </div>
+
+      <div class="alert alert-blue">
+        <div class="alert-icon">💡</div>
+        <div>
+          <strong>발견 2: 상승 시간(rise_h)은 위험도 예측력이 없다</strong><br>
+          rising_hours의 Spearman r = +0.037 (p=0.29, 유의하지 않음).
+          Q99 초과 사건의 rise_h 중앙값은 15h이고, Q50 미만 사건은 18h입니다.
+          즉, Q99 초과 사건이 오히려 더 짧은 상승 시간을 가집니다.
+          위험도를 결정하는 것은 "얼마나 오래 올라왔냐"가 아니라
+          <strong>"얼마나 빠르게 올라왔냐"</strong>입니다.
+        </div>
+      </div>
+
+      <div class="alert alert-amber">
+        <div class="alert-icon">△</div>
+        <div>
+          <strong>발견 3: prior_event_recession이 예상보다 흔함 (23%)</strong><br>
+          926개 window의 23%(213건)에서 onset 시점의 유량이 이전 72시간 최대 유량의 절반 이상입니다.
+          이는 선행 홍수 사건이 완전히 회복되기 전에 다음 사건이 시작된 경우입니다.
+          이런 상황에서는 onset_q가 실제 "비 오기 전 기저유량"보다 높게 측정되어
+          rise_slope가 과소평가될 수 있습니다.
+          통계에는 포함하되 해석 시 주의가 필요합니다.
+        </div>
+      </div>
+
+      <div class="alert alert-green">
+        <div class="alert-icon">✓</div>
+        <div>
+          <strong>발견 4: rise_slope_max가 rise_slope보다 약간 더 강한 신호</strong><br>
+          6시간 rolling 최대 기울기(rise_slope_max_m4, r=+0.502)가
+          전체 평균 기울기(rise_slope_m4, r=+0.498)보다 약간 높습니다.
+          차이는 작지만, 극단 홍수에서는 상승 구간 전체가 아니라
+          가장 급격한 일부 구간이 위험도를 결정한다는 물리적 해석을 지지합니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">6-5. 상승 시간 분포</div>
+      <img src="../output/model_analysis/rising_limb_comparison/figures/m4_rise_h_distribution.png"
+           alt="M4 rise_h 분포"
+           style="width:100%; border-radius:8px; border:1px solid var(--border); margin-bottom:0.6rem;" />
+      <p class="sub">
+        clean 813건 기준: 중앙값 <strong>15시간</strong>, 75%가 24시간(1일) 이내.
+        오른쪽 긴 꼬리는 반응이 느린 대형 유역 또는 복합 강수 사건에 해당합니다.
+        T_cap으로 다중 사건이 혼재된 극단 장기 window는 이미 제외됩니다.
+      </p>
+    </div>
+  </section>
+
+  <div class="separator"></div>
+
+  <!-- 7. 종합 리뷰 -->
+  <section>
+    <div class="section-title">7. 종합 리뷰 — M4 분석 판정</div>
+
+    <div class="verdict-grid">
+      <div class="verdict-card verdict-ok">
+        <div class="verdict-title">잘 설계된 부분</div>
+        <ul class="check">
+          <li><strong>B10 밴드 실패율 투명 보고.</strong> 43% above_q99 — 숨기지 않고 명시.</li>
+          <li><strong>B11 단조성 검증 통과.</strong> τ 증가 → 부족 감소·초과 증가.</li>
+          <li><strong>calval 안정성 확인.</strong> 2014-2015 패턴이 2016년에도 재현.</li>
+          <li><strong>강수 기준 onset (M4) r = +0.498.</strong> 물리적으로 타당: 빠른 상승 = 위험.</li>
+          <li><strong>rise_slope_max r = +0.502.</strong> 평균보다 강한 신호, 순간 급등 포착.</li>
+          <li><strong>단조 증가 확인.</strong> q50 미만(0.216) → q99 초과(2.530), 11.7배 차이.</li>
+          <li><strong>rise_rel 아티팩트 최종 확정.</strong> r = −0.093 (음의 방향) — onset 정의 편향 제거 시 신호 소멸.</li>
+          <li><strong>flag 체계 설계.</strong> HARD 3종(통계 제외) + SOFT 2종(주의 포함)으로 분석 품질 관리.</li>
+        </ul>
+      </div>
+      <div class="verdict-card verdict-warn">
+        <div class="verdict-title">한계 및 주의사항</div>
+        <ul class="warn">
+          <li><strong>B12 밴드 형태 지표 이벤트 기준 미달.</strong>
+              rel_width(r=−0.015, 유의 아님), g3_ratio(r=+0.137). "obs-free 예측"은 지지되지 않음.</li>
+          <li><strong>rise_slope/rise_slope_max 모두 관측 필요.</strong>
+              onset_obs와 peak_obs가 실측이어야 계산 가능. 순수 사전 예측 불가.</li>
+          <li><strong>rise_rel 신호 없음 확정.</strong>
+              r = −0.093 (음의 방향) — onset 정의와 무관하게 사용 불가.</li>
+          <li><strong>rise_h 예측력 없음.</strong>
+              r = +0.037 (유의 아님). "오래 올라왔다"는 위험 신호가 아님.</li>
+          <li><strong>prior_event_recession 23%.</strong>
+              이 경우 onset_q가 실제 기저유량보다 높아 rise_slope 과소평가 가능.</li>
+          <li><strong>allts 신호 약함 (r≈0.09~0.15).</strong>
+              실용적 예측 임계에는 미달.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-title">전체 판정</div>
+      <p>
+        <strong>B10·B11은 RQ-2/3 보조 증거로 합당.</strong>
+        단조성·실패율 투명 보고·이중 범위 검증 모두 적절합니다.
+      </p>
+      <p>
+        <strong>B12 밴드 형태(rel_width·g3_ratio)는 이벤트 첨두 기준으로 목표 미달.</strong>
+        allts(전체 시각열)에서는 단조 패턴이 가시적이며 calval 안정성도 확인됩니다.
+        "탐색적 신호"로는 의미가 있으나 "사전 위험 예측 도구"로 쓰기엔 부족합니다.
+      </p>
+      <p>
+        <strong>M4 강수 기준 onset의 rise_slope r=+0.498은 분석 전체에서 가장 강한 신호입니다.</strong>
+        강수 발생 직전의 기저유량(onset_q) 대비 얼마나 빠르게 절대 유량이 올라오는지가
+        Q99 초과 위험을 중간 이상(r≈0.5)으로 예측합니다.
+        rise_rel(상대 배율)은 방법론적 아티팩트로 확정되었으며, rise_h(시간)는 예측력이 없습니다.
+        두 지표 모두 관측값이 필요하므로 실시간 유량계 데이터가 있는 운영 환경에서 적용 가능합니다.
+      </p>
+      <div class="alert alert-blue" style="margin-top:0.5rem;">
+        <div class="alert-icon">💡</div>
+        <div>
+          <strong>권고:</strong>
+          B10·B11 → 본문 보조 증거 포함 가능.
+          B12 밴드 형태 → allts/calval 시각화와 함께 "탐색적·음성 결과"로 보충 자료.
+          rise_slope_m4 (r=+0.498) 및 rise_slope_max_m4 (r=+0.502) →
+          "실시간 모니터링 조기 경보 신호"로 별도 논의 가능. 관측 필요 한계 명시.
+          rise_rel은 onset 정의 아티팩트로 논문에서 사용 금지.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. 한눈에 -->
+  <section>
+    <div class="section-title">8. 분석 결과 한눈에 정리 (M4 기준)</div>
+    <div class="card">
+      <table>
+        <thead><tr>
+          <th>분석</th><th>질문</th><th>M4 주요 결과</th><th>판정</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>B10</strong><br><span style="font-size:0.8rem;color:var(--slate)">위치 분류</span></td>
+            <td>관측이 밴드 어디 있나?</td>
+            <td>Q99 43% / NOAA 57% 초과</td>
+            <td><span style="color:var(--amber); font-weight:700;">△ 실패율 높음 — 투명 보고</span></td>
+          </tr>
+          <tr>
+            <td><strong>B11</strong><br><span style="font-size:0.8rem;color:var(--slate)">간격 궤적</span></td>
+            <td>τ 올리면 어떻게 바뀌나?</td>
+            <td>단조 감소/증가 확인<br>q99 부족 0.018 / 초과 0.122</td>
+            <td><span style="color:var(--green); font-weight:700;">✓ 단조성 검증 통과</span></td>
+          </tr>
+          <tr>
+            <td><strong>B12 (첨두)</strong><br><span style="font-size:0.8rem;color:var(--slate)">밴드 형태</span></td>
+            <td>밴드만으로 위험 예측?</td>
+            <td>최대 r=0.205 (0.3 미달)<br>rel_width Q99 r=−0.015 (유의 아님)</td>
+            <td><span style="color:var(--red); font-weight:700;">✗ 이벤트 첨두 기준 미달</span></td>
+          </tr>
+          <tr>
+            <td><strong>allts</strong><br><span style="font-size:0.8rem;color:var(--slate)">전체 시각열</span></td>
+            <td>모든 시각에서 신호?</td>
+            <td>r=0.092~0.147 (유의, 0.3 미달)<br>단조 패턴 시각적으로 명확, calval 안정</td>
+            <td><span style="color:var(--amber); font-weight:700;">△ 약한 신호 · 안정적</span></td>
+          </tr>
+          <tr style="background:#fff1f2;">
+            <td><strong>rise_rel_m4</strong><br><span style="font-size:0.8rem;color:var(--slate)">상대 상승 배율</span></td>
+            <td>상대 배율이 위험 신호?</td>
+            <td>r = −0.093 (음의 방향)<br>onset 정의 아티팩트 확정</td>
+            <td><span style="color:var(--red); font-weight:700;">✗ 사용 불가</span></td>
+          </tr>
+          <tr style="background:#fafafa;">
+            <td><strong>rising_hours</strong><br><span style="font-size:0.8rem;color:var(--slate)">상승 시간</span></td>
+            <td>상승 시간이 위험 신호?</td>
+            <td>r = +0.037 (유의 아님)</td>
+            <td><span style="color:var(--red); font-weight:700;">✗ 예측력 없음</span></td>
+          </tr>
+          <tr style="background:#f0fdf4;">
+            <td><strong>rise_slope_m4</strong><br><span style="font-size:0.8rem;color:var(--slate)">평균 상승 속도<br>(M4 강수 onset)</span></td>
+            <td>빠른 상승이 위험 신호?</td>
+            <td><strong>r = +0.498</strong> (p&lt;0.001, n=813)<br>중앙값: below_q50 0.22 → above_q99 2.53</td>
+            <td><span style="color:var(--green); font-weight:700;">✓ 기준 달성 (obs 필요)</span></td>
+          </tr>
+          <tr style="background:#f0fdf4;">
+            <td><strong>rise_slope_max_m4</strong><br><span style="font-size:0.8rem;color:var(--slate)">최대 상승 속도<br>(6h rolling)</span></td>
+            <td>순간 급등이 위험 신호?</td>
+            <td><strong>r = +0.502</strong> (p&lt;0.001, n=763)<br>평균 속도보다 약간 강한 신호</td>
+            <td><span style="color:var(--indigo); font-weight:700;">✓ 최강 신호 (obs 필요)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="footer">
+    CAMELS UB + M4 상승 경사 분석 리뷰 — 비전공 대학생용 · 2026<br>
+    <span style="font-size:0.75rem;">M4 강수 anchor onset (MIT 6h, T_cap = clip(3×median_lag, 24h, 168h)) · clean=813 / 926 total</span>
+  </div>
+</div>
+</body>
+</html>

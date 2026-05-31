@@ -1,4 +1,4 @@
-# 08. ML로 high-flow event regime을 나누는 방법
+# 07. ML로 high-flow event regime을 나누는 방법
 
 이 문서는 ML을 거의 모르는 상태를 가정하고, CAMELSH hourly high-flow event를 ML로 어떻게 나누고 해석할지 설명한다. 여기서 중요한 결론은 하나다.
 

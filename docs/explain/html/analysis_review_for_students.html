@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CAMELS 연구 분석 방법 리뷰</title>
+  <style>
+    :root {
+      --blue:   #2563eb;
+      --indigo: #4f46e5;
+      --green:  #16a34a;
+      --amber:  #d97706;
+      --red:    #dc2626;
+      --slate:  #475569;
+      --bg:     #f8fafc;
+      --card:   #ffffff;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      background: var(--bg);
+      color: #1e293b;
+      line-height: 1.75;
+      font-size: 15px;
+    }
+    /* ── Layout ── */
+    .page { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+    /* ── Header ── */
+    .hero {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 60%, #4f46e5 100%);
+      color: #fff;
+      border-radius: 16px;
+      padding: 2.5rem 2rem 2rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 999px;
+      padding: 0.2rem 0.8rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.8rem;
+    }
+    .hero h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.3; }
+    .hero p  { opacity: 0.85; font-size: 0.95rem; max-width: 620px; }
+    /* ── Section ── */
+    section { margin-bottom: 2.5rem; }
+    .section-title {
+      font-size: 1.2rem; font-weight: 700;
+      color: var(--indigo);
+      border-left: 4px solid var(--indigo);
+      padding-left: 0.75rem;
+      margin-bottom: 1.2rem;
+    }
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .card-title {
+      font-size: 1rem; font-weight: 700;
+      margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    /* ── Pill ── */
+    .pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 0.15rem 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .pill-blue   { background: #dbeafe; color: var(--blue); }
+    .pill-green  { background: #dcfce7; color: var(--green); }
+    .pill-amber  { background: #fef3c7; color: var(--amber); }
+    .pill-red    { background: #fee2e2; color: var(--red); }
+    .pill-indigo { background: #e0e7ff; color: var(--indigo); }
+    /* ── Model compare ── */
+    .model-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 600px) { .model-grid { grid-template-columns: 1fr; } }
+    .model-card {
+      border-radius: 10px;
+      padding: 1.2rem;
+      border: 2px solid transparent;
+    }
+    .model1 { background: #eff6ff; border-color: #93c5fd; }
+    .model2 { background: #f0fdf4; border-color: #86efac; }
+    .model-tag {
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+    .m1-tag { color: var(--blue); }
+    .m2-tag { color: var(--green); }
+    .model-name { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .model-desc { font-size: 0.88rem; color: var(--slate); }
+    /* ── RQ Flow ── */
+    .rq-flow {
+      display: flex; flex-direction: column; gap: 0;
+      position: relative;
+    }
+    .rq-item {
+      display: flex; gap: 0;
+      position: relative;
+    }
+    .rq-spine {
+      display: flex; flex-direction: column; align-items: center;
+      width: 36px; flex-shrink: 0;
+    }
+    .rq-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 700; color: #fff;
+      flex-shrink: 0; z-index: 1;
+    }
+    .rq-line { width: 2px; flex: 1; background: var(--border); }
+    .rq-body {
+      padding: 0 0 1.4rem 0.8rem;
+      flex: 1;
+    }
+    .rq-tag  { font-size: 0.72rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .rq-desc { font-size: 0.88rem; color: #334155; margin-top: 0.3rem; }
+    /* ── Metric cards ── */
+    .metric-row {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem;
+      margin: 0.8rem 0;
+    }
+    @media (max-width: 600px) { .metric-row { grid-template-columns: 1fr; } }
+    .metric-card {
+      background: #f8fafc; border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem;
+      text-align: center;
+    }
+    .metric-sym  { font-size: 1.8rem; font-weight: 700; color: var(--indigo); }
+    .metric-name { font-size: 0.8rem; font-weight: 600; color: var(--slate); margin: 0.2rem 0; }
+    .metric-def  { font-size: 0.78rem; color: #64748b; }
+    /* ── Result table ── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+    th {
+      background: #f1f5f9; text-align: left;
+      padding: 0.55rem 0.75rem;
+      border-bottom: 2px solid var(--border);
+      font-weight: 600; color: var(--slate);
+    }
+    td {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .highlight { font-weight: 700; color: var(--indigo); }
+    /* ── Alert boxes ── */
+    .alert {
+      border-radius: 10px; padding: 1rem 1.2rem;
+      font-size: 0.88rem; margin-bottom: 0.8rem;
+      display: flex; gap: 0.7rem; align-items: flex-start;
+    }
+    .alert-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
+    .alert-green  { background: #f0fdf4; border: 1px solid #86efac; }
+    .alert-amber  { background: #fffbeb; border: 1px solid #fcd34d; }
+    .alert-red    { background: #fff1f2; border: 1px solid #fca5a5; }
+    .alert-blue   { background: #eff6ff; border: 1px solid #93c5fd; }
+    /* ── Tradeoff viz ── */
+    .tradeoff-bar-wrap { margin: 0.8rem 0; }
+    .tradeoff-row {
+      display: grid; grid-template-columns: 50px 1fr 1fr;
+      align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;
+      font-size: 0.82rem;
+    }
+    .tradeoff-label { font-weight: 600; color: var(--slate); text-align: right; }
+    .bar-wrap { display: flex; flex-direction: column; gap: 2px; }
+    .bar-bg { height: 12px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+    .bar-recall { background: #4ade80; }
+    .bar-far    { background: #f87171; }
+    .bar-val { font-size: 0.75rem; color: #64748b; }
+    /* ── Verdict ── */
+    .verdict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 600px) { .verdict-grid { grid-template-columns: 1fr; } }
+    .verdict-card {
+      border-radius: 10px; padding: 1.2rem;
+      font-size: 0.88rem;
+    }
+    .verdict-ok    { background: #f0fdf4; border: 1.5px solid #86efac; }
+    .verdict-warn  { background: #fffbeb; border: 1.5px solid #fcd34d; }
+    .verdict-title { font-weight: 700; margin-bottom: 0.5rem; }
+    .verdict-ok   .verdict-title { color: var(--green); }
+    .verdict-warn .verdict-title { color: var(--amber); }
+    ul.check li { margin-bottom: 0.3rem; padding-left: 0.2rem; }
+    ul.check li::marker { content: '✓  '; color: var(--green); }
+    ul.warn  li { margin-bottom: 0.3rem; padding-left: 0.2rem; }
+    ul.warn  li::marker { content: '△  '; color: var(--amber); }
+    /* ── Footer ── */
+    .footer {
+      text-align: center; font-size: 0.8rem; color: #94a3b8;
+      margin-top: 3rem; padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    /* ── misc ── */
+    p { margin-bottom: 0.6rem; }
+    strong { color: #1e293b; }
+    code {
+      background: #f1f5f9; border-radius: 4px;
+      padding: 0.1rem 0.35rem; font-size: 0.85em;
+      font-family: 'Menlo', 'Consolas', monospace;
+      color: var(--indigo);
+    }
+    .separator { height: 1px; background: var(--border); margin: 2rem 0; }
+    .sub { color: var(--slate); font-size: 0.85rem; margin-bottom: 0.4rem; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── Hero ── -->
+  <div class="hero">
+    <div class="hero-badge">분석 방법 리뷰 · 비전공 대학생용</div>
+    <h1>이 연구, 어떻게 분석했나?<br>그게 맞는 방법인가?</h1>
+    <p>LSTM으로 홍수 유량을 예측할 때 극한 사건 첨두(peak)를 놓치는 문제를 수치로 증명하고,
+       확률적 예측 모델이 이를 얼마나 개선하는지 검증한 연구입니다.</p>
+  </div>
+
+  <!-- ── 1. 연구가 풀려는 문제 ── -->
+  <section>
+    <div class="section-title">1. 이 연구가 풀려는 문제</div>
+    <div class="card">
+      <p>강물이 얼마나 불어날지 예측하는 AI 모델(LSTM)은 보통 때는 잘 맞는데,
+         <strong>홍수처럼 극단적으로 많은 물이 흐를 때</strong>는 실제 첨두(가장 높은 수위)를
+         계속 낮게 예측합니다.</p>
+      <p>이를 <strong>첨두 과소추정(peak underestimation)</strong>이라 부릅니다.
+         실제 홍수가 100이라면 AI는 60 정도로 예측하는 셈인데,
+         이것이 홍수 대피 결정에 쓰이면 <strong>사람 목숨을 위협</strong>합니다.</p>
+    </div>
+    <div class="alert alert-blue">
+      <div class="alert-icon">💡</div>
+      <div>
+        <strong>왜 과소추정이 생길까?</strong><br>
+        AI 모델은 평균적인 상황에서 오차를 줄이도록 학습합니다.
+        홍수는 전체 시간 중 아주 짧게만 발생하므로, 평균 오차를 줄이는 쪽으로 학습하면
+        희귀한 극단 사건은 자동으로 무시됩니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 2. 두 모델 비교 ── -->
+  <section>
+    <div class="section-title">2. 비교하는 두 모델</div>
+    <div class="model-grid">
+      <div class="model-card model1">
+        <div class="model-tag m1-tag">Model 1</div>
+        <div class="model-name">결정론적 LSTM</div>
+        <div class="model-desc">
+          "내일 유량은 <strong>55.3</strong> m³/s" 처럼 하나의 숫자만 출력.
+          일반적인 AI 예측 방식. 오차를 제곱해서 줄이도록(MSE) 학습합니다.
+        </div>
+      </div>
+      <div class="model-card model2">
+        <div class="model-tag m2-tag">Model 2</div>
+        <div class="model-name">확률적 분위수 LSTM</div>
+        <div class="model-desc">
+          "중앙값 55, 보수적 예측 90, 더 보수적 예측 120" 처럼
+          <strong>여러 개의 보수성 단계</strong>를 동시에 출력.
+          분위수 손실 함수(pinball loss)로 학습합니다.
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">분위수 출력이란? (q50 / q90 / q95 / q99)</div>
+      <p>분위수(quantile)는 "이 값 아래에 관측값이 얼마나 들어올 것인가"의 보수성 단계입니다.</p>
+      <ul style="margin-left:1.2rem; margin-bottom:0.5rem;">
+        <li><code>q50</code> — 중앙값 수준. 실제 값의 절반이 이 아래</li>
+        <li><code>q90</code> — 좀 더 여유 있는 예측</li>
+        <li><code>q95</code> — 더 보수적인 예측</li>
+        <li><code>q99</code> — 가장 보수적, 거의 항상 실제 값을 포함하도록 높게 예측</li>
+      </ul>
+      <div class="alert alert-amber">
+        <div class="alert-icon">⚠️</div>
+        <div>
+          <strong>주의:</strong> <code>q99</code>가 "100년 빈도 홍수 예측"이거나 "99% 신뢰구간"이라는 뜻이 아닙니다.
+          단순히 <em>보수성 단계</em>가 가장 높은 출력입니다. 이 연구에서 엄격하게 지킵니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 3. 분석 전체 흐름 ── -->
+  <section>
+    <div class="section-title">3. 분석 전체 흐름 — 6개 연구 질문(RQ)</div>
+    <div class="card">
+      <p class="sub">각 연구 질문(RQ)이 어떤 순서로 이어지는지 보여줍니다.</p>
+      <div class="rq-flow">
+
+        <div class="rq-item">
+          <div class="rq-spine">
+            <div class="rq-dot" style="background:#6366f1;">0</div>
+            <div class="rq-line"></div>
+          </div>
+          <div class="rq-body">
+            <div class="rq-tag" style="color:#6366f1;">RQ-0 · 방법론 정의</div>
+            <strong>분위수 출력을 어떻게 해석할 것인가?</strong>
+            <div class="rq-desc">
+              분석 전체를 아우르는 <em>해석 규칙</em> 수립.
+              예를 들어 <code>q99</code>를 "확률적 신뢰구간"으로 읽지 않는다는 규칙을 먼저 정합니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="rq-item">
+          <div class="rq-spine">
+            <div class="rq-dot" style="background:#2563eb;">1</div>
+            <div class="rq-line"></div>
+          </div>
+          <div class="rq-body">
+            <div class="rq-tag" style="color:#2563eb;">RQ-1 · 전제 확인</div>
+            <strong>Model 2의 중앙값 예측(q50)이 Model 1만큼은 잘 맞는가?</strong>
+            <div class="rq-desc">
+              "상위 분위수가 더 좋다"고 주장하려면 먼저 기본 성능이 무너지지 않았는지 확인해야 합니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="rq-item">
+          <div class="rq-spine">
+            <div class="rq-dot" style="background:#16a34a;">2</div>
+            <div class="rq-line"></div>
+          </div>
+          <div class="rq-body">
+            <div class="rq-tag" style="color:#16a34a;">RQ-2 · 핵심 주장</div>
+            <strong>상위 분위수(q90~q99)가 실제 첨두 과소추정을 줄이는가?</strong>
+            <div class="rq-desc">
+              세 가지 지표로 검증. 연구의 중심 결론이 여기에 있습니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="rq-item">
+          <div class="rq-spine">
+            <div class="rq-dot" style="background:#d97706;">3</div>
+            <div class="rq-line"></div>
+          </div>
+          <div class="rq-body">
+            <div class="rq-tag" style="color:#d97706;">RQ-3 · 비용 분석</div>
+            <strong>개선의 대가로 오경보나 과예측이 얼마나 늘어나는가?</strong>
+            <div class="rq-desc">
+              보수적으로 예측할수록 홍수를 잘 잡지만 헛경보도 늘어납니다. 이 균형을 측정합니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="rq-item">
+          <div class="rq-spine">
+            <div class="rq-dot" style="background:#7c3aed;">4</div>
+            <div class="rq-line"></div>
+          </div>
+          <div class="rq-body">
+            <div class="rq-tag" style="color:#7c3aed;">RQ-4 · 일반화 검토</div>
+            <strong>유역 특성별 / 홍수 유형별로 효과가 달라지는가?</strong>
+            <div class="rq-desc">
+              모든 유역과 모든 홍수 유형에서 같은 결과가 나오는지, 아니면 특정 조건에서만 잘 되는지 확인합니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="rq-item">
+          <div class="rq-spine">
+            <div class="rq-dot" style="background:#0891b2;">5</div>
+          </div>
+          <div class="rq-body">
+            <div class="rq-tag" style="color:#0891b2;">RQ-5 · 통계 품질</div>
+            <strong>분위수 예측 자체가 통계적으로 얼마나 믿을 수 있는가?</strong>
+            <div class="rq-desc">
+              모델이 "q99" 를 출력할 때 실제로 관측값의 99%를 커버하는지, 얼마나 정밀한지 진단합니다.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 4. RQ-1 ── -->
+  <section>
+    <div class="section-title">4. RQ-1 — "기본 성능은 유지되나?" (전제 확인)</div>
+    <div class="card">
+      <p><strong>무엇을 보는가:</strong> Model 2의 중앙값 출력 <code>q50</code>이
+         Model 1(결정론적)보다 못하지 않은지 6개 수치로 비교합니다.</p>
+      <p><strong>왜 필요한가:</strong> "홍수를 잘 잡는 모델"이 "평소 유량도 더 못 맞추는 모델"이라면
+         실용성이 없습니다. 상위 분위수의 이점을 주장하기 전에 기본 전제가 깨지지 않았는지 확인해야 합니다.</p>
+      <table style="margin-top:0.8rem;">
+        <thead><tr>
+          <th>지표</th><th class="num">Model 1</th><th class="num">Model 2 q50</th>
+          <th class="num">차이 (q50 − M1)</th><th>해석</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>NSE (1에 가까울수록 좋음)</td><td class="num">−0.031</td><td class="num">0.225</td><td class="num highlight">+0.149</td><td>q50 더 좋음</td></tr>
+          <tr><td>RMSE (낮을수록 좋음)</td><td class="num">4.850</td><td class="num">4.393</td><td class="num highlight">−0.273</td><td>q50 더 좋음</td></tr>
+          <tr><td>MAE (낮을수록 좋음)</td><td class="num">2.584</td><td class="num">2.509</td><td class="num highlight">−0.197</td><td>q50 더 좋음</td></tr>
+          <tr><td>편향 (0에 가까울수록 좋음)</td><td class="num">−0.459</td><td class="num">−0.948</td><td class="num" style="color:var(--amber)">−0.437</td><td>q50이 더 낮게 예측</td></tr>
+          <tr><td>FHV — 상위 2% 유량 (0%가 이상적)</td><td class="num">−12.3%</td><td class="num">−36.1%</td><td class="num" style="color:var(--amber)">−8.5%p</td><td>q50이 고유량 구간 더 낮게</td></tr>
+        </tbody>
+      </table>
+      <div class="alert alert-amber" style="margin-top:0.8rem;">
+        <div class="alert-icon">△</div>
+        <div>
+          <strong>NSE·RMSE·MAE는 개선되지만 고유량 편향(FHV)은 오히려 악화됩니다.</strong><br>
+          이유: Model 1은 제곱오차(평균 추적), Model 2 q50은 분위수 손실(중앙값 추적).
+          극단 유량 분포는 비대칭(오른쪽 꼬리가 길어서) 평균 ≠ 중앙값.
+          그래서 q50은 평균 성능은 올라가지만 상위 2% 고유량 구간은 더 낮게 예측합니다.
+          이것이 바로 <strong>상위 분위수(q90~q99)가 필요한 이유</strong>입니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 5. RQ-2 ── -->
+  <section>
+    <div class="section-title">5. RQ-2 — "상위 분위수가 정말 첨두를 잡나?" (핵심 주장)</div>
+    <div class="card">
+      <p><strong>무엇을 보는가:</strong> 세 가지 다른 각도의 지표로 첨두 과소추정이 얼마나 줄어드는지 측정합니다.</p>
+      <p><strong>왜 세 가지 지표가 필요한가:</strong> 하나의 숫자만으로는 "우연히 잘 맞은 것인지"
+         "전반적으로 개선된 것인지" 구별하기 어렵기 때문입니다.</p>
+    </div>
+
+    <div class="metric-row">
+      <div class="metric-card">
+        <div class="metric-sym">α</div>
+        <div class="metric-name">첨두 부족률</div>
+        <div class="metric-def">
+          실제 첨두에서 예측값이 얼마나 <em>모자라는가</em>.<br>
+          0에 가까울수록 좋음.<br>
+          <small>= (실제 − 예측)<sub>+</sub> / 실제</small>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-sym">β</div>
+        <div class="metric-name">±6시간 포착률</div>
+        <div class="metric-def">
+          첨두 전후 6시간 창 안에서 예측 최댓값 / 실제 최댓값.<br>
+          1 이상이면 충분히 커버.<br>
+          <small>= max(예측) / max(관측) in ±6h</small>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-sym">δ</div>
+        <div class="metric-name">고유량 재현율</div>
+        <div class="metric-def">
+          관측값이 상위 1%(Q99)를 넘은 시각 중 예측도 그것을 넘은 비율.<br>
+          1에 가까울수록 좋음.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">α 결과 — 분위수 단계별 첨두 부족률 (낮을수록 좋음)</div>
+      <p class="sub">유역 중앙값. 홍수 발생 926개 사건, 85개 유역.</p>
+      <table>
+        <thead><tr><th>출력</th><th class="num">α (첨두 부족률)</th><th>의미</th></tr></thead>
+        <tbody>
+          <tr><td>Model 1 (결정론적)</td><td class="num">0.588</td><td>실제 첨두의 59%를 놓침</td></tr>
+          <tr><td>q50 (Model 2 중앙값)</td><td class="num">0.657</td><td>더 나빠짐 (66%를 놓침)</td></tr>
+          <tr><td>q90</td><td class="num">0.376</td><td>38%만 놓침</td></tr>
+          <tr><td>q95</td><td class="num">0.272</td><td>27%만 놓침</td></tr>
+          <tr><td class="highlight">q99</td><td class="num highlight">0.018</td><td class="highlight">거의 안 놓침! (2%)</td></tr>
+        </tbody>
+      </table>
+      <div class="alert alert-green" style="margin-top:0.8rem;">
+        <div class="alert-icon">✓</div>
+        <div>q99은 첨두 부족률이 0.018 — 즉 유역 중앙값 기준 첨두를 거의 완벽하게 포착합니다.
+             q50 대비 <strong>33배 개선</strong>.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">δ 결과 — 고유량 재현율 (높을수록 좋음)</div>
+      <table>
+        <thead><tr><th>출력</th><th class="num">δ (재현율)</th></tr></thead>
+        <tbody>
+          <tr><td>Model 1</td><td class="num">0.143</td></tr>
+          <tr><td>q50</td><td class="num">0.069</td></tr>
+          <tr><td>q90</td><td class="num">0.280</td></tr>
+          <tr><td>q95</td><td class="num">0.379</td></tr>
+          <tr><td class="highlight">q99</td><td class="num highlight">0.583</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:0.6rem; font-size:0.88rem; color:var(--slate);">
+        q99는 실제로 고유량인 시각의 <strong>58%</strong>를 잡아냅니다.
+        여전히 42%는 놓치지만, q50(7%)에 비하면 <strong>8.5배 개선</strong>입니다.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">NOAA 공식 홍수 기록으로 교차 검증</div>
+      <p class="sub">미국 기상청(NWS) 공식 홍수 사건 65건, 21개 유역 대상 별도 검증.</p>
+      <table>
+        <thead><tr><th>출력</th><th class="num">α (첨두 부족률)</th><th class="num">β (포착률)</th></tr></thead>
+        <tbody>
+          <tr><td>q50</td><td class="num">0.788</td><td class="num">0.282</td></tr>
+          <tr><td>q90</td><td class="num">0.482</td><td class="num">0.566</td></tr>
+          <tr><td>q95</td><td class="num">0.404</td><td class="num">0.677</td></tr>
+          <tr><td class="highlight">q99</td><td class="num highlight">0.172</td><td class="num highlight">0.977</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:0.6rem; font-size:0.88rem; color:var(--slate);">
+        공식 홍수 기록에서도 같은 방향. q99이 첨두 부족률 17%, 포착률 98%.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── 6. RQ-3 ── -->
+  <section>
+    <div class="section-title">6. RQ-3 — "개선의 대가는?" (비용 분석)</div>
+    <div class="card">
+      <p><strong>무엇을 보는가:</strong> q99처럼 보수적으로 예측하면 홍수는 잘 잡지만
+         "<strong>홍수 아닌데 홍수라고 경보하는</strong>" 오경보도 같이 늘어납니다.
+         이 균형을 정량화합니다.</p>
+      <p><strong>왜 필요한가:</strong> 재난 경보는 헛경보가 너무 많으면 "늑대가 왔다" 효과로 사람들이 무시합니다.
+         장점만 보여주고 단점을 숨기면 편향된 주장입니다.</p>
+
+      <div style="margin: 1rem 0;">
+        <div style="display:flex;gap:1rem;font-size:0.78rem;margin-bottom:0.5rem;color:var(--slate);">
+          <span><span style="display:inline-block;width:12px;height:12px;background:#4ade80;border-radius:2px;margin-right:4px;"></span>재현율 (홍수 잡는 비율, 높을수록 좋음)</span>
+          <span><span style="display:inline-block;width:12px;height:12px;background:#f87171;border-radius:2px;margin-right:4px;"></span>오경보율 FAR (홍수 아닌데 경보, 낮을수록 좋음)</span>
+        </div>
+
+        <div class="tradeoff-bar-wrap">
+          <div class="tradeoff-row">
+            <div class="tradeoff-label">q50</div>
+            <div class="bar-wrap">
+              <div class="bar-bg"><div class="bar-fill bar-recall" style="width:12%"></div></div>
+              <div class="bar-val">재현율 0.069</div>
+            </div>
+            <div class="bar-wrap">
+              <div class="bar-bg"><div class="bar-fill bar-far" style="width:5%"></div></div>
+              <div class="bar-val">FAR 0.0007</div>
+            </div>
+          </div>
+          <div class="tradeoff-row">
+            <div class="tradeoff-label">q90</div>
+            <div class="bar-wrap">
+              <div class="bar-bg"><div class="bar-fill bar-recall" style="width:48%"></div></div>
+              <div class="bar-val">재현율 0.280</div>
+            </div>
+            <div class="bar-wrap">
+              <div class="bar-bg"><div class="bar-fill bar-far" style="width:26%"></div></div>
+              <div class="bar-val">FAR 0.0042</div>
+            </div>
+          </div>
+          <div class="tradeoff-row">
+            <div class="tradeoff-label">q95</div>
+            <div class="bar-wrap">
+              <div class="bar-bg"><div class="bar-fill bar-recall" style="width:65%"></div></div>
+              <div class="bar-val">재현율 0.379</div>
+            </div>
+            <div class="bar-wrap">
+              <div class="bar-bg"><div class="bar-fill bar-far" style="width:38%"></div></div>
+              <div class="bar-val">FAR 0.0063</div>
+            </div>
+          </div>
+          <div class="tradeoff-row">
+            <div class="tradeoff-label">q99</div>
+            <div class="bar-wrap">
+              <div class="bar-bg"><div class="bar-fill bar-recall" style="width:100%"></div></div>
+              <div class="bar-val">재현율 0.583</div>
+            </div>
+            <div class="bar-wrap">
+              <div class="bar-bg"><div class="bar-fill bar-far" style="width:100%"></div></div>
+              <div class="bar-val">FAR 0.0164</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-amber">
+        <div class="alert-icon">△</div>
+        <div>
+          q50 → q99으로 갈 때 재현율은 <strong>8.4배</strong> 오르지만,
+          오경보율은 <strong>23배</strong> 오릅니다. 비대칭 절충(tradeoff)입니다.<br>
+          단, FAR 절대값은 작습니다 (0.016 = 전체 비홍수 시간의 1.6%).
+          이유: 홍수는 1년 중 1% 미만이므로 분모(비홍수 시간)가 매우 큽니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 7. RQ-4 ── -->
+  <section>
+    <div class="section-title">7. RQ-4 — "어디서나 같은 효과인가?" (일반화)</div>
+    <div class="card">
+      <div class="card-title">RQ-4a — 유역 특성별 (Model 1 성능 기준 3단계)</div>
+      <p class="sub">Model 1 NSE 기준 상위·중간·하위 1/3로 유역을 나눠 비교.</p>
+      <table>
+        <thead><tr>
+          <th>유역 그룹</th><th class="num">q99 α<br>(첨두 부족률)</th>
+          <th class="num">q99 δ<br>(재현율)</th><th class="num">q99 FAR<br>(오경보율)</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>상위 (Model 1이 잘 맞는 유역)</td><td class="num">0.22</td><td class="num">0.39</td><td class="num">0.0077</td></tr>
+          <tr><td>중간</td><td class="num">0.00</td><td class="num">0.62</td><td class="num">0.0115</td></tr>
+          <tr><td class="highlight">하위 (Model 1이 못 맞는 유역)</td><td class="num highlight">0.00</td><td class="num highlight">0.95</td><td class="num" style="color:var(--amber)">0.060</td></tr>
+        </tbody>
+      </table>
+      <div class="alert alert-blue" style="margin-top:0.8rem;">
+        <div class="alert-icon">💡</div>
+        <div>
+          역설적으로 <strong>Model 1이 나쁜 유역일수록 q99 효과가 큽니다</strong> (재현율 95%).
+          단, 오경보율도 함께 올라갑니다(6%).
+          Model 1이 잘 되는 유역에서는 q99 효과가 제한적입니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">RQ-4b — 홍수 유형별 (NOAA 기록 기준)</div>
+      <p class="sub">미국 기상청이 분류한 홍수 종류별로 효과를 비교.</p>
+      <table>
+        <thead><tr>
+          <th>홍수 유형</th><th class="num">사건 수</th>
+          <th class="num">q99 α</th><th>해석</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td>일반 홍수 (Flood)</td>
+            <td class="num">32</td>
+            <td class="num highlight">0.06</td>
+            <td>q99이 잘 잡음</td>
+          </tr>
+          <tr>
+            <td>돌발 홍수 (Flash Flood)</td>
+            <td class="num">8</td>
+            <td class="num" style="color:var(--red)">0.42</td>
+            <td>42% 여전히 놓침</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="alert alert-red" style="margin-top:0.8rem;">
+        <div class="alert-icon">⚠️</div>
+        <div>
+          <strong>돌발 홍수(Flash Flood)는 q99로도 첨두의 42%를 놓칩니다.</strong>
+          돌발 홍수는 수 시간 내에 급상승하는 특성상 LSTM이 패턴을 학습하기 어렵습니다.
+          단, 표본이 8건에 불과해 통계적 단정보다 <em>사례 비교</em>로 읽어야 합니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 8. RQ-5 ── -->
+  <section>
+    <div class="section-title">8. RQ-5 — "통계적으로 믿을 수 있나?" (보정 품질)</div>
+    <div class="card">
+      <p><strong>무엇을 보는가:</strong> 모델이 "q99"라고 출력했을 때 실제로 99%의 관측값이
+         그 아래 들어오는지(보정, calibration), 예측이 얼마나 좁고 정밀한지(날카로움, sharpness)를 진단합니다.</p>
+      <p><strong>왜 필요한가:</strong> 분위수 예측의 신뢰성 근거를 마련합니다. 방어적 역할입니다.</p>
+
+      <table style="margin-top:0.8rem;">
+        <thead><tr>
+          <th>분위수</th><th class="num">이상적 포함률</th><th class="num">실제 포함률</th>
+          <th class="num">오차</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>q50</td><td class="num">50%</td><td class="num">33.9%</td><td class="num" style="color:var(--red)">−16.1%p</td></tr>
+          <tr><td>q90</td><td class="num">90%</td><td class="num">50.6%</td><td class="num" style="color:var(--red)">−39.4%p</td></tr>
+          <tr><td>q95</td><td class="num">95%</td><td class="num">63.8%</td><td class="num" style="color:var(--red)">−31.2%p</td></tr>
+          <tr><td>q99</td><td class="num">99%</td><td class="num">78.7%</td><td class="num" style="color:var(--red)">−20.3%p</td></tr>
+        </tbody>
+      </table>
+
+      <div class="alert alert-red" style="margin-top:0.8rem;">
+        <div class="alert-icon">⚠️</div>
+        <div>
+          <strong>모든 분위수에서 실제 포함률이 이론값보다 낮습니다 (미보정, undercoverage).</strong><br>
+          q99이 99%를 보장하지 않으며 실제로는 78.7%입니다.
+          이 연구에서는 q99을 "99% 신뢰구간"이라 부르지 않고 <em>상위 보수성 단계 출력</em>으로만 표현합니다.
+          이는 결과를 과장하지 않는 정직한 처리입니다.
+        </div>
+      </div>
+
+      <div class="alert alert-amber" style="margin-top:0.5rem;">
+        <div class="alert-icon">△</div>
+        <div>
+          <strong>기후 기준값 대비 skill score:</strong>
+          q90·q95는 기후 기준보다 나은 반면, <strong>q99는 −0.27</strong>로 기후 기준보다 나쁩니다.
+          극단 분위수는 단순 기후 추정보다 통계적으로 더 정밀하지 않습니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="separator"></div>
+
+  <!-- ── 9. 분석 방법 합당성 리뷰 ── -->
+  <section>
+    <div class="section-title">9. 이 분석, 합당한가? — 종합 리뷰</div>
+
+    <div class="verdict-grid">
+      <div class="verdict-card verdict-ok">
+        <div class="verdict-title">잘 설계된 부분</div>
+        <ul class="check">
+          <li><strong>RQ 논리 체계</strong> — 전제 → 중심 주장 → 비용 → 일반화 → 통계 품질 순서가 탄탄합니다. 주장 하나에 여러 질문이 이중 검증합니다.</li>
+          <li><strong>세 지표 삼중주 (α·β·δ)</strong> — 첨두 지점, ±6시간 창, 전체 고유량 재현율을 각기 다른 각도에서 측정해 한 지표에 의존하는 허점을 막습니다.</li>
+          <li><strong>이중 검증 범위</strong> — 전체 85유역(Q99 기준)과 NOAA 공식 홍수 기록(21유역)에서 같은 방향으로 재현됩니다.</li>
+          <li><strong>비용(FAR)을 숨기지 않음</strong> — 이득만 보고하지 않고 오경보 비용도 솔직히 함께 보고합니다.</li>
+          <li><strong>단조성 검증</strong> — q50 → q90 → q95 → q99 순으로 지표가 반드시 단조적으로 변하는지 검증해 분석 내부 일관성을 확인합니다.</li>
+          <li><strong>해석 제한 명시</strong> — q99을 "99% 신뢰구간"이라 부르지 않는 규칙을 문서화합니다.</li>
+        </ul>
+      </div>
+
+      <div class="verdict-card verdict-warn">
+        <div class="verdict-title">한계 및 주의사항</div>
+        <ul class="warn">
+          <li><strong>미보정 문제</strong> — q99 실제 포함률이 78.7%에 그쳐 통계적으로 완전히 calibrated된 분위수 예측이 아닙니다. "탐지 도구"로는 유용하지만 확률 주장에 한계가 있습니다.</li>
+          <li><strong>FAR 비대칭</strong> — 재현율 8.5배 증가 vs 오경보율 23배 증가. 현장 운영에서 오경보 비용이 클수록 q99 단독 사용은 부담입니다.</li>
+          <li><strong>돌발 홍수 한계</strong> — Flash Flood에서 q99 α = 0.42 잔존. 가장 위험한 유형이 가장 어렵습니다. 표본도 8건에 불과합니다.</li>
+          <li><strong>q99 skill < 0</strong> — 극단 분위수가 단순 기후 기준보다 분위수 예측 정밀도가 낮습니다.</li>
+          <li><strong>NOAA 표본 작음</strong> — 21유역 65건은 방향성 확인용이며 세밀한 통계 추론은 어렵습니다.</li>
+          <li><strong>1개 임계값만 사용</strong> — per-basin Q99 하나만 고유량 기준으로 씁니다. 임계값 선택이 결과에 미치는 민감도 분석이 없습니다.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-title">전체 판정</div>
+      <p>
+        분석 논리 구조와 다각도 검증 방식은 <strong>학술 연구로서 합당</strong>합니다.
+        핵심 주장(q99이 첨두 과소추정을 줄인다)은 복수 범위에서 단조적으로 재현되므로 신뢰성이 높습니다.
+      </p>
+      <p>
+        다만 이 연구의 결론은 <em>"q99이 홍수를 더 잘 잡는 탐지 도구"</em>이지,
+        <em>"q99이 99% 확률 보장 예측"</em>이 아님을 명확히 해야 합니다.
+        미보정 문제와 돌발 홍수 한계는 논문에서 caveat으로 충분히 인정되고 있습니다.
+      </p>
+      <div class="alert alert-green" style="margin-top:0.6rem;">
+        <div class="alert-icon">✓</div>
+        <div>
+          <strong>핵심 메시지:</strong>
+          결정론적 모델의 대안으로 분위수 모델을 쓰면 홍수 첨두를 더 잘 잡을 수 있다.
+          단 보수성 단계를 올릴수록 오경보도 함께 증가하며, 이 절충을 의사결정자가 선택해야 한다.
+          통계적으로 완전히 보정된 예측은 아니지만, 실용적 탐지 도구로서의 가치는 입증되었다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 용어 정리 ── -->
+  <section>
+    <div class="section-title">10. 주요 용어 빠른 정리</div>
+    <div class="card">
+      <table>
+        <thead><tr><th style="width:140px">용어</th><th>뜻</th></tr></thead>
+        <tbody>
+          <tr><td><code>LSTM</code></td><td>시간 순서 데이터를 기억하는 딥러닝 모델. 강물 유량처럼 시계열 예측에 많이 씁니다.</td></tr>
+          <tr><td>첨두 (peak)</td><td>홍수 사건에서 유량이 가장 높은 시각의 값.</td></tr>
+          <tr><td>분위수 (quantile)</td><td>"전체 값 중 몇 %가 이 값 아래에 있는가"를 나타내는 기준점. q99 = 상위 1%.</td></tr>
+          <tr><td>NSE</td><td>Nash-Sutcliffe Efficiency. 1이 완벽, 0 이하면 평균값보다 못한 예측.</td></tr>
+          <tr><td>FAR</td><td>False Alarm Rate. 홍수가 아닌데 홍수라고 예측한 비율.</td></tr>
+          <tr><td>재현율 (recall)</td><td>실제 홍수인 것 중 모델이 잡아낸 비율.</td></tr>
+          <tr><td>보정 (calibration)</td><td>예측 확률과 실제 발생 빈도가 일치하는 정도. q99이 실제로 99%를 포함하면 완벽 보정.</td></tr>
+          <tr><td>pinball loss</td><td>분위수 학습에 쓰는 손실 함수. 비대칭 벌점 구조.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="footer">
+    CAMELS 극한 홍수 첨두 과소추정 연구 · 분석 방법 리뷰 · 2026
+  </div>
+</div>
+</body>
+</html>

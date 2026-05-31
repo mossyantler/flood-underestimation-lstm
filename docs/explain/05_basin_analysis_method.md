@@ -9,13 +9,36 @@ flowchart TD
     B --> D["non-DRBC training pool<br/>outlet outside + overlap <= 0.1 허용"]
     C --> E["DRBC selected basin<br/>154개"]
     E --> F["quality gate<br/>usable years, estimated flow, boundary confidence"]
-    F --> G["DRBC quality-pass test basin<br/>38개"]
+    F --> G["expanded observed DRBC test basin<br/>85개"]
     D --> H["quality gate"]
     H --> I["non-DRBC quality-pass pool<br/>1923개"]
     I --> J["scaling_300 subset<br/>train 269 + validation 31"]
     B --> K["server all-basin observed-flow analysis<br/>return-period + event response + typing"]
     K --> L["post-hoc 해석과 final screening 보강"]
 ```
+
+## 평가 유역을 더 적은 수에서 85개로 늘린 과정
+
+이 연구에서 모델 성능을 채점하는 곳은 DRBC(Delaware River Basin Commission, 델라웨어 강 유역 위원회) 경계 안의 유역이다. 이렇게 "학습에는 쓰지 않고 채점 전용으로 떼어둔 유역"을 holdout(평가용으로 떼어둔 유역)이라고 부른다.
+
+무엇을 했는가. 처음에는 이 평가용 유역을 비교적 적은 수만 골라서 썼다. 이후 같은 DRBC 경계 안에서 조건에 맞는 유역을 더 찾아내, 최종적으로 평가 유역을 **85개**까지 늘렸다. (초기 단계의 정확한 유역 수는 이 문서가 근거로 삼는 공식 기준 자료에 숫자로 남아 있지 않아, 여기서는 "초기엔 더 적은 수였다"고만 적는다.)
+
+왜 늘렸는가. 평가 유역이 적으면 "이 모델이 정말 더 낫다"는 결론이 우연히 뽑힌 몇 개 유역 때문일 위험이 있다. 평가 대상을 늘리면 결과가 특정 유역에 휘둘리지 않고, 더 다양한 유역에서 모델을 시험할 수 있다.
+
+어떻게 늘렸는가. 늘어난 유역은 새로 만든 데이터가 아니라, 원래 DRBC 경계 안에 있으면서 그동안 빠져 있던 유역에서 왔다. 핵심 조건은 두 가지다. 첫째, DRBC 경계 안에 위치할 것. 둘째, 실제로 측정된 유량(observed flow, 하천에서 직접 관측한 흐름 양) 자료가 충분히 있을 것. 이 두 조건과 뒤에서 설명할 품질 기준(quality gate)을 함께 통과한 유역을 골랐다. 그렇게 추려낸 유역을 기존에 쓰던 시간별 유량 시계열 데이터셋(CAMELSH hourly)과 합쳐 최종 평가 세트(test set) 85개를 완성했다. 즉 "DRBC 안 + 관측 유량 충분 + 품질 통과" 유역을 골라 기존 데이터와 묶은 것이다.
+
+어떻게 해석해야 하는가. 85개라는 숫자는 "DRBC 안의 모든 유역"이 아니라 "그중 자료 품질을 믿을 만한 유역"만 추린 결과다. 그래서 결론은 DRBC 전체가 아니라 이 85개 유역에서 확인된 것으로 읽어야 한다.
+
+## 학습·검증에 전체 유역을 다 쓰지 못한 이유
+
+무엇을 못 했는가. 모델 학습(train)과 검증(validation)에는 쓸 수 있는 유역 전부를 사용하지는 못했다. 조건과 품질 기준을 통과한 학습용 유역 풀(training pool)은 약 **1923개**까지 모였지만, 실제 학습·검증에는 이 중 고정된 일부인 **300개**만 썼다. 이 고정 300개 묶음을 `scaling_300`이라고 부르며, 학습용 269개와 검증용 31개로 나뉜다.
+
+왜 일부만 썼는가. 이유는 크게 두 가지다.
+
+1. 계산 자원과 시간의 한계. 유역 1923개를 모두 넣고 여러 모델을 학습시키려면 GPU 계산량과 시간이 많이 든다. 현실적으로 감당할 수 있는 규모로 줄여야 했다.
+2. 공정한 비교를 위한 표본 고정. 이 연구는 Model 1(결정론적 LSTM)과 Model 2(확률적 quantile LSTM)를 여러 seed(난수 초기값)로 반복 학습해 비교한다. 만약 실험마다 학습 유역이 달라지면, 성능 차이가 모델 때문인지 유역 구성 때문인지 구분할 수 없다. 그래서 같은 300개 유역으로 모든 실험을 똑같이 돌려, 차이가 오직 모델 구조에서 오도록 했다.
+
+어떻게 해석해야 하는가. 이 한계는 결과를 읽을 때 꼭 염두에 둬야 한다. 만약 1923개 유역 전부로 학습했다면 모델이 더 다양한 유역을 학습해 결과가 달라졌을 수 있다. 따라서 이 연구의 결론은 "전국의 모든 유역으로 학습한 모델"이 아니라 "고정된 300개 유역으로 학습한 모델"에서 나온 것이며, 일반화 범위(다른 유역에도 그대로 적용된다는 보장)는 그만큼 제한적으로 받아들여야 한다.
 
 ## DRBC holdout basin을 고르는 방법
 
@@ -49,7 +72,7 @@ DRBC holdout 쪽 quality gate는 다음 조건을 본다.
 
 여기서 boundary confidence는 CAMELSH/GAGES-II가 제공하는 basin boundary QA 점수다. 이 점수는 유역 polygon이 실제로 해당 outlet gauge에 물을 보내는 drainage area를 잘 대표하는지 보는 값이다. 면적이 NWIS drainage area와 얼마나 맞는지, HUC10 경계와 대체로 정합적인지, gauge 위치가 basin boundary와 streamlines에 비추어 말이 되는지를 종합해서 판단한다. 이 값이 낮으면 유역 polygon 안에서 집계한 강수·지형 입력과 gauge에서 관측한 유량 target이 서로 다른 공간을 가리킬 수 있으므로 제외한다.
 
-이 gate를 통과한 DRBC basin은 현재 38개다. 이 38개가 현재 DRBC quality-pass test basin으로 쓰인다.
+현재 공식 DRBC test는 expanded observed 기준 85개다. 이 85개는 metadata quality gate와 2014-2016 선택 target coverage gate를 함께 통과한 유역이다.
 
 ## static basin analysis
 

@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spearman 상관계수 — r이란 무엇인가?</title>
+  <style>
+    :root {
+      --blue:   #2563eb;
+      --indigo: #4f46e5;
+      --green:  #16a34a;
+      --amber:  #d97706;
+      --red:    #dc2626;
+      --slate:  #475569;
+      --bg:     #f8fafc;
+      --card:   #ffffff;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      background: var(--bg); color: #1e293b;
+      line-height: 1.75; font-size: 15px;
+    }
+    .page { max-width: 920px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+
+    .hero {
+      background: linear-gradient(135deg, #1e3a5f 0%, #7c3aed 60%, #4f46e5 100%);
+      color: #fff; border-radius: 16px;
+      padding: 2.5rem 2rem 2rem; margin-bottom: 2.5rem;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 999px; padding: 0.2rem 0.8rem;
+      font-size: 0.75rem; letter-spacing: 0.04em; margin-bottom: 0.8rem;
+    }
+    .hero h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.3; }
+    .hero p  { opacity: 0.85; font-size: 0.95rem; max-width: 640px; }
+
+    section { margin-bottom: 2.5rem; }
+    .section-title {
+      font-size: 1.2rem; font-weight: 700;
+      color: var(--indigo);
+      border-left: 4px solid var(--indigo);
+      padding-left: 0.75rem; margin-bottom: 1.2rem;
+    }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;
+    }
+    .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.6rem; }
+
+    .alert {
+      border-radius: 10px; padding: 1rem 1.2rem;
+      font-size: 0.88rem; margin-bottom: 0.8rem;
+      display: flex; gap: 0.7rem; align-items: flex-start;
+    }
+    .alert-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
+    .alert-green  { background: #f0fdf4; border: 1px solid #86efac; }
+    .alert-amber  { background: #fffbeb; border: 1px solid #fcd34d; }
+    .alert-red    { background: #fff1f2; border: 1px solid #fca5a5; }
+    .alert-blue   { background: #eff6ff; border: 1px solid #93c5fd; }
+    .alert-purple { background: #f5f3ff; border: 1px solid #c4b5fd; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.87rem; margin-bottom: 0.8rem; }
+    th {
+      background: #f1f5f9; text-align: left;
+      padding: 0.55rem 0.75rem;
+      border-bottom: 2px solid var(--border);
+      font-weight: 600; color: var(--slate);
+    }
+    td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .hi { font-weight: 700; color: var(--indigo); }
+    .warn-val { font-weight: 700; color: var(--red); }
+    .ok-val { font-weight: 700; color: var(--green); }
+
+    .analogy {
+      background: linear-gradient(135deg, #f5f3ff, #eff6ff);
+      border: 1px solid #c4b5fd; border-radius: 10px;
+      padding: 1rem 1.2rem; margin: 0.8rem 0; font-size: 0.88rem;
+    }
+    .analogy-title { font-weight: 700; color: #6d28d9; margin-bottom: 0.3rem; }
+
+    p { margin-bottom: 0.6rem; }
+    .sub { color: var(--slate); font-size: 0.85rem; margin-bottom: 0.4rem; }
+    .separator { height: 1px; background: var(--border); margin: 2rem 0; }
+    code {
+      background: #f1f5f9; border-radius: 4px;
+      padding: 0.1rem 0.35rem; font-size: 0.85em;
+      font-family: 'Menlo', 'Consolas', monospace; color: var(--indigo);
+    }
+
+    /* ── 수직 수직선 시각화 ── */
+    .r-scale {
+      position: relative;
+      height: 48px;
+      background: linear-gradient(to right,
+        #dc2626 0%, #f97316 20%, #fbbf24 35%,
+        #d1d5db 50%,
+        #fbbf24 65%, #4ade80 80%, #16a34a 100%);
+      border-radius: 8px;
+      margin: 1rem 0 0.4rem;
+    }
+    .r-tick {
+      position: absolute; top: 0; height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    }
+    .r-tick-line { width: 2px; background: rgba(0,0,0,0.35); height: 60%; }
+    .r-tick-label {
+      font-size: 0.75rem; font-weight: 700; color: #1e293b;
+      margin-top: 4px; white-space: nowrap;
+      background: rgba(255,255,255,0.85); border-radius: 4px;
+      padding: 0 3px; transform: translateY(100%);
+    }
+    .r-marker {
+      position: absolute; top: -10px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .r-marker-arrow {
+      font-size: 1.2rem; line-height: 1; color: #1e293b;
+    }
+    .r-marker-label {
+      font-size: 0.72rem; font-weight: 700;
+      background: #1e293b; color: #fff;
+      border-radius: 4px; padding: 1px 5px; white-space: nowrap;
+      margin-top: 2px;
+    }
+    .r-axis-labels {
+      display: flex; justify-content: space-between;
+      font-size: 0.8rem; color: var(--slate);
+      margin-top: 2.2rem; padding: 0 2px;
+    }
+
+    /* ── 순위 계산 스텝 테이블 ── */
+    .step-box {
+      background: #f8fafc; border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem 1.2rem; margin: 0.8rem 0;
+    }
+    .step-title { font-weight: 700; font-size: 0.88rem; margin-bottom: 0.5rem; color: var(--indigo); }
+
+    /* ── 수식 블록 ── */
+    .formula-box {
+      background: #1e293b; color: #e2e8f0;
+      border-radius: 10px; padding: 1.2rem 1.5rem;
+      font-family: 'Menlo', 'Consolas', monospace;
+      font-size: 1rem; margin: 0.8rem 0;
+      text-align: center; letter-spacing: 0.02em;
+    }
+    .formula-box .frac {
+      display: inline-block; vertical-align: middle; text-align: center;
+    }
+    .formula-box .frac .num-f { border-bottom: 2px solid #94a3b8; padding: 0 4px; display: block; }
+    .formula-box .frac .den-f { padding: 0 4px; display: block; }
+    .formula-note { font-size: 0.82rem; color: var(--slate); margin-top: 0.4rem; }
+
+    /* ── 강도 카드 그리드 ── */
+    .strength-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem;
+      margin: 0.8rem 0;
+    }
+    @media (max-width: 620px) { .strength-grid { grid-template-columns: 1fr 1fr; } }
+    .str-card {
+      border-radius: 10px; padding: 0.8rem 0.6rem; text-align: center;
+      border: 2px solid var(--border);
+    }
+    .str-r { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .str-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; color: var(--slate); }
+    .str-desc { font-size: 0.7rem; color: var(--slate); margin-top: 0.2rem; }
+    .s0 { border-color: #d1d5db; background: #f9fafb; }
+    .s1 { border-color: #fcd34d; background: #fffbeb; }
+    .s2 { border-color: #fdba74; background: #fff7ed; }
+    .s3 { border-color: #86efac; background: #f0fdf4; }
+    .s4 { border-color: #4ade80; background: #dcfce7; }
+
+    /* ── 비교표: 분야별 기준 ── */
+    .footer {
+      text-align: center; font-size: 0.8rem; color: #94a3b8;
+      margin-top: 3rem; padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    ul.check li { margin-bottom: 0.3rem; }
+    ul.check li::marker { content: '✓  '; color: var(--green); }
+    ul.warn  li { margin-bottom: 0.3rem; }
+    ul.warn  li::marker { content: '△  '; color: var(--amber); }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-badge">통계 기초 · Spearman r · 비전공 대학생용</div>
+    <h1>Spearman 상관계수 r이란?<br>왜 0.3이 "의미 있다"는 기준인가?</h1>
+    <p>두 변수가 함께 변하는 경향을 −1~+1 하나의 숫자로 나타내는 지표.
+       범위가 0~1이 아니라 −1~+1이라는 사실이 핵심입니다.</p>
+  </div>
+
+  <!-- 1. r이 뭔가 -->
+  <section>
+    <div class="section-title">1. r은 무엇을 측정하는가?</div>
+    <div class="card">
+      <p><strong>Spearman 상관계수(r)</strong>는 두 변수가 <strong>단조적으로(monotonically)</strong>
+         함께 변하는 정도를 측정합니다.</p>
+      <p>단조적 = "X가 커질 때 Y도 커지는 경향" 또는 "X가 커질 때 Y가 작아지는 경향".</p>
+
+      <div class="analogy">
+        <div class="analogy-title">비유: 반 석차와 성적</div>
+        반 석차가 1등→30등으로 올라갈수록 성적은 100점→50점으로 내려갑니다.
+        이 둘은 <strong>완벽한 음의 단조 관계</strong>: r = −1.
+        반대로 공부 시간이 늘수록 성적도 꼭 그 비례로 오르면 r = +1.
+        현실에서는 노이즈가 섞이므로 r은 중간 어딘가에 위치합니다.
+      </div>
+
+      <div class="alert alert-red">
+        <div class="alert-icon">⚠️</div>
+        <div>
+          <strong>r의 범위는 0~1이 아니라 −1~+1입니다.</strong>
+          음수 r은 "반대 방향 관계"를 의미하며, 이 점이 해석의 핵심입니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 수식 -->
+  <section>
+    <div class="section-title">2. 수식: 어떻게 계산하는가?</div>
+    <div class="card">
+      <div class="card-title">핵심 아이디어: 값 자체가 아니라 "순위"로 계산</div>
+      <p>Pearson 상관계수는 값 그대로 비교하는데, Spearman은 먼저 <strong>순위로 변환</strong>한 뒤
+         그 순위에 대해 상관을 계산합니다. 덕분에 극단값(outlier)에 강합니다.</p>
+
+      <div class="step-box">
+        <div class="step-title">예시: rise_slope vs obs_class (5개 이벤트)</div>
+        <table style="font-size:0.83rem;">
+          <thead>
+            <tr>
+              <th>이벤트</th>
+              <th class="num">rise_slope<br>(cfs/h)</th>
+              <th class="num">rise_slope<br>순위 (R_x)</th>
+              <th class="num">obs_class<br>(0~4)</th>
+              <th class="num">obs_class<br>순위 (R_y)</th>
+              <th class="num">순위차 d</th>
+              <th class="num">d²</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>A</td><td class="num">8</td><td class="num">1</td><td class="num">0</td><td class="num">1</td><td class="num">0</td><td class="num">0</td></tr>
+            <tr><td>B</td><td class="num">25</td><td class="num">2</td><td class="num">1</td><td class="num">2</td><td class="num">0</td><td class="num">0</td></tr>
+            <tr><td>C</td><td class="num">40</td><td class="num">3</td><td class="num">3</td><td class="num">4</td><td class="num">−1</td><td class="num">1</td></tr>
+            <tr><td>D</td><td class="num">65</td><td class="num">4</td><td class="num">2</td><td class="num">3</td><td class="num">1</td><td class="num">1</td></tr>
+            <tr><td>E</td><td class="num">90</td><td class="num">5</td><td class="num">4</td><td class="num">5</td><td class="num">0</td><td class="num">0</td></tr>
+            <tr style="background:#f0fdf4;">
+              <td colspan="5" style="text-align:right; font-weight:700;">Σd² =</td>
+              <td class="num ok-val">2</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card-title" style="margin-top:1rem;">공식</div>
+
+      <div class="formula-box">
+        r<sub>s</sub> &nbsp;=&nbsp; 1 &nbsp;−&nbsp;
+        <span class="frac">
+          <span class="num-f">6 · Σd<sub>i</sub>²</span>
+          <span class="den-f">n(n² − 1)</span>
+        </span>
+      </div>
+      <p class="formula-note">d<sub>i</sub> = 이벤트 i의 두 변수 순위 차이 &nbsp;|&nbsp; n = 전체 표본 수</p>
+
+      <div class="step-box">
+        <div class="step-title">예시 계산 (n=5, Σd²=2)</div>
+        <p style="font-family:monospace; font-size:0.9rem;">
+          r = 1 − (6 × 2) / (5 × (25 − 1))<br>
+          r = 1 − 12 / 120<br>
+          r = 1 − 0.1 = <strong>+0.90</strong>
+        </p>
+        <p class="sub">순위가 거의 일치하므로 r이 +1에 가깝습니다.</p>
+      </div>
+
+      <div class="alert alert-blue">
+        <div class="alert-icon">💡</div>
+        <div>
+          실제로는 공식 라이브러리(Python: <code>scipy.stats.spearmanr</code>)를 쓰며,
+          동점(tied ranks)이 많으면 더 정확한 Pearson-on-ranks 공식을 사용합니다.
+          이 두 방법은 동점이 없으면 완전히 동일한 결과를 냅니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 범위 시각화 -->
+  <section>
+    <div class="section-title">3. −1 ~ +1 범위 시각화</div>
+    <div class="card">
+      <p>r = 0을 중심으로 좌우 대칭입니다. 절댓값 |r|이 클수록 강한 관계.</p>
+
+      <div style="position:relative; margin-top:1.8rem;">
+        <div class="r-scale"></div>
+
+        <!-- 눈금 -->
+        <div class="r-tick" style="left:0%;">
+          <div class="r-tick-line"></div>
+          <div class="r-tick-label">−1.0</div>
+        </div>
+        <div class="r-tick" style="left:25%;">
+          <div class="r-tick-line"></div>
+          <div class="r-tick-label">−0.5</div>
+        </div>
+        <div class="r-tick" style="left:50%;">
+          <div class="r-tick-line"></div>
+          <div class="r-tick-label">0.0</div>
+        </div>
+        <div class="r-tick" style="left:75%;">
+          <div class="r-tick-line"></div>
+          <div class="r-tick-label">+0.5</div>
+        </div>
+        <div class="r-tick" style="left:100%; transform:translateX(-100%);">
+          <div class="r-tick-line"></div>
+          <div class="r-tick-label">+1.0</div>
+        </div>
+
+        <!-- 마커: 기준치 0.3 -->
+        <div class="r-marker" style="left:65%;">
+          <div class="r-marker-arrow">▼</div>
+          <div class="r-marker-label">기준치 +0.3</div>
+        </div>
+
+        <!-- 마커: rise_slope -->
+        <div class="r-marker" style="left:67.95%; top:-30px;">
+          <div class="r-marker-arrow" style="color:#16a34a;">▼</div>
+          <div class="r-marker-label" style="background:#16a34a;">rise_slope +0.359 ✓</div>
+        </div>
+
+        <!-- 마커: rise_rel M3 -->
+        <div class="r-marker" style="left:48.2%; top:-55px;">
+          <div class="r-marker-arrow" style="color:#dc2626;">▼</div>
+          <div class="r-marker-label" style="background:#dc2626;">rise_rel −0.073 ✗</div>
+        </div>
+
+        <div class="r-axis-labels">
+          <span>완벽한 음의 상관<br>(X↑ → Y↓)</span>
+          <span style="text-align:center;">무상관</span>
+          <span style="text-align:right;">완벽한 양의 상관<br>(X↑ → Y↑)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 강도 해석 -->
+  <section>
+    <div class="section-title">4. r 크기 해석 — 왜 0.3이 기준인가?</div>
+    <div class="card">
+      <div class="card-title">Cohen(1988) 효과 크기 기준 (절댓값 기준)</div>
+
+      <div class="strength-grid">
+        <div class="str-card s0">
+          <div class="str-r" style="color:#6b7280;">|r| &lt; 0.1</div>
+          <div class="str-label">무시 가능</div>
+          <div class="str-desc">노이즈 수준</div>
+        </div>
+        <div class="str-card s1">
+          <div class="str-r" style="color:var(--amber);">0.1 ~ 0.3</div>
+          <div class="str-label">약한 신호</div>
+          <div class="str-desc">있긴 있음</div>
+        </div>
+        <div class="str-card s2" style="border-color:#f97316; background:#fff7ed;">
+          <div class="str-r" style="color:#ea580c; font-size:1.35rem;">0.3 ~ 0.5</div>
+          <div class="str-label" style="color:#ea580c;">중간 ← 기준치</div>
+          <div class="str-desc">실용적 의미</div>
+        </div>
+        <div class="str-card s3">
+          <div class="str-r" style="color:var(--green);">0.5 ~ 0.7</div>
+          <div class="str-label">강함</div>
+          <div class="str-desc">명확한 신호</div>
+        </div>
+        <div class="str-card s4">
+          <div class="str-r" style="color:#15803d;">&gt; 0.7</div>
+          <div class="str-label">매우 강함</div>
+          <div class="str-desc">거의 선형 관계</div>
+        </div>
+      </div>
+
+      <div class="alert alert-amber">
+        <div class="alert-icon">△</div>
+        <div>
+          <strong>"0.3은 낮은 거 아니야?" — 분야에 따라 기준이 다릅니다.</strong>
+          실험물리학이나 공학에서는 r &lt; 0.99면 관계가 약합니다.
+          하지만 지구과학·수문학·사회과학에서는 데이터 자체의 분산이 훨씬 크기 때문에
+          0.3도 실용적으로 의미 있는 신호입니다.
+        </div>
+      </div>
+
+      <div class="card" style="background:#f8fafc; margin-top:0.6rem;">
+        <div class="card-title">왜 홍수 데이터에서 높은 r이 나오기 어려운가?</div>
+        <table>
+          <thead><tr><th>요인</th><th>영향</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>유역 다양성</td>
+              <td>300개 유역의 토양·기후·면적이 모두 다름 → 같은 rise_slope라도 결과가 다름</td>
+            </tr>
+            <tr>
+              <td>강수 공간 패턴</td>
+              <td>상류에만 비가 와도 하류에서 홍수 → 단일 지표로 설명 한계</td>
+            </tr>
+            <tr>
+              <td>모델 불확실성</td>
+              <td>q99 예측 자체가 완벽하지 않아 obs_class에 노이즈 추가</td>
+            </tr>
+            <tr>
+              <td>희귀 사건 표본</td>
+              <td>above_q99 사건은 전체 시계열의 극소수 → 통계 분산 큼</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="alert alert-green" style="margin-top:0.6rem;">
+          <div class="alert-icon">✓</div>
+          <div>
+            이런 노이즈 환경에서 rise_slope r = +0.359 달성 →
+            <strong>"절대 상승 속도 하나만 알아도 홍수 위험을 중간 수준으로 예측 가능"</strong>하다는
+            실용적 의미가 있습니다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="separator"></div>
+
+  <!-- 5. 이 연구에서 적용 -->
+  <section>
+    <div class="section-title">5. 이 연구에서 r 해석 정리</div>
+    <div class="card">
+      <p class="sub">두 변수: rise_slope (절대 상승 속도, cfs/h) ↔ obs_class (관측 위치 구간, 0=아래~4=q99초과)</p>
+      <table>
+        <thead>
+          <tr>
+            <th>지표</th>
+            <th>onset 방법</th>
+            <th class="num">r</th>
+            <th>해석</th>
+            <th>판정</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>rise_slope</td>
+            <td>Q50 임계값 (구 방법)</td>
+            <td class="num warn-val">−0.129</td>
+            <td>반직관적 — onset 오류로 부호 반전</td>
+            <td><span style="color:var(--red); font-weight:700;">✗ 아티팩트</span></td>
+          </tr>
+          <tr style="background:#f0fdf4;">
+            <td><strong>rise_slope</strong></td>
+            <td><strong>M3 SG (새 방법)</strong></td>
+            <td class="num ok-val"><strong>+0.359</strong></td>
+            <td>빠른 상승 → q99 초과 확률 높음</td>
+            <td><span style="color:var(--green); font-weight:700;">✓ 기준 달성</span></td>
+          </tr>
+          <tr>
+            <td>rise_rel</td>
+            <td>Q50 임계값 (구 방법)</td>
+            <td class="num" style="color:var(--amber);">+0.451</td>
+            <td>onset이 above_q99 사건에서 낮게 잡혀 rise_rel 부풀림</td>
+            <td><span style="color:var(--amber); font-weight:700;">△ 아티팩트 의심</span></td>
+          </tr>
+          <tr>
+            <td>rise_rel</td>
+            <td>M3 SG (새 방법)</td>
+            <td class="num warn-val">−0.073</td>
+            <td>아티팩트 제거 후 신호 없음</td>
+            <td><span style="color:var(--red); font-weight:700;">✗ 신호 없음</span></td>
+          </tr>
+          <tr>
+            <td>rel_width</td>
+            <td>—</td>
+            <td class="num warn-val">−0.015</td>
+            <td>유의하지도 않음 (p=0.433)</td>
+            <td><span style="color:var(--red); font-weight:700;">✗ 노이즈</span></td>
+          </tr>
+          <tr>
+            <td>g3_ratio</td>
+            <td>—</td>
+            <td class="num" style="color:var(--amber);">+0.137~0.173</td>
+            <td>유의하나 기준치 미달</td>
+            <td><span style="color:var(--amber); font-weight:700;">△ 약한 신호</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="alert alert-blue">
+        <div class="alert-icon">💡</div>
+        <div>
+          <strong>r 부호가 바뀌는 것 (−0.129 → +0.359)이 의심스러울 수 있습니다.</strong>
+          onset을 잘못 정의하면 상승 속도 계산 자체가 뒤집힙니다:
+          Q50 onset은 유량이 이미 높은 시점을 "시작점"으로 잡아서 짧은 상승 구간을 빠른 속도로 계산.
+          M3 SG onset은 실제 유량 극솟값을 찾아서 전체 상승 구간을 올바르게 측정.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. 한눈에 정리 -->
+  <section>
+    <div class="section-title">6. Spearman r 한눈에 정리</div>
+    <div class="card">
+      <table>
+        <thead><tr><th>질문</th><th>답</th></tr></thead>
+        <tbody>
+          <tr><td>r 범위</td><td>−1 ~ +1 (0~1 아님)</td></tr>
+          <tr><td>r = 0 의미</td><td>두 변수 간 단조 관계 없음</td></tr>
+          <tr><td>r = −1 의미</td><td>완벽한 반대 방향 단조 관계</td></tr>
+          <tr><td>왜 순위로 변환?</td><td>극단값(outlier)에 강하고, 비선형 단조 관계도 잡음</td></tr>
+          <tr><td>왜 0.3이 기준?</td><td>수문학·지구과학에서 "실용적으로 의미 있는 중간 신호"의 최소치 (Cohen 1988)</td></tr>
+          <tr><td>0.3이 낮지 않냐?</td><td>범위는 0~1이 아니라 0~+1 (절댓값). 노이즈 많은 현실 데이터에서 0.3은 중간 수준</td></tr>
+          <tr style="background:#f0fdf4;"><td>이 연구 결론</td><td>rise_slope (M3 SG onset) r=+0.359 → 기준치 달성. 빠른 상승 = q99 초과 확률 높음</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="footer">
+    CAMELS 연구 · Spearman 상관계수 기초 설명 · 비전공 대학생용 · 2026
+  </div>
+</div>
+</body>
+</html>

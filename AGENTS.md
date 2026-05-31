@@ -9,8 +9,12 @@
 
 - 응답, `docs/`, `report/` 본문은 한국어 기본.
 - API, LSTM, SHAP, quantile, calibration, coverage, RandomForest, surrogate model 같은 고정 전문 용어는 영어 그대로. 일반 설명어·문장 연결·해석 문장은 한국어.
-- 전문 용어 첫 등장 또는 독자 혼동 가능 시 짧은 한국어 설명 추가. 예: `coverage`는 "관측값이 예측 quantile 아래에 들어오는 비율".
+- 영어 사용은 필요한 고정 전문 용어와 코드 식별자에만 제한한다. 설명용 제목·표 머리글·일반 개념어는 가능한 한 한국어로 쓴다.
+- 전문 용어, 자체 규정 단어, 새로 만든 지표명은 첫 등장 시 반드시 한국어 풀이를 붙인다. 예: `coverage`는 "관측값이 예측 quantile 아래에 들어오는 비율".
+- `obs class`, `signal feature`, `risk tier`, `leakage`, `anchor`처럼 분석 과정에서 만든 내부 용어를 그대로 던지지 않는다. 각각 "관측 위치 구간", "신호 지표", "위험 단계", "관측값 누수", "계산 기준 시점"처럼 한국어 이름을 먼저 쓰고, 필요할 때만 괄호 안에 영어/코드명을 병기한다.
+- HTML, dashboard, 발표자료, 설명 문서처럼 독자 이해가 목적인 산출물은 특히 영어 약어·내부 용어를 남발하지 않는다. 표와 그림에는 "무엇을 뜻하는 값인지"를 한 문장으로 풀어 쓴다.
 - `docs/` 또는 `report/` 작성 시 대학생 수준 가독성. 순서: "무엇을 보는 분석인지" → "왜 필요한지" → "결과를 어떻게 해석해야 하는지".
+- `docs/explain/` 같은 입문 설명 자료는 **비전공 대학생** 기준으로 쓴다. 수문학·기계학습 배경 지식을 전제하지 않고, 개념을 일상어로 먼저 풀어 쓴다. 영어는 최대한 지양하고 한국어 위주로 쓰며, 불가피한 고정 전문 용어만 영어로 두고 곧바로 한국어 풀이를 붙인다.
 - 수식·지표·모델 구조 설명 시 정의와 직관적 의미 함께. 논문용 문장에서는 과장·미확인 인과 단정 금지.
 
 ---
@@ -40,7 +44,7 @@ Multi-basin LSTM 기반 수문 예측에서 **극한 홍수 첨두 과소추정*
 
 `Model 3` 관련 conceptual core 설계 메모는 보존하되, 현재 논문 공식 비교축에는 미포함. 상세 아키텍처는 [`docs/experiment/method/model/architecture.md`](docs/experiment/method/model/architecture.md) 참조.
 
-`scaling pilot`은 basin 수 결정용 운영 실험. deterministic Model 1로 전국 범위 stratified subset `100 / 300 / 600` 비교 후, non-DRBC train/validation basin 수는 `300` 고정. 선택 기준: `non-DRBC validation 성능 + static attribute distribution diagnostics + observed-flow event-response diagnostics + random same-size subset benchmark + compute cost`. DRBC holdout test metric으로 pilot basin 수 선택 금지. seed `111`의 `scaling_300` subset 고정, Model 1 / Model 2 seed `111 / 222 / 444` 동일 subset 재사용. Model 2 seed `333`은 NaN loss로 중단, 공정한 paired-seed 비교를 위해 완료된 Model 1 seed `333`도 final aggregate 제외.
+`scaling pilot`은 basin 수 결정용 운영 실험. deterministic Model 1로 전국 범위 stratified subset `100 / 300 / 600` 비교 후, non-DRBC train/validation basin 수는 `300` 고정. 선택 기준: `non-DRBC validation 성능 + static attribute distribution diagnostics + observed-flow event-response diagnostics + random same-size subset benchmark + compute cost`. DRBC holdout test metric으로 pilot basin 수 선택 금지. seed `111`의 `scaling_300` subset 고정, Model 1 / Model 2 seed `111 / 222 / 444` 동일 subset 재사용. 현재 공식 primary DRBC test split은 expanded observed 기준 **85개**이며 `configs/pilot/basin_splits/scaling_300/test.txt`는 `configs/basin_splits/drbc_expanded_observed_test/test.txt`와 같은 85개 유역을 사용한다. Model 2 seed `333`은 NaN loss로 중단, 공정한 paired-seed 비교를 위해 완료된 Model 1 seed `333`도 final aggregate 제외.
 
 극한호우 보조 test는 subset300 primary DRBC test 대체 아님. hourly `Rainf`에서 만든 rain-event catalog로 train/validation exposure와 DRBC historical stress response 점검. `drbc_historical_stress`는 DRBC basin holdout 조건 유지하나 historical `1980-2024` 사용 → temporal independence claim 부적합. All-validation-epoch 결과는 checkpoint sensitivity 진단이며 stress/test 결과로 primary epoch 재선택 용도 아님.
 
@@ -145,6 +149,51 @@ DB cache 구조 변경 (schema, importer, migration, DuckDB view 수정) 시 `da
 - **DRBC 선택 기준**: `outlet_in_drbc == True` 및 `overlap_ratio_of_basin >= 0.9` → **154개** (outlet 기준만이면 192개).
 - **Training pool 기준**: `outlet_in_drbc == False` 및 `overlap_ratio_of_basin <= 0.1`, 이후 usable year / estimated-flow fraction / boundary confidence quality gate 적용 → **1923개** quality-pass basin.
 
+## output 분석 폴더 표준
+
+`output/model_analysis/` 분석 산출물은 아래 표준을 따른다. 코드/config는 두지 않는다.
+
+주제(top-level) = 평가셋·분석 단위. 각 주제는 **평탄형** 또는 **그룹형** 하나만 쓴다. 섞지 않는다.
+
+- **평탄형** (분석 1개): 주제 폴더 = `README.md` + `figures/` `tables/` `data/` `report/` `gallery/`
+- **그룹형** (분석 2개+): 주제 폴더 = `README.md` + 하위 분석별 표준 폴더. 주제 직속에 `figures/`·`tables/`를 두지 않는다.
+
+| 표준 하위 폴더 | 담는 것 |
+| --- | --- |
+| `figures/` | 결론용 대표 그림 (.png) |
+| `tables/` | 수치 표 (.csv .parquet) |
+| `data/` | 입력·중간물·캐시 (추론 원본, catalog, metadata, .geojson .json) |
+| `report/` | 사람이 읽는 요약 (.md .html, summary .json) |
+| `gallery/` | basin별 대량 그림. `figures/`와 분리 |
+
+배치 규칙:
+
+- 그림은 `figures/`(또는 `gallery/`)에만. 다른 곳에 흩지 않는다.
+- 주제·분석 폴더 root에 파일을 직접 두지 않는다. 전부 표준 하위 폴더로.
+- 분석 폴더 안에 다른 분석 이름을 넣지 않는다. 최대 2단계. 더 깊어지면 별 주제로 분리.
+- 한 분석이 여러 갈래면(예: 오차 원인 basin/forcing/attribution) 폴더를 더 파지 말고 파일명 prefix로 구분.
+
+확정 top-level 구조:
+
+| 주제 | 형태 | 하위 분석 |
+| --- | --- | --- |
+| `primary/` | 그룹 | `metrics/` · `calibration/` |
+| `confirmed_flood/` | 평탄 | NWS flood stage 기준 실제 홍수 event |
+| `q99_analysis/` | 그룹 | `performance/` · `causes/` |
+| `band_signal/` | 그룹 | `band_shape/` · `slope_signal/` · `signal_sweep/` · `method_compare/` |
+| `shap/` | 그룹 | `q99/` · `test_split/` |
+
+`band_signal/` = 관측 첨두가 예측 밴드(q50~q99) 어디에 드는지(관측 위치 구간)와 그 위치를 예측하는 신호를 묶은 주제. 하위: `band_shape`(밴드 폭·꼬리·위치·gap), `slope_signal`(상승 기울기 신호), `signal_sweep`(위치 구간 신호 탐색), `method_compare`(상승부 onset 검출법 비교).
+
+파일명 규칙:
+
+- 폴더가 주는 맥락 prefix 제거: `confirmed_flood_`, `q99_`, `primary_` 등 폴더명과 중복되는 접두어.
+- 실험맥락 prefix 제거: `subset300_`, `expanded_drbc_`. **"expanded" 용어는 쓰지 않는다** (모든 test·분석이 expanded).
+- 식별자는 보존: `seed111/222/444`, `model1/model2`, `q50/q90/q95/q99`, `with_outliers/without_outliers`.
+- 약어: `ub_`(upper band) 접두 제거. `band_signal/band_shape/` 폴더가 band 맥락을 주므로 `ub_band_shape_*`→`band_shape_*`, `ub_location_class_*`→`location_class_*` 식. 그 외(`rq1~rq4`, `m3/m4`, `q99`)는 유지.
+
+파일명은 생성 스크립트가 출력한다. 폴더·파일명 규칙 변경 시 해당 스크립트의 출력 경로·파일명 문자열도 같은 작업에서 수정한다. 상세 레이아웃은 `output/AGENTS.md` 참조(이 표준과 동기화 유지).
+
 ## 개발 환경 규칙
 
 - **패키지 관리**: `uv` 표준. 새 코드는 `uv run` 실행 가능해야 함.
@@ -167,7 +216,7 @@ Subagents 남용 금지. 단순 한 파일 수정, 즉시 확인 가능한 명�
 - 접속 주소: `central-02.tcp.tunnel.elice.io:15699`
 - SSH 비밀키: `/Users/jang-minyeop/.ssh/elice.pem`
 - 원격 서버 OS: `Ubuntu 22.04.5 LTS`
-- 재접속 예시: `ssh -i /Users/jang-minyeop/.ssh/elice.pem elicer@central-02.tcp.tunnel.elice.io -p 15699`
+- 재접속 예시: `ssh -i /Users/jang-minyeop/.ssh/elice.pem elicer@central-01.tcp.tunnel.elice.io -p 27612`
 - `export PATH="/opt/homebrew/bin:$PATH"` 규칙은 **로컬 macOS 터미널에서만** 적용. 원격 Ubuntu 인스턴스에서는 Homebrew PATH 추가 금지, 필요 시 `~/.local/bin` 같은 사용자 로컬 PATH만 사용.
 
 ## 문서 정합성 유지 규칙

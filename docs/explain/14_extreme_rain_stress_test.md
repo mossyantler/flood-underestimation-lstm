@@ -1,4 +1,4 @@
-# 10. 극한호우 stress test를 어떻게 읽을까
+# 14. 극한호우 stress test를 어떻게 읽을까
 
 이 문서는 `subset300` Model 1 / Model 2 결과에 새로 붙인 극한호우 stress test를 학부생 기준으로 설명한다. 앞 장의 hydrograph 분석이 "큰 유량 시간대에서 모델이 얼마나 낮게 예측하는가"를 본다면, 이 장의 stress test는 "큰 비가 왔을 때 모델이 유량을 충분히 올리는가"를 본다.
 
@@ -138,7 +138,7 @@ DRBC historical stress period인 1980-2024에서는 response metric까지 가능
 
 대표 flow graph에서도 같은 패턴이 보인다. Positive-response 사례에서는 `q50`이 peak를 낮게 잡는 동안 `q95/q99`가 관측 peak 쪽으로 올라가고, low-response negative-control 사례에서는 관측 유량이 낮은데도 `q99`가 flood proxy를 넘는 장면이 나온다. 그래서 그림은 "Model 2가 평균적으로 더 좋다"가 아니라 "upper quantile은 놓치는 큰 peak를 줄이지만 경보처럼 쓰면 과대반응도 같이 생긴다"는 메시지를 보여주는 용도다.
 
-All-validation-epoch sensitivity도 같은 236개 event와 38개 basin을 대상으로 생성되어 있다. 이 결과는 primary checkpoint를 바꾸기 위한 근거가 아니라, upper-tail 효과와 false-positive tradeoff가 epoch `005 / 010 / 015 / 020 / 025 / 030` 전반에서 얼마나 유지되는지 보는 보조 확인이다.
+All-validation-epoch sensitivity도 expanded observed DRBC 85개 기준과 분리해 보조 진단으로 해석해야 한다. 이 결과는 primary checkpoint를 바꾸기 위한 근거가 아니라, upper-tail 효과와 false-positive tradeoff가 epoch `005 / 010 / 015 / 020 / 025 / 030` 전반에서 얼마나 유지되는지 보는 보조 확인이다.
 
 ## 결론을 어떻게 써야 할까
 

@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>상승 시간(rising_hours) 분포 분석</title>
+  <style>
+    :root {
+      --blue:   #2563eb;
+      --indigo: #4f46e5;
+      --green:  #16a34a;
+      --amber:  #d97706;
+      --red:    #dc2626;
+      --slate:  #475569;
+      --bg:     #f8fafc;
+      --card:   #ffffff;
+      --border: #e2e8f0;
+
+      /* obs_class 색상 */
+      --c-above: #d6604d;
+      --c-q9599: #f4a582;
+      --c-q9095: #fddbc7;
+      --c-q5090: #92c5de;
+      --c-below: #4393c3;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      background: var(--bg); color: #1e293b;
+      line-height: 1.75; font-size: 15px;
+    }
+    .page { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+
+    .hero {
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f766e 60%, #0891b2 100%);
+      color: #fff; border-radius: 16px;
+      padding: 2.5rem 2rem 2rem; margin-bottom: 2.5rem;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 999px; padding: 0.2rem 0.8rem;
+      font-size: 0.75rem; letter-spacing: 0.04em; margin-bottom: 0.8rem;
+    }
+    .hero h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.3; }
+    .hero p  { opacity: 0.85; font-size: 0.95rem; max-width: 660px; }
+
+    section { margin-bottom: 2.5rem; }
+    .section-title {
+      font-size: 1.2rem; font-weight: 700; color: var(--indigo);
+      border-left: 4px solid var(--indigo);
+      padding-left: 0.75rem; margin-bottom: 1.2rem;
+    }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;
+    }
+    .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.6rem; }
+
+    .alert {
+      border-radius: 10px; padding: 1rem 1.2rem;
+      font-size: 0.88rem; margin-bottom: 0.8rem;
+      display: flex; gap: 0.7rem; align-items: flex-start;
+    }
+    .alert-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
+    .alert-green  { background: #f0fdf4; border: 1px solid #86efac; }
+    .alert-amber  { background: #fffbeb; border: 1px solid #fcd34d; }
+    .alert-red    { background: #fff1f2; border: 1px solid #fca5a5; }
+    .alert-blue   { background: #eff6ff; border: 1px solid #93c5fd; }
+    .alert-purple { background: #f5f3ff; border: 1px solid #c4b5fd; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.87rem; margin-bottom: 0.8rem; }
+    th {
+      background: #f1f5f9; text-align: left;
+      padding: 0.55rem 0.75rem;
+      border-bottom: 2px solid var(--border);
+      font-weight: 600; color: var(--slate);
+    }
+    td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .warn-val { font-weight: 700; color: var(--red); }
+    .ok-val { font-weight: 700; color: var(--green); }
+    .hi { font-weight: 700; color: var(--indigo); }
+
+    p { margin-bottom: 0.6rem; }
+    .sub { color: var(--slate); font-size: 0.85rem; margin-bottom: 0.4rem; }
+    .separator { height: 1px; background: var(--border); margin: 2rem 0; }
+    code {
+      background: #f1f5f9; border-radius: 4px;
+      padding: 0.1rem 0.35rem; font-size: 0.85em;
+      font-family: 'Menlo', 'Consolas', monospace; color: var(--indigo);
+    }
+    .analogy {
+      background: linear-gradient(135deg, #f5f3ff, #eff6ff);
+      border: 1px solid #c4b5fd; border-radius: 10px;
+      padding: 1rem 1.2rem; margin: 0.8rem 0; font-size: 0.88rem;
+    }
+    .analogy-title { font-weight: 700; color: #6d28d9; margin-bottom: 0.3rem; }
+
+    /* ── stat 카드 그리드 ── */
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;
+      margin: 0.8rem 0;
+    }
+    @media (max-width: 640px) { .stat-grid { grid-template-columns: 1fr 1fr; } }
+    .stat-card {
+      border-radius: 10px; padding: 1rem; text-align: center;
+      border: 2px solid var(--border); background: #f8fafc;
+    }
+    .stat-val { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.15rem; }
+    .stat-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; color: var(--slate); }
+    .stat-sub { font-size: 0.7rem; color: var(--slate); margin-top: 0.1rem; }
+
+    /* ── 적층 막대 차트 ── */
+    .stack-chart { margin: 0.8rem 0; }
+    .stack-row {
+      display: flex; align-items: center; gap: 0.6rem;
+      margin-bottom: 0.45rem; font-size: 0.83rem;
+    }
+    .stack-label { width: 72px; font-weight: 600; color: var(--slate); flex-shrink: 0; text-align: right; }
+    .stack-bar-wrap { flex: 1; height: 26px; display: flex; border-radius: 5px; overflow: hidden; }
+    .stack-seg { height: 100%; transition: width 0.3s; }
+    .stack-total { width: 52px; text-align: right; font-size: 0.78rem;
+      color: var(--slate); font-variant-numeric: tabular-nums; }
+
+    /* ── 전체 분포 막대 ── */
+    .dist-row {
+      display: flex; align-items: center; gap: 0.7rem;
+      margin-bottom: 0.4rem; font-size: 0.83rem;
+    }
+    .dist-label { width: 80px; font-weight: 600; flex-shrink: 0; }
+    .dist-bar-bg { flex: 1; height: 22px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+    .dist-bar { height: 100%; background: #0891b2; border-radius: 4px; }
+    .dist-n { width: 52px; text-align: right; font-variant-numeric: tabular-nums; font-size: 0.78rem; }
+    .dist-pct { width: 40px; text-align: right; font-variant-numeric: tabular-nums;
+      font-size: 0.78rem; color: var(--slate); }
+
+    /* ── above_q99 비율 막대 ── */
+    .aq99-row {
+      display: flex; align-items: center; gap: 0.7rem;
+      margin-bottom: 0.4rem; font-size: 0.83rem;
+    }
+    .aq99-label { width: 80px; font-weight: 600; flex-shrink: 0; }
+    .aq99-bar-bg { flex: 1; height: 24px; background: #f1f5f9; border-radius: 4px; overflow: hidden; position: relative; }
+    .aq99-bar-fill { height: 100%; border-radius: 4px; background: var(--c-above); }
+    .aq99-ref-line {
+      position: absolute; top: 0; height: 100%; width: 2px;
+      background: #475569; opacity: 0.5;
+    }
+    .aq99-pct { width: 44px; text-align: right; font-weight: 700;
+      font-variant-numeric: tabular-nums; font-size: 0.83rem; }
+
+    /* 범례 */
+    .legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem;
+      font-size: 0.78rem; margin: 0.5rem 0 0.8rem; }
+    .legend-item { display: flex; align-items: center; gap: 0.3rem; }
+    .legend-swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+
+    .footer {
+      text-align: center; font-size: 0.8rem; color: #94a3b8;
+      margin-top: 3rem; padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-badge">UB 분석 확장 · 상승 시간 분포 · M3 SG onset 기준</div>
+    <h1>홍수 상승 시간(rising_hours) 분포<br>얼마나 빨리 올라오는가?</h1>
+    <p>M3 Savitzky-Golay onset 기준, 2,778건 이벤트-피크의 상승 구간 길이 분포.
+       관측 위치 구간(obs_class)별로 시간이 어떻게 달라지는지 분석합니다.</p>
+  </div>
+
+  <!-- 1. 핵심 통계 -->
+  <section>
+    <div class="section-title">1. 전체 분포 핵심 통계</div>
+    <div class="card">
+      <p class="sub">n = 2,778 건 · 82개 유역 × 3 seed · 2014~2016년 Q99 이벤트 피크</p>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--indigo);">11h</div>
+          <div class="stat-label">중앙값 (P50)</div>
+          <div class="stat-sub">절반이 11시간 이내</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--amber);">170h</div>
+          <div class="stat-label">평균</div>
+          <div class="stat-sub">극단 outlier로 부풀림</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--green);">4h</div>
+          <div class="stat-label">최솟값</div>
+          <div class="stat-sub">가장 급격한 홍수</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--red);">15,105h</div>
+          <div class="stat-label">최댓값</div>
+          <div class="stat-sub">≈ 629일 (아마 snowmelt)</div>
+        </div>
+      </div>
+
+      <div class="stat-grid" style="grid-template-columns: repeat(5,1fr); margin-top:0;">
+        <div class="stat-card" style="border-color:#93c5fd; background:#eff6ff;">
+          <div class="stat-val" style="color:var(--blue); font-size:1.2rem;">6h</div>
+          <div class="stat-label">P10</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="font-size:1.2rem;">8h</div>
+          <div class="stat-label">P25</div>
+        </div>
+        <div class="stat-card" style="border-color:#86efac; background:#f0fdf4;">
+          <div class="stat-val" style="color:var(--green); font-size:1.2rem;">11h</div>
+          <div class="stat-label">P50</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="font-size:1.2rem;">24h</div>
+          <div class="stat-label">P75</div>
+        </div>
+        <div class="stat-card" style="border-color:#fca5a5; background:#fff1f2;">
+          <div class="stat-val" style="color:var(--red); font-size:1.2rem;">421h</div>
+          <div class="stat-label">P95</div>
+          <div class="stat-sub">극단 꼬리 시작</div>
+        </div>
+      </div>
+
+      <div class="alert alert-amber">
+        <div class="alert-icon">△</div>
+        <div>
+          <strong>분포가 극단적으로 오른쪽으로 치우쳐 있습니다(right-skewed).</strong>
+          90%의 이벤트는 45시간 이내에 상승하지만, 상위 5%는 421시간~15,105시간입니다.
+          평균(170h)이 중앙값(11h)의 15배 — 분석에는 중앙값을 기준으로 써야 합니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 시간 구간별 빈도 -->
+  <section>
+    <div class="section-title">2. 시간 구간별 이벤트 수</div>
+    <div class="card">
+      <p class="sub">전체 2,778건 기준 빈도 분포</p>
+
+      <!-- 막대 차트 -->
+      <div style="margin: 0.8rem 0;">
+        <div class="dist-row">
+          <div class="dist-label">0–6h</div>
+          <div class="dist-bar-bg"><div class="dist-bar" style="width:26.4%;"></div></div>
+          <div class="dist-n">309건</div>
+          <div class="dist-pct">11.1%</div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-label" style="color:var(--indigo); font-weight:800;">6–12h</div>
+          <div class="dist-bar-bg"><div class="dist-bar" style="width:100%; background:var(--indigo);"></div></div>
+          <div class="dist-n" style="font-weight:700;">1,170건</div>
+          <div class="dist-pct" style="font-weight:700; color:var(--indigo);">42.1%</div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-label">12–24h</div>
+          <div class="dist-bar-bg"><div class="dist-bar" style="width:52.8%;"></div></div>
+          <div class="dist-n">618건</div>
+          <div class="dist-pct">22.2%</div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-label">24–48h</div>
+          <div class="dist-bar-bg"><div class="dist-bar" style="width:35.4%;"></div></div>
+          <div class="dist-n">414건</div>
+          <div class="dist-pct">14.9%</div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-label">48–72h</div>
+          <div class="dist-bar-bg"><div class="dist-bar" style="width:4.1%; background:#94a3b8;"></div></div>
+          <div class="dist-n">48건</div>
+          <div class="dist-pct">1.7%</div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-label">72–200h</div>
+          <div class="dist-bar-bg"><div class="dist-bar" style="width:3.3%; background:#94a3b8;"></div></div>
+          <div class="dist-n">39건</div>
+          <div class="dist-pct">1.4%</div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-label">200h+</div>
+          <div class="dist-bar-bg"><div class="dist-bar" style="width:14.9%; background:#dc2626;"></div></div>
+          <div class="dist-n">126건</div>
+          <div class="dist-pct" style="color:var(--red);">4.5%</div>
+        </div>
+      </div>
+
+      <div class="alert alert-blue">
+        <div class="alert-icon">💡</div>
+        <div>
+          <strong>전체의 75%가 24시간 이내 상승:</strong> 대부분의 홍수는 당일~이틀 안에 첨두에 달함.
+          200h+ (4.5%)는 느린 봄철 눈 녹음(snowmelt) 또는 장기 강수 누적 사건일 가능성.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. obs_class별 상승 시간 중앙값 -->
+  <section>
+    <div class="section-title">3. 관측 위치 구간(obs_class)별 상승 시간 중앙값</div>
+    <div class="card">
+      <div class="card-title">핵심 발견: 위험 구간(above_q99)이 다른 구간과 거의 같다</div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--c-above);"></div>above_q99 (q99 초과)</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--c-q9599);"></div>q95~q99</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--c-q9095);"></div>q90~q95</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--c-q5090);"></div>q50~q90</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--c-below);"></div>below_q50</div>
+      </div>
+
+      <div style="margin: 0.8rem 0;">
+        <!-- above_q99 -->
+        <div class="dist-row">
+          <div class="dist-label" style="color:var(--red); font-weight:700;">above_q99</div>
+          <div class="dist-bar-bg"><div class="dist-bar" style="width:72.7%; background:var(--c-above);"></div></div>
+          <div class="dist-n" style="color:var(--red); font-weight:700;">12h</div>
+          <div class="dist-pct">n=1,200</div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-label" style="color:#c0392b;">q95~q99</div>
+          <div class="dist-bar-bg"><div class="dist-bar" style="width:60.6%; background:var(--c-q9599);"></div></div>
+          <div class="dist-n">10h</div>
+          <div class="dist-pct">n=533</div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-label">q90~q95</div>
+          <div class="dist-bar-bg"><div class="dist-bar" style="width:66.7%; background:var(--c-q9095);"></div></div>
+          <div class="dist-n">11h</div>
+          <div class="dist-pct">n=223</div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-label">q50~q90</div>
+          <div class="dist-bar-bg"><div class="dist-bar" style="width:72.7%; background:var(--c-q5090);"></div></div>
+          <div class="dist-n">12h</div>
+          <div class="dist-pct">n=471</div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-label" style="color:var(--blue);">below_q50</div>
+          <div class="dist-bar-bg"><div class="dist-bar" style="width:100%; background:var(--c-below);"></div></div>
+          <div class="dist-n" style="font-weight:700; color:var(--blue);">16.5h</div>
+          <div class="dist-pct">n=351</div>
+        </div>
+      </div>
+
+      <div class="alert alert-red">
+        <div class="alert-icon">⚠️</div>
+        <div>
+          <strong>above_q99 중앙값(12h) ≈ 전체 중앙값(11h).</strong>
+          상승 시간만으로는 "위험한 홍수"를 구분할 수 없습니다.
+          오히려 <strong>below_q50(과예측 구간)에서 상승 시간이 16.5h로 가장 깁니다</strong> —
+          천천히 올라오는 홍수일수록 모델이 오히려 과예측하는 경향.
+        </div>
+      </div>
+
+      <div class="analogy">
+        <div class="analogy-title">왜 rise_slope는 r=0.359인데 rising_hours는 구분력이 낮은가?</div>
+        12시간 동안 10→200 cfs로 올라온 홍수(slope=15.8 cfs/h)와
+        12시간 동안 10→30 cfs로 올라온 홍수(slope=1.7 cfs/h)는
+        rising_hours가 동일합니다. 하지만 첫 번째만 above_q99가 됩니다.
+        중요한 것은 시간 자체가 아니라 <strong>단위 시간당 얼마나 급격하게 올라오는지(slope)</strong>입니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 시간 구간별 above_q99 비율 -->
+  <section>
+    <div class="section-title">4. 시간 구간별 above_q99 비율</div>
+    <div class="card">
+      <p><strong>전체 평균 above_q99 비율: 43.2%</strong> (기준선)</p>
+      <p class="sub">아래 막대가 기준선(점선)을 넘으면 해당 구간에서 above_q99 사건 비율이 평균보다 높음.</p>
+
+      <!-- above_q99 비율 차트 -->
+      <div style="margin: 0.8rem 0;">
+        <div class="aq99-row">
+          <div class="aq99-label">0–6h</div>
+          <div class="aq99-bar-bg">
+            <div class="aq99-bar-fill" style="width:45%;"></div>
+            <div class="aq99-ref-line" style="left:43.2%;"></div>
+          </div>
+          <div class="aq99-pct warn-val">45.0%</div>
+        </div>
+        <div class="aq99-row">
+          <div class="aq99-label">6–12h</div>
+          <div class="aq99-bar-bg">
+            <div class="aq99-bar-fill" style="width:41.7%;"></div>
+            <div class="aq99-ref-line" style="left:43.2%;"></div>
+          </div>
+          <div class="aq99-pct" style="color:var(--slate);">41.7%</div>
+        </div>
+        <div class="aq99-row">
+          <div class="aq99-label">12–24h</div>
+          <div class="aq99-bar-bg">
+            <div class="aq99-bar-fill" style="width:44.8%;"></div>
+            <div class="aq99-ref-line" style="left:43.2%;"></div>
+          </div>
+          <div class="aq99-pct warn-val">44.8%</div>
+        </div>
+        <div class="aq99-row">
+          <div class="aq99-label">24–48h</div>
+          <div class="aq99-bar-bg">
+            <div class="aq99-bar-fill" style="width:45.7%;"></div>
+            <div class="aq99-ref-line" style="left:43.2%;"></div>
+          </div>
+          <div class="aq99-pct warn-val">45.7%</div>
+        </div>
+        <div class="aq99-row">
+          <div class="aq99-label">48–72h</div>
+          <div class="aq99-bar-bg">
+            <div class="aq99-bar-fill" style="width:47.9%;"></div>
+            <div class="aq99-ref-line" style="left:43.2%;"></div>
+          </div>
+          <div class="aq99-pct warn-val">47.9%</div>
+        </div>
+        <div class="aq99-row">
+          <div class="aq99-label" style="color:var(--red); font-weight:800;">72–200h</div>
+          <div class="aq99-bar-bg">
+            <div class="aq99-bar-fill" style="width:61.5%;"></div>
+            <div class="aq99-ref-line" style="left:43.2%;"></div>
+          </div>
+          <div class="aq99-pct" style="color:var(--red); font-weight:800;">61.5% !</div>
+        </div>
+        <div class="aq99-row">
+          <div class="aq99-label">200h+</div>
+          <div class="aq99-bar-bg">
+            <div class="aq99-bar-fill" style="width:32.8%;"></div>
+            <div class="aq99-ref-line" style="left:43.2%;"></div>
+          </div>
+          <div class="aq99-pct ok-val">32.8%</div>
+        </div>
+        <p class="sub" style="margin-top:0.3rem;">점선(|) = 전체 평균 43.2%</p>
+      </div>
+
+      <div class="alert alert-purple">
+        <div class="alert-icon">🔬</div>
+        <div>
+          <strong>72–200h 구간에서 above_q99 비율 61.5% — 눈에 띄게 높음.</strong>
+          표본이 작아 불안정하지만(39건), 해석 가설:
+          중간 길이 상승 사건은 단순 강우 사건보다 복잡한 수문 과정(복합 강수 패턴, 지하수 기여 등)에서 발생하며
+          모델이 이 패턴을 더 자주 과소추정할 수 있습니다.
+        </div>
+      </div>
+      <div class="alert alert-green">
+        <div class="alert-icon">✓</div>
+        <div>
+          <strong>200h+ 구간에서 above_q99 비율 32.8% — 평균보다 낮음.</strong>
+          매우 느리게 상승하는 사건(아마 snowmelt)은 모델이 상대적으로 잘 따라가거나,
+          최대 유량 자체가 q99를 초과하지 않는 경우가 많을 수 있습니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 적층 막대: 구간별 obs_class 구성 -->
+  <section>
+    <div class="section-title">5. 시간 구간별 obs_class 구성 (적층 막대)</div>
+    <div class="card">
+      <p class="sub">각 막대는 해당 시간 구간 이벤트의 obs_class 비율 (행 합계 = 100%)</p>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--c-above);"></div>above_q99</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--c-q9599);"></div>q95~q99</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--c-q9095);"></div>q90~q95</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--c-q5090);"></div>q50~q90</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--c-below);"></div>below_q50</div>
+      </div>
+
+      <div class="stack-chart">
+        <!-- 0-6h: above=45.0, q9599=22.0, q9095=11.3, q5090=15.9, below=5.8 -->
+        <div class="stack-row">
+          <div class="stack-label">0–6h</div>
+          <div class="stack-bar-wrap">
+            <div class="stack-seg" style="width:45.0%; background:var(--c-above);"></div>
+            <div class="stack-seg" style="width:22.0%; background:var(--c-q9599);"></div>
+            <div class="stack-seg" style="width:11.3%; background:var(--c-q9095);"></div>
+            <div class="stack-seg" style="width:15.9%; background:var(--c-q5090);"></div>
+            <div class="stack-seg" style="width:5.8%;  background:var(--c-below);"></div>
+          </div>
+          <div class="stack-total">309건</div>
+        </div>
+        <!-- 6-12h: above=41.7, q9599=24.0, q9095=8.9, q5090=16.7, below=8.7 -->
+        <div class="stack-row">
+          <div class="stack-label">6–12h</div>
+          <div class="stack-bar-wrap">
+            <div class="stack-seg" style="width:41.7%; background:var(--c-above);"></div>
+            <div class="stack-seg" style="width:24.0%; background:var(--c-q9599);"></div>
+            <div class="stack-seg" style="width:8.9%;  background:var(--c-q9095);"></div>
+            <div class="stack-seg" style="width:16.7%; background:var(--c-q5090);"></div>
+            <div class="stack-seg" style="width:8.7%;  background:var(--c-below);"></div>
+          </div>
+          <div class="stack-total">1,170건</div>
+        </div>
+        <!-- 12-24h: above=44.8, q9599=19.7, q9095=7.9, q5090=15.5, below=12.0 -->
+        <div class="stack-row">
+          <div class="stack-label">12–24h</div>
+          <div class="stack-bar-wrap">
+            <div class="stack-seg" style="width:44.8%; background:var(--c-above);"></div>
+            <div class="stack-seg" style="width:19.7%; background:var(--c-q9599);"></div>
+            <div class="stack-seg" style="width:7.9%;  background:var(--c-q9095);"></div>
+            <div class="stack-seg" style="width:15.5%; background:var(--c-q5090);"></div>
+            <div class="stack-seg" style="width:12.0%; background:var(--c-below);"></div>
+          </div>
+          <div class="stack-total">618건</div>
+        </div>
+        <!-- 24-48h: above=45.7, q9599=13.8, q9095=7.0, q5090=18.4, below=15.2 -->
+        <div class="stack-row">
+          <div class="stack-label">24–48h</div>
+          <div class="stack-bar-wrap">
+            <div class="stack-seg" style="width:45.7%; background:var(--c-above);"></div>
+            <div class="stack-seg" style="width:13.8%; background:var(--c-q9599);"></div>
+            <div class="stack-seg" style="width:7.0%;  background:var(--c-q9095);"></div>
+            <div class="stack-seg" style="width:18.4%; background:var(--c-q5090);"></div>
+            <div class="stack-seg" style="width:15.2%; background:var(--c-below);"></div>
+          </div>
+          <div class="stack-total">414건</div>
+        </div>
+        <!-- 48-72h: above=47.9, q9599=8.3, q9095=6.2, q5090=18.8, below=18.8 -->
+        <div class="stack-row">
+          <div class="stack-label">48–72h</div>
+          <div class="stack-bar-wrap">
+            <div class="stack-seg" style="width:47.9%; background:var(--c-above);"></div>
+            <div class="stack-seg" style="width:8.3%;  background:var(--c-q9599);"></div>
+            <div class="stack-seg" style="width:6.2%;  background:var(--c-q9095);"></div>
+            <div class="stack-seg" style="width:18.8%; background:var(--c-q5090);"></div>
+            <div class="stack-seg" style="width:18.8%; background:var(--c-below);"></div>
+          </div>
+          <div class="stack-total">48건</div>
+        </div>
+        <!-- 72-200h: above=61.5, q9599=5.1, q9095=7.7, q5090=15.4, below=10.3 -->
+        <div class="stack-row">
+          <div class="stack-label" style="color:var(--red); font-weight:800;">72–200h</div>
+          <div class="stack-bar-wrap" style="outline: 2px solid #dc2626; outline-offset:1px; border-radius:5px;">
+            <div class="stack-seg" style="width:61.5%; background:var(--c-above);"></div>
+            <div class="stack-seg" style="width:5.1%;  background:var(--c-q9599);"></div>
+            <div class="stack-seg" style="width:7.7%;  background:var(--c-q9095);"></div>
+            <div class="stack-seg" style="width:15.4%; background:var(--c-q5090);"></div>
+            <div class="stack-seg" style="width:10.3%; background:var(--c-below);"></div>
+          </div>
+          <div class="stack-total" style="color:var(--red); font-weight:700;">39건</div>
+        </div>
+        <!-- 200h+: above=32.8, q9599=17.5, q9095=6.8, q5090=22.6, below=20.3 -->
+        <div class="stack-row">
+          <div class="stack-label">200h+</div>
+          <div class="stack-bar-wrap">
+            <div class="stack-seg" style="width:32.8%; background:var(--c-above);"></div>
+            <div class="stack-seg" style="width:17.5%; background:var(--c-q9599);"></div>
+            <div class="stack-seg" style="width:6.8%;  background:var(--c-q9095);"></div>
+            <div class="stack-seg" style="width:22.6%; background:var(--c-q5090);"></div>
+            <div class="stack-seg" style="width:20.3%; background:var(--c-below);"></div>
+          </div>
+          <div class="stack-total">177건</div>
+        </div>
+      </div>
+
+      <p class="sub">
+        q95~q99(주황) 비율이 상승 시간이 길어질수록 점진적으로 감소함에 주목.
+        즉 오래 걸리는 홍수는 "밴드 바로 아래"가 아니라 밴드 안 또는 above_q99 양 극단으로 분리되는 경향.
+      </p>
+    </div>
+  </section>
+
+  <div class="separator"></div>
+
+  <!-- 6. 종합 -->
+  <section>
+    <div class="section-title">6. 종합 해석</div>
+    <div class="card">
+      <table>
+        <thead><tr><th>발견</th><th>해석</th><th>시사점</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>75%가 24h 이내 상승</td>
+            <td>CAMELS 유역 대부분이 단기 강수 반응형</td>
+            <td>6~12h 창이 실시간 모니터링 핵심 윈도우</td>
+          </tr>
+          <tr>
+            <td>above_q99 중앙값 12h ≈ 전체 11h</td>
+            <td>시간 자체로는 위험 구분 불가</td>
+            <td>rising_hours 단독 사용 비추천</td>
+          </tr>
+          <tr>
+            <td>below_q50 중앙값 16.5h (가장 김)</td>
+            <td>천천히 올라오는 홍수 → 모델 과예측</td>
+            <td>장기 상승 = 과예측 패턴 연구 가치 있음</td>
+          </tr>
+          <tr style="background:#fff1f2;">
+            <td>72–200h 구간 above_q99 = 61.5%</td>
+            <td>중간 길이 상승 사건이 가장 위험 (표본 소량)</td>
+            <td>주의: n=39, 불안정. 추가 검증 필요</td>
+          </tr>
+          <tr style="background:#f0fdf4;">
+            <td>200h+ above_q99 = 32.8% (낮음)</td>
+            <td>snowmelt형 완만 상승 → 상대적으로 예측 용이</td>
+            <td>장기 사건 분류 분리 분석 고려</td>
+          </tr>
+          <tr>
+            <td>rise_slope r=+0.359 달성</td>
+            <td>시간이 아니라 <strong>속도(slope)</strong>가 예측력 있음</td>
+            <td>실시간 모니터링에서 slope 계산이 핵심</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="footer">
+    CAMELS UB 분석 확장 · 상승 시간(rising_hours) 분포 · M3 SG onset 기준 · 2026
+  </div>
+</div>
+</body>
+</html>
