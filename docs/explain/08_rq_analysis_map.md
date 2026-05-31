@@ -342,7 +342,13 @@ recall = hits / n_hours
 | α 중앙값 | 0.018         | 0.172          | Q99 초과 사건에서는 첨두 부족이 거의 없고, NOAA 공식 홍수에서는 17% 부족이 남는다 |
 | δ 중앙값 | 0.583         | —             | Q99 초과 시점의 58%에서 예측이 실제 높이를 덮음                                   |
 
-`q50` → `q90` → `q95` → `q99`로 갈수록 α 중앙값이 줄어들고 δ 회수율이 커지는 패턴, 즉 "상위 예측선으로 갈수록 첨두를 더 잘 따라잡는" 경향이 관찰되는지가 이 RQ의 핵심 확인 사항이다. 이 단조 증가 경향은 그림 `figures/rq2_alpha_by_tau.png`, `figures/rq2_beta_by_tau.png`, `figures/rq2_delta_recall_by_tau.png`에서 분위(τ)를 가로축에 놓고 눈으로 확인할 수 있다.
+`q50` → `q90` → `q95` → `q99`로 갈수록 α 중앙값이 줄어들고 δ 회수율이 커지는 패턴, 즉 "상위 예측선으로 갈수록 첨두를 더 잘 따라잡는" 경향이 관찰되는지가 이 RQ의 핵심 확인 사항이다. 이 단조 증가 경향은 아래 세 그림에서 분위(τ)를 가로축에 놓고 눈으로 확인할 수 있다.
+
+![분위(τ)별 α 첨두 부족분: q50에서 q99로 갈수록 부족분이 줄어든다](figures/rq2_alpha_by_tau.png)
+
+![분위(τ)별 β 꼭대기 포착 비율: q99로 갈수록 1에 가까워지거나 넘어선다](figures/rq2_beta_by_tau.png)
+
+![분위(τ)별 δ Q99 초과 회수율: q99로 갈수록 회수율이 커진다](figures/rq2_delta_recall_by_tau.png)
 
 > **주의**: NOAA 사건에서 `q99` α = 0.172는 Q99 기준(0.018)보다 크다. NOAA 공식 홍수는 Q99 초과로 정의되는 것이 아니라 사회적 피해 기준으로 지정되기 때문에, Q99를 훨씬 크게 초과하는 극단적 사건을 포함할 수 있다. 따라서 두 기준의 결과가 다른 것은 자연스럽다.
 
@@ -403,7 +409,9 @@ over_mag = float((sub.loc[over_mask, tau] - sub.loc[over_mask, "obs"]).mean())
 
 #### 결과 해석 방식
 
-분석 문서는 `q99` 기준으로 FAR 중앙값 0.016, 과대예측 크기 중앙값 3.44를 보고한다. 그리고 Q99 기준 δ 회수율 이득이 약 8배 증가할 때 FAR는 약 23배 증가한다는 비대칭을 짚는다. 이 비대칭은 그림 `figures/rq3_cost_recall_tradeoff.png`에서 FAR와 δ 회수율을 한 평면에 점으로 찍어 분위별로 비교하는 방식으로 보여 준다.
+분석 문서는 `q99` 기준으로 FAR 중앙값 0.016, 과대예측 크기 중앙값 3.44를 보고한다. 그리고 Q99 기준 δ 회수율 이득이 약 8배 증가할 때 FAR는 약 23배 증가한다는 비대칭을 짚는다. 이 비대칭은 아래 그림에서 FAR와 δ 회수율을 한 평면에 점으로 찍어 분위별로 비교하는 방식으로 보여 준다.
+
+![분위별 비용-회수율 맞교환: δ 회수율이 늘수록 FAR도 늘지만 증가폭이 비대칭](figures/rq3_cost_recall_tradeoff.png)
 
 이것을 어떻게 해석해야 하는가.
 
@@ -446,7 +454,9 @@ m1_nse["tier"] = pd.qcut(m1_nse["m1_nse_seed_median"], q=3,
 
 #### 분석 목적
 
-분석 문서 `04a_basin_cohort.md`가 담당한다. `compute_rq4a_nse_tier_stratify.py`는 단계를 나눈 뒤, 앞 RQ들이 이미 계산해 둔 α(첨두 부족분), β(창 포착 비율), δ(회수율), FAR(헛경보 비율), 과대예측 크기를 단계별·분위별로 다시 모아 비교한다. 결과는 `tables/rq4a_nse_tier_metrics.csv`와 그림 `figures/rq4a_tier_metric_heatmap.png`(단계×분위 히트맵)로 정리된다.
+분석 문서 `04a_basin_cohort.md`가 담당한다. `compute_rq4a_nse_tier_stratify.py`는 단계를 나눈 뒤, 앞 RQ들이 이미 계산해 둔 α(첨두 부족분), β(창 포착 비율), δ(회수율), FAR(헛경보 비율), 과대예측 크기를 단계별·분위별로 다시 모아 비교한다. 결과는 표 `tables/rq4a_nse_tier_metrics.csv`와 아래 히트맵으로 정리된다.
+
+![NSE 성능 단계(상·중·하)×분위별 지표 히트맵](figures/rq4a_tier_metric_heatmap.png)
 
 #### 결과 해석 방식
 
@@ -495,7 +505,9 @@ NOAA_TIE_BREAK = ("Flash Flood", "Coastal Flood", "Flood", "Other")     # 동점
 
 #### 분석 목적
 
-분석 문서 `04b_event_type.md`가 담당한다. `compute_rq4b_event_type_stratify.py`는 위에서 붙인 유형 레이블별로 α 같은 핵심 지표를 모아 비교하고, 결과를 `tables/rq4b_event_type_metrics.csv`와 그림 `figures/rq4b_event_type_bar.png`(유형×분위 막대그림)로 낸다. 어떤 유형으로도 분류되지 않은 문구는 `tables/rq4b_noaa_annotation_unmatched.csv`에 따로 적어 둬, 분류가 무엇을 놓쳤는지 추적할 수 있게 한다.
+분석 문서 `04b_event_type.md`가 담당한다. `compute_rq4b_event_type_stratify.py`는 위에서 붙인 유형 레이블별로 α 같은 핵심 지표를 모아 비교하고, 결과를 표 `tables/rq4b_event_type_metrics.csv`와 아래 막대그림으로 낸다.
+
+![홍수 유형×분위별 핵심 지표 막대그림](figures/rq4b_event_type_bar.png) 어떤 유형으로도 분류되지 않은 문구는 `tables/rq4b_noaa_annotation_unmatched.csv`에 따로 적어 둬, 분류가 무엇을 놓쳤는지 추적할 수 있게 한다.
 
 #### 결과 해석 방식
 
