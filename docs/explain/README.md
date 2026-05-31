@@ -65,3 +65,7 @@ flowchart TD
 결과 해석 상태와 산출물 위치는 `docs/experiment/analysis/model/README.md`와 그 하위 분석 문서를 먼저 확인한다.
 
 이 폴더는 설명용 문서이지만 저장소에 함께 보관한다. 연구 기준을 바꿔야 할 때는 이 폴더만 고치지 말고, 위 canonical 문서를 먼저 확인해야 한다.
+
+## 작성 원칙
+
+이 폴더 문서를 새로 쓰거나 고칠 때는 [`../templates/writing_guide.md`](../templates/writing_guide.md)의 "explain 입문 문서 작성 원칙"을 따른다. 대상(비전공 대학생), 헤딩(명사구), 구현 포인터(코드 인용 + 출처 주석), 지표 표기(간결 카드 + math block), 그림 삽입, 정확성 규칙이 정리돼 있다.
