@@ -10,7 +10,8 @@ Branch A (CSV 전용, 가벼움): band 지표 + model gap + seed_spread + basin 
   I = 독립(누수 없음): model1_minus_model2, seed_spread, basin 특성(area/slope/aridity/BFI/...)
   L = obs 누수(기준선): obs_peak
 
-조인 키: (basin_id, seed, peak_time)
+입력 조인 키: (basin_id, seed, peak_time)
+상관관계 행: (basin_id, peak_time), seed별 obs_class ordinal 중앙값을 primary target으로 사용
 """
 import pandas as pd, numpy as np
 from scipy.stats import spearmanr

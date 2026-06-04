@@ -6,7 +6,7 @@ Branch B (입력 강제력, .nc): 강우/CAPE 지표 vs obs_class. 타깃 Q99 + 
 모두 분류 I (독립, 누수 없음 — 입력은 obs_class 정의에 안 들어감).
 
 NWS 강우강도 등급 (mm/h): light<2.5, moderate 2.5-7.6, heavy 7.6-50, violent>50.
-각 peak_time 기준 사전 window에서 강우/CAPE 지표 추출. (강제력은 seed 무관 → peak당 1값)
+각 peak_time 기준 사전 window에서 강우/CAPE 지표 추출. 강제력은 seed 무관하므로 peak당 1값이고, seed별 obs_class ordinal은 중앙값으로 묶어 target을 만든다.
 
 지표:
   rain_sum_24h / rain_sum_72h     peak 전 24/72h 누적 강우
