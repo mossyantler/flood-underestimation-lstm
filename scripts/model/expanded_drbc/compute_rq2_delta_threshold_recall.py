@@ -14,7 +14,7 @@ denominator counts test-period (2014-2016) hours only where obs ≥ Q99.
 Inputs
 ------
 - tables/rq2_q99_per_basin_thresholds.csv (B1)
-- required_series/seed{111,222,444}/primary_required_series.csv
+- required_series/seed{111,222,444}/required_series.csv
 
 Outputs
 -------
@@ -56,7 +56,7 @@ from expanded_drbc import (  # noqa: E402
 QUANTILE_TAU_ORDER = ("q50", "q90", "q95", "q99")
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/primary/metrics"
 DEFAULT_INPUT_DIR = DEFAULT_OUTPUT_DIR / "required_series"
 
 
@@ -115,7 +115,7 @@ def main() -> None:
 
     parts: list[pd.DataFrame] = []
     for seed in args.seeds:
-        seed_csv = args.input_dir / f"seed{seed}" / "primary_required_series.csv"
+        seed_csv = args.input_dir / f"seed{seed}" / "required_series.csv"
         print(f"[B5] loading {seed_csv}", flush=True)
         df_seed = load_seed(seed_csv)
         part = compute_recall_for_seed(df_seed, thresholds, seed)

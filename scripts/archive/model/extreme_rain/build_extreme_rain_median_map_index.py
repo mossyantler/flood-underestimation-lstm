@@ -16,6 +16,8 @@ import json
 import math
 import os
 import re
+import urllib.parse
+import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -47,6 +49,10 @@ DEFAULT_OUTPUT_HTML = Path(
 )
 MAP_CRS = "EPSG:5070"
 BASIN_FALLBACK_CRS = "EPSG:4326"
+GAGESII_API_BASIN_CRS = "EPSG:4326"
+DEFAULT_GAGESII_BASINS_API_URL = (
+    "https://api.water.usgs.gov/fabric/pygeoapi/collections/gagesii-basins/items"
+)
 
 
 TIER_CONFIG: list[dict[str, str]] = [
@@ -109,6 +115,29 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--drbc-selected", type=Path, default=DEFAULT_DRBC_SELECTED)
     parser.add_argument("--camelsh-shapefile", type=Path, default=DEFAULT_CAMELSH_SHAPEFILE)
     parser.add_argument("--drbc-boundary", type=Path, default=DEFAULT_DRBC_BOUNDARY)
+    parser.add_argument(
+        "--basin-geometry-source",
+        choices=("camelsh", "gagesii-api"),
+        default="camelsh",
+        help=(
+            "Basin geometry source for the map. 'camelsh' reads --camelsh-shapefile. "
+            "'gagesii-api' fetches CRS-tagged USGS GAGES-II basin features and caches them."
+        ),
+    )
+    parser.add_argument(
+        "--gagesii-cache-dir",
+        type=Path,
+        default=None,
+        help=(
+            "Directory for cached USGS GAGES-II basin GeoJSON features. Defaults to "
+            "<output-html-parent>/map_geometry/gagesii_basins."
+        ),
+    )
+    parser.add_argument(
+        "--gagesii-api-url",
+        default=DEFAULT_GAGESII_BASINS_API_URL,
+        help="USGS pygeoapi item endpoint used when --basin-geometry-source gagesii-api.",
+    )
     parser.add_argument("--output-html", type=Path, default=DEFAULT_OUTPUT_HTML)
     parser.add_argument(
         "--svg-width",
@@ -313,6 +342,47 @@ def read_shapefile_crs(path: Path, fallback: str) -> pyproj.CRS:
     return pyproj.CRS.from_user_input(fallback)
 
 
+def default_gagesii_cache_dir(output_html: Path) -> Path:
+    return output_html.parent / "map_geometry" / "gagesii_basins"
+
+
+def gagesii_cache_path(cache_dir: Path, gauge_id: str) -> Path:
+    return cache_dir / f"{normalize_gauge_id(gauge_id)}.geojson"
+
+
+def fetch_gagesii_feature_collection(
+    gauge_id: str,
+    *,
+    cache_dir: Path,
+    api_url: str = DEFAULT_GAGESII_BASINS_API_URL,
+) -> dict[str, Any]:
+    """Return a cached USGS GAGES-II basin FeatureCollection for one gauge."""
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    gauge_id = normalize_gauge_id(gauge_id)
+    cache_file = gagesii_cache_path(cache_dir, gauge_id)
+    if cache_file.exists():
+        return json.loads(cache_file.read_text(encoding="utf-8"))
+
+    query = urllib.parse.urlencode({"gage_id": gauge_id, "f": "json", "limit": 1})
+    url = f"{api_url}?{query}"
+    with urllib.request.urlopen(url, timeout=45) as response:
+        payload = json.load(response)
+
+    features = payload.get("features") or []
+    if not features:
+        raise RuntimeError(f"USGS GAGES-II API returned no basin geometry for {gauge_id}")
+
+    cache_file.write_text(json.dumps(payload), encoding="utf-8")
+    return payload
+
+
+def feature_collection_geometry(feature_collection: dict[str, Any], gauge_id: str) -> Any:
+    features = feature_collection.get("features") or []
+    if not features:
+        raise RuntimeError(f"Cached USGS GAGES-II feature collection is empty for {gauge_id}")
+    return make_valid(shapely_shape(features[0]["geometry"]))
+
+
 def polygonal_rings(geometry: Any) -> list[list[tuple[float, float]]]:
     if geometry.is_empty:
         return []
@@ -380,6 +450,64 @@ def load_basin_rings(
     if missing:
         raise RuntimeError(f"Missing CAMELSH basin geometry for {', '.join(missing[:10])}")
     return geometries
+
+
+def load_gagesii_api_basin_rings(
+    gauge_ids: set[str],
+    clip_geometry: Any,
+    *,
+    cache_dir: Path,
+    api_url: str = DEFAULT_GAGESII_BASINS_API_URL,
+) -> dict[str, list[list[tuple[float, float]]]]:
+    """Load CRS-tagged GAGES-II basin rings from the USGS API cache.
+
+    The API returns lon/lat coordinates. Projecting them to EPSG:5070 before
+    clipping keeps map geometry and area-based DRBC overlay checks in one
+    equal-area coordinate system.
+    """
+    source_crs = pyproj.CRS.from_user_input(GAGESII_API_BASIN_CRS)
+    to_map_crs = pyproj.Transformer.from_crs(source_crs, MAP_CRS, always_xy=True).transform
+    geometries: dict[str, list[list[tuple[float, float]]]] = {}
+    for gauge_id in sorted(normalize_gauge_id(gid) for gid in gauge_ids):
+        feature_collection = fetch_gagesii_feature_collection(
+            gauge_id,
+            cache_dir=cache_dir,
+            api_url=api_url,
+        )
+        raw_geometry = feature_collection_geometry(feature_collection, gauge_id)
+        projected_geometry = make_valid(transform_geometry(to_map_crs, raw_geometry))
+        clipped_geometry = make_valid(projected_geometry.intersection(clip_geometry))
+        rings = polygonal_rings(clipped_geometry)
+        if not rings:
+            rings = polygonal_rings(projected_geometry)
+        geometries[gauge_id] = rings
+
+    missing = sorted(gauge_ids - set(geometries))
+    if missing:
+        raise RuntimeError(f"Missing USGS GAGES-II basin geometry for {', '.join(missing[:10])}")
+    return geometries
+
+
+def load_map_basin_rings(
+    args: argparse.Namespace,
+    gauge_ids: set[str],
+    clip_geometry: Any,
+) -> dict[str, list[list[tuple[float, float]]]]:
+    if getattr(args, "basin_geometry_source", "camelsh") == "gagesii-api":
+        cache_dir = args.gagesii_cache_dir or default_gagesii_cache_dir(args.output_html)
+        args.resolved_gagesii_cache_dir = cache_dir
+        return load_gagesii_api_basin_rings(
+            gauge_ids,
+            clip_geometry,
+            cache_dir=cache_dir,
+            api_url=args.gagesii_api_url,
+        )
+    args.resolved_gagesii_cache_dir = None
+    return load_basin_rings(
+        args.camelsh_shapefile,
+        gauge_ids,
+        clip_geometry=clip_geometry,
+    )
 
 
 def point_line_distance(point: tuple[float, float], start: tuple[float, float], end: tuple[float, float]) -> float:
@@ -662,10 +790,25 @@ def render_html(
         "drbcSelected": str(args.drbc_selected),
         "camelshShapefile": str(args.camelsh_shapefile),
         "drbcBoundary": str(args.drbc_boundary),
+        "basinGeometrySource": str(args.basin_geometry_source),
+        "gagesiiCacheDir": (
+            None
+            if getattr(args, "resolved_gagesii_cache_dir", None) is None
+            else str(args.resolved_gagesii_cache_dir)
+        ),
+        "gagesiiApiUrl": str(args.gagesii_api_url),
         "mapCrs": MAP_CRS,
         "basinFallbackCrs": BASIN_FALLBACK_CRS,
     }
     source_json = json.dumps(source_info, ensure_ascii=False, allow_nan=False)
+    if args.basin_geometry_source == "gagesii-api":
+        map_geometry_source = (
+            f'<code>{html.escape(str(args.gagesii_api_url))}</code> '
+            f'(USGS GAGES-II basin geometry cache: '
+            f'<code>{html.escape(str(getattr(args, "resolved_gagesii_cache_dir", "")))}</code>)'
+        )
+    else:
+        map_geometry_source = f"<code>{html.escape(str(args.camelsh_shapefile))}</code>"
 
     tier_cards = "\n".join(
         [
@@ -1066,7 +1209,7 @@ def render_html(
   <header>
     <h1>Extreme-rain event plots by median-distance basin tier</h1>
     <p class="intro">
-      DRBC primary 38개 basin을 primary metric boxplot median-distance 기준으로 먼저 나누고,
+      DRBC primary 85개 basin을 primary metric boxplot median-distance 기준으로 먼저 나누고,
       각 basin을 누르면 해당 basin의 extreme-rain event flow chart를 바로 확인하는 index입니다.
       Median-distance는 NSE/KGE/FHV x Model 1/2 x seed 111/222/444의 18개 record를 기준으로 합니다.
     </p>
@@ -1112,7 +1255,7 @@ def render_html(
       <code>{html.escape(str(event_manifest))}</code>,
       <code>{html.escape(str(args.tier_profile))}</code>,
       <code>{html.escape(str(args.drbc_boundary))}</code>,
-      <code>{html.escape(str(args.camelsh_shapefile))}</code>.
+      {map_geometry_source}.
     </p>
   </section>
 
@@ -1382,8 +1525,8 @@ def main() -> None:
     events, tiers, selected = read_inputs(args)
     basin_records = build_basin_records(events, tiers, selected)
     boundary_geometry, boundary_rings = load_boundary_geometry(args.drbc_boundary)
-    basin_rings = load_basin_rings(
-        args.camelsh_shapefile,
+    basin_rings = load_map_basin_rings(
+        args,
         set(basin_records),
         clip_geometry=boundary_geometry,
     )

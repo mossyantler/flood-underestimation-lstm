@@ -23,9 +23,9 @@ q99_under_frac          : fraction of obs_q99_plus timesteps q99 underestimates
 
 Outputs
 -------
-output/model_analysis/q99_analysis/tables/q99_driver_correlation.csv
-output/model_analysis/q99_analysis/tables/q99_stable_drivers.csv
-output/model_analysis/q99_analysis/tables/q99_quartile_comparison.csv
+output/model_analysis/q99_analysis/causes/tables/q99_driver_correlation.csv
+output/model_analysis/q99_analysis/causes/tables/q99_stable_drivers.csv
+output/model_analysis/q99_analysis/causes/tables/q99_quartile_comparison.csv
 """
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ import pandas as pd
 from scipy import stats
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-OUT_DIR = REPO_ROOT / "output/model_analysis/q99_analysis/tables"
+OUT_DIR = REPO_ROOT / "output/model_analysis/q99_analysis/causes/tables"
 
 TARGET_METRICS = ["q99_med_rel_bias", "med_rel_bias_delta", "q99_under_frac"]
 

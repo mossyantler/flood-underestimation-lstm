@@ -76,17 +76,17 @@ DRBC holdout basin은 `outlet_in_drbc == True`이고 `overlap_ratio_of_basin >= 
 
 이 gate를 통과한 broad non-DRBC training basin은 문서 기준 `1923개`다. hydromodification risk가 없는 natural subset은 `248개`다. 현재 main comparison은 natural-only가 아니라 broad pool에서 출발한다. 이유는 compute-constrained 상황에서도 national-scale multi-basin diversity를 유지하려는 목적이 크기 때문이다. Natural-only는 해석상 깨끗하지만 basin 수와 지역 다양성이 크게 줄어든다.
 
-DRBC 쪽도 별도 streamflow quality gate를 통과한 basin만 test에 들어간다. 현재 raw broad split 기준 DRBC quality-pass test는 `38개`다.
+DRBC 쪽도 별도 streamflow quality gate와 2014-2016 선택 target coverage gate를 통과한 basin만 test에 들어간다. 현재 공식 primary test는 expanded observed DRBC 기준 `85개`다.
 
 ## 4. Raw split과 prepared split은 왜 다르게 보나
 
 프로젝트에는 split이 여러 층 있다. 이 구분을 놓치면 숫자가 헷갈린다.
 
-첫 번째는 raw basin membership split이다. `build_drbc_holdout_split_files.py`가 non-DRBC selected pool을 HUC02 기준으로 train/validation에 나누고, DRBC quality-pass basin을 test로 둔다. 현재 raw broad split은 `train 1722 / validation 201 / test 38`이다.
+첫 번째는 raw basin membership split이다. `build_drbc_holdout_split_files.py`가 non-DRBC selected pool을 HUC02 기준으로 train/validation에 나누고, DRBC quality-pass basin을 test candidate로 둔다. 현재 공식 평가에는 expanded observed DRBC test `85개`를 사용한다.
 
-두 번째는 prepared split이다. `prepare_camelsh_generic_dataset.py`가 raw split을 NeuralHydrology `generic` dataset 구조로 바꾸면서 실제 split 기간 안에 target `Streamflow`가 충분히 있는지 다시 확인한다. 여기서 train은 최소 `720` valid target hours, validation/test는 최소 `168` valid target hours를 요구한다. 이 기준을 통과한 prepared broad split은 `train 1705 / validation 198 / test 38`이다.
+두 번째는 prepared split이다. `prepare_camelsh_generic_dataset.py`가 raw split을 NeuralHydrology `generic` dataset 구조로 바꾸면서 실제 split 기간 안에 target `Streamflow`가 충분히 있는지 다시 확인한다. 여기서 train은 최소 `720` valid target hours, validation/test는 최소 `168` valid target hours를 요구한다. 현재 공식 Model 1/2 비교에서는 prepared train/validation pool에서 고정한 subset과 expanded observed DRBC test `85개`를 조합한다.
 
-세 번째는 subset300 main comparison split이다. broad prepared split 전체를 그대로 학습하면 비용이 크기 때문에, deterministic scaling pilot을 통해 non-DRBC train/validation basin 수를 `300`으로 줄였다. 현재 실제 main comparison이 직접 쓰는 split은 `configs/pilot/basin_splits/scaling_300/`이고, 구성은 `train 269 / validation 31 / test 38`이다.
+세 번째는 subset300 main comparison split이다. broad prepared split 전체를 그대로 학습하면 비용이 크기 때문에, deterministic scaling pilot을 통해 non-DRBC train/validation basin 수를 `300`으로 줄였다. 현재 실제 main comparison이 직접 쓰는 split은 `configs/pilot/basin_splits/scaling_300/`이고, 구성은 `train 269 / validation 31 / test 85`이다.
 
 정리하면 아래처럼 읽는다.
 

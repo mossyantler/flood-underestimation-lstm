@@ -30,7 +30,7 @@ export function ChartCard() {
       <div className="panel-header">
         <div>
           <div className="panel-title">Quantile 과소추정률</div>
-          <div className="panel-sub">DRBC 38 · top 1% flow stratum · {active}</div>
+          <div className="panel-sub">DRBC 85 · top 1% flow stratum · {active}</div>
         </div>
         <div className="seg-ctrl">
           {QUANTILES.map((q) => (

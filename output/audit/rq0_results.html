@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RQ-0 — 분위 출력 해석과 관측 위치 추측 (실험 결과·분석·결론)</title>
+<style>
+  :root{
+    --bg:#f5f6f9; --card:#ffffff; --ink:#161a22; --sub:#5b6472; --line:#e4e7ee;
+    --accent:#0f766e; --accent2:#0891b2; --accent-soft:#e6f4f1;
+    --pass:#16a34a; --pass-bg:#e9f7ee; --warn:#d97706; --warn-bg:#fdf3e3;
+    --fail:#dc2626; --fail-bg:#fdeaea; --blue:#2563eb;
+    --mono:"SFMono-Regular",ui-monospace,"JetBrains Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR",-apple-system,system-ui,sans-serif;
+    line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 24px 96px}
+  header.hero{background:linear-gradient(135deg,#0a1f1c 0%,#0f766e 55%,#0891b2 100%);
+    color:#fff;padding:56px 24px 48px;margin-bottom:40px}
+  .hero-in{max-width:1060px;margin:0 auto}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#7fd9cd;margin:0 0 14px}
+  h1{font-size:29px;line-height:1.32;margin:0 0 16px;font-weight:800;letter-spacing:-.01em}
+  .hero p{margin:0;color:#c7e8e3;max-width:800px;font-size:15px}
+  .hero-meta{display:flex;gap:26px;flex-wrap:wrap;margin-top:26px;font-size:13px}
+  .hero-meta div span{display:block;color:#7fd9cd;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+  .hero-meta div b{font-family:var(--mono);font-weight:600;color:#fff;font-size:15px}
+  .toc{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
+  .toc a{font-size:12.5px;font-family:var(--mono);text-decoration:none;color:#0a5249;background:#fff;border:1px solid #b6ddd6;padding:6px 12px;border-radius:8px}
+  .toc a:hover{background:var(--accent);color:#fff}
+
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:30px 32px;margin-bottom:26px;box-shadow:0 1px 2px rgba(10,31,28,.04)}
+  h2{font-size:21px;margin:0 0 6px;font-weight:750;letter-spacing:-.01em;display:flex;align-items:center;gap:11px}
+  h2 .n{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:var(--accent);color:#fff;border-radius:9px;font-family:var(--mono);font-size:14px;font-weight:700;flex:none}
+  h3{font-size:16px;margin:26px 0 10px;font-weight:700;color:#0a5249}
+  h4{font-size:14px;margin:18px 0 6px;font-weight:700;color:#0a4a43}
+  .lead{color:var(--sub);font-size:14.5px;margin:2px 0 22px}
+  p{font-size:14.5px}
+  code{font-family:var(--mono);font-size:.86em;background:#e9f0ef;padding:1px 6px;border-radius:5px;color:#0a4a43}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:14px 0}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#eaf4f2;font-weight:700;font-size:12.5px;color:#0a4a43}
+  tbody tr:hover{background:#f7fbfa}
+  td.mono,th.mono{font-family:var(--mono);font-size:12.5px}
+  td.num,th.num{font-family:var(--mono);text-align:right;white-space:nowrap}
+  td.pos{color:#0f766e;font-weight:600} td.neg{color:#dc2626;font-weight:600}
+  .table-scroll{width:100%;overflow-x:auto;margin:14px 0}
+  .table-scroll table{margin:0}
+  table.signal-detail{min-width:980px}
+  table.signal-detail th:nth-child(-n+6),table.signal-detail td:nth-child(-n+6){white-space:nowrap}
+  table.signal-detail th:last-child,table.signal-detail td:last-child{min-width:310px}
+
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;font-family:var(--mono);white-space:nowrap}
+  .b-i,.b-s{background:var(--pass-bg);color:var(--pass)}
+  .b-f{background:#e8f1ff;color:var(--blue)}
+  .b-c{background:var(--fail-bg);color:var(--fail)}
+  .b-m{background:var(--warn-bg);color:var(--warn)}
+  .b-l{background:#eef1f6;color:#5b6472}
+  tr.row-strong{background:#f0fbf4}
+  tr.row-conditional{background:#f1f6ff}
+  tr.row-caution{background:#fff7ed}
+  tr.row-null{background:#f7f8fb}
+  tr.row-strong:hover{background:#e8f8ee}
+  tr.row-conditional:hover{background:#e7f0ff}
+  tr.row-caution:hover{background:#ffefd9}
+  tr.row-null:hover{background:#eef1f6}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+  .stat{background:#f3f9f8;border:1px solid var(--line);border-radius:11px;padding:18px}
+  .stat .v{font-family:var(--mono);font-size:25px;font-weight:700;line-height:1.1;color:var(--accent)}
+  .stat.red .v{color:var(--fail)}
+  .stat .l{font-size:12.5px;color:var(--sub);margin-top:6px}
+
+  figure{margin:18px 0;background:#fafdfc;border:1px solid var(--line);border-radius:12px;padding:22px 18px}
+  figcaption{font-size:12.5px;color:var(--sub);margin-top:12px;text-align:center}
+  figcaption b{color:var(--ink)}
+
+  .callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:14px 18px;border-radius:0 10px 10px 0;margin:18px 0;font-size:14px}
+  .callout.fail{border-color:var(--fail);background:var(--fail-bg)}
+  .callout.warn{border-color:var(--warn);background:var(--warn-bg)}
+  .callout.pass{border-color:var(--pass);background:var(--pass-bg)}
+  .callout b{font-weight:700}
+
+  ul.clean{padding-left:0;list-style:none;margin:10px 0}
+  ul.clean li{padding:7px 0 7px 24px;position:relative;font-size:14px;border-bottom:1px dashed var(--line)}
+  ul.clean li:last-child{border-bottom:none}
+  ul.clean li::before{content:"";position:absolute;left:4px;top:14px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  footer{text-align:center;color:var(--sub);font-size:12px;padding:30px 0 0}
+  .num2{font-family:var(--mono)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font-size:12px;color:var(--sub);margin-top:10px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-in">
+    <p class="kicker">CAMELSH · Model 2 분위 LSTM · RQ-0 결과</p>
+    <h1>RQ-0 — 분위 출력 해석과 관측 위치(obs_class) 추측<br>실험 결과 · 분석 · 결론</h1>
+    <p>RQ-0의 질문은 두 갈래다 — (1) 네 예측선 <code>q50/q90/q95/q99</code>를 어떻게 읽는가, (2) 이 선들로 <b>관측 첨두가 밴드 어디에 드는지(관측 위치 구간)</b>를 추측하고 <b>모델이 언제 첨두를 놓치는지</b>를 어떤 신호로 예고하는가. 관측이 최상단 <code>q99</code>마저 넘는 경우(<code>above_q99</code>)가 곧 첨두 과소추정이다. 이 글은 관측 위치 분포·신호 상관관계·상승 기울기 분석의 결과·분석·결론을 담는다.</p>
+    <div class="hero-meta">
+      <div><span>평가 유역</span><b>DRBC 관측 시험 85개</b></div>
+      <div><span>난수 seed</span><b>111 / 222 / 444</b></div>
+      <div><span>사건 범위</span><b>Q99 · NOAA · 전체강우</b></div>
+      <div><span>핵심 결론</span><b>대류성 돌발홍수+큰 유역</b></div>
+    </div>
+    <div class="toc">
+      <a href="#q">질문·구조</a>
+      <a href="#setup">실험 설정</a>
+      <a href="#data">사건 생성 절차</a>
+      <a href="#a">결과A 관측 위치</a>
+      <a href="#b">결과B 신호 탐색</a>
+      <a href="#c">결과C 상승 기울기</a>
+      <a href="#d">결과D 읽기 규칙</a>
+      <a href="#concl">종합 결론</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- ===== 질문·구조 ===== -->
+<section id="q">
+  <h2><span class="n">1</span>질문과 핵심 구조 — 관측 위치 구간</h2>
+  <p class="lead">관측 첨두가 예측 밴드(<code>q50</code>~<code>q99</code>) 안 어디에 드는지를 다섯 서수 구간으로 나눈다. 이 변수가 RQ-0 진단의 중심 축이며 모든 신호 분석의 타깃이다.</p>
+
+  <figure>
+  <svg viewBox="0 0 760 270" width="100%" role="img" aria-label="관측 위치 구간 사다리">
+    <g font-family="monospace">
+      <line x1="120" y1="235" x2="640" y2="235" stroke="#5eead4" stroke-width="2"/><text x="86" y="239" fill="#0a5249" font-size="11">q50</text>
+      <line x1="120" y1="188" x2="640" y2="188" stroke="#2dd4bf" stroke-width="2"/><text x="86" y="192" fill="#0a5249" font-size="11">q90</text>
+      <line x1="120" y1="141" x2="640" y2="141" stroke="#14b8a6" stroke-width="2"/><text x="86" y="145" fill="#0a5249" font-size="11">q95</text>
+      <line x1="120" y1="94"  x2="640" y2="94"  stroke="#0f766e" stroke-width="2.5"/><text x="86" y="98"  fill="#0a5249" font-size="11">q99</text>
+      <rect x="120" y="94" width="520" height="141" fill="#0f766e" opacity="0.05"/>
+      <g font-family="sans-serif" font-size="11.5">
+        <rect x="150" y="243" width="210" height="22" rx="5" fill="#eef1f6"/><text x="160" y="258" fill="#5b6472">obs_class 0 · 관측 ≤ q50</text>
+        <rect x="150" y="200" width="210" height="22" rx="5" fill="#e6f4f1"/><text x="160" y="215" fill="#0a5249">1 · q50&lt;관측≤q90</text>
+        <rect x="150" y="153" width="210" height="22" rx="5" fill="#e6f4f1"/><text x="160" y="168" fill="#0a5249">2 · q90&lt;관측≤q95</text>
+        <rect x="150" y="106" width="210" height="22" rx="5" fill="#cdeee7"/><text x="160" y="121" fill="#0a5249">3 · q95&lt;관측≤q99</text>
+        <rect x="400" y="58" width="240" height="24" rx="5" fill="#fdeaea"/><text x="410" y="74" fill="#b91c1c" font-weight="700">4 · 관측 &gt; q99 = 과소추정</text>
+      </g>
+    </g>
+  </svg>
+  <figcaption><b>그림 1.</b> 관측 위치 구간(obs_class) 0~4. 값이 클수록 모델이 첨두를 더 심하게 놓침. <b>obs_class 4(<code>above_q99</code>)</b> = 가장 보수적인 예측선조차 관측을 못 덮은 과소추정 사건.</figcaption>
+  </figure>
+</section>
+
+<!-- ===== 실험 설정 ===== -->
+<section id="setup">
+  <h2><span class="n">2</span>실험 설정</h2>
+  <div class="grid3">
+    <div class="stat"><div class="v">85</div><div class="l">DRBC 관측 시험 유역, seed 111/222/444</div></div>
+    <div class="stat"><div class="v">3</div><div class="l">사건 범위: Q99 926건 · NOAA/NWS 65건 · 전체강우 16,639건</div></div>
+    <div class="stat"><div class="v">Spearman</div><div class="l">신호 vs 관측 위치 구간 순위상관 r</div></div>
+  </div>
+  <ul class="clean">
+    <li>세 범위(3-scope)를 함께 본다: 극단 집합(Q99·NOAA)은 범위 제한(선택 편향) 위험이 있어, <b>전체 강우 사건</b>에서 신호가 살아남는지로 견고성을 검증한다.</li>
+    <li>신호 vs 관측 위치 구간을 Spearman 순위상관으로 측정. Q99/NOAA는 seed별 <code>(basin_id, seed, peak_time)</code>, 전체강우는 seed 평균 <code>(basin_id, peak_time)</code> 기준.</li>
+    <li>출처: <code>output/model_analysis/band_signal/</code> (band_shape · signal_sweep · slope_signal · method_compare).</li>
+  </ul>
+</section>
+
+<!-- ===== 데이터 생성 절차 ===== -->
+<section id="data">
+  <h2><span class="n">3</span>데이터와 사건 범위 생성 절차 — Q99 · NOAA/NWS · 전체강우</h2>
+  <p class="lead">상관관계 분석은 같은 DRBC 관측 시험 split 위에서 세 사건 범위를 따로 만든 뒤 비교한다. Q99와 NOAA/NWS는 어려운 홍수 첨두 범위이고, 전체강우는 극단만 골랐을 때 생기는 범위 제한(선택 편향)을 점검하는 대조 범위다.</p>
+
+  <h3>공통 기준과 조인 규칙</h3>
+  <table>
+    <thead><tr><th>항목</th><th>값</th><th>근거</th></tr></thead>
+    <tbody>
+      <tr><td>평가 유역</td><td>DRBC 관측 시험 유역 85개</td><td><code>data/CAMELSH_generic/drbc_expanded_observed_test/time_series/*.nc</code></td></tr>
+      <tr><td>시험 기간</td><td>2014-01-01 00:00 ~ 2016-12-31 23:00</td><td><code>TEST_PERIOD</code></td></tr>
+      <tr><td>Q99 임계 산정 기간</td><td>2000-01-01 ~ 2010-12-31</td><td><code>TRAIN_PERIOD</code></td></tr>
+      <tr><td>seed</td><td><code>111 / 222 / 444</code></td><td><code>SEEDS</code></td></tr>
+      <tr><td>예측선 순서</td><td><code>model1 → q50 → q90 → q95 → q99</code></td><td><code>TAU_ORDER</code></td></tr>
+      <tr><td>사건 창</td><td>관측 첨두 기준 ±6시간</td><td><code>EVENT_WINDOW_HOURS = 6</code></td></tr>
+      <tr><td>Q99 초과 병합</td><td>초과 시각 사이 간격 12시간 이하이면 같은 사건</td><td><code>EVENT_MERGE_GAP_HOURS = 12</code></td></tr>
+    </tbody>
+  </table>
+  <p><code>basin_id</code>는 모든 단계에서 8자리 문자열로 정규화한다. 이 규칙이 있어야 CAMELSH NetCDF 파일명, <code>required_series.csv</code>의 <code>basin</code>, NOAA catalog의 <code>usgs_id</code>가 같은 유역으로 붙는다.</p>
+
+  <div class="grid3">
+    <div class="stat red"><div class="v">926</div><div class="l">Q99 사건: 학습기간 관측 Q99 임계를 넘은 시험기간 고유량 사건, 82개 유역</div></div>
+    <div class="stat red"><div class="v">65</div><div class="l">NOAA/NWS catalog 사건: 2014–2016 DRBC 85개 교집합, 21개 유역</div></div>
+    <div class="stat"><div class="v">16,639</div><div class="l">전체강우 사건: 2014–2016 강우 탐지 후 반응 첨두를 잡은 대조 범위, 84개 유역</div></div>
+  </div>
+
+  <h3>Q99 사건 — 모델 q99가 아니라 과거 관측 Q99 기준</h3>
+  <p>Q99 사건은 <b>모델의 <code>q99</code> 예측값으로 고른 사건이 아니다.</b> <code>build_q99_events.py</code>가 유역별 학습기간 관측 <code>Streamflow</code>의 0.99 quantile을 먼저 만들고, 시험기간 관측값이 이 임계를 넘는 시각을 사건으로 묶는다.</p>
+  <ol>
+    <li>각 유역 NetCDF에서 2000–2010 <code>Streamflow</code>를 읽고 NaN을 제외한다.</li>
+    <li>유역별 <code>q99_train_value</code>를 계산한다.</li>
+    <li>시험기간 관측값은 seed와 무관하므로 <code>required_series/seed111/required_series.csv</code>를 canonical 관측 source로 쓴다.</li>
+    <li><code>obs ≥ q99_train_value</code>인 시각을 찾고, 초과 시각 사이 간격이 12시간 이하이면 같은 사건으로 병합한다.</li>
+    <li>병합된 사건 안에서 관측 유량 최대 시각을 <code>peak_time</code>, 그 값을 <code>peak_obs</code>로 둔다.</li>
+    <li><code>peak_time ± 6h</code>를 사건 창으로 저장하고 시험기간 경계를 넘으면 자른다.</li>
+  </ol>
+  <table>
+    <thead><tr><th>Q99 산출물</th><th>내용</th></tr></thead>
+    <tbody>
+      <tr><td><code>rq2_q99_per_basin_thresholds.csv</code></td><td>85개 유역별 학습기간 Q99 임계, 사용 시간 수, 시험기간 사건 수</td></tr>
+      <tr><td><code>rq2_q99_events_85basin.csv</code></td><td>926개 Q99 초과 사건의 <code>basin_id/event_id/peak_time/peak_obs/window_start/window_end</code></td></tr>
+      <tr><td><code>rq2_q99_basin_warnings.csv</code></td><td>사건 수가 매우 적거나 많은 유역 경고. 현재 23개 유역은 사건 3건 미만 경고이나 실패 조건은 아님</td></tr>
+    </tbody>
+  </table>
+
+  <h3>NOAA/NWS 사건 — flood-stage catalog를 시험 split에 맞춘 범위</h3>
+  <p>NOAA 사건의 실제 입력은 <code>drbc_confirmed_flood_event_catalog.csv</code>에 저장된 <b>NWS flood-stage 기준 확인 홍수 catalog</b>다. <code>build_noaa_mapping.py</code>가 이 catalog를 DRBC 85개 시험 유역과 2014–2016 시험기간으로 자른다.</p>
+  <ol>
+    <li>catalog의 <code>usgs_id</code>를 8자리 <code>basin_id</code>로 정규화한다.</li>
+    <li>DRBC 시험 split 85개 유역과의 교집합을 <code>in_expanded_85</code>로 표시한다.</li>
+    <li>catalog의 <code>peak_time</code>과 <code>peak_discharge_cms</code>를 사건 첨두 시각·첨두 유량으로 사용한다.</li>
+    <li>NOAA 문구가 <code>-</code>이면 <code>NoNOAA</code>로 두고, 문구가 있으면 정규식으로 <code>Flash Flood</code>, <code>Flood</code>, <code>Coastal Flood</code>를 찾는다.</li>
+    <li>여러 유형이 같은 횟수로 걸리면 <code>Flash Flood &gt; Coastal Flood &gt; Flood &gt; Other</code> 순서로 대표 유형을 정한다.</li>
+    <li>최종 RQ-0 분석은 <code>in_expanded_85=True</code>이고 2014–2016 안에 있는 65건만 사용한다.</li>
+  </ol>
+  <div class="callout warn"><b>NOAA 사건의 정확한 구성:</b> 65건은 <code>Flood</code> 32건, <code>Flash Flood</code> 8건, <code>NoNOAA</code> 25건이다. 즉 40건은 NOAA Storm Events 문구가 붙었고, 25건은 NWS flood-stage는 넘었지만 NOAA 문구가 없는 데이터 품질 카테고리다. 따라서 <code>NoNOAA</code>는 논문 주장용 홍수 유형이 아니라 별도 카테고리로 읽는다.</div>
+
+  <h3>전체강우 사건 — 극단 선택 편향을 점검하는 전체 반응 범위</h3>
+  <p>전체강우 사건은 <code>signal_sweep_branchB2_allrain.py</code>가 시험기간 전체에서 새로 탐지한다. Q99나 NOAA처럼 이미 큰 홍수를 고른 것이 아니라, 모든 강우 반응에서 관측 위치 구간이 어떻게 분포하는지 보는 대조 범위다.</p>
+  <ol>
+    <li><code>Rainf &gt; 0.1 mm/h</code>인 시간을 강우 시간으로 본다.</li>
+    <li>건조 공백이 6시간 이하이면 같은 사건으로 유지하고, 6시간을 넘으면 사건을 종료한다.</li>
+    <li>사건 총강우량이 2.5 mm 미만이면 제외한다.</li>
+    <li>사건 최대 시간강우로 NWS 강우강도 등급을 만든다: <code>light&lt;2.5</code>, <code>moderate 2.5–7.6</code>, <code>heavy 7.6–50</code>, <code>violent≥50 mm/h</code>.</li>
+    <li>강우 시작부터 강우 종료 후 48시간까지의 <code>Streamflow</code> 최대 시각을 반응 첨두 <code>peak_time</code>으로 잡는다.</li>
+    <li>세 seed의 <code>obs/q50/q90/q95/q99</code>를 <code>(basin, datetime)</code>별 평균한 뒤, 그 평균 사다리에서 <code>obs_class</code>를 계산한다.</li>
+  </ol>
+  <p>현재 전체강우 표는 16,639개 행이고, 고유 <code>(basin_id, peak_time)</code>은 14,904개다. 관측 위치 구간은 <code>below_q50</code> 4,446건, <code>q50_to_q90</code> 3,615건, <code>q90_to_q95</code> 1,866건, <code>q95_to_q99</code> 2,970건, <code>above_q99</code> 3,742건으로 비교적 넓게 퍼진다.</p>
+
+  <h3>상관관계 표 생성 경로</h3>
+  <table>
+    <thead><tr><th>범위</th><th>타깃 생성</th><th>feature 생성</th><th>주요 산출물</th></tr></thead>
+    <tbody>
+      <tr><td>Q99</td><td><code>compute_ub_location_class.py</code>가 seed별 <code>obs_class</code> 계산</td><td><code>signal_sweep_branchA_csv.py</code>, <code>signal_sweep_branchB_forcing.py</code></td><td><code>branchA_features_q99.csv</code>, <code>branchB_features_q99.csv</code></td></tr>
+      <tr><td>NOAA/NWS</td><td>NOAA/NWS catalog 첨두 시각을 seed별 예측선과 조인</td><td><code>signal_sweep_branchA_csv.py</code>, <code>signal_sweep_branchB_forcing.py</code></td><td><code>branchA_features_noaa.csv</code>, <code>branchB_features_noaa.csv</code></td></tr>
+      <tr><td>전체강우</td><td>강우 탐지부터 seed 평균 <code>obs_class</code>까지 한 스크립트에서 생성</td><td><code>signal_sweep_branchB2_allrain.py</code>, <code>signal_sweep_seed_spread_allrain.py</code></td><td><code>branchB2_features_allrain.csv</code>, <code>branchB2_spearman.csv</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===== 결과 A ===== -->
+<section id="a">
+  <h2><span class="n">4</span>결과 A — 관측 위치 분포: q99마저 넘는 첨두</h2>
+
+  <div class="grid2">
+    <div class="stat red"><div class="v">47%</div><div class="l">Q99 초과 사건 중 관측이 <code>q99</code>마저 넘은 비율 (유역 중앙값)</div></div>
+    <div class="stat red"><div class="v">100%</div><div class="l">NOAA/NWS catalog 홍수가 <code>above_q99</code>인 비율</div></div>
+  </div>
+
+  <figure>
+  <svg viewBox="0 0 760 250" width="100%" role="img" aria-label="관측 위치 분포">
+    <g font-family="sans-serif">
+      <text x="20" y="24" fill="#5b6472" font-size="11">사건 비율 (유역 중앙값)</text>
+      <!-- Q99 group -->
+      <text x="150" y="225" text-anchor="middle" fill="#0a5249" font-size="12" font-weight="700">Q99 초과 사건</text>
+      <!-- bars from baseline y=205, scale 150px per 1.0 -->
+      <rect x="80" y="191.5" width="40" height="13.5" fill="#cdeee7"/><text x="100" y="186" text-anchor="middle" font-size="9" fill="#0a5249">q50_q90 .09</text>
+      <rect x="135" y="194.2" width="40" height="10.8" fill="#5eead4"/><text x="155" y="188" text-anchor="middle" font-size="9" fill="#0a5249">q95_q99 .07</text>
+      <rect x="190" y="134.7" width="40" height="70.3" fill="#dc2626"/><text x="210" y="128" text-anchor="middle" font-size="10" fill="#b91c1c" font-weight="700">above_q99 .47</text>
+      <!-- NOAA group -->
+      <text x="500" y="225" text-anchor="middle" fill="#0a5249" font-size="12" font-weight="700">NOAA/NWS 홍수</text>
+      <rect x="480" y="55" width="44" height="150" fill="#dc2626"/><text x="502" y="48" text-anchor="middle" font-size="10" fill="#b91c1c" font-weight="700">above_q99 1.00</text>
+      <line x1="60" y1="205" x2="700" y2="205" stroke="#cbd5d3"/>
+    </g>
+  </svg>
+  <figcaption><b>그림 2.</b> 관측 위치 분포. Q99 초과 사건의 약 <b>47%</b>, NOAA/NWS catalog 홍수의 <b>100%</b>에서 관측이 <code>q99</code>를 초과 — 가장 보수적인 예측선조차 극단 첨두를 못 덮는다.</figcaption>
+  </figure>
+
+  <h3>τ에 따른 과소·과대 폭 맞교환 (gap trajectory)</h3>
+  <table>
+    <thead><tr><th class="mono">τ</th><th class="num">상대 under_gap (과소)</th><th class="num">상대 over_gap (과대)</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">q50</td><td class="num">0.657</td><td class="num">0.0</td></tr>
+      <tr><td class="mono">q90</td><td class="num">0.376</td><td class="num">0.0</td></tr>
+      <tr><td class="mono">q95</td><td class="num">0.272</td><td class="num">0.0</td></tr>
+      <tr><td class="mono">q99</td><td class="num">0.018</td><td class="num">0.122</td></tr>
+    </tbody>
+  </table>
+  <div class="callout fail"><b>핵심:</b> q99에서 전형적 사건의 과소추정 폭은 거의 닫히지만(0.018), <code>above_q99</code> 47%가 말하듯 <b>꼬리의 극단 첨두는 여전히 놓친다.</b> 이것이 RQ-2(위쪽 분위로 첨두 과소추정 완화)의 정량적 문제 정의다.</div>
+</section>
+
+<!-- ===== 결과 B ===== -->
+<section id="b">
+  <h2><span class="n">5</span>결과 B — 관측 위치를 예측하는 신호 (상관관계 분석)</h2>
+  <p class="lead">상관관계의 대상은 <b>관측 위치 구간 번호</b>(0=관측≤q50, 4=관측&gt;q99)와 후보 신호 지표다. Spearman r이 양수이면 신호가 클수록 관측 첨두가 예측 사다리 위쪽, 즉 더 큰 과소추정 구간으로 이동한다는 뜻이다.</p>
+
+  <div class="grid3">
+    <div class="stat" style="border-left:4px solid var(--pass)"><div class="v" style="font-size:16px">S 유역 독립 신호</div><div class="l">유역 면적·투수성·기저유출처럼 관측 위치 정의와 분리된 정적 특성. <b>가장 재사용 가능한 신호</b>.</div></div>
+    <div class="stat" style="border-left:4px solid var(--blue)"><div class="v" style="font-size:16px;color:var(--blue)">F 강수·대기 신호</div><div class="l">대류성 강수비·CAPE·강우량. <b>대류 성격은 생존</b>하지만 강우 총량·강도는 전 범위에서 약함.</div></div>
+    <div class="stat" style="border-left:4px solid var(--fail)"><div class="v" style="font-size:16px;color:var(--fail)">C/M/L 주의 신호</div><div class="l">밴드 결합(C), 모델 불확실성(M), 관측값 누수(L)는 예측 신호로 바로 쓰지 않는다.</div></div>
+  </div>
+
+  <figure>
+  <svg viewBox="0 0 880 430" width="100%" role="img" aria-label="상관관계 신호별 3개 범위 막대 그래프">
+    <g font-family="sans-serif">
+      <text x="22" y="28" fill="#0a4a43" font-size="15" font-weight="700">3개 범위에서 본 상관관계 방향</text>
+      <text x="22" y="48" fill="#5b6472" font-size="11">막대가 오른쪽이면 관측 첨두가 q99 위쪽으로 이동, 왼쪽이면 낮은 위치 구간으로 이동. 회색 세로선은 r=0.</text>
+      <g font-family="monospace" font-size="10" fill="#5b6472">
+        <line x1="420" y1="64" x2="420" y2="374" stroke="#cbd5d3"/>
+        <text x="420" y="394" text-anchor="middle">0</text>
+        <text x="300" y="394" text-anchor="middle">−0.3</text>
+        <text x="540" y="394" text-anchor="middle">+0.3</text>
+        <text x="600" y="394" text-anchor="middle">+0.45</text>
+      </g>
+
+      <g font-size="11" fill="#5b6472">
+        <rect x="650" y="18" width="10" height="10" fill="#0f766e"/><text x="666" y="27">Q99 사건</text>
+        <rect x="734" y="18" width="10" height="10" fill="#2563eb"/><text x="750" y="27">NOAA 홍수</text>
+        <rect x="650" y="36" width="10" height="10" fill="#94a3b8"/><text x="666" y="45">전체 강우</text>
+      </g>
+
+      <!-- row helper: x0=420, scale=400px/r -->
+      <g font-family="monospace" font-size="11">
+        <text x="250" y="88" text-anchor="end" fill="#0a5249" font-weight="700">area</text>
+        <rect x="420" y="74" width="172" height="8" fill="#0f766e"/><rect x="420" y="84" width="172" height="8" fill="#2563eb"/><rect x="420" y="94" width="108" height="8" fill="#94a3b8"/>
+        <text x="606" y="90" fill="#0a5249">+0.43/+0.43/+0.27</text>
+
+        <text x="250" y="128" text-anchor="end" fill="#0a5249">baseflow_index</text>
+        <rect x="420" y="114" width="44" height="8" fill="#0f766e"/><rect x="420" y="124" width="164" height="8" fill="#2563eb"/><rect x="420" y="134" width="80" height="8" fill="#94a3b8"/>
+        <text x="606" y="130" fill="#0a5249">+0.11/+0.41/+0.20</text>
+
+        <text x="250" y="168" text-anchor="end" fill="#0a5249">CRainf_frac · CAPE</text>
+        <rect x="420" y="154" width="28" height="8" fill="#0f766e"/><rect x="420" y="164" width="152" height="8" fill="#2563eb"/><rect x="420" y="174" width="52" height="8" fill="#94a3b8"/>
+        <text x="606" y="170" fill="#0a5249">+0.07/+0.38/+0.13</text>
+
+        <text x="250" y="208" text-anchor="end" fill="#7f1d1d">rain_sum</text>
+        <rect x="304" y="194" width="116" height="8" fill="#dc2626"/><rect x="312" y="204" width="108" height="8" fill="#ef4444"/><rect x="408" y="214" width="12" height="8" fill="#94a3b8"/>
+        <text x="606" y="210" fill="#7f1d1d">−0.29/−0.27/−0.03</text>
+
+        <text x="250" y="248" text-anchor="end" fill="#7f1d1d">rel_width</text>
+        <rect x="320" y="234" width="100" height="8" fill="#dc2626"/><rect x="300" y="244" width="120" height="8" fill="#ef4444"/><rect x="420" y="254" width="4" height="8" fill="#94a3b8"/>
+        <text x="606" y="250" fill="#7f1d1d">−0.25/−0.30/+0.01</text>
+
+        <text x="250" y="288" text-anchor="end" fill="#5b6472">seed_spread_rel</text>
+        <rect x="416" y="274" width="4" height="8" fill="#94a3b8"/><rect x="352" y="284" width="68" height="8" fill="#94a3b8"/><rect x="412" y="294" width="8" height="8" fill="#94a3b8"/>
+        <text x="606" y="290" fill="#5b6472">−0.01/−0.17/−0.02</text>
+
+        <text x="250" y="328" text-anchor="end" fill="#5b6472">obs_peak(관측값 누수)</text>
+        <rect x="420" y="314" width="180" height="8" fill="#cbd5d3"/><rect x="420" y="324" width="132" height="8" fill="#cbd5d3"/>
+        <text x="606" y="326" fill="#5b6472">+0.45/+0.33/—</text>
+      </g>
+
+      <text x="22" y="408" fill="#5b6472" font-size="11">읽기: area는 세 범위 모두 양수로 남는다. rain_sum·rel_width는 극단 범위에서만 음수이고 전체 강우에서 0 근처로 붕괴한다.</text>
+    </g>
+  </svg>
+  <figcaption><b>그림 3.</b> 상관관계 신호를 3개 범위로 나눠 본 결과. 공통 신호는 유역 규모(area)이고, 대류성 강수 성격은 NOAA 확인 홍수에서 강하다. 강우 총량·밴드 폭·모델 불확실성은 안정적인 예측 신호로 해석하지 않는다.</figcaption>
+  </figure>
+
+  <h3>분류 기준 — 세 범위에서 같은 방향으로 남는가</h3>
+  <table>
+    <thead><tr><th>판정</th><th>기준</th><th>해석</th></tr></thead>
+    <tbody>
+      <tr class="row-strong"><td><span class="badge b-i">공통·견고</span></td><td>Q99 사건 · NOAA 홍수 · 전체 강우에서 같은 방향</td><td>극단 subset 선택에 덜 의존하는 실제 후보 신호</td></tr>
+      <tr class="row-conditional"><td><span class="badge b-f">조건부 생존</span></td><td>세 범위 모두 같은 방향이나 특정 범위에서만 강함</td><td>논문에서는 “특히 어떤 사건에서 강하다”로 제한해 해석</td></tr>
+      <tr class="row-caution"><td><span class="badge b-c">선택 편향/정의상 결합</span></td><td>Q99·NOAA에서는 커 보이나 전체 강우에서 0 근처</td><td>극단 사건만 골라 생긴 착시 또는 관측 위치 정의와의 수학적 결합</td></tr>
+      <tr class="row-null"><td><span class="badge b-l">기각·기준선</span></td><td>상관이 0 근처이거나 관측값 자체를 사용</td><td>미래 예측 신호가 아니라 null 또는 사후 진단 기준선</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3-scope 상관관계 상세 분류 (Spearman r vs 관측 위치 구간)</h3>
+  <div class="table-scroll">
+  <table class="signal-detail">
+    <thead><tr><th>신호 묶음</th><th>세부 지표</th><th>부류</th><th class="num">Q99 사건</th><th class="num">NOAA 홍수</th><th class="num">전체 강우</th><th>판정과 정확한 해석</th></tr></thead>
+    <tbody>
+      <tr class="row-strong"><td><b>유역 규모</b></td><td>area</td><td><span class="badge b-s">S</span></td><td class="num pos">+0.43</td><td class="num pos">+0.43</td><td class="num pos">+0.27</td><td><b>공통·견고.</b> 큰 유역일수록 관측 첨두가 밴드 위쪽으로 간다. 과소추정 위험을 가장 안정적으로 예고한다.</td></tr>
+      <tr class="row-conditional"><td><b>유역 반응성</b></td><td>baseflow_index</td><td><span class="badge b-s">S</span></td><td class="num pos">+0.11</td><td class="num pos">+0.41</td><td class="num pos">+0.20</td><td><b>조건부 생존.</b> 세 범위 모두 양수지만 NOAA 홍수에서 특히 강하다. 유역 저장·완만한 반응 특성이 실제 홍수 과소추정과 연결될 수 있다.</td></tr>
+      <tr class="row-conditional"><td><b>유역 토양/지질</b></td><td>permeability</td><td><span class="badge b-s">S</span></td><td class="num pos">+0.27</td><td class="num">+0.03</td><td class="num pos">+0.26</td><td><b>보조 신호.</b> Q99와 전체 강우에서는 양수이나 NOAA 표본에서는 거의 0이다. headline 신호보다는 보조 유역 특성으로 둔다.</td></tr>
+      <tr class="row-conditional"><td><b>대류성 성격</b></td><td>CRainf_frac / CAPE</td><td><span class="badge b-f">F</span></td><td class="num">+0.07 / +0.05</td><td class="num pos">+0.38 / +0.29</td><td class="num pos">+0.13 / +0.12</td><td><b>조건부 핵심 신호.</b> Q99 전체에서는 약하지만 NOAA 확인 홍수와 전체 강우에서 양수다. “비의 양”보다 <b>대류성 여부</b>가 더 중요한 공통 단서다.</td></tr>
+      <tr class="row-caution"><td><b>강우 총량</b></td><td>rain_sum</td><td><span class="badge b-f">F</span></td><td class="num neg">−0.29</td><td class="num neg">−0.27</td><td class="num">−0.03</td><td><b>선택 편향.</b> 극단 범위에서는 음수지만 전체 강우에서는 거의 0이다. 비가 많이 오면 모델도 밴드를 올리는 간접 결합으로 해석한다.</td></tr>
+      <tr class="row-caution"><td><b>강우 강도/등급</b></td><td>rain_max_1h / NWS class</td><td><span class="badge b-f">F</span></td><td class="num neg">−0.24 / −0.24</td><td class="num">−0.07 / −0.08</td><td class="num">+0.02 / +0.01</td><td><b>전 범위 붕괴.</b> 극단 사건 안에서만 보이는 음의 상관이다. 독립 예측 신호로 쓰지 않는다.</td></tr>
+      <tr class="row-caution"><td><b>밴드 폭</b></td><td>rel_width / q99_q50_ratio</td><td><span class="badge b-c">C</span></td><td class="num neg">−0.25</td><td class="num neg">−0.30</td><td class="num">+0.01</td><td><b>정의상 결합.</b> 밴드가 넓으면 관측이 밴드 안에 들어갈 확률이 커져 관측 위치 구간이 낮아진다. 예측력으로 말하지 않는다.</td></tr>
+      <tr class="row-null"><td><b>모델 불확실성</b></td><td>seed_spread_rel / M1−M2 gap</td><td><span class="badge b-m">M</span></td><td class="num">−0.01 / −0.04</td><td class="num">−0.17 / +0.07</td><td class="num">−0.02 / —</td><td><b>기각.</b> 모델 간 차이와 seed 분산은 과소추정 위험을 안정적으로 예고하지 못한다.</td></tr>
+      <tr class="row-null"><td><b>관측값 기준선</b></td><td>obs_peak</td><td><span class="badge b-l">L</span></td><td class="num pos">+0.45</td><td class="num pos">+0.33</td><td class="num">—</td><td><b>관측값 누수.</b> 강하지만 미래 예측에는 쓸 수 없다. area(+0.43)가 이 기준선에 근접한다는 점만 의미가 있다.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout pass"><b>공통 결론:</b> 과소추정 위험을 누수 없이 가장 명확하게 말해 주는 축은 <b>유역 규모(area)</b>다. 여기에 <b>대류성 강수 성격(CRainf_frac, CAPE)</b>이 NOAA 확인 홍수에서 강하게 붙는다. 따라서 “강우량이 많아서”가 아니라 <b>큰 유역 + 대류성 폭우 성격</b>이 관측 첨두가 q99 위로 넘어가는 조건으로 정리된다.</div>
+  <div class="callout warn"><b>해석 금지:</b> 밴드 폭, 강우 총량, 강우 강도는 극단 범위에서만 그럴듯해 보이고 전체 강우에서는 0 근처로 무너진다. 모델 불확실성(seed spread, M1−M2 gap)도 안정 신호가 아니다. 이들은 예측 신호가 아니라 선택 편향·정의상 결합·null로 분류한다.</div>
+</section>
+
+<!-- ===== 결과 C ===== -->
+<section id="c">
+  <h2><span class="n">6</span>결과 C — 상승 기울기 신호</h2>
+  <p class="lead">홍수 상승부 기울기가 위험도(관측 위치 구간)를 예고하는지 검정 (clean 상승 구간 813개).</p>
+  <figure>
+  <svg viewBox="0 0 880 260" width="100%" role="img" aria-label="상승 기울기 신호 상관관계 막대 그래프">
+    <g font-family="sans-serif">
+      <text x="22" y="28" fill="#0a4a43" font-size="15" font-weight="700">상승 기울기 신호의 상관관계</text>
+      <text x="22" y="48" fill="#5b6472" font-size="11">결과 B와 같은 기준선 형식이다. 관측 기울기는 누수 기준선, 예측 기울기는 단독으로 잘 맞추지 못한 신호라 적색으로 표시한다.</text>
+
+      <g font-family="monospace" font-size="10" fill="#5b6472">
+        <line x1="420" y1="66" x2="420" y2="190" stroke="#cbd5d3"/>
+        <text x="420" y="214" text-anchor="middle">r=0</text>
+        <text x="300" y="214" text-anchor="middle">−0.3</text>
+        <text x="540" y="214" text-anchor="middle">+0.3</text>
+        <text x="620" y="214" text-anchor="middle">+0.5</text>
+      </g>
+
+      <g font-size="11" fill="#5b6472">
+        <rect x="650" y="18" width="10" height="10" fill="#cbd5d3"/><text x="666" y="27">관측값 누수</text>
+        <rect x="742" y="18" width="10" height="10" fill="#dc2626"/><text x="758" y="27">예측 신호 약함</text>
+      </g>
+
+      <!-- row helper: x0=420, scale=400px/r -->
+      <g font-family="monospace" font-size="11">
+        <text x="250" y="91" text-anchor="end" fill="#5b6472">관측 상승 기울기(누수 L)</text>
+        <rect x="420" y="78" width="199" height="18" fill="#cbd5d3"/>
+        <text x="628" y="92" fill="#5b6472">+0.498</text>
+
+        <text x="250" y="132" text-anchor="end" fill="#7f1d1d" font-weight="700">예측 fanning_slope</text>
+        <rect x="347" y="119" width="73" height="18" fill="#dc2626"/>
+        <text x="337" y="133" text-anchor="end" fill="#b91c1c">−0.182</text>
+
+        <text x="250" y="173" text-anchor="end" fill="#7f1d1d" font-weight="700">예측 q99_rise_slope</text>
+        <rect x="363" y="160" width="57" height="18" fill="#ef4444"/>
+        <text x="353" y="174" text-anchor="end" fill="#b91c1c">−0.143</text>
+      </g>
+
+      <text x="22" y="244" fill="#5b6472" font-size="11">읽기: 관측 기울기는 강하지만 관측값 누수다. 예측 기울기 2개는 적색으로 표시한 것처럼 단독 예측 신호로 약하다.</text>
+    </g>
+  </svg>
+  <figcaption><b>그림 4.</b> 관측 상승 기울기는 위험도와 강하게(r≈0.5) 연결되나 관측값 누수라 사용 불가. 누수 없는 <b>예측 분위 기울기는 단독으로 약하다</b>(최대 |r|=0.182).</figcaption>
+  </figure>
+  <div class="callout"><b>판정:</b> 예측 기울기만으로 과소추정을 예고하기엔 부족. 유역 정적 특성·대류 지표와 결합해야 한다. 예측 기울기가 음수인 것은 관측 위치 구간이 (관측−예측)이라 예측 기울기가 빼는 항으로 들어가는 구조적 결합 때문.</div>
+</section>
+
+<!-- ===== 결과 D ===== -->
+<section id="d">
+  <h2><span class="n">7</span>결과 D — 네 선 읽기 규칙의 타당성 (요약)</h2>
+  <table>
+    <thead><tr><th style="width:26%">읽기 규칙</th><th style="width:40%">실증 결과</th><th>판정</th></tr></thead>
+    <tbody>
+      <tr><td>예측 폭으로 읽기</td><td>q99−q50 폭 전체 시각 관측의 122%, 첨두서 절대폭 최대</td><td><span class="badge b-i">정당</span></td></tr>
+      <tr><td>q50을 가운데 예측으로</td><td>q50 가운데 예측 Δ NSE +0.149 / RMSE −0.273 (vs Model 1)</td><td><span class="badge b-i">정당</span></td></tr>
+      <tr><td>예측구간·보정성으로 읽지 않기</td><td>포함률 전 τ 명목 미달(q99 0.787 vs 0.99), q99 pinball 최저인데 포함률 미달</td><td><span class="badge b-i">정당</span></td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12.5px;color:var(--sub)">상세는 <code>05_calibration_sharpness.md</code> · <code>01_q50_central.md</code>. 여기서는 신호 분석(결과 A~C)의 토대로만 둔다.</p>
+</section>
+
+<!-- ===== 종합 결론 ===== -->
+<section id="concl">
+  <h2><span class="n">8</span>종합 분석 및 결론</h2>
+  <ul class="clean">
+    <li><b>과소추정의 규모:</b> 가장 보수적인 <code>q99</code>조차 Q99 사건의 약 47%, NOAA/NWS catalog 홍수의 100%를 못 덮는다. 위쪽 분위는 과소추정을 줄이되 극단 꼬리는 여전히 놓친다 → RQ-2 문제 정의.</li>
+    <li><b>견고한 예측 신호 = 유역 정적 특성 + 대류 성격:</b> 유역 면적·투수성·기저유출 지표는 극단에서 전 범위까지 살아남고, 대류성 강수비·CAPE는 모든 체제에서 양수. 같은 "강우"라도 <b>총량은 모델이 반응해 밴드를 올리는 입력(간접 결합)</b>이지만 <b>대류성 성격은 모델이 구조적으로 못 잡는 부분(진짜 신호)</b>이다.</li>
+    <li><b>밴드 결합·강우 총량·불확실성 신호는 모두 가짜:</b> 극단 집합의 음의 상관은 선택 편향·정의상 결합의 산물로 전 범위에서 0 붕괴. 모델 진단은 반드시 전 강우 범위에서 검증해야 한다.</li>
+    <li><b>상승 기울기:</b> 관측 기울기는 강하나 누수, 예측 기울기는 약함 — 단독 신호로 불충분.</li>
+  </ul>
+  <div class="callout pass"><b>핵심 결론:</b> Model 2의 첨두 과소추정은 <b>대류성 돌발홍수 + 큰 유역</b>에서 두드러진다. 이 조건부 진단 틀이 RQ-0의 실질 deliverable이며, RQ-1~5가 같은 분위 출력을 일관되게 해석할 토대를 제공한다.</div>
+</section>
+
+<footer>
+  CAMELSH Model 2 분위 LSTM · RQ-0 실험 결과·분석·결론 · DRBC 관측 시험 유역 85개 · seed 111/222/444 · 시험 기간 2014–2016<br>
+  근거: <span class="num2">band_signal/{band_shape,signal_sweep,slope_signal}/ · primary/calibration/</span> · RQ-1 가운데 예측 지표
+</footer>
+
+</div>
+</body>
+</html>

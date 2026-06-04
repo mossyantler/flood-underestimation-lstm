@@ -29,8 +29,8 @@ from build_extreme_rain_median_map_index import (
     build_svg,
     finite_or_none,
     fmt_float,
-    load_basin_rings,
     load_boundary_geometry,
+    load_map_basin_rings,
     normalize_gauge_id,
     rel_path,
 )
@@ -70,6 +70,29 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--drbc-selected", type=Path, default=DEFAULT_DRBC_SELECTED)
     parser.add_argument("--camelsh-shapefile", type=Path, default=DEFAULT_CAMELSH_SHAPEFILE)
     parser.add_argument("--drbc-boundary", type=Path, default=DEFAULT_DRBC_BOUNDARY)
+    parser.add_argument(
+        "--basin-geometry-source",
+        choices=("camelsh", "gagesii-api"),
+        default="camelsh",
+        help=(
+            "Basin geometry source for the map. 'camelsh' reads --camelsh-shapefile. "
+            "'gagesii-api' fetches CRS-tagged USGS GAGES-II basin features and caches them."
+        ),
+    )
+    parser.add_argument(
+        "--gagesii-cache-dir",
+        type=Path,
+        default=None,
+        help=(
+            "Directory for cached USGS GAGES-II basin GeoJSON features. Defaults to "
+            "<output-html-parent>/map_geometry/gagesii_basins."
+        ),
+    )
+    parser.add_argument(
+        "--gagesii-api-url",
+        default="https://api.water.usgs.gov/fabric/pygeoapi/collections/gagesii-basins/items",
+        help="USGS pygeoapi item endpoint used when --basin-geometry-source gagesii-api.",
+    )
     parser.add_argument("--output-html", type=Path, default=DEFAULT_OUTPUT_HTML)
     parser.add_argument(
         "--allow-missing",
@@ -113,6 +136,31 @@ def read_metadata(path: Path) -> pd.DataFrame:
 
 def hydrograph_manifest_paths(root: Path) -> list[Path]:
     return sorted(root.glob("*_hydrograph/*_q99_hydrograph_manifest.csv"))
+
+
+def resolve_plot_path(manifest_path: Path, raw_plot_path: Any) -> Path:
+    """Return an existing plot path for a manifest row.
+
+    Older gallery manifests may contain the output directory used when the PNGs
+    were first generated. When that gallery directory is moved or regenerated
+    under a different analysis root, the PNG basename remains colocated with the
+    manifest while the stored path becomes stale. Prefer the stored path when it
+    still exists, but fall back to the local file next to the manifest before
+    failing loudly.
+    """
+    raw_text = str(raw_plot_path)
+    stored = Path(raw_text)
+    if stored.exists():
+        return stored
+
+    local = manifest_path.parent / stored.name
+    if local.exists():
+        return local
+
+    raise FileNotFoundError(
+        f"Hydrograph PNG not found for manifest row: stored={raw_text}; "
+        f"also tried local={local}"
+    )
 
 
 def fmt_area(value: Any) -> str:
@@ -180,6 +228,7 @@ def build_basin_records(
         events = []
         for _, event in manifest.iterrows():
             peak_q = finite_or_none(event.get("peak_discharge"))
+            plot_path = resolve_plot_path(manifest_path, event["plot_path"])
             events.append(
                 {
                     "eventId": str(event["event_id"]),
@@ -187,7 +236,7 @@ def build_basin_records(
                     "eventStart": str(event.get("event_start", "")),
                     "eventEnd": str(event.get("event_end", "")),
                     "peakDischarge": "NA" if peak_q is None else f"{peak_q:.3f}",
-                    "plotPath": rel_path(args.output_html, event["plot_path"]),
+                    "plotPath": rel_path(args.output_html, plot_path),
                 }
             )
 
@@ -260,6 +309,13 @@ def render_html(
             "drbcSelected": str(args.drbc_selected),
             "camelshShapefile": str(args.camelsh_shapefile),
             "drbcBoundary": str(args.drbc_boundary),
+            "basinGeometrySource": str(args.basin_geometry_source),
+            "gagesiiCacheDir": (
+                None
+                if getattr(args, "resolved_gagesii_cache_dir", None) is None
+                else str(args.resolved_gagesii_cache_dir)
+            ),
+            "gagesiiApiUrl": str(args.gagesii_api_url),
             "mapCrs": MAP_CRS,
             "basinFallbackCrs": BASIN_FALLBACK_CRS,
         },
@@ -277,6 +333,14 @@ def render_html(
         )
         for tier in TIER_CONFIG
     )
+    if args.basin_geometry_source == "gagesii-api":
+        map_geometry_source = (
+            f'<code>{html.escape(str(args.gagesii_api_url))}</code> '
+            f'(USGS GAGES-II basin geometry cache: '
+            f'<code>{html.escape(str(getattr(args, "resolved_gagesii_cache_dir", "")))}</code>)'
+        )
+    else:
+        map_geometry_source = f"<code>{html.escape(str(args.camelsh_shapefile))}</code>"
 
     template = """<!doctype html>
 <html lang="ko">
@@ -418,16 +482,32 @@ def render_html(
     .drbc-boundary-line { fill: none; stroke: #334155; stroke-width: 2.2; pointer-events: none; }
     .basin-shape {
       fill: var(--tier-color);
-      fill-opacity: 0.78;
+      fill-opacity: 0.82;
       fill-rule: evenodd;
-      stroke: #ffffff;
-      stroke-width: 1.15;
+      stroke: #243244;
+      stroke-opacity: 0.62;
+      stroke-width: 1.45;
+      vector-effect: non-scaling-stroke;
+      paint-order: stroke fill;
       cursor: pointer;
       transition: fill 130ms ease, fill-opacity 130ms ease, opacity 130ms ease, stroke 130ms ease, stroke-width 130ms ease;
     }
-    .basin-shape:hover, .basin-shape:focus-visible { fill-opacity: 0.95; stroke: #111827; stroke-width: 2.2; }
-    .basin-shape.is-muted { fill: #d8dee7; fill-opacity: 0.45; stroke: #ffffff; }
-    .basin-shape.is-selected { fill-opacity: 1; stroke: #111827; stroke-width: 3; }
+    .basin-shape:focus { outline: none; }
+    .basin-shape:hover, .basin-shape:focus-visible {
+      fill: #2563eb;
+      fill-opacity: 0.96;
+      stroke: #0f172a;
+      stroke-opacity: 1;
+      stroke-width: 3.2;
+    }
+    .basin-shape.is-muted { fill: #d8dee7; fill-opacity: 0.34; stroke: #64748b; stroke-opacity: 0.38; }
+    .basin-shape.is-selected {
+      fill: #2563eb;
+      fill-opacity: 1;
+      stroke: #0f172a;
+      stroke-opacity: 1;
+      stroke-width: 3.6;
+    }
     .legend-row { display: grid; gap: 7px; color: var(--muted); font-size: 12px; }
     .legend-item { display: inline-flex; align-items: center; gap: 5px; }
     .detail-top { padding: 14px; border-bottom: 1px solid var(--line); background: #fff; }
@@ -555,7 +635,7 @@ def render_html(
   <header>
     <h1>Observed Q99+ hydrograph gallery explorer</h1>
     <p class="intro">
-      DRBC primary 38개 basin의 observed Q99+ hydrograph gallery를 median-distance basin tier와 map으로 탐색합니다.
+      DRBC __SUMMARY_BASINS__개 basin의 observed Q99+ hydrograph gallery를 median-distance basin tier와 map으로 탐색합니다.
       각 basin을 누르면 해당 basin의 Q99+ event hydrograph를 바로 볼 수 있고, full gallery도 열 수 있습니다.
     </p>
   </header>
@@ -608,7 +688,7 @@ def render_html(
       <code>__EVENT_RESPONSE_TABLE__</code>,
       <code>__TIER_PROFILE__</code>,
       <code>__DRBC_BOUNDARY__</code>,
-      <code>__CAMELSH_SHAPEFILE__</code>.
+      __MAP_GEOMETRY_SOURCE__.
     </p>
   </section>
 
@@ -911,7 +991,7 @@ def render_html(
         "__EVENT_RESPONSE_TABLE__": html.escape(str(args.event_response_table)),
         "__TIER_PROFILE__": html.escape(str(args.tier_profile)),
         "__DRBC_BOUNDARY__": html.escape(str(args.drbc_boundary)),
-        "__CAMELSH_SHAPEFILE__": html.escape(str(args.camelsh_shapefile)),
+        "__MAP_GEOMETRY_SOURCE__": map_geometry_source,
         "__TIERS_JSON__": tiers_json,
         "__BASINS_JSON__": basins_json,
         "__SUMMARY_JSON__": summary_json,
@@ -931,8 +1011,8 @@ def main() -> None:
     metadata = read_metadata(args.metadata_manifest)
     basin_records = build_basin_records(args, expected_events, tiers, selected, metadata)
     boundary_geometry, boundary_rings = load_boundary_geometry(args.drbc_boundary)
-    basin_rings = load_basin_rings(
-        args.camelsh_shapefile,
+    basin_rings = load_map_basin_rings(
+        args,
         set(basin_records),
         clip_geometry=boundary_geometry,
     )

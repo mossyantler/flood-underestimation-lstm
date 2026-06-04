@@ -87,7 +87,7 @@ Primary checkpoint stress test의 기본 출력 위치는 아래다.
 output/model_analysis/legacy/extreme_rain/primary/
 ```
 
-5. Broad vs Natural robustness 분석은 기존 primary 산출물을 cohort로 다시 나누어 계산한다. Natural test basin 8개가 Broad test basin 38개의 부분집합이므로, output에는 `broad_all_38`, `natural_8`, `broad_non_natural_30`을 함께 둔다.
+5. Broad vs Natural robustness 분석은 pre-expanded legacy 산출물을 cohort로 다시 나누어 계산한 보존용 분석이다. 현재 공식 primary test는 expanded observed DRBC 85개 기준이며, legacy cohort label은 paper canonical 기준으로 사용하지 않는다.
 
 ```bash
 uv run scripts/model/overall/analyze_natural_broad_comparison.py
@@ -152,7 +152,7 @@ Rule-based `degree_day_v2` label은 본문 주 분석이 아니라 sensitivity�
 
 ## 현재 산출물 해석 기준
 
-현재 event-regime 분석은 DRBC test basin 38개, observed high-flow event candidate 570개, paired seed `111 / 222 / 444`를 사용한다. 모든 seed에서 같은 event set을 사용하므로 paired comparison이 가능하다.
+현재 event-regime 분석은 expanded observed DRBC test basin 85개와 paired seed `111 / 222 / 444`를 기준으로 해석한다. 모든 seed에서 같은 event set을 사용하므로 paired comparison이 가능하다.
 
 이 570개 event는 모두 `Q99` observed high-flow candidate지만, return-period proxy 기준으로는 대부분이 `high_flow_below_2yr_proxy`다. 따라서 event-regime 결과를 “공식 flood inventory에 대한 결과”나 “재현기간이 큰 flood event 전체에 대한 결과”로 쓰면 안 된다. `flood_relevance_tier_predictor_aggregate.csv`와 `ml_event_regime_by_flood_tier_predictor_aggregate.csv`는 이 민감도를 확인하기 위한 보조 산출물이다.
 
@@ -170,7 +170,7 @@ Rule-based `degree_day_v2` label은 본문 주 분석이 아니라 sensitivity�
 
 Rain-event catalog는 `event_response_table.csv`가 아니라 hourly `.nc`의 `Rainf` rolling sum에서 직접 만든다. Duration은 `1h / 6h / 24h / 72h`, threshold는 CAMELSH annual-maxima proxy인 `prec_ari25/50/100_{duration}h`로 고정한다. Active rain hour 사이 gap이 `72h` 이하면 같은 storm으로 병합하고, response window는 `[rain_start - 24h, rain_end + 168h]`, inference block은 LSTM warmup을 위해 `[rain_start - 21d, rain_end + 8d]`로 둔다.
 
-Split은 네 개로 고정한다. `train`은 subset300 train basin `269개`와 `2000-2010`, `validation`은 `31개`와 `2011-2013`, `official_test`는 DRBC `38개`와 `2014-2016`, `drbc_historical_stress`는 같은 DRBC `38개`와 `1980-2024`다. Primary rain cohort는 `max_prec_ari100_ratio >= 1.0`이고, sensitivity는 `ARI50`, `ARI25`, 그리고 `0.8 <= ARI100 ratio < 1.0` near miss로 둔다.
+Split은 네 개로 고정한다. `train`은 subset300 train basin `269개`와 `2000-2010`, `validation`은 `31개`와 `2011-2013`, `official_test`는 expanded observed DRBC `85개`와 `2014-2016`, `drbc_historical_stress`는 같은 expanded DRBC basin universe와 `1980-2024`다. Primary rain cohort는 `max_prec_ari100_ratio >= 1.0`이고, sensitivity는 `ARI50`, `ARI25`, 그리고 `0.8 <= ARI100 ratio < 1.0` near miss로 둔다.
 
 Quality gate는 event-level로 기록한다. Detection period의 `Rainf` finite coverage가 `95%` 미만이면 rain-event detection에서 제외하고, response window의 `Streamflow` finite coverage가 `90%` 미만이면 response metric에서 제외한다. 제외된 basin/event는 `coverage_failure_report.csv`와 event catalog의 `skipped_reason`에 남긴다.
 

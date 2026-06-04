@@ -8,7 +8,7 @@
 | `quantile_analysis/` | 모든 validation checkpoint의 required-series와 q50/q90/q95/q99 hydrograph 분석 결과를 둔다. high-flow strata, peak-hour, quantile coverage, event-regime 분석과 event-level surrogate SHAP의 기준 입력이다. |
 | `extreme_rain/primary/` | validation 기준 primary checkpoint를 사용하고 rain event 시간축은 wet-footprint 기준으로 정렬한 extreme-rain exposure/stress-test 산출물이다. event catalog, inference required-series, paired delta aggregate, observed/sim-Q event plot, local peak quantile bracket, 대표 event의 prediction-overlaid flow graph diagnostic을 포함한다. |
 | `extreme_rain/all/` | primary 선택과 분리된 checkpoint sensitivity 진단용 extreme-rain sweep 산출물이다. validation epoch grid `005 / 010 / 015 / 020 / 025 / 030` 전체를 비교한다. |
-| `natural_broad_comparison/` | Broad DRBC test 38개를 Natural 8개와 broad non-natural 30개로 다시 나누어 primary overall, high-flow, event-window, extreme-rain stress 방향을 비교한 robustness 산출물이다. |
+| `natural_broad_comparison/` | Pre-expanded legacy broad/natural robustness 산출물이다. 현재 공식 primary test는 expanded observed DRBC 85개 기준이므로 paper canonical 인용에는 사용하지 않는다. |
 | `../basin/timeseries/` | fixed split의 target/input coverage, basin time-series overview, 단일 sequence 구조 진단 산출물. 시간축 coverage는 basin/data support 성격이므로 `model_analysis/`가 아니라 `output/basin/timeseries/`에 둔다. |
 
 `overall_analysis/` 안에서는 파일 역할을 폴더명으로 바로 알 수 있게 아래 구조를 사용한다.

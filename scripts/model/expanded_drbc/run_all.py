@@ -18,15 +18,15 @@ from typing import Sequence
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/primary/metrics"
 DEFAULT_INPUT_DIR = DEFAULT_OUTPUT_DIR / "required_series"
 DEFAULT_RAW_METRICS_DIR = DEFAULT_OUTPUT_DIR / "raw_metrics"
 DEFAULT_TS_DIR = (
     REPO_ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test/time_series"
 )
-DEFAULT_TEST_OBS_CSV = DEFAULT_INPUT_DIR / "seed111/primary_required_series.csv"
+DEFAULT_TEST_OBS_CSV = DEFAULT_INPUT_DIR / "seed111/required_series.csv"
 DEFAULT_CATALOG = (
-    REPO_ROOT / "output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv"
+    REPO_ROOT / "output/model_analysis/confirmed_flood/data/catalog/drbc_confirmed_flood_event_catalog.csv"
 )
 DEFAULT_BASIN_DIR = DEFAULT_TS_DIR
 

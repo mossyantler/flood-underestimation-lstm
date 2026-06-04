@@ -22,17 +22,19 @@ aggregation 순서 (C0 canonical): per-basin per-seed compute → median across 
 - FAR denominator: obs < Q99인 test-period 시각 (≈ 99% 전체 hour).
 - Over-pred magnitude denominator: 시각별 `q_τ > obs`인 부분 mean.
 
-## 결과 — cross-basin median (Q99 baseline, 85 basin)
+## 결과 — cross-basin median + IQR (Q99 baseline, 85 basin)
 
-| τ | FAR | Over-prediction magnitude |
+| τ | FAR [IQR low / high] | Over-prediction magnitude [IQR low / high] |
 | --- | --- | --- |
-| model1 | 0.0018 | 1.80 |
-| q50 | 0.0007 | 1.47 |
-| q90 | 0.0042 | 2.19 |
-| q95 | 0.0063 | 2.29 |
-| q99 | 0.0164 | 3.44 |
+| model1 | 0.0018 [0.0 / 0.0073] | 1.80 [1.00 / 5.10] |
+| q50 | 0.00068 [0.00004 / 0.0048] | 1.47 [0.85 / 4.17] |
+| q90 | 0.0042 [0.0012 / 0.0139] | 2.19 [1.24 / 6.05] |
+| q95 | 0.0063 [0.0020 / 0.0198] | 2.29 [1.47 / 7.33] |
+| q99 | 0.0164 [0.0060 / 0.0359] | 3.44 [2.42 / 10.47] |
 
-τ가 커질수록 FAR이 단조 증가 (q50 → q99 9× 폭증). Over-prediction magnitude도 비례 증가.
+τ가 커질수록 FAR이 단조 증가 (q50 0.00068 → q99 0.0164, 약 **24배 폭증**). Over-prediction magnitude도 비례 증가 (q50 1.47 → q99 3.44, 약 2.3배).
+
+IQR 폭이 넓다 (q99 FAR 0.006~0.036, over-pred 2.4~10.5) — basin 간 cost 이질성이 크다. over-pred magnitude는 basin 평균 유량 규모에 종속되므로 top-NSE basin(원래 고유량)에서 절대값이 크다(RQ-4a 참조).
 
 `figures/rq3_cost_recall_tradeoff.png`: B5 recall과 B6 FAR을 동일 axis에 그려 Pareto-like 관계 시각화.
 
@@ -47,7 +49,7 @@ RQ-2 (recall, B5) + RQ-3 (FAR, B6) 결합:
 | q95 | 0.38 | 0.0063 |
 | q99 | 0.58 | 0.0164 |
 
-upper τ는 recall을 monotone 증가(0.07 → 0.58)시키면서 FAR도 monotone 증가(0.0007 → 0.0164)시킨다. recall 8× 증가 vs FAR 23× 증가 → recall–cost 비대칭. 운영 의사결정자가 trade-off 선택 가능.
+upper τ는 recall을 monotone 증가(0.069 → 0.583, 약 8배)시키면서 FAR도 monotone 증가(0.00068 → 0.0164, 약 24배)시킨다. 절대 증가폭으로 보면 FAR 변화(+0.016)가 recall 변화(+0.51)보다 훨씬 작아, **드문 false alarm 비용 대비 recall 이득이 크다**. 단 배수로는 FAR이 더 가파르게 증가하므로 운영 의사결정자는 recall–cost trade-off에서 τ를 선택한다(q95가 recall 0.38 / FAR 0.0063으로 균형점 후보).
 
 ## 해석 framework 적용 (RQ-0)
 
@@ -56,12 +58,12 @@ upper τ는 recall을 monotone 증가(0.07 → 0.58)시키면서 FAR도 monotone
 ## 산출물
 
 ```text
-output/model_analysis/expanded_drbc_test/tables/
+output/model_analysis/primary/metrics/tables/
   rq3_far_per_basin_seed.csv
   rq3_far_summary.csv
   rq3_over_prediction_magnitude_per_basin_seed.csv
   rq3_over_prediction_magnitude_summary.csv
-output/model_analysis/expanded_drbc_test/figures/
+output/model_analysis/primary/metrics/figures/
   rq3_cost_recall_tradeoff.png
 ```
 

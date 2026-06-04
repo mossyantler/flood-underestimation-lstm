@@ -33,13 +33,13 @@ export type ChartPoint = { x: number; y: number };
 
 // ── 개요(O) KPI ───────────────────────────────────────────────
 export const overviewKpis: KpiItem[] = [
-  { label: "DRBC test", value: "38", sub: "quality-pass basins", accent: "#6bb4ff" },
+  { label: "DRBC test", value: "85", sub: "expanded observed basins", accent: "#6bb4ff" },
   { label: "공식 seed", value: "3", sub: "111 / 222 / 444", accent: "#6bb4ff" },
   { label: "q99 과소추정", value: "44.9%", sub: "Q99 exceedance · seed median", accent: "#ffd166" },
 ];
 
 export const evidenceRows: EvidenceRow[] = [
-  { tag: "PRIMARY", value: "DRBC test 38 · paired seed 111/222/444" },
+  { tag: "PRIMARY", value: "DRBC test 85 · paired seed 111/222/444" },
   { tag: "TAIL", value: "q99 exceedance 과소추정 72.6% → 44.9%" },
   { tag: "CAVEAT", value: "q99는 calibrated 99% interval 아님" },
 ];
@@ -69,7 +69,7 @@ export const sectionIndexRows: SectionIndexRow[] = [
   { section: "데이터셋", role: "split provenance", data: "subset300 / DRBC holdout", status: "확정", statusAccent: "#50e3c2" },
   { section: "모델", role: "head-only contrast", data: "M1 det. vs M2 q50–q99", status: "완료", statusAccent: "#50e3c2" },
   { section: "결과", role: "Q99 exceedance & peak hour", data: "seed 111/222/444", status: "완료", statusAccent: "#50e3c2" },
-  { section: "분석", role: "event-regime + calibration", data: "570 events · 38 basins", status: "완료", statusAccent: "#50e3c2" },
+  { section: "분석", role: "event-regime + calibration", data: "expanded DRBC · 85 basins", status: "완료", statusAccent: "#50e3c2" },
   { section: "스트레스", role: "historical extreme-rain", data: "1980–2024 DRBC", status: "보조", statusAccent: "#6bb4ff" },
   { section: "확정홍수", role: "NWS flood-stage confirmed events", data: "623 events · 48 basins", status: "완료", statusAccent: "#50e3c2" },
 ];

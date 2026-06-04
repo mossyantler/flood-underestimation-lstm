@@ -12,9 +12,9 @@
 tester.evaluate() 없이 수동 배치 루프로 시계열을 직접 추출한다.
 
 주요 출력:
-  output/model_analysis/expanded_drbc_test/raw_timeseries/model1_seed{S}_epoch{E}.csv
-  output/model_analysis/expanded_drbc_test/raw_timeseries/model2_seed{S}_epoch{E}.csv
-  output/model_analysis/expanded_drbc_test/required_series/seed{S}/primary_required_series.csv
+  output/model_analysis/primary/metrics/data/raw_timeseries/model1_seed{S}_epoch{E}.csv
+  output/model_analysis/primary/metrics/data/raw_timeseries/model2_seed{S}_epoch{E}.csv
+  output/model_analysis/primary/metrics/data/required_series/seed{S}/required_series.csv
 """
 from __future__ import annotations
 
@@ -61,7 +61,7 @@ TEST_END = pd.Timestamp("2016-12-31")
 DEFAULT_RUN_ROOT = ROOT / "runs/subset_comparison"
 DEFAULT_DATA_DIR = ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test"
 DEFAULT_BASIN_FILE = ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test/splits/test.txt"
-DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/expanded_drbc_test"
+DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/primary/metrics"
 
 RUN_RE = re.compile(r"camelsh_hourly_(model[12])_drbc_holdout_subset300_seed(\d+)_")
 PRIMARY_EPOCHS: dict[tuple[str, int], int] = {
@@ -372,7 +372,7 @@ def main() -> int:
                 output_csv=m2_csv, device=device, batch_size=args.batch_size, force=args.force,
             )
 
-            series_csv = series_dir / f"seed{seed}" / "primary_required_series.csv"
+            series_csv = series_dir / f"seed{seed}" / "required_series.csv"
             merge_seed_series(
                 seed=seed, model1_epoch=m1_epoch, model2_epoch=m2_epoch,
                 model1_csv=m1_csv, model2_csv=m2_csv, output_csv=series_csv,

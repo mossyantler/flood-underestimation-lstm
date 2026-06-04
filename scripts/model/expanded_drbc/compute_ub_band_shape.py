@@ -32,7 +32,7 @@ Inputs
 ------
 - tables/rq2_q99_events_85basin.csv       (B1)
 - tables/rq2_noaa_events_expanded_overlap.csv  (B2)
-- required_series/seed{111,222,444}/primary_required_series.csv
+- required_series/seed{111,222,444}/required_series.csv
 
 Outputs
 -------
@@ -72,8 +72,8 @@ from expanded_drbc import (  # noqa: E402
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test"
-DEFAULT_INPUT_DIR = DEFAULT_OUTPUT_DIR / "required_series"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/band_signal/band_shape"
+DEFAULT_INPUT_DIR = REPO_ROOT / "output/model_analysis/primary/metrics/data/required_series"
 
 
 def load_seed_at_event_times(
@@ -406,7 +406,7 @@ def main() -> None:
     ].copy()
 
     seed_csvs = {
-        s: args.input_dir / f"seed{s}" / "primary_required_series.csv" for s in args.seeds
+        s: args.input_dir / f"seed{s}" / "required_series.csv" for s in args.seeds
     }
 
     q99_df = run_scope("q99", q99_events, seed_csvs, args.output_dir)

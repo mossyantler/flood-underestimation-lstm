@@ -13,10 +13,10 @@ Confirmed flood catalog의 각 event에 대해 LSTM warmup을 포함한 event wi
 추론하고, primary hydrograph/export 계열과 같은 lean time-series 산출물을 남긴다.
 
 주요 출력:
-  - output/model_analysis/confirmed_flood/inference/raw_model_exports/
-  - output/model_analysis/confirmed_flood/inference/required_series/
-  - output/model_analysis/confirmed_flood/inference/inference_manifest.csv
-  - output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv
+  - output/model_analysis/confirmed_flood/data/inference/raw_model_exports/
+  - output/model_analysis/confirmed_flood/data/inference/required_series/
+  - output/model_analysis/confirmed_flood/data/inference/inference_manifest.csv
+  - output/model_analysis/confirmed_flood/tables/drbc_confirmed_flood_performance.csv
 """
 from __future__ import annotations
 
@@ -57,11 +57,11 @@ def _load_timeseries_with_date_index(data_dir: Path, basin: str) -> pd.DataFrame
 nh_genericdataset.load_timeseries = _load_timeseries_with_date_index
 
 
-DEFAULT_CATALOG_CSV = ROOT / "output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv"
+DEFAULT_CATALOG_CSV = ROOT / "output/model_analysis/confirmed_flood/data/catalog/drbc_confirmed_flood_event_catalog.csv"
 DEFAULT_RUN_ROOT = ROOT / "runs/subset_comparison"
 DEFAULT_DATA_DIR = ROOT / "data" / "CAMELSH_generic" / "drbc_holdout_confirmed_flood_events"
-DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/confirmed_flood/inference"
-DEFAULT_PERFORMANCE_DIR = ROOT / "output/model_analysis/confirmed_flood/performance"
+DEFAULT_OUTPUT_DIR = ROOT / "output/model_analysis/confirmed_flood/data/inference"
+DEFAULT_PERFORMANCE_DIR = ROOT / "output/model_analysis/confirmed_flood/tables"
 DEFAULT_VALIDATION_EPOCHS = [5, 10, 15, 20, 25, 30]
 
 RUN_RE = re.compile(r"camelsh_hourly_(model[12])_drbc_holdout_subset300_seed(\d+)_")

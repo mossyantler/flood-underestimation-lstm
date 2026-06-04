@@ -38,9 +38,11 @@
     "drbc_candidate_count": 154,
     "selected_count": 85,
     "old_quality_test_count": 38,
-    "scaling_300_test_count": 38,
+    "scaling_300_test_count": 85,
     "overlap_with_old_quality_test_count": 36,
-    "new_vs_old_quality_test_count": 49
+    "new_vs_old_quality_test_count": 49,
+    "overlap_with_current_scaling_300_test_count": 85,
+    "current_scaling_300_matches_expanded_observed_test": true
   },
   "forcing_source_counts": {
     "timeseries": 36,

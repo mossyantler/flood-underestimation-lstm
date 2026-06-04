@@ -54,15 +54,17 @@
 
 quantile regression은 각 τ에 대해 pinball loss `E[(obs − q_τ)(τ − 1{obs<q_τ})]`를 최소화한다. 이 손실이 강제하는 것과 강제하지 않는 것을 구분해 둔다.
 
-| 강제하는 것 | 강제하지 않는 것 |
+| pinball loss가 강제 | pinball loss가 강제하지 않음 |
 | --- | --- |
-| 각 τ에서 one-sided 분위 추정이 average sense로 일치하도록 학습됨 | quantile monotonicity (`q50 ≤ q90 ≤ q95 ≤ q99`) |
-| 큰 obs 시점에서의 underestimation에 대해 τ가 클수록 더 큰 penalty | 양방향 PI calibration |
-| τ별 sharpness와 calibration이 함께 영향을 받음 (단일 score) | high-flow 조건부 stratum에서의 정식 calibration |
+| 각 τ에서 one-sided 분위 추정이 average sense로 일치하도록 학습됨 | 양방향 PI calibration |
+| 큰 obs 시점에서의 underestimation에 대해 τ가 클수록 더 큰 penalty | high-flow 조건부 stratum에서의 정식 calibration |
+| τ별 sharpness와 calibration이 함께 영향을 받음 (단일 score) | — |
 
-따라서 분석 단계에서 다음 두 진단이 필요하다.
+**quantile monotonicity(`q50 ≤ q90 ≤ q95 ≤ q99`)는 loss가 아니라 model head가 강제한다.** 현재 `head: quantile`은 NeuralHydrology의 Monotonic Quantile head(`vendor/neuralhydrology/neuralhydrology/modelzoo/head.py`)로, 첫 quantile을 base로 두고 이후 quantile을 base 위에 양의 증분(`softplus`)을 누적합한다(`q90 = base + Δ90`, `q95 = base + Δ90 + Δ95`, …). softplus가 음의 증분을 막으므로 단조 증가가 **by construction(구조적으로) 보장**되고 quantile crossing이 불가능하다.
 
-1. **quantile crossing 진단**: 학습 후 `q50 > q90` 등이 발생할 수 있다. crossing rate를 한 번은 측정하고, 그 뒤의 해석에서 monotonicity가 어느 수준에서 성립한다고 가정할지 정한다.
+따라서 분석 단계에서 다음 두 사항을 둔다.
+
+1. **quantile crossing은 sanity로만 확인**: head가 단조성을 보장하므로 monotonicity는 가정해도 된다. inverse-transform(denorm·per-basin scaling 등)이 순서를 깨지 않았는지 crossing rate를 한 번 측정해 0임을 확인하는 sanity check로 다룬다 (`output/model_analysis/primary/calibration/tables/quantile_crossing_check.csv`: `q90<q50`/`q95<q90`/`q99<q95` 모두 0 row). 이 0은 학습으로 얻은 성질이 아니라 구조적 필연이다.
 2. **calibration과 sharpness 분리**: pinball loss가 낮다는 것만으로 calibration이 좋다고 말하지 않는다. coverage·reliability를 별도로 확인한다.
 
 ## 해석 layer 4단계
@@ -72,7 +74,7 @@ quantile regression은 각 τ에 대해 pinball loss `E[(obs − q_τ)(τ − 1{
 ### L1. 통계적 layer — 학습이 무엇을 강제했나
 
 - pinball loss와 quantile regression theory
-- monotonicity 가정 여부와 crossing 진단
+- monotonicity는 model head 구조(누적 softplus)가 보장 — crossing은 sanity로만 확인
 - sharpness와 calibration의 결합 효과
 
 ### L2. 확률예측 layer — calibration과 sharpness
@@ -164,8 +166,8 @@ Model 2의 가치 주장은 τ에 따라 다르게 표현된다.
    pinball은 sharpness와 calibration이 결합된 proper score다. calibration 주장은 coverage / reliability diagram으로 따로 확인한다.
 5. **`q99` peak가 obs를 초과하면 "맞춘 것"**
    over-prediction도 운영 비용이다. recall과 precision(또는 false alarm rate)을 함께 보고하지 않은 채 "맞췄다"고 쓰지 않는다.
-6. **monotonicity 가정으로 시작**
-   학습이 monotonicity를 강제하지 않으므로 crossing이 가능하다. crossing rate를 한 번 측정한 뒤, 어느 수준에서 가정할지 명시하고 사용한다.
+6. **monotonicity를 pinball loss의 성질로 설명**
+   monotonicity는 pinball loss가 아니라 model head 구조(누적 softplus 증분)가 by construction 보장한다. "loss가 monotonicity를 강제하지 않아 crossing이 가능하다"는 설명은 틀리다. crossing rate 0은 그 구조가 inverse-transform 파이프라인 끝까지 보존됐다는 sanity 확인이지 학습으로 얻은 성질이 아니다.
 
 ## RQ별 해석 layer 매핑 (expanded DRBC rebuild)
 
@@ -244,5 +246,5 @@ q99를 manuscript에서 쓸 때는 단일 point forecast가 아닌 upper uncerta
 
 - 출력 head 자체의 정의와 학습 손실의 직관 → [`probabilistic_head_guide.md`](probabilistic_head_guide.md)
 - RQ ↔ 분석 매핑 → [`docs/experiment/analysis/model/00_research_question_analysis_map.md`](../../analysis/model/00_research_question_analysis_map.md)
-- calibration·pinball 실제 산출물과 표·그림 → [`docs/experiment/analysis/model/08_probabilistic_calibration_pinball.md`](../../analysis/model/08_probabilistic_calibration_pinball.md)
+- calibration·pinball 실제 산출물과 표·그림 → [`docs/experiment/analysis/model/05_calibration_sharpness.md`](../../analysis/model/05_calibration_sharpness.md)
 - 실험 split·seed·primary epoch 규칙 → [`experiment_protocol.md`](experiment_protocol.md)

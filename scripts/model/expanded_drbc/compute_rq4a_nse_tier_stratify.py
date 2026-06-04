@@ -44,7 +44,7 @@ from expanded_drbc import TAU_ORDER, normalize_basin_id  # noqa: E402
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/primary/metrics"
 
 
 def main() -> None:

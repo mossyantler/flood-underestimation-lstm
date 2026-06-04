@@ -14,8 +14,17 @@
 - `obs class`, `signal feature`, `risk tier`, `leakage`, `anchor`처럼 분석 과정에서 만든 내부 용어를 그대로 던지지 않는다. 각각 "관측 위치 구간", "신호 지표", "위험 단계", "관측값 누수", "계산 기준 시점"처럼 한국어 이름을 먼저 쓰고, 필요할 때만 괄호 안에 영어/코드명을 병기한다.
 - HTML, dashboard, 발표자료, 설명 문서처럼 독자 이해가 목적인 산출물은 특히 영어 약어·내부 용어를 남발하지 않는다. 표와 그림에는 "무엇을 뜻하는 값인지"를 한 문장으로 풀어 쓴다.
 - `docs/` 또는 `report/` 작성 시 대학생 수준 가독성. 순서: "무엇을 보는 분석인지" → "왜 필요한지" → "결과를 어떻게 해석해야 하는지".
-- `docs/explain/` 같은 입문 설명 자료는 **비전공 대학생** 기준으로 쓴다. 수문학·기계학습 배경 지식을 전제하지 않고, 개념을 일상어로 먼저 풀어 쓴다. 영어는 최대한 지양하고 한국어 위주로 쓰며, 불가피한 고정 전문 용어만 영어로 두고 곧바로 한국어 풀이를 붙인다.
+- `docs/explain/` 설명 자료는 **수문학 전공 대학생** 기준으로 쓴다. 유역·하천 유량·홍수 첨두·재현기간·NSE/KGE 같은 수문학 기본 개념은 전제하고 다시 풀지 않는다. 반면 기계학습 배경(LSTM, quantile, calibration 등)은 전제하지 않고 첫 등장 시 한 번만 짚는다. 간결하게 쓰고 일상 비유·장황한 단계 풀이는 지양한다. 한국어 위주로 쓰며, 불가피한 고정 전문 용어만 영어로 둔다.
 - 수식·지표·모델 구조 설명 시 정의와 직관적 의미 함께. 논문용 문장에서는 과장·미확인 인과 단정 금지.
+
+## Paper draft / Notion 운영
+
+- Notion은 논문 draft를 확인하고 수정하는 공간이다. 운영 규칙, export 절차, 원본 artifact 준비 방법은 Notion에 쓰지 않는다.
+- Notion 문장은 논문 본문처럼 간결하게 쓴다. AI가 설명하는 듯한 말투, 작업 보고 말투, 장황한 안내문을 넣지 않는다.
+- Notion page와 database title에는 이모지를 쓰지 않는다.
+- `Draft`는 버전 관리를 위한 full-page database로 둔다. 각 논문 본문은 `Draft` database row page에 둔다.
+- Draft version을 freeze하거나 export할 때의 절차와 보관 규칙은 repo 문서(`AGENTS.md`, `CLAUDE.md`, `draft/README.md`, `draft/notion_exports/README.md`)에서 관리한다.
+- Notion 밖에서 준비하는 figure, table, export, source path, canonical 근거는 repo에 기록한다. Notion에는 논문 검토에 필요한 최종 draft 내용만 둔다.
 
 ---
 

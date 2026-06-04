@@ -62,7 +62,7 @@ export PATH="/opt/homebrew/bin:$PATH"
 uv run --script scripts/model/overall/export_evaluation_tests_dashboard_snapshot.py
 ```
 
-현재 dashboard snapshot의 핵심 경계는 DRBC primary test 38개 유역, fixed subset300, paired seed `111 / 222 / 444`, excluded seed `333`, Model 1 deterministic head, Model 2 q50/q90/q95/q99 quantile head입니다. Top 1% flow stratum underestimation은 Model 1 `72.6%`, Model 2 q99 `44.0%`로 표시하되, q99는 calibrated interval이나 return-period estimate로 읽지 않습니다.
+현재 dashboard snapshot의 공식 경계는 DRBC primary test expanded observed **85개** 유역, fixed subset300 train/validation, paired seed `111 / 222 / 444`, excluded seed `333`, Model 1 deterministic head, Model 2 q50/q90/q95/q99 quantile head입니다. Top 1% flow stratum underestimation은 expanded DRBC snapshot 재생성 결과를 기준으로 표시해야 하며, q99는 calibrated interval이나 return-period estimate로 읽지 않습니다.
 
 Confirmed flood snapshot은 아래 명령으로 canonical output에서 재생성합니다. 이 화면은 NWS flood-stage 초과 event 기준의 `623 events / 48 basins` inference 결과를 사용하고, NOAA Storm Events annotation은 flood type 보조 정보로만 표시합니다. 지도는 DRBC boundary shapefile과 CAMELSH basin polygon을 읽어 SVG path로 저장하며, gauge marker는 같은 크기의 위치점으로만 표시합니다.
 

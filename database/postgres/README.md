@@ -14,7 +14,7 @@ uv run --script database/postgres/import_camels_csvs.py
 
 현재 typed table은 다음과 같다.
 
-- `analysis.basin_membership`: DRBC 38개 basin의 broad/natural cohort membership.
+- `analysis.basin_membership`: expanded observed DRBC test **85개** 기준 basin membership. 구식 broad/natural cohort 적재분은 legacy 비교용으로만 해석한다.
 - `analysis.basin_metrics`: subset300 epoch sensitivity의 basin-level `NSE`, `KGE`, `FHV`, `Peak-Timing`, `Peak-MAPE`.
 - `analysis.primary_epoch_basin_deltas`: primary epoch의 paired-seed Model 2 minus Model 1 basin delta.
 - `analysis.extreme_rain_events`: primary extreme-rain event catalog의 event-level 핵심 metadata.

@@ -8,24 +8,24 @@ ROOT = '/Users/jang-minyeop/Project/CAMELS'
 
 VERSIONS = [
     {
-        'docx': 'draft_original_backup_20260527_005437.docx',
-        'out': 'docs/paper/versions/v1_original.html',
+        'docx': 'draft/docx/draft_original_backup_20260527_005437.docx',
+        'out': 'draft/versions/v1_original.html',
         'name': 'v1_original.html',
         'label': 'v1',
         'date': '2026-05-27 00:47',
         'desc': '초기 목차 초안',
     },
     {
-        'docx': 'draft_original_backup_20260527_013119.docx',
-        'out': 'docs/paper/versions/v2_expanded.html',
+        'docx': 'draft/docx/draft_original_backup_20260527_013119.docx',
+        'out': 'draft/versions/v2_expanded.html',
         'name': 'v2_expanded.html',
         'label': 'v2',
         'date': '2026-05-27 01:31',
         'desc': '이론 + 수식 확장',
     },
     {
-        'docx': 'draft.docx',
-        'out': 'docs/paper/versions/v3_current_docx.html',
+        'docx': 'draft/docx/draft.docx',
+        'out': 'draft/versions/v3_current_docx.html',
         'name': 'v3_current_docx.html',
         'label': 'v3',
         'date': '2026-05-27 (진행중)',

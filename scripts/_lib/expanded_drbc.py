@@ -56,7 +56,7 @@ SEEDS: tuple[int, ...] = (111, 222, 444)
 
 NOAA_LABELS: tuple[str, ...] = ("Flash Flood", "Flood", "Coastal Flood", "Other")
 """Empirical lexicon present in
-output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv.
+output/model_analysis/confirmed_flood/data/catalog/drbc_confirmed_flood_event_catalog.csv.
 Riverine and Ice Jam labels are absent from the actual catalog and so are NOT
 included. "Other" is the residual bucket for any unmatched annotation."""
 

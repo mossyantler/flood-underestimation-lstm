@@ -9,7 +9,8 @@
     "prepared_test_basin_file": "data/CAMELSH_generic/drbc_holdout_broad/splits/test.txt",
     "training_selected_csv": "output/basin/camelsh_training_non_drbc/camelsh_non_drbc_training_selected.csv",
     "basin_id_csv": "basins/CAMELSH_data/attributes/attributes_gageii_BasinID.csv",
-    "prepared_static_attributes_csv": "data/CAMELSH_generic/drbc_holdout_broad/attributes/static_attributes.csv"
+    "prepared_static_attributes_csv": "data/CAMELSH_generic/drbc_holdout_broad/attributes/static_attributes.csv",
+    "expanded_observed_test_basin_file": "configs/basin_splits/drbc_expanded_observed_test/test.txt"
   },
   "source_summary": {
     "raw_broad_pool_total_count": 1923,
@@ -40,7 +41,9 @@
       "18": 48
     },
     "stratify_col": "camelsh_huc02",
-    "test_count": 38
+    "test_count": 85,
+    "test_split_source": "configs/basin_splits/drbc_expanded_observed_test/test.txt",
+    "test_split_policy": "expanded observed DRBC test: metadata quality gates plus 2014-2016 selected target coverage >= 80%"
   },
   "prepared_pool_manifest_path": "configs/pilot/basin_splits/prepared_pool_manifest.csv",
   "subsets": [
@@ -48,7 +51,7 @@
       "subset_size": 100,
       "train_count": 90,
       "validation_count": 10,
-      "test_count": 38,
+      "test_count": 85,
       "subset_dir": "configs/pilot/basin_splits/scaling_100",
       "manifest_path": "configs/pilot/basin_splits/scaling_100/manifest.csv",
       "stratify_col": "camelsh_huc02",
@@ -108,13 +111,14 @@
           "18": 3
         }
       },
-      "summary_path": "configs/pilot/basin_splits/scaling_100/summary.json"
+      "summary_path": "configs/pilot/basin_splits/scaling_100/summary.json",
+      "test_split_source": "configs/basin_splits/drbc_expanded_observed_test/test.txt"
     },
     {
       "subset_size": 300,
       "train_count": 269,
       "validation_count": 31,
-      "test_count": 38,
+      "test_count": 85,
       "subset_dir": "configs/pilot/basin_splits/scaling_300",
       "manifest_path": "configs/pilot/basin_splits/scaling_300/manifest.csv",
       "stratify_col": "camelsh_huc02",
@@ -180,13 +184,14 @@
           "18": 8
         }
       },
-      "summary_path": "configs/pilot/basin_splits/scaling_300/summary.json"
+      "summary_path": "configs/pilot/basin_splits/scaling_300/summary.json",
+      "test_split_source": "configs/basin_splits/drbc_expanded_observed_test/test.txt"
     },
     {
       "subset_size": 600,
       "train_count": 538,
       "validation_count": 62,
-      "test_count": 38,
+      "test_count": 85,
       "subset_dir": "configs/pilot/basin_splits/scaling_600",
       "manifest_path": "configs/pilot/basin_splits/scaling_600/manifest.csv",
       "stratify_col": "camelsh_huc02",
@@ -253,7 +258,8 @@
           "18": 16
         }
       },
-      "summary_path": "configs/pilot/basin_splits/scaling_600/summary.json"
+      "summary_path": "configs/pilot/basin_splits/scaling_600/summary.json",
+      "test_split_source": "configs/basin_splits/drbc_expanded_observed_test/test.txt"
     }
   ]
 }

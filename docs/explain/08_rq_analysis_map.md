@@ -1,6 +1,6 @@
 # 08. 분석 질문: RQ-0~5
 
-이 글은 "이 연구가 무엇을 어떤 순서로 따지는가"를 한 장의 지도로 보여 준다. 결과 수치를 외우는 것이 목적이 아니다. 뒤에 이어지는 결과 문서들이 각각 어떤 질문에 답하는지, 그리고 그 답이 실제로 어떤 분석 스크립트와 산출물에서 나오는지 미리 길을 깔아 두는 글이다. 이 지도를 먼저 읽으면 결과 숫자가 나왔을 때 "이게 왜 중요한 숫자인지", "이 숫자가 어디서 계산돼 나온 것인지"를 더 쉽게 이해할 수 있다.
+이 글은 "이 연구가 무엇을 어떤 순서로 따지는가"를 한 장의 지도로 보여 준다. 결과 수치 암기가 목적이 아니다. 뒤에 이어지는 결과 문서들이 각각 어떤 질문에 답하는지, 그 답이 실제로 어떤 분석 스크립트와 산출물에서 나오는지 미리 길을 깔아 두는 글이다. 이 지도를 먼저 읽으면 결과 숫자가 나왔을 때 "이게 왜 중요한 숫자인지", "이 숫자가 어디서 계산돼 나온 것인지"를 더 쉽게 이해할 수 있다.
 
 ---
 
@@ -14,7 +14,7 @@
 
 비유하자면, "이 사람이 건강한가?"라는 큰 질문을 "혈압은 정상인가", "혈당은 정상인가", "콜레스테롤은 어떤가"처럼 항목별로 나눠 검사하는 것과 같다. 각 RQ는 "이것만 따로 확인하자"는 작은 검사 항목이고, 각 RQ마다 그 질문에 답하는 분석 문서가 정확히 하나씩 붙어 있다. 그리고 그 분석 문서 뒤에는 실제로 숫자를 계산해 내는 파이썬 스크립트가 한두 개씩 매여 있다.
 
-이 지도의 수치·구조 기준은 `docs/experiment/analysis/model/00_research_question_analysis_map.md`와 같은 위치의 `README.md`다. 분석 스크립트는 모두 `scripts/model/expanded_drbc/` 폴더에 모여 있고, 모든 스크립트가 공통으로 쓰는 용어·기간·기준값은 `scripts/_lib/expanded_drbc.py`라는 하나의 파일에 못 박혀 있다. 이 글은 그 문서·코드를 배경지식이 없는 독자가 읽을 수 있게 풀어 쓴 것이다.
+이 지도의 수치·구조 기준은 `00_research_question_analysis_map.md`[^src-rq-map]와 같은 위치의 `README.md`다. 분석 스크립트는 모두 `expanded_drbc/`[^src-rq-dir] 폴더에 모여 있고, 모든 스크립트가 공통으로 쓰는 용어·기간·기준값은 `expanded_drbc.py`[^src-lib]라는 하나의 파일에 못 박혀 있다. 이 글은 그 문서·코드를 배경지식이 없는 독자가 읽을 수 있게 풀어 쓴 것이다.
 
 ---
 
@@ -22,9 +22,9 @@
 
 RQ를 이해하려면 두 모델의 차이를 먼저 파악해야 한다.
 
-**Model 1**은 한 시점에 유량 값 하나를 낸다. "지금 이 강의 유량은 Xm³/s다"라고 하나만 말하는 방식이다. 이것을 deterministic(결정형) 예측이라 부른다.
+**Model 1**은 한 시점에 유량 값 하나를 낸다. "지금 이 강의 유량은 Xm³/s다"라고 하나만 말하는 방식, 곧 deterministic(결정형) 예측이다.
 
-**Model 2**는 한 시점에 네 개의 예측선을 동시에 낸다. "유량이 A 이하일 가능성 50% / 유량이 B 이하일 가능성 90% / 유량이 C 이하일 가능성 95% / 유량이 D 이하일 가능성 99%"처럼 여러 단계를 한꺼번에 제시한다. 이것을 probabilistic quantile(확률 분위) 예측이라 부른다.
+**Model 2**는 한 시점에 네 개의 예측선을 동시에 낸다. "유량이 A 이하일 가능성 50% / 유량이 B 이하일 가능성 90% / 유량이 C 이하일 가능성 95% / 유량이 D 이하일 가능성 99%"처럼 여러 단계를 한꺼번에 제시하는 probabilistic quantile(확률 분위) 예측이다.
 
 이때 각 예측선을 quantile(분위)이라고 부르며, Model 2가 내는 네 줄은 각각 `q50`, `q90`, `q95`, `q99`다.
 
@@ -153,7 +153,7 @@ Model 2는 매 시점에 `q50/q90/q95/q99` 네 지표를 동시에 출력한다.
 
 #### 분석 목적
 
-이 연구 질문은 4개의 예측선을 읽는 규칙을 미리 정하는 일이다. 규칙은 크게 세 가지다. 첫째, 네 줄을 각각 독립된 해석 층(layer)으로 본다. `q50`은 중앙 예측, `q90/q95/q99`는 점점 더 보수적인 상위선이며, 이들을 하나의 양방향 예측 구간으로 합쳐 읽지 않는다. 둘째, 두 줄씩 짝지어(예: `q50`과 `q99`) 그 간격을 불확실성의 폭으로 읽는다. 셋째, 아래에서 위로 순서대로 올라가며(`q50 → q90 → q95 → q99`) 값이 단조롭게 커지는지를 확인한다. 또한 앞서 정리한 두 오해(재현 기간 혼동, 대칭 예측 구간 가정)를 포함해 금지된 해석들을 명시적으로 배제한다.
+이 연구 질문은 4개의 예측선을 읽는 규칙을 미리 정하는 일이다. 규칙은 크게 세 가지. 첫째, 네 줄을 각각 독립된 해석 층(layer)으로 본다. `q50`은 중앙 예측, `q90/q95/q99`는 점점 더 보수적인 상위선이며, 이들을 하나의 양방향 예측 구간으로 합쳐 읽지 않는다. 둘째, 두 줄씩 짝지어(예: `q50`과 `q99`) 그 간격을 불확실성의 폭으로 읽는다. 셋째, 아래에서 위로 순서대로 올라가며(`q50 → q90 → q95 → q99`) 값이 단조롭게 커지는지를 확인한다. 또한 앞서 정리한 두 오해(재현 기간 혼동, 대칭 예측 구간 가정)를 포함해 금지된 해석들을 명시적으로 배제한다.
 
 이 규정을 준수하기 위해, 분위의 순서와 각 예측선이 표의 어느 열을 가리키는지를 공용 라이브러리에 상수로 잠가 둔다. 뒤따르는 모든 RQ 스크립트는 이 순서와 열 이름을 직접 정의하지 않고 여기서 가져다 써야 한다.
 
@@ -169,7 +169,7 @@ PREDICTION_COLUMNS = {"model1": "model1", "q50": "q50",
 - `TAU_ORDER`: 예측선을 항상 같은 순서로 정렬해, "위로 갈수록 값이 커지는가"를 일관되게 확인하게 한다.
 - `PREDICTION_COLUMNS`: 각 예측선이 결과표의 어느 열인지 한 곳에서 정해, 스크립트마다 열 이름을 다르게 쓰는 실수를 막는다.
 
-규칙의 전체 목록과 금지 해석 여섯 가지는 방법론 문서 `docs/experiment/method/model/quantile_output_interpretation.md`가 공식 기준으로 보관한다.
+규칙의 전체 목록과 금지 해석 여섯 가지는 방법론 문서 `quantile_output_interpretation.md`[^src-quantile-interp]가 공식 기준으로 보관한다.
 
 #### 결과 해석 방식
 
@@ -544,7 +544,7 @@ RQ-2와 RQ-3이 "운영상 도움이 되는가"(실용적 관점)를 봤다면, 
 
 #### 분석 목적
 
-분석 문서 `05_calibration_sharpness.md`가 담당한다. RQ-5는 전용 스크립트를 새로 만들지 않고, 이미 있던 확률 예측 진단 스크립트 `scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py`를 재사용한다. 이 스크립트도 다른 RQ와 같은 용어 자물쇠(`scripts/_lib/expanded_drbc.py`)에서 분위 순서·기간 같은 상수를 불러와 일관성을 맞춘다. 결과는 `output/model_analysis/expanded_drbc_test/probabilistic_diagnostics/` 아래에 떨어진다.
+분석 문서 `05_calibration_sharpness.md`가 담당한다. RQ-5는 전용 스크립트를 새로 만들지 않고, 이미 있던 확률 예측 진단 스크립트 `analyze_expanded_drbc_probabilistic_diagnostics.py`[^src-prob-diag]를 재사용한다. 이 스크립트도 다른 RQ와 같은 용어 자물쇠(`expanded_drbc.py`[^src-lib])에서 분위 순서·기간 같은 상수를 불러와 일관성을 맞춘다. 결과는 `output/model_analysis/expanded_drbc_test/probabilistic_diagnostics/` 아래에 떨어진다.
 
 | 평가지표       | 범위                         | 최적화 방향                  |
 | -------------- | ---------------------------- | ---------------------------- |
@@ -635,7 +635,7 @@ flowchart LR
 5. RQ-4a·4b가 "이 개선이 어디서 더 크고 어디서 한계가 있는지"를 구체화한다.
 6. RQ-5가 "이 결과가 통계적으로 탄탄한 기반 위에 있는지"를 확인한다.
 
-이 모든 스크립트를 순서대로 한 번에 돌려 보고 싶다면, `scripts/model/expanded_drbc/run_all.py`가 RQ-1부터 보조 확인까지를 묶어 실행하는 진입점 역할을 한다.
+이 모든 스크립트를 순서대로 한 번에 돌려 보고 싶다면, `run_all.py`[^src-run-all]가 RQ-1부터 보조 확인까지를 묶어 실행하는 진입점 역할을 한다.
 
 ---
 
@@ -660,3 +660,10 @@ flowchart LR
 - [**12 관측 위치 구간 신호**](12_band_signal.md) — 첨두가 예측 밴드 어디에 드는지와 그 신호.
 - [**13 결과 종합**](13_results_reading.md) — RQ 전체 종합 결론·한계.
 - [**14 극한호우 stress test**](14_extreme_rain_stress_test.md) — ARI 극한 강수 사건에서의 첨두 동작.
+
+[^src-rq-map]: `docs/experiment/analysis/model/00_research_question_analysis_map.md`
+[^src-rq-dir]: `scripts/model/expanded_drbc/`
+[^src-lib]: `scripts/_lib/expanded_drbc.py`
+[^src-quantile-interp]: `docs/experiment/method/model/quantile_output_interpretation.md`
+[^src-run-all]: `scripts/model/expanded_drbc/run_all.py`
+[^src-prob-diag]: `scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py`

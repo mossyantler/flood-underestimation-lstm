@@ -27,10 +27,10 @@ import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REQUIRED_SERIES_DIR = (
-    REPO_ROOT / "output/model_analysis/expanded_drbc_test/required_series"
+    REPO_ROOT / "output/model_analysis/primary/metrics/data/required_series"
 )
 OUTPUT_TABLES_DIR = (
-    REPO_ROOT / "output/model_analysis/expanded_drbc_test/tables"
+    REPO_ROOT / "output/model_analysis/primary/metrics/tables"
 )
 
 OFFICIAL_SEEDS: list[int] = [111, 222, 444]
@@ -57,7 +57,7 @@ def load_required_series(
     """Load and concatenate required_series CSVs for given seeds."""
     dfs: list[pd.DataFrame] = []
     for seed in seeds:
-        path = base_dir / f"seed{seed}" / "primary_required_series.csv"
+        path = base_dir / f"seed{seed}" / "required_series.csv"
         df = pd.read_csv(path, parse_dates=["datetime"])
         dfs.append(df)
     combined = pd.concat(dfs, ignore_index=True)

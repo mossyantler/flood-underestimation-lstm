@@ -42,7 +42,7 @@ from expanded_drbc import (  # noqa: E402
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/primary/metrics"
 DEFAULT_INPUT_DIR = DEFAULT_OUTPUT_DIR / "required_series"
 
 CAPTURE_FLAG_THRESHOLD = 2.0  # flag if max(q_τ)/max(obs) > this
@@ -179,7 +179,7 @@ def main() -> None:
         (noaa_events["peak_time"] >= test_start) & (noaa_events["peak_time"] <= test_end)
     ].copy()
 
-    seed_csvs = {seed: args.input_dir / f"seed{seed}" / "primary_required_series.csv" for seed in args.seeds}
+    seed_csvs = {seed: args.input_dir / f"seed{seed}" / "required_series.csv" for seed in args.seeds}
 
     q99_summary, q99_dropped = run_scope("q99", q99_events, seed_csvs, args.output_dir)
     noaa_summary, noaa_dropped = run_scope("noaa", noaa_events, seed_csvs, args.output_dir)

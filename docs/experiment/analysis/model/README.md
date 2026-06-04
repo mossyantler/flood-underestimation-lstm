@@ -7,6 +7,7 @@
 | 순서 | 문서 | 역할 |
 | ---: | --- | --- |
 | 0 | [`00_research_question_analysis_map.md`](00_research_question_analysis_map.md) | 핵심 주제 → RQ-0/1/2/3/4a/4b/5 분해와 산출물 매핑 |
+| 0b | [`00b_rq0_framework_validation.md`](00b_rq0_framework_validation.md) | RQ-0 — 분위 출력 해석과 관측 위치(obs_class) 추측: 위치 분포(q99 47%/NOAA 100% above_q99)·신호 상관(유역 면적·대류 성격)·상승 기울기 분석 |
 | 1 | [`01_q50_central.md`](01_q50_central.md) | RQ-1 — Model 2 `q50`가 Model 1 deterministic 대비 central 성능을 유지하는가 |
 | 2 | [`02_upper_quantile_peak_under.md`](02_upper_quantile_peak_under.md) | RQ-2 — upper quantile (`q90/q95/q99`)이 peak underestimation을 줄이는가 (α + β + δ triplet, Q99 + NOAA dual scope) |
 | 3 | [`03_cost.md`](03_cost.md) | RQ-3 — peak under 감소의 cost (FAR + over-prediction magnitude) |
@@ -14,7 +15,7 @@
 | 4b | [`04b_event_type.md`](04b_event_type.md) | RQ-4b — NOAA event-type heterogeneity (Flash Flood / Flood / Coastal Flood) |
 | 5 | [`05_calibration_sharpness.md`](05_calibration_sharpness.md) | RQ-5 — quantile output calibration·sharpness forecast quality |
 
-방법론 RQ-0 (병렬 quantile output 해석 framework) 문서는 [`docs/experiment/method/model/quantile_output_interpretation.md`](../../method/model/quantile_output_interpretation.md)에 둔다.
+방법론 RQ-0 (병렬 quantile output 해석 framework) 문서는 [`docs/experiment/method/model/quantile_output_interpretation.md`](../../method/model/quantile_output_interpretation.md)에 둔다. 그 framework가 실데이터에서 타당한지, 그리고 분위 출력으로 관측 위치(obs_class)를 추측하는 신호가 무엇인지(`band_signal/` 상관관계 분석)를 정리한 결과 문서는 [`00b_rq0_framework_validation.md`](00b_rq0_framework_validation.md)다.
 
 ## 해석 원칙
 
@@ -66,4 +67,4 @@ scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py   # 
 
 ## Legacy 보존
 
-scaling_300 / DRBC-38 holdout 기반 구식 분석은 [`docs/archive/analysis_legacy/`](../../../archive/analysis_legacy/)로 이동. paper canonical 인용 범위에서 제외하지만 reproducibility 비교 보존.
+pre-expanded DRBC holdout 기반 구식 분석은 [`docs/archive/analysis_legacy/`](../../../archive/analysis_legacy/)로 이동. 현재 paper canonical 기준은 expanded observed DRBC test **85개**이며, legacy 결과는 reproducibility 비교로만 보존한다.

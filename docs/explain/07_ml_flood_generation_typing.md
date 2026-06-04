@@ -1,6 +1,6 @@
 # 07. 머신러닝 기반 큰 홍수 사건 묶음
 
-이 문서는 머신러닝(machine learning, 이하 ML)을 거의 모르는 독자를 가정한다. CAMELSH 시간별(hourly) 자료에서 잡아낸 큰 홍수 후보 사건을 ML 군집화(clustering)로 묶고, 그 결과를 모델 비교 분석에 쓰는 절차를 설명한다. 각 계산의 구현 스크립트·함수·변수명도 함께 짚는다. 비전공 독자가 "이 계산이 코드 어디에 있는가"를 곧바로 찾아갈 수 있게 하는 것이 목표다.
+이 문서는 머신러닝(machine learning, 이하 ML)을 거의 모르는 독자를 가정한다. CAMELSH 시간별(hourly) 자료에서 잡아낸 큰 홍수 후보 사건을 ML 군집화(clustering)로 묶어 모델 비교 분석에 쓰는 절차의 설명이다. 각 계산의 구현 스크립트·함수·변수명도 함께 짚는다. 비전공 독자가 "이 계산이 코드 어디에 있는가"를 곧바로 찾아갈 수 있게 하는 것이 목표다.
 
 핵심 결론은 다음 한 문장이다.
 
@@ -27,7 +27,7 @@ flowchart TD
     D --> H["논문 해석:<br/>어떤 사건 묶음에서 확률예측(Model 2)이 도움이 되는가"]
 ```
 
-용어 약속. "큰 홍수 후보 사건"은 관측 유량이 그 유역(basin) 기준 상위 1% 같은 높은 선을 넘긴 사건이다. 공식 인증 홍수가 아니라 데이터에서 1차로 잡아낸 후보(high-flow event candidate)다. 한 "사건(event)"은 유량 첨두(peak) 하나를 중심으로 시작·끝을 붙인 한 덩어리다.
+용어 약속. "큰 홍수 후보 사건"은 관측 유량이 그 유역(basin) 기준 상위 1% 같은 높은 선을 넘긴 사건. 공식 인증 홍수가 아니라 데이터에서 1차로 잡아낸 후보(high-flow event candidate)다. 한 "사건(event)"은 유량 첨두(peak) 하나를 중심으로 시작·끝을 붙인 한 덩어리.
 
 ---
 
@@ -35,7 +35,7 @@ flowchart TD
 
 "홍수 발생 유형(flood generation type)"이라는 표현은 사건의 실제 원인을 확정한 것처럼 들린다. "눈녹음 홍수(snowmelt flood)"라고 쓰면 적설량(SWE)이나 눈 깊이를 확인해 원인을 증명한 인상을 준다.
 
-데이터에는 그런 정답표가 없다. CAMELSH 시간별 자료에는 "사람이 검증한 눈녹음 홍수" 같은 공식 정답표(label)가 없다. `degree_day_v2`도 관측 정답이 아니라 기온(temperature)과 강수(precipitation)만으로 만든 대리 규칙(proxy rule)이다.
+데이터에는 그런 정답표가 없다. CAMELSH 시간별 자료에는 "사람이 검증한 눈녹음 홍수" 같은 공식 정답표(label)가 없다. `degree_day_v2`도 관측 정답이 아니라 기온(temperature)과 강수(precipitation)만으로 만든 대리 규칙(proxy rule).
 
 ML 군집화도 같은 한계를 갖는다. ML은 사건 주변의 비, 선행 강수, 기온, 눈녹음 대리값 같은 숫자만 보고 비슷한 사건을 묶는다. 이 묶음은 신호 공간에서의 유사성이지 원인의 증명이 아니다.
 
@@ -110,7 +110,7 @@ ML에 넣는 표(feature table)의 한 행은 유역 하나가 아니라 사건 
 
 한 유역에서도 여름의 짧고 강한 비, 한 달간 누적된 비로 이미 젖은 상태, 겨울·봄의 기온·눈녹음 대리값처럼 사건 성격이 갈린다.
 
-따라서 유역 하나를 한 유형으로 고정하는 것은 거칠다. 먼저 사건을 나눈 뒤 유역별로 각 묶음의 비율을 계산한다.
+따라서 유역 하나를 한 유형으로 고정하는 방식은 거칠다. 먼저 사건을 나눈 뒤 유역별로 각 묶음의 비율을 계산한다.
 
 ```text
 사건 단위:
@@ -162,7 +162,7 @@ ML에 넣는 표(feature table)의 한 행은 유역 하나가 아니라 사건 
 
 이 신호들의 구현 위치는 다음과 같다.
 
-- 스크립트: `scripts/basin/event_regime/compare_camelsh_flood_generation_ml_variants.py`
+- 스크립트: `compare_camelsh_flood_generation_ml_variants.py`[^src-compare]
 - 함수: `build_feature_table`
 - 핵심 helper: `safe_ratio` — 분자를 분모로 나누되 분모가 0이거나 결과가 무한대면 빈 값으로 처리
 
@@ -302,13 +302,13 @@ ML hydromet_only_7 k=3:
 | 1 | 약한 신호 (`Weak / low-signal hydromet regime`) | 강한 최근/선행 신호가 약하고, 일부 눈·추운 시기 꼬리가 섞인 사건 |
 | 2 | 최근 강수 (`Recent rainfall`) | 직전 1일 강수비가 뚜렷하게 높은 사건 |
 
-주의점이 있다. 과거 그림이나 임시 산출물에서는 묶음 1을 "약한 신호/눈 영향(`Weak-driver / snow-influenced`)"으로 불렀다. 그림 생성 스크립트 `scripts/basin/event_regime/plot_camelsh_flood_generation_ml_variant.py`의 묶음 이름 매핑(`CLUSTER_NAMES`)에는 여전히 묶음 1이 옛 이름으로 남아 있다. 그러나 저위도 유역을 추가 확인한 결과 이 묶음 전체를 눈 위주로 해석하면 안 된다. 저위도 "약한 신호/눈 영향" 유역 중 상당수는 눈 분율(`snow_fraction`)이 거의 0이다. 따라서 더 안전한 이름은 "약한 신호(`Weak / low-signal hydromet regime`)"다. 눈녹음은 이 묶음 일부 사건의 꼬리 설명일 뿐 묶음 전체 이름이 될 수 없다. 그림 스크립트의 옛 이름 매핑은 공식 파이프라인 승격 시 정리 대상이다.
+주의점이 있다. 과거 그림이나 임시 산출물에서는 묶음 1을 "약한 신호/눈 영향(`Weak-driver / snow-influenced`)"으로 불렀다. 그림 생성 스크립트 `plot_camelsh_flood_generation_ml_variant.py`[^src-plot-variant]의 묶음 이름 매핑(`CLUSTER_NAMES`)에는 여전히 묶음 1이 옛 이름으로 남아 있다. 그러나 저위도 유역을 추가 확인한 결과 이 묶음 전체를 눈 위주로 해석하면 안 된다. 저위도 "약한 신호/눈 영향" 유역 중 상당수는 눈 분율(`snow_fraction`)이 거의 0이다. 따라서 더 안전한 이름은 "약한 신호(`Weak / low-signal hydromet regime`)"다. 눈녹음은 이 묶음 일부 사건의 꼬리 설명일 뿐 묶음 전체 이름이 될 수 없다. 그림 스크립트의 옛 이름 매핑은 공식 파이프라인 승격 시 정리 대상이다.
 
 ---
 
 ## 11. 규칙 기반과 ML 기반의 차이
 
-ML 군집과 규칙 분류를 비교하면 패턴이 드러난다. 비교는 `compare_camelsh_flood_generation_ml_variants.py`의 `rule_agreement` 함수가 맡는다. 두 분류의 중첩도를 ARI(`rule_adjusted_rand_index`)와 정규화 상호정보량(`rule_normalized_mutual_info`)으로 재고, 규칙 분류와 묶음의 대응을 교차표(`variant_rule_crosstab_long.csv`)로 남긴다.
+ML 군집과 규칙 분류를 비교하면 패턴이 드러난다. 비교는 `compare_camelsh_flood_generation_ml_variants.py`[^src-compare]의 `rule_agreement` 함수가 맡는다. 두 분류의 중첩도를 ARI(`rule_adjusted_rand_index`)와 정규화 상호정보량(`rule_normalized_mutual_info`)으로 재고, 규칙 분류와 묶음의 대응을 교차표(`variant_rule_crosstab_long.csv`)로 남긴다.
 
 ML의 "최근 강수" 묶음은 규칙의 "최근 강수(recent_precipitation)"와 잘 맞는다. 이 묶음 안에서 규칙상 최근 강수 비중이 약 95%[^ratio-source]여서 해석이 깔끔하다.
 
@@ -346,7 +346,7 @@ ML은 규칙을 부정하지 않는다. 규칙이 크게 묶은 최근 강수 �
 
 ## 12. 유역 단위 상위 2개 구성
 
-사건 묶음을 유역별로 집계하면 각 유역의 묶음 비율을 얻는다. 집계는 `compare_camelsh_flood_generation_ml_variants.py`의 `basin_composition` 함수가 맡고, 각 유역의 최대 비율(`top1_share`)과 상위 두 개 합(`top2_share`)을 함께 남긴다. 다음 유역을 예로 든다.
+사건 묶음을 유역별로 집계하면 각 유역의 묶음 비율을 얻는다. 집계는 `compare_camelsh_flood_generation_ml_variants.py`[^src-compare]의 `basin_composition` 함수가 맡고, 각 유역의 최대 비율(`top1_share`)과 상위 두 개 합(`top2_share`)을 함께 남긴다. 다음 유역을 예로 든다.
 
 ```text
 최근 강수             0.46
@@ -391,7 +391,7 @@ interpretation.
 
 ## 14. 참고 그림
 
-선택된 변형의 그림은 `plot_camelsh_flood_generation_ml_variant.py`와 `plot_camelsh_basin_group_maps.py`가 만든다. 산출 폴더는 `output/basin/all/archive/event_regime_variants/figures/`다.
+선택된 변형의 그림은 `plot_camelsh_flood_generation_ml_variant.py`[^src-plot-variant]와 `plot_camelsh_basin_group_maps.py`[^src-plot-maps]가 만든다. 산출 폴더는 `output/basin/all/archive/event_regime_variants/figures/`다.
 
 | 그림 | 보여 주는 것 |
 | --- | --- |
@@ -410,7 +410,7 @@ interpretation.
 
 ## 15. 산출물과 실행 스크립트
 
-규칙 기반 분류 산출물은 `scripts/basin/all/build_camelsh_flood_generation_typing.py`가 만든다. 기본 위치는 아래다.
+규칙 기반 분류 산출물은 `build_camelsh_flood_generation_typing.py`[^src-build-typing]가 만든다. 기본 위치는 아래다.
 
 ```text
 output/basin/all/analysis/flood_generation/tables/
@@ -512,3 +512,8 @@ ML 묶음 이름은 조심해서 붙인다. 예전의 "약한 신호/눈 영향(
 - 사건 추출과 신호 계산 규칙: [`event_response_spec.md`](../experiment/method/basin/event_response_spec.md)
 - 사건 묶음/규칙 분류의 method 기준: [`flood_generation_typing.md`](../experiment/method/basin/flood_generation_typing.md)
 - 모델 구조 설명(같은 explain 시리즈): [`02_model_structure.md`](02_model_structure.md)
+
+[^src-compare]: `scripts/basin/event_regime/compare_camelsh_flood_generation_ml_variants.py`
+[^src-plot-variant]: `scripts/basin/event_regime/plot_camelsh_flood_generation_ml_variant.py`
+[^src-plot-maps]: `scripts/basin/event_regime/plot_camelsh_basin_group_maps.py`
+[^src-build-typing]: `scripts/basin/all/build_camelsh_flood_generation_typing.py`

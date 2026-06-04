@@ -199,7 +199,7 @@ Results section은 artifact 생성 순서가 아니라 claim strength 순서로 
 
 본 연구의 기대 기여는 deterministic LSTM의 flood underestimation이 output-design problem의 영향을 받는지 명확히 하는 것이다. 만약 Model 2 `q95/q99`가 peak under-deficit을 줄이지만 Model 2 `q50`은 Model 1과 비슷하거나 약간 낮은 성능을 보인다면, 그 결과도 중심 thesis를 지지할 수 있다. 이는 probabilistic head의 가치가 모든 central hydrograph metric을 개선하는 데 있는 것이 아니라, deterministic point estimate가 누르는 upper-tail risk를 표현하는 데 있음을 보여주기 때문이다.
 
-한계도 명확히 둔다. 첫째, 현재 quantile head는 upper tail만 모델링하므로 complete predictive distribution이나 central prediction interval을 제공하지 않는다. 둘째, 현재 DRBC quality-pass test set은 38개 basin이므로 basin heterogeneity와 uncertainty를 모든 결론에 함께 보여줘야 한다. 셋째, observed high-flow candidate는 official flood inventory가 아니다. 넷째, historical extreme-rain stress test는 independent temporal test가 아니며 checkpoint selection에 사용할 수 없다. 다섯째, 현재 training subset에는 basin별 sample support 불균형이 있으며, 이는 비용이 큰 재학습으로 고치기보다 투명하게 보고한다.
+한계도 명확히 둔다. 첫째, 현재 quantile head는 upper tail만 모델링하므로 complete predictive distribution이나 central prediction interval을 제공하지 않는다. 둘째, 현재 expanded observed DRBC test set은 85개 basin이므로 basin heterogeneity와 uncertainty를 모든 결론에 함께 보여줘야 한다. 셋째, observed high-flow candidate는 official flood inventory가 아니다. 넷째, historical extreme-rain stress test는 independent temporal test가 아니며 checkpoint selection에 사용할 수 없다. 다섯째, 현재 training subset에는 basin별 sample support 불균형이 있으며, 이는 비용이 큰 재학습으로 고치기보다 투명하게 보고한다.
 
 이 한계는 최종 claim의 경계를 정한다. 논문은 quantile LSTM이 flood forecasting을 해결했다고 주장하면 안 된다. 또한 `q99`가 정의상 calibrated flood warning threshold라고 주장해서도 안 된다. 결과가 뒷받침한다면 주장할 수 있는 것은 이것이다. Deterministic point output은 upper-tail flood peak를 낮게 누를 수 있고, quantile output head는 통제된 multi-basin LSTM 비교에서 이 과소추정을 완화한다.
 

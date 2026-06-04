@@ -4,7 +4,7 @@
 
 본 논문의 핵심 주제를 세부 연구 질문(Research Question, RQ)으로 분해하고, 각 RQ가 어떤 분석 문서·스크립트·산출물에 1:1로 대응되는지 정리한다. 분석 결과 수치 자체는 다시 쓰지 않고, "어느 질문을 어떤 분석으로 답하는가"의 지도를 제공한다.
 
-본 RQ 매핑은 **expanded DRBC observed test split(85 basin, seed 111/222/444, test 2014-2016)**을 canonical baseline으로 가정한다. 레거시 300-basin / DRBC-38 holdout 매핑은 폐기(`docs/archive/analysis_legacy/` 보존).
+본 RQ 매핑은 **expanded DRBC observed test split(85 basin, seed 111/222/444, test 2014-2016)**을 canonical baseline으로 가정한다. 레거시 300-basin / pre-expanded DRBC holdout 매핑은 폐기(`docs/archive/analysis_legacy/` 보존).
 
 ## 핵심 주제와 주장
 
@@ -29,8 +29,10 @@
 
 | 항목 | 위치 |
 | --- | --- |
-| 분석 문서 | [`docs/experiment/method/model/quantile_output_interpretation.md`](../../method/model/quantile_output_interpretation.md) |
-| 핵심 도구 | L1-L4 해석 layer + Pairwise/Sequence/Spread/**Uncertainty Band** reading + 6 prohibited interpretations |
+| framework 문서 (방법) | [`docs/experiment/method/model/quantile_output_interpretation.md`](../../method/model/quantile_output_interpretation.md) |
+| 검증·분석 문서 | [`00b_rq0_framework_validation.md`](00b_rq0_framework_validation.md) — 관측 위치(obs_class) 분포 + 위치 예측 신호 상관관계(유역 면적·대류 성격) + 상승 기울기 + 읽기 규칙 타당성 |
+| 핵심 도구 | obs_class(관측 위치 구간 0~4) + 신호 3분류(독립/밴드결합/누수) + 3-scope Spearman + L1-L4 해석 layer + 6 prohibited interpretations |
+| 산출물 | `output/model_analysis/band_signal/{band_shape,signal_sweep,slope_signal}/` + `primary/calibration/tables/` |
 | Phase B 자물쇠 | `scripts/_lib/expanded_drbc.py` 의 vocabulary constants (TAU_ORDER, NOAA_LABELS, NOAA_REGEX 등) |
 
 ### RQ-1. q50가 중앙예측 성능을 유지하는가 (전제)
@@ -168,7 +170,7 @@ output/model_analysis/expanded_drbc_test/
 
 ## Legacy 보존
 
-레거시 300-basin / DRBC-38 holdout 기반 구식 분석 문서는 `docs/archive/analysis_legacy/`로 이동:
+레거시 300-basin / pre-expanded DRBC holdout 기반 구식 분석 문서는 `docs/archive/analysis_legacy/`로 이동:
 
 - `03_event_regime_performance.md`
 - `04_extreme_flood_proxy_performance.md`

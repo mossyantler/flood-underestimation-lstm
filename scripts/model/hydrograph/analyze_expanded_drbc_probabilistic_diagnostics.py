@@ -54,9 +54,9 @@ STRATA = base.STRATA
 STRATUM_LABELS = base.STRATUM_LABELS
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_INPUT_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test"
+DEFAULT_INPUT_DIR = REPO_ROOT / "output/model_analysis/primary/metrics"
 DEFAULT_OUTPUT_DIR = (
-    REPO_ROOT / "output/model_analysis/expanded_drbc_test/probabilistic_diagnostics"
+    REPO_ROOT / "output/model_analysis/primary/calibration"
 )
 TIER_PROFILE_REL = "tables/expanded_drbc_tier_profile.csv"
 PRIMARY_SEEDS = [111, 222, 444]
@@ -118,7 +118,7 @@ def _relative(path: Path) -> str:
 
 
 def _expanded_series_path(input_dir: Path, seed: int) -> Path:
-    return input_dir / "required_series" / f"seed{seed}" / "primary_required_series.csv"
+    return input_dir / "required_series" / f"seed{seed}" / "required_series.csv"
 
 
 def _preflight(input_dir: Path, seeds: list[int], timeseries_dir: Path) -> tuple[list[Path], Path]:
@@ -142,7 +142,7 @@ def _preflight(input_dir: Path, seeds: list[int], timeseries_dir: Path) -> tuple
 
 
 def _read_expanded_series(path: Path, seed: int) -> tuple[pd.DataFrame, dict[str, object]]:
-    """Load expanded primary_required_series.csv. Drop NaN-obs rows; record counts."""
+    """Load expanded required_series.csv. Drop NaN-obs rows; record counts."""
     usecols = ["seed", "basin", "model1_epoch", "model2_epoch", "datetime", "obs", *QUANTILES]
     df = pd.read_csv(path, usecols=usecols, dtype={"basin": str})
     df["basin"] = df["basin"].str.zfill(8)
@@ -553,7 +553,7 @@ def _write_expanded_report(
         "",
         "## Caveats",
         "",
-        "- **obs-NaN denominator:** the expanded `primary_required_series.csv` has ~7.7% NaN obs; "
+        "- **obs-NaN denominator:** the expanded `required_series.csv` has ~7.7% NaN obs; "
         "these rows are dropped, so the all-stratum coverage denominator is observed hours only.",
         "- **dataset-relative thresholds:** per-basin high-flow strata thresholds are computed from "
         "this split's own obs, so absolute values are NOT comparable across disjoint basin sets.",

@@ -30,13 +30,13 @@ import pandas as pd
 import xarray as xr
 
 
-DEFAULT_EVENT_WINDOWS = Path("output/model_analysis/confirmed_flood/inference/confirmed_flood_event_windows_used.csv")
-DEFAULT_CATALOG_CSV = Path("output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv")
-DEFAULT_COVERAGE_CSV = Path("output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv")
-DEFAULT_SERIES_DIR = Path("output/model_analysis/confirmed_flood/inference/required_series")
+DEFAULT_EVENT_WINDOWS = Path("output/model_analysis/confirmed_flood/data/inference/confirmed_flood_event_windows_used.csv")
+DEFAULT_CATALOG_CSV = Path("output/model_analysis/confirmed_flood/data/catalog/drbc_confirmed_flood_event_catalog.csv")
+DEFAULT_COVERAGE_CSV = Path("output/model_analysis/confirmed_flood/data/nws_flood_stage_coverage.csv")
+DEFAULT_SERIES_DIR = Path("output/model_analysis/confirmed_flood/data/inference/required_series")
 DEFAULT_DATA_DIR = Path("data/CAMELSH_generic/drbc_holdout_confirmed_flood_events/time_series")
-DEFAULT_NOAA_CACHE = Path("output/model_analysis/confirmed_flood/noaa_cache")
-DEFAULT_OUTPUT_DIR = Path("output/model_analysis/confirmed_flood/hydrographs")
+DEFAULT_NOAA_CACHE = Path("output/model_analysis/confirmed_flood/data/noaa_cache")
+DEFAULT_OUTPUT_DIR = Path("output/model_analysis/confirmed_flood/gallery")
 DEFAULT_SEEDS = [111, 222, 444]
 
 PREDICTORS = [
@@ -164,7 +164,7 @@ def read_coverage(path: Path) -> pd.DataFrame:
 
 
 def read_required_series(series_dir: Path, seed: int) -> pd.DataFrame:
-    path = series_dir / f"seed{seed}" / "primary_required_series.csv"
+    path = series_dir / f"seed{seed}" / "required_series.csv"
     if not path.exists():
         raise FileNotFoundError(f"Missing required-series file: {path}")
     df = pd.read_csv(path, dtype={"basin": str, "event_id": str}, parse_dates=["datetime"])

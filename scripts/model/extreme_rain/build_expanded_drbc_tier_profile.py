@@ -39,10 +39,10 @@ TIER_LABELS = {
     "extreme_ge_3_iqr": ">=3 IQR",
 }
 
-DEFAULT_DELTAS = REPO_ROOT / "output/model_analysis/expanded_drbc_test/tables/primary_epoch_basin_deltas.csv"
+DEFAULT_DELTAS = REPO_ROOT / "output/model_analysis/primary/metrics/tables/primary_epoch_basin_deltas.csv"
 DEFAULT_EVENT_RESPONSE_SUMMARY = REPO_ROOT / "output/basin/expanded_drbc/analysis/event_response/tables/event_response_basin_summary.csv"
 DEFAULT_SELECTED_CSV = REPO_ROOT / "output/basin/drbc/basin_define/camelsh_drbc_selected.csv"
-DEFAULT_OUTPUT_CSV = REPO_ROOT / "output/model_analysis/expanded_drbc_test/tables/expanded_drbc_tier_profile.csv"
+DEFAULT_OUTPUT_CSV = REPO_ROOT / "output/model_analysis/primary/metrics/tables/expanded_drbc_tier_profile.csv"
 
 
 def parse_args() -> argparse.Namespace:

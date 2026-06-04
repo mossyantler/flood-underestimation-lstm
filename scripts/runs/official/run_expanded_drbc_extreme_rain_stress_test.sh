@@ -6,7 +6,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$ROOT_DIR"
 
-OUTPUT_ROOT="${OUTPUT_ROOT:-output/model_analysis/expanded/extreme_rain/expanded_drbc}"
+OUTPUT_ROOT="${OUTPUT_ROOT:-output/model_analysis/q99_analysis/performance}"
 LOG_DIR="${LOG_DIR:-logs}"
 DEVICE="${DEVICE:-cuda:0}"
 SEEDS="${SEEDS:-111 222 444}"

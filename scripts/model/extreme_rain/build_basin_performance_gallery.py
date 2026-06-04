@@ -52,13 +52,13 @@ from build_extreme_rain_median_map_index import (
     rel_path,
 )
 
-DEFAULT_TIER_PROFILE = REPO_ROOT / "output/model_analysis/expanded_drbc_test/tables/expanded_drbc_tier_profile.csv"
-DEFAULT_DELTAS = REPO_ROOT / "output/model_analysis/expanded_drbc_test/tables/primary_epoch_basin_deltas.csv"
+DEFAULT_TIER_PROFILE = REPO_ROOT / "output/model_analysis/primary/metrics/tables/expanded_drbc_tier_profile.csv"
+DEFAULT_DELTAS = REPO_ROOT / "output/model_analysis/primary/metrics/tables/primary_epoch_basin_deltas.csv"
 DEFAULT_STATIC_ATTRS = REPO_ROOT / "output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_static_attributes_full.csv"
 DEFAULT_DRBC_SELECTED = REPO_ROOT / "output/basin/drbc/basin_define/camelsh_drbc_selected.csv"
-DEFAULT_EVENT_MANIFEST = REPO_ROOT / "output/model_analysis/extreme_rain/expanded_drbc/event_plots/event_plot_manifest.csv"
-DEFAULT_HYDROGRAPH_ROOT = REPO_ROOT / "output/model_analysis/extreme_rain/expanded_drbc/basin_performance/hydrograph"
-DEFAULT_OUTPUT_HTML = REPO_ROOT / "output/model_analysis/extreme_rain/expanded_drbc/basin_performance/gallery_index.html"
+DEFAULT_EVENT_MANIFEST = REPO_ROOT / "output/model_analysis/q99_analysis/performance/event_plots/event_plot_manifest.csv"
+DEFAULT_HYDROGRAPH_ROOT = REPO_ROOT / "output/model_analysis/q99_analysis/performance/basin_performance/hydrograph"
+DEFAULT_OUTPUT_HTML = REPO_ROOT / "output/model_analysis/q99_analysis/performance/basin_performance/gallery_index.html"
 DEFAULT_CAMELSH_SHAPEFILE = REPO_ROOT / "basins/CAMELSH_data/shapefiles/CAMELSH_shapefile.shp"
 DEFAULT_DRBC_BOUNDARY = REPO_ROOT / "basins/drbc_boundary/drb_bnd_polygon.shp"
 

@@ -50,7 +50,7 @@
 
 첫째, `공간적으로 일관된 holdout region`이기 때문이다. random basin sample은 training basin과 test basin이 공간적으로 섞이기 쉽고, hydrologic similarity leakage를 완전히 피하기 어렵다. 반면 DRBC는 하나의 연속된 수문 권역이기 때문에 “다른 지역에서 학습한 모델이 이 지역 전체로 일반화되는가”를 보기 좋다.
 
-둘째, `충분한 평가 basin 수`가 있기 때문이다. 현재 DRBC 기준 CAMELSH selected basin은 154개이고, broad checklist 기준 test candidate basin은 38개다. 즉 Delaware는 단일 case basin이 아니라, regional evaluation cohort를 구성할 수 있을 정도의 basin 수를 제공한다.
+둘째, `충분한 평가 basin 수`가 있기 때문이다. 현재 DRBC 기준 CAMELSH selected basin은 154개이고, expanded observed test 기준 basin은 85개다. 즉 Delaware는 단일 case basin이 아니라, regional evaluation cohort를 구성할 수 있을 정도의 basin 수를 제공한다.
 
 셋째, `상류-하류 수문 조건이 한 권역 안에서 꽤 다양하다.` 현재 broad checklist 기준 test candidate basin만 봐도 basin area는 약 10.8–4560.6 km², 경사는 약 0.18–11.57 %, forest 비율은 약 10.6–75.0 %, developed 비율은 약 4.9–80.5 % 범위를 가진다. 즉 Delaware는 하나의 권역이지만 작은 headwater부터 큰 mainstem 영향 basin까지, 비교적 다양한 flood response 조건을 포함한다.
 
@@ -145,7 +145,7 @@
 
 출력값의 단위도 구분해서 말해야 한다. 네트워크 내부에서는 scaler를 적용한 normalized `Streamflow`를 학습하지만, evaluation 단계에서는 inverse scaling을 거친 뒤 실제 `Streamflow` 스케일에서 metric을 계산한다. 따라서 “모델이 내는 최종 결과”는 물리 단위의 discharge time series이고, cumulative runoff나 event total volume은 이 시계열을 후처리해서 계산하는 값이다.
 
-현재 baseline의 basin 구성은 fixed `subset300` 기준 `train 269 / validation 31 / test 38`이다. 이 subset은 broad prepared pool `1903`에서 HUC02-stratified 방식으로 뽑았고, static attribute diagnostics와 observed-flow event-response diagnostics 모두에서 representativeness가 크게 무너지지 않는다는 점을 확인한 뒤 채택했다. 따라서 디펜스에서는 “임의 축소 실험”이 아니라 “대표성 점검을 거쳐 고정한 compute-constrained main comparison cohort”라고 설명하는 것이 맞다.
+현재 baseline의 basin 구성은 fixed `subset300` 기준 `train 269 / validation 31 / test 85`이다. 이 subset은 broad prepared pool `1903`에서 HUC02-stratified 방식으로 뽑았고, static attribute diagnostics와 observed-flow event-response diagnostics 모두에서 representativeness가 크게 무너지지 않는다는 점을 확인한 뒤 채택했다. 따라서 디펜스에서는 “임의 축소 실험”이 아니라 “대표성 점검을 거쳐 고정한 compute-constrained main comparison cohort”라고 설명하는 것이 맞다.
 
 ## 3. 현재 설계의 가장 큰 취약점
 
@@ -383,7 +383,7 @@ broad cohort는 현실적인 전체 flood-relevant basin, natural cohort는 hydr
 
 ### Q28. 현재 공식 subset300 split은 어떻게 정의되나요?
 
-현재 공식 compute-constrained main comparison split은 `train 269 / validation 31 / test 38`이다. train/validation basin은 broad prepared pool `1903`에서 HUC02-stratified 방식으로 뽑은 `scaling_300` subset이고, test basin `38`과 시간 구간은 broad prepared split과 동일하게 유지한다. selection 근거는 non-DRBC validation 성능, static attribute diagnostics, observed-flow event-response diagnostics, compute cost다.
+현재 공식 compute-constrained main comparison split은 `train 269 / validation 31 / test 85`이다. train/validation basin은 broad prepared pool `1903`에서 HUC02-stratified 방식으로 뽑은 `scaling_300` subset이고, test basin은 expanded observed DRBC 기준 85개와 `2014-2016` 시간 구간을 사용한다. selection 근거는 non-DRBC validation 성능, static attribute diagnostics, observed-flow event-response diagnostics, compute cost다.
 
 ### Q29. 현재 논문용 공식 run 산출물은 준비되어 있나요?
 

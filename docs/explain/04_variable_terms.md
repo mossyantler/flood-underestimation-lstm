@@ -4,83 +4,83 @@
 
 읽는 방법을 먼저 정리한다.
 
-- **일반 용어**(데이터, 모델, 실험, 유역 특성, event 분석)는 `용어 | 쉬운 설명` 표로 간단히 본다.
+- **일반 용어**(데이터, 모델, 실험, 유역 특성, event 분석)는 `용어 | 설명` 표로 간단히 본다.
 - **지표성 용어**(NSE, coverage, calibration, α/β/δ, FAR 등 숫자로 모델 성능을 재는 값)는 먼저 **참조 카드** 표로 한눈에 보고, 표 바로 아래 H3(`###`) 항목에서 정의·직관·비유·해석을 상세히 본다. 참조 카드 표의 열 순서는 `지표 | 변수명 | 심볼 | 범위 | 최적화 방향`이며, 맨 앞은 지표 정식 이름이다.
 
 여기서 "변수명"은 산출물 표(`output/model_analysis/...`)의 컬럼명이나 분석 스크립트가 출력하는 이름이다. 어떤 분석에서 나온 값인지 추적할 수 있도록 가능한 곳에 출처를 가볍게 적어 둔다.
 
 ## 연구와 데이터 용어
 
-| 용어 | 쉬운 설명 |
+| 용어 | 설명 |
 | --- | --- |
-| basin | 비가 내려 한 하천 출구로 모이는 땅의 범위다. 한국어로는 유역이라고 부른다. |
-| outlet | 유역의 물이 관측소로 모여 나가는 지점이다. 이 연구에서는 DRBC 안팎을 판단하는 중요한 기준점이다. |
-| DRBC | Delaware River Basin Commission 기준 Delaware River Basin이다. 현재 연구의 holdout 평가 지역이다. |
-| CAMELSH | 시간 단위 수문·기상·유역 특성을 제공하는 large-sample hydrology dataset이다. |
-| hourly | 자료 간격이 1시간이라는 뜻이다. 이 연구는 daily가 아니라 hourly 예측을 기본으로 한다. |
-| streamflow | 하천 유량이다. 모델이 최종적으로 맞히려는 target이다. |
-| forcing | 유역에 작용하는 외부 조건이다. 이 연구에서는 주로 강수, 기온, 복사, 습도 같은 기상 입력을 뜻한다. |
-| static attributes | 유역 면적, 경사, 토양, 산림 비율처럼 시간에 따라 거의 고정된 유역 특성이다. |
-| dynamic inputs | 시간마다 달라지는 입력 변수다. 강수와 기온 같은 forcing이 여기에 들어간다. |
-| target variable | 모델이 예측해야 하는 값이다. 여기서는 `Streamflow`다. |
-| return period | 평균적으로 몇 년에 한 번 넘을 정도의 크기인지를 나타내는 표현이다. 예를 들어 100-year event는 매년 초과확률이 약 1%인 event를 뜻한다. |
-| AEP | Annual Exceedance Probability의 약자다. 100년 빈도 event는 보통 1% AEP event라고 부른다. |
-| ARI | Average Recurrence Interval의 약자다. return period와 비슷한 뜻으로 쓰이며, NOAA Atlas 14에서는 average recurrence interval 표현을 자주 쓴다. |
-| prec_ari100_24h | 24시간 기준 100년 빈도 강수량이다. `prec`는 precipitation의 짧은 표기다. `P100_24h`라고 쓸 수도 있지만, 이 프로젝트에서는 `Q99/q99`와 헷갈리지 않게 `prec_ari100_24h` 표기를 권장한다. |
-| flood_ari100 | 100년 빈도 홍수량 또는 1% AEP flood magnitude다. `Q100`이라고 쓸 수도 있지만, 이 프로젝트에서는 `flood_ari100` 표기를 권장한다. |
-| return-period proxy | 공식 NOAA/USGS 재현기간 자료가 아니라, 현재 가진 CAMELSH hourly record에서 임시로 추정한 참고값이다. 공식값처럼 주장하지 않기 위해 source와 confidence flag를 같이 남긴다. |
-| Gumbel annual-maxima proxy | water year마다 최대값을 하나씩 뽑고 Gumbel 극값분포를 맞춰 재현기간 값을 추정하는 간단한 방법이다. 현재 서버 all-basin 분석의 기본 reference 계산법이다. |
+| basin | 비가 내려 한 하천 출구로 모이는 땅의 범위. 한국어로는 유역. |
+| outlet | 유역의 물이 관측소로 모여 나가는 지점. 이 연구에서 DRBC 안팎을 판단하는 기준점이다. |
+| DRBC | Delaware River Basin Commission 기준 Delaware River Basin. 현재 연구의 holdout 평가 지역이다. |
+| CAMELSH | 시간 단위 수문·기상·유역 특성을 제공하는 large-sample hydrology dataset. |
+| hourly | 자료 간격이 1시간이라는 뜻. 이 연구는 daily가 아니라 hourly 예측을 기본으로 한다. |
+| streamflow | 하천 유량. 모델이 최종적으로 맞히려는 target이다. |
+| forcing | 유역에 작용하는 외부 조건. 이 연구에서는 주로 강수, 기온, 복사, 습도 같은 기상 입력을 뜻한다. |
+| static attributes | 유역 면적, 경사, 토양, 산림 비율처럼 시간에 따라 거의 고정된 유역 특성. |
+| dynamic inputs | 시간마다 달라지는 입력 변수. 강수와 기온 같은 forcing이 여기에 들어간다. |
+| target variable | 모델이 예측해야 하는 값. 여기서는 `Streamflow`. |
+| return period | 평균적으로 몇 년에 한 번 넘을 크기인지 나타내는 표현. 예를 들어 100-year event는 매년 초과확률이 약 1%인 event를 뜻한다. |
+| AEP | Annual Exceedance Probability의 약자. 100년 빈도 event는 보통 1% AEP event라고 부른다. |
+| ARI | Average Recurrence Interval의 약자. return period와 비슷한 뜻으로 쓰이며, NOAA Atlas 14에서는 average recurrence interval 표현을 자주 쓴다. |
+| prec_ari100_24h | 24시간 기준 100년 빈도 강수량. `prec`는 precipitation의 짧은 표기다. `P100_24h`라고 쓸 수도 있지만, 이 프로젝트에서는 `Q99/q99`와 헷갈리지 않게 `prec_ari100_24h` 표기를 권장한다. |
+| flood_ari100 | 100년 빈도 홍수량 또는 1% AEP flood magnitude. `Q100`이라고 쓸 수도 있지만, 이 프로젝트에서는 `flood_ari100` 표기를 권장한다. |
+| return-period proxy | 공식 NOAA/USGS 재현기간 자료가 아니라, 현재 가진 CAMELSH hourly record에서 임시로 추정한 참고값. 공식값처럼 주장하지 않기 위해 source와 confidence flag를 같이 남긴다. |
+| Gumbel annual-maxima proxy | water year마다 최대값을 하나씩 뽑고 Gumbel 극값분포를 맞춰 재현기간 값을 추정하는 간단한 방법. 현재 서버 all-basin 분석의 기본 reference 계산법이다. |
 
 ## 모델 용어
 
-| 용어 | 쉬운 설명 |
+| 용어 | 설명 |
 | --- | --- |
-| LSTM | 과거 정보를 기억하면서 시간 순서 자료를 읽는 neural network다. |
-| backbone | 모델의 공통 몸통이다. 이 연구에서는 두 모델 모두 LSTM backbone을 공유한다. |
-| head | backbone이 만든 정보를 실제 예측값으로 바꾸는 마지막 출력층이다. |
-| deterministic model | 한 시점에 유량 하나만 예측하는 모델이다. Model 1이 여기에 해당한다. |
-| probabilistic model | 가능한 범위나 불확실성을 함께 표현하는 모델이다. Model 2는 quantile 방식으로 이를 구현한다. |
-| regression head | 유량 하나를 출력하는 head다. |
-| quantile head | `q50`, `q90`, `q95`, `q99`처럼 여러 quantile을 출력하는 head다. |
-| q50 | 중앙값에 가까운 예측선이다. Model 2의 대표 중앙 예측으로 쓴다. |
-| q90, q95, q99 | 더 높은 쪽의 유량 가능성을 나타내는 예측선이다. 홍수 첨두를 감싸는지 볼 때 중요하다. |
-| quantile crossing | 예를 들어 `q95`가 `q90`보다 낮아지는 문제다. 현재 구현은 이런 일이 생기지 않게 설계한다. |
-| pinball loss | quantile을 학습할 때 쓰는 loss다. 상위 quantile에서는 실제 큰 값을 너무 낮게 예측하면 더 크게 벌을 준다. |
-| NSE loss | 수문 모델에서 자주 쓰는 성능 기준인 NSE를 학습 목표로 쓰는 방식이다. |
+| LSTM | 과거 정보를 기억하면서 시간 순서 자료를 읽는 neural network. |
+| backbone | 모델의 공통 몸통. 이 연구에서는 두 모델 모두 LSTM backbone을 공유한다. |
+| head | backbone이 만든 정보를 실제 예측값으로 바꾸는 마지막 출력층. |
+| deterministic model | 한 시점에 유량 하나만 예측하는 모델. Model 1이 여기에 해당한다. |
+| probabilistic model | 가능한 범위나 불확실성을 함께 표현하는 모델. Model 2는 quantile 방식으로 이를 구현한다. |
+| regression head | 유량 하나를 출력하는 head. |
+| quantile head | `q50`, `q90`, `q95`, `q99`처럼 여러 quantile을 출력하는 head. |
+| q50 | 중앙값에 가까운 예측선. Model 2의 대표 중앙 예측으로 쓴다. |
+| q90, q95, q99 | 더 높은 쪽의 유량 가능성을 나타내는 예측선. 홍수 첨두를 감싸는지 볼 때 중요하다. |
+| quantile crossing | 예를 들어 `q95`가 `q90`보다 낮아지는 문제. 현재 구현은 이런 일이 생기지 않게 설계한다. |
+| pinball loss | quantile 학습에 쓰는 loss. 상위 quantile에서는 실제 큰 값을 너무 낮게 예측하면 더 크게 벌을 준다. |
+| NSE loss | 수문 모델에서 자주 쓰는 성능 기준 NSE를 학습 목표로 쓰는 방식. |
 
 ## 실험 용어
 
-| 용어 | 쉬운 설명 |
+| 용어 | 설명 |
 | --- | --- |
-| train | 모델이 실제로 배우는 자료 구간 또는 유역 집합이다. |
-| validation | 학습 중 어느 epoch를 선택할지 판단하는 점검 구간이다. test 대신 validation으로 모델 선택을 해야 공정하다. |
-| test | 최종 성능을 보고하는 평가 구간이다. 모델 선택에 쓰면 안 된다. |
-| holdout | 일부 자료나 지역을 학습에서 빼고 마지막 평가에만 쓰는 방식이다. |
-| regional holdout | 특정 지역 전체를 학습에서 빼고 평가하는 방식이다. 이 연구에서는 DRBC가 regional holdout이다. |
-| temporal split | 같은 유역에서 기간을 나눠 학습과 평가를 하는 방식이다. |
-| basin holdout | 학습에 쓰지 않은 유역에서 평가하는 방식이다. |
-| extreme-event holdout | 큰 홍수 event 일부를 학습에서 제외하고, 모델이 그 event를 얼마나 잘 예측하는지 보는 방식이다. |
-| seed | 난수 시작값이다. seed가 다르면 같은 설정에서도 결과가 조금 달라질 수 있다. 현재 paired final comparison은 `111`, `222`, `444`를 기준으로 한다. Model 2 seed `333`은 NaN loss로 실패했고, 공정한 비교를 위해 Model 1 seed `333`도 final aggregate에서 제외한다. |
-| scaling pilot | basin 수를 100, 300, 600으로 줄여 보며 계산 비용과 대표성을 확인한 운영 실험이다. 현재 main comparison은 300개 subset을 쓴다. |
-| NSE tier (NSE 3-tier cohort) | Model 1의 NSE 성능을 기준으로 유역을 세 묶음(잘 맞는 유역 / 보통 / 못 맞는 유역)으로 나눈 것이다. 우리말로는 NSE 성능 단계라고 부른다. 같은 결과라도 어느 단계 유역인지에 따라 해석이 달라질 수 있어 묶어서 본다. |
+| train | 모델이 실제로 배우는 자료 구간 또는 유역 집합. |
+| validation | 학습 중 어느 epoch를 선택할지 판단하는 점검 구간. test 대신 validation으로 모델 선택을 해야 공정하다. |
+| test | 최종 성능을 보고하는 평가 구간. 모델 선택에 쓰면 안 된다. |
+| holdout | 일부 자료나 지역을 학습에서 빼고 마지막 평가에만 쓰는 방식. |
+| regional holdout | 특정 지역 전체를 학습에서 빼고 평가하는 방식. 이 연구에서는 DRBC가 regional holdout이다. |
+| temporal split | 같은 유역에서 기간을 나눠 학습과 평가를 하는 방식. |
+| basin holdout | 학습에 쓰지 않은 유역에서 평가하는 방식. |
+| extreme-event holdout | 큰 홍수 event 일부를 학습에서 제외하고, 모델이 그 event를 얼마나 잘 예측하는지 보는 방식. |
+| seed | 난수 시작값. seed가 다르면 같은 설정에서도 결과가 조금 달라질 수 있다. 현재 paired final comparison은 `111`, `222`, `444`를 기준으로 한다. Model 2 seed `333`은 NaN loss로 실패했고, 공정한 비교를 위해 Model 1 seed `333`도 final aggregate에서 제외한다. |
+| scaling pilot | basin 수를 100, 300, 600으로 줄여 보며 계산 비용과 대표성을 확인한 운영 실험. 현재 main comparison은 300개 subset을 쓴다. |
+| NSE tier (NSE 3-tier cohort) | Model 1의 NSE 성능을 기준으로 유역을 세 묶음(잘 맞는 유역 / 보통 / 못 맞는 유역)으로 나눈 것. 우리말로는 NSE 성능 단계라고 부른다. 같은 결과라도 어느 단계 유역인지에 따라 해석이 달라질 수 있어 묶어서 본다. |
 
 ## 유역 특성 변수
 
-모델 입력 static은 8개이고, 나머지는 분석용 특성이다.
+모델 입력 static은 8개, 나머지는 분석용 특성이다.
 
-| 변수 | 쉬운 설명 |
+| 변수 | 설명 |
 | --- | --- |
-| area | 유역 면적이다. 같은 유량이라도 큰 유역과 작은 유역에서 의미가 다르므로 중요하다. |
-| slope | 유역 평균 경사다. 클수록 물이 빨리 모일 가능성이 커진다. |
-| aridity | 건조도를 나타낸다. 강수와 증발산의 균형을 이해하는 데 쓴다. |
-| snow_fraction | 강수 중 snow와 관련된 비중이다. snowmelt나 rain-on-snow 가능성을 볼 때 중요하다. |
-| soil_depth | 토양 깊이다. 깊을수록 물을 저장할 공간이 커질 수 있다. |
-| permeability | 물이 토양이나 지층으로 스며드는 쉬운 정도다. 클수록 직접유출이 줄 수 있다. |
-| forest_fraction | 산림 비율이다. 식생과 토양 저장 효과를 통해 홍수 반응을 완충할 수 있다. |
-| baseflow_index | 전체 유량 중 지하수성 흐름의 비중을 나타내는 지표다. 낮으면 빠른 반응 유역일 가능성이 있다. |
-| stream_density | 단위 면적당 하천 길이다. 높으면 물이 하천망으로 빨리 연결될 수 있다. |
-| high_prec_freq | 강한 강수가 얼마나 자주 나타나는지 나타낸다. |
-| high_prec_dur | 강한 강수가 한 번 올 때 얼마나 오래 지속되는지 나타낸다. |
+| area | 유역 면적. 같은 유량이라도 큰 유역과 작은 유역에서 의미가 다르므로 중요하다. |
+| slope | 유역 평균 경사. 클수록 물이 빨리 모일 가능성이 커진다. |
+| aridity | 건조도. 강수와 증발산의 균형을 이해하는 데 쓴다. |
+| snow_fraction | 강수 중 snow와 관련된 비중. snowmelt나 rain-on-snow 가능성을 볼 때 중요하다. |
+| soil_depth | 토양 깊이. 깊을수록 물을 저장할 공간이 커질 수 있다. |
+| permeability | 물이 토양이나 지층으로 스며드는 정도. 클수록 직접유출이 줄 수 있다. |
+| forest_fraction | 산림 비율. 식생과 토양 저장 효과를 통해 홍수 반응을 완충할 수 있다. |
+| baseflow_index | 전체 유량 중 지하수성 흐름의 비중. 낮으면 빠른 반응 유역일 가능성이 있다. |
+| stream_density | 단위 면적당 하천 길이. 높으면 물이 하천망으로 빨리 연결될 수 있다. |
+| high_prec_freq | 강한 강수가 얼마나 자주 나타나는지를 나타낸다. |
+| high_prec_dur | 강한 강수가 한 번 올 때 얼마나 오래 지속되는지를 나타낸다. |
 
 ## 평가 지표 — 중심·고유량 성능
 
@@ -350,33 +350,33 @@ $$
 
 | 용어 | 설명 |
 | --- | --- |
-| flood event | 유량이 일정 기준 이상으로 커지는 하나의 독립 홍수 사건이다. |
-| NOAA event type | 미국 기상청(NOAA)이 분류한 홍수 유형이다. 돌발홍수(Flash Flood), 일반홍수(Flood), 해안홍수(Coastal Flood) 등으로 나뉜다. 같은 큰 물이라도 생기는 방식이 달라, 모델이 어떤 유형에서 잘하고 못하는지 볼 때 쓴다. |
-| 관측 위치 구간 (band_shape / location class) | 실제 관측 첨두가 모델 예측 밴드 q50~q99 중 어느 칸에 드는지를 나타낸다. q50보다 아래인지, q50~q90 사이인지, q99 위로 삐져나갔는지처럼 관측이 예측 폭의 어디에 떨어졌는지로 구분한다. |
-| Q99 | 한 basin의 시간별 유량 중 상위 1%에 해당하는 기준값이다. |
-| inter-event separation | 두 peak를 독립 event로 볼지 판단하는 최소 시간 간격이다. 현재 기본값은 72시간이다. |
-| rain event | 유량이 아니라 강수량 기준으로 잡은 event다. 극한호우 stress test에서는 hourly `Rainf`의 rolling sum이 ARI 기준을 넘는 시간을 먼저 찾는다. |
-| rolling precipitation | 1시간, 6시간, 24시간, 72시간처럼 움직이는 시간창 안의 누적 강수량이다. 같은 비라도 짧게 몰아서 오면 1시간/6시간 값이 커지고, 오래 이어지면 24시간/72시간 값이 커진다. |
-| annual peak | 한 해에서 가장 큰 유량이다. |
-| unit-area peak | peak discharge를 유역 면적으로 나눈 값이다. 서로 다른 면적의 유역을 비교하기 위해 쓴다. |
-| RBI | hydrograph가 얼마나 급격하게 오르내리는지 나타내는 flashiness 지표다. |
-| event runoff coefficient | event 동안 내린 비 중 얼마나 유출로 나타났는지를 나타내는 비율이다. |
-| recent rainfall | event peak 직전 6시간, 24시간, 72시간 같은 짧은 기간의 강수량이다. |
-| antecedent rainfall | event보다 앞선 7일 또는 30일 동안의 누적 강수다. 유역이 이미 젖어 있었는지 보는 proxy다. |
-| flood generation typing | event를 recent precipitation, antecedent precipitation, snowmelt or rain-on-snow 같은 생성 메커니즘으로 분류하고, basin별로 dominant type 또는 mixture를 요약하는 과정이다. |
-| response window | rain event 뒤에 실제 유량이 얼마나 반응했는지 보는 시간 구간이다. 극한호우 stress test에서는 rain 시작 24시간 전부터 rain 종료 168시간 뒤까지 본다. |
-| inference block | LSTM이 충분한 이전 정보를 보게 하기 위해 response window보다 넓게 잘라낸 입력 구간이다. 현재는 rain 시작 21일 전부터 rain 종료 8일 뒤까지 둔다. |
-| positive-response event | 극한호우 뒤에 관측 유량도 flood-like하게 오른 event다. 모델이 peak를 따라가는지 보는 주 test 대상이다. |
-| negative-control event | 비는 극단적이었지만 관측 유량은 크게 오르지 않은 event다. 이런 경우 모델이 괜히 큰 홍수를 예측하지 않는지도 봐야 한다. |
-| primary checkpoint | validation 기준으로 고른 대표 epoch의 model checkpoint다. 논문 본문에서는 이 결과를 우선 읽는다. |
-| validation checkpoint grid | validation 결과가 저장된 여러 epoch 묶음이다. 현재는 `005 / 010 / 015 / 020 / 025 / 030`이고, primary 결과가 특정 epoch 하나에만 의존하는지 확인하는 sensitivity 용도다. |
-| progress bar | 긴 서버 분석에서 몇 개 basin을 처리했는지 보여주는 진행 표시다. 현재 all-basin return-period 단계와 event-response 단계에서 `0/N`, elapsed, ETA가 출력된다. |
+| flood event | 유량이 일정 기준 이상으로 커지는 하나의 독립 홍수 사건. |
+| NOAA event type | 미국 기상청(NOAA)이 분류한 홍수 유형. 돌발홍수(Flash Flood), 일반홍수(Flood), 해안홍수(Coastal Flood) 등으로 나뉜다. 같은 큰 물이라도 생기는 방식이 달라, 모델이 어떤 유형에서 잘하고 못하는지 볼 때 쓴다. |
+| 관측 위치 구간 (band_shape / location class) | 실제 관측 첨두가 모델 예측 밴드 q50~q99 중 어느 칸에 드는지. q50보다 아래인지, q50~q90 사이인지, q99 위로 삐져나갔는지처럼 관측이 예측 폭의 어디에 떨어졌는지로 구분한다. |
+| Q99 | 한 basin의 시간별 유량 중 상위 1%에 해당하는 기준값. |
+| inter-event separation | 두 peak를 독립 event로 볼지 판단하는 최소 시간 간격. 현재 기본값은 72시간이다. |
+| rain event | 유량이 아니라 강수량 기준으로 잡은 event. 극한호우 stress test에서는 hourly `Rainf`의 rolling sum이 ARI 기준을 넘는 시간을 먼저 찾는다. |
+| rolling precipitation | 1시간, 6시간, 24시간, 72시간처럼 움직이는 시간창 안의 누적 강수량. 같은 비라도 짧게 몰아서 오면 1시간/6시간 값이 커지고, 오래 이어지면 24시간/72시간 값이 커진다. |
+| annual peak | 한 해에서 가장 큰 유량. |
+| unit-area peak | peak discharge를 유역 면적으로 나눈 값. 서로 다른 면적의 유역을 비교하기 위해 쓴다. |
+| RBI | hydrograph가 얼마나 급격하게 오르내리는지 나타내는 flashiness 지표. |
+| event runoff coefficient | event 동안 내린 비 중 얼마나 유출로 나타났는지를 나타내는 비율. |
+| recent rainfall | event peak 직전 6시간, 24시간, 72시간 같은 짧은 기간의 강수량. |
+| antecedent rainfall | event보다 앞선 7일 또는 30일 동안의 누적 강수. 유역이 이미 젖어 있었는지 보는 proxy다. |
+| flood generation typing | event를 recent precipitation, antecedent precipitation, snowmelt or rain-on-snow 같은 생성 메커니즘으로 분류하고, basin별로 dominant type 또는 mixture를 요약하는 과정. |
+| response window | rain event 뒤에 실제 유량이 얼마나 반응했는지 보는 시간 구간. 극한호우 stress test에서는 rain 시작 24시간 전부터 rain 종료 168시간 뒤까지 본다. |
+| inference block | LSTM이 충분한 이전 정보를 보게 하기 위해 response window보다 넓게 잘라낸 입력 구간. 현재는 rain 시작 21일 전부터 rain 종료 8일 뒤까지 둔다. |
+| positive-response event | 극한호우 뒤에 관측 유량도 flood-like하게 오른 event. 모델이 peak를 따라가는지 보는 주 test 대상이다. |
+| negative-control event | 비는 극단적이었지만 관측 유량은 크게 오르지 않은 event. 이런 경우 모델이 괜히 큰 홍수를 예측하지 않는지도 봐야 한다. |
+| primary checkpoint | validation 기준으로 고른 대표 epoch의 model checkpoint. 논문 본문에서는 이 결과를 우선 읽는다. |
+| validation checkpoint grid | validation 결과가 저장된 여러 epoch 묶음. 현재는 `005 / 010 / 015 / 020 / 025 / 030`이고, primary 결과가 특정 epoch 하나에만 의존하는지 확인하는 sensitivity 용도다. |
+| progress bar | 긴 서버 분석에서 몇 개 basin을 처리했는지 보여주는 진행 표시. 현재 all-basin return-period 단계와 event-response 단계에서 `0/N`, elapsed, ETA가 출력된다. |
 
 ## 재현기간 지표와 Q99/q99의 차이
 
 `prec_ari100_24h`, `flood_ari100`, `Q99`, Model 2의 `q99`는 서로 다른 값이다. 문헌에서는 `P100`, `Q100` 같은 표기도 보이지만, 이 프로젝트의 설명 문서와 산출물 컬럼명에서는 `Q99/q99`와 헷갈리지 않게 `prec_ari*`, `flood_ari*`를 권장한다.
 
-| 값 | 계산 대상 | 쉬운 해석 |
+| 값 | 계산 대상 | 해석 |
 | --- | --- | --- |
 | `prec_ari100_24h` | 24시간 rolling precipitation의 annual maximum series에 맞춘 CAMELSH hourly proxy. 별도 비교용으로 NOAA Atlas 14 point/gridmean/areal-ARF reference도 둔다. | 24시간 강수량 기준 100년 빈도 강수 |
 | `flood_ari100` | annual maximum streamflow series에 맞춘 CAMELSH hourly proxy. 별도 비교용으로 USGS StreamStats/GageStats peak-flow reference도 둔다. | 100년 빈도 홍수량 또는 1% AEP flood |

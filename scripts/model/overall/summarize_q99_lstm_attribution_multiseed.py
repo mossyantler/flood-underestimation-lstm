@@ -18,10 +18,10 @@ Reads q99_lstm_attribution_seed{111,222,444}.csv and produces:
 
 Outputs
 -------
-output/model_analysis/q99_analysis/tables/q99_lstm_attribution_multiseed_summary.csv
-output/model_analysis/q99_analysis/figures/q99_lstm_feature_importance_multiseed.png
-output/model_analysis/q99_analysis/figures/q99_lstm_temporal_lag_multiseed.png
-output/model_analysis/q99_analysis/figures/q99_lstm_attribution_stratified_multiseed.png
+output/model_analysis/q99_analysis/causes/tables/q99_lstm_attribution_multiseed_summary.csv
+output/model_analysis/q99_analysis/causes/figures/q99_lstm_feature_importance_multiseed.png
+output/model_analysis/q99_analysis/causes/figures/q99_lstm_temporal_lag_multiseed.png
+output/model_analysis/q99_analysis/causes/figures/q99_lstm_attribution_stratified_multiseed.png
 """
 from __future__ import annotations
 
@@ -35,8 +35,8 @@ import pandas as pd
 from scipy import stats
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-TABLE_DIR = REPO_ROOT / "output/model_analysis/q99_analysis/tables"
-FIG_DIR = REPO_ROOT / "output/model_analysis/q99_analysis/figures"
+TABLE_DIR = REPO_ROOT / "output/model_analysis/q99_analysis/causes/tables"
+FIG_DIR = REPO_ROOT / "output/model_analysis/q99_analysis/causes/figures"
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 
 SEEDS = [111, 222, 444]

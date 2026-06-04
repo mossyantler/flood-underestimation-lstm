@@ -58,7 +58,7 @@ flowchart TD
 
 ### 유역경계 신뢰도 (`BASIN_BOUNDARY_CONFIDENCE`)
 
-`BASIN_BOUNDARY_CONFIDENCE`는 GAGES-II가 제공하는 유역 경계 품질 점수다. 유역 polygon이 실제로 그 출구 관측소로 물을 보내는 면적을 잘 대표하는지를 본다. 면적이 공식 drainage area(집수 면적)와 얼마나 맞는지, HUC10(미국 표준 소유역 코드) 경계와 대체로 정합적인지, 관측소 위치가 경계·하천망과 비추어 말이 되는지를 종합한 정성 점수다. 7 이상만 통과시킨다. 원자료는 `basins/CAMELSH_data/attributes/attributes_gageii_Bound_QA.csv`에 있다.
+`BASIN_BOUNDARY_CONFIDENCE`는 GAGES-II가 제공하는 유역 경계 품질 점수다. 유역 polygon이 실제로 그 출구 관측소로 물을 보내는 면적을 잘 대표하는지를 본다. 면적이 공식 drainage area(집수 면적)와 얼마나 맞는지, HUC10(미국 표준 소유역 코드) 경계와 대체로 정합적인지, 관측소 위치가 경계·하천망과 비추어 말이 되는지를 종합한 정성 점수다. 7 이상만 통과시킨다. 원자료는 GAGES-II boundary QA 속성표[^src-boundqa]에 있다.
 
 ### test 구간 관측 충실도 (target coverage)
 
@@ -109,7 +109,7 @@ flowchart TD
 
 ## DRBC holdout 유역 선정
 
-DRBC는 Delaware River Basin Commission의 공식 경계를 기준으로 한다. 기준 파일은 `basins/drbc_boundary/drb_bnd_polygon.shp`다. 이 경계와 CAMELSH 전체 9008개 유역의 공간 관계를 계산하는 스크립트가 `scripts/basin/drbc/build_drbc_camelsh_tables.py`이고, 그 결과 매핑표가 `output/basin/drbc/basin_define/camelsh_drbc_mapping.csv`에 저장된다. 최종 후보만 추린 표는 같은 폴더의 `camelsh_drbc_selected.csv`다.
+DRBC는 Delaware River Basin Commission의 공식 경계를 기준으로 한다. 기준 파일은 `drb_bnd_polygon.shp`[^src-drbcshp]다. 이 경계와 CAMELSH 전체 9008개 유역의 공간 관계를 계산하는 스크립트가 `build_drbc_camelsh_tables.py`[^src-mapscript]이고, 그 결과 매핑표가 `camelsh_drbc_mapping.csv`[^src-mappingcsv]에 저장된다. 최종 후보만 추린 표는 같은 폴더의 `camelsh_drbc_selected.csv`다.
 
 CAMELSH 유역이 DRBC 평가 후보가 되려면 두 조건을 동시에 만족해야 한다. 첫째, 관측소 출구(outlet)가 DRBC 경계 안에 있어야 한다(`outlet_in_drbc == True`). 둘째, 유역 polygon의 대부분이 DRBC와 겹쳐야 한다(`overlap_ratio_of_basin >= 0.9`).
 
@@ -119,7 +119,7 @@ CAMELSH 유역이 DRBC 평가 후보가 되려면 두 조건을 동시에 만족
 
 ## 학습용 non-DRBC 유역 선정
 
-모델 학습에는 DRBC와 겹치지 않는 유역을 사용한다. 구성 스크립트는 `scripts/basin/all/build_camelsh_non_drbc_training_pool.py`이고, 산출 목록은 `output/basin/all/screening/training_non_drbc/camelsh_non_drbc_training_selected.csv`, 요약은 같은 폴더의 `camelsh_non_drbc_training_summary.json`이다.
+모델 학습에는 DRBC와 겹치지 않는 유역을 사용한다. 구성 스크립트는 `build_camelsh_non_drbc_training_pool.py`[^src-poolscript]이고, 산출 목록은 `camelsh_non_drbc_training_selected.csv`[^src-poolcsv], 요약은 같은 폴더의 `camelsh_non_drbc_training_summary.json`이다.
 
 학습 후보의 기본 조건은 출구가 DRBC 밖에 있고(`outlet_in_drbc == False`), 유역 polygon 겹침이 0.1 이하이거나(`overlap_ratio_of_basin <= 0.1`) 아예 겹치지 않는 것이다.
 
@@ -143,7 +143,7 @@ CAMELSH 유역이 DRBC 평가 후보가 되려면 두 조건을 동시에 만족
 
 ## 정적 유역 특성 분석 (static basin analysis)
 
-정적 유역 특성 분석은 유역의 구조적 배경을 설명하는 단계다. 여기서는 토지 피복(land cover), 기후(climate), 지형(topography), 토양(soils), 지질(geology), 수문 요약(hydro summary) 같은 정보를 모은다.
+정적 유역 특성 분석은 유역의 구조적 배경을 설명하는 단계다. 토지 피복(land cover), 기후(climate), 지형(topography), 토양(soils), 지질(geology), 수문 요약(hydro summary) 같은 정보를 모은다.
 
 예를 들어 큰 강수가 자주 오는지, 경사가 큰지, 하천망이 촘촘한지, 토양이 물을 잘 저장하는지, 산림이나 습지가 많은지를 본다. 이 정보는 "왜 이 유역이 빠르게 반응할 가능성이 있는가"를 설명하는 데 도움을 준다.
 
@@ -151,7 +151,7 @@ CAMELSH 유역이 DRBC 평가 후보가 되려면 두 조건을 동시에 만족
 
 ## 임시 선별과 최종 선별
 
-현재까지는 정적 분석, 유량 품질표(streamflow quality table), 임시 선별(provisional screening)이 준비되어 있다. 임시 선별은 정적 특성을 백분위 순위(percentile rank, 전체 유역 중 몇 % 위치인지)로 바꿔 내부 후보 목록을 만드는 단계다. 이 점수는 논문 본문에서 공식 홍수 취약 점수처럼 쓰기보다, 탐색용 우선순위 지표로 읽어야 한다.
+현재까지 정적 분석, 유량 품질표(streamflow quality table), 임시 선별(provisional screening)이 준비되어 있다. 임시 선별은 정적 특성을 백분위 순위(percentile rank, 전체 유역 중 몇 % 위치인지)로 바꿔 내부 후보 목록을 만드는 단계다. 이 점수는 논문 본문에서 공식 홍수 취약 점수처럼 쓰기보다, 탐색용 우선순위 지표로 읽어야 한다.
 
 최종 선별은 관측 유량 중심이어야 한다. 실제 시간별 유량에서 연 최대 유량(annual peak), 상위 1% event 빈도(Q99 event frequency), 유량 변동 급격함 지수(RBI, Richards–Baker Flashiness Index), event 유출 계수(event runoff coefficient) 같은 지표를 계산해 유역이 실제로 홍수형 반응(flood-like response)을 보이는지 확인한다. 이 계산은 DRBC 전용 스크립트뿐 아니라, 서버에서 전 유역 `.nc`를 대상으로 돌리는 전 유역 분석 runner로도 수행할 수 있다.
 
@@ -163,7 +163,7 @@ CAMELSH 유역이 DRBC 평가 후보가 되려면 두 조건을 동시에 만족
 
 현재 서버 구현은 CAMELSH hourly record 자체에서 재현기간 기준선을 먼저 만든다. 강수는 지속시간별 누적강수의 water year(수문 연도, 미국에서는 10월~다음 해 9월) 연 최댓값 계열을 쓰고, 홍수량은 water year별 최대 시간 유량을 쓴다. 그 연 최댓값에 기본적으로 Gumbel 분포를 맞춰 `2 / 5 / 10 / 25 / 50 / 100년` 기준선을 계산한다. 이 값은 공식 NOAA Atlas 14 / PFDS나 USGS Bulletin 17C 값이 아니라 `CAMELSH hourly record 기반 근사값(proxy)`이다.
 
-그래서 산출물에는 `flood_ari_source`, `prec_ari_source`, `return_period_confidence_flag`를 같이 남긴다. record가 짧은 유역에서 100년 값을 추정하면 외삽(observed 범위 밖으로 곡선을 늘려 추정)이 크기 때문에, 그 값은 "공식 100년 빈도"라기보다 event 규모를 비교하기 위한 내부 참고선으로 읽어야 한다. 공식 기준값과의 비교가 필요할 때는 `output/basin/all/reference_comparison/` 아래의 USGS peak-flow 기준값과 NOAA precipitation 기준값을 CAMELSH 근사값 옆에 두고 읽는다.
+그래서 산출물에는 `flood_ari_source`, `prec_ari_source`, `return_period_confidence_flag`를 같이 남긴다. record가 짧은 유역에서 100년 값을 추정하면 외삽(observed 범위 밖으로 곡선을 늘려 추정)이 크기 때문에, 그 값은 "공식 100년 빈도"라기보다 event 규모를 비교하기 위한 내부 참고선으로 읽어야 한다. 공식 기준값과의 비교가 필요할 때는 reference 비교 폴더[^src-refcomp] 아래의 USGS peak-flow 기준값과 NOAA precipitation 기준값을 CAMELSH 근사값 옆에 두고 읽는다.
 
 이 값들은 모델 성능 지표가 아니라 유역과 event를 설명하는 배경값이다. 예를 들어 어떤 event의 첨두(peak)가 `flood_ari100`에 얼마나 가까운지, event 직전 24시간 강수량이 `prec_ari100_24h` 대비 어느 정도인지 보면, 그 event가 해당 유역에서 얼마나 극단적인 상황이었는지 더 잘 설명할 수 있다.
 
@@ -183,7 +183,7 @@ event 반응표는 시간별 유량에서 독립적인 큰 유량 event 후보(h
 bash scripts/runs/official/run_camelsh_flood_analysis.sh
 ```
 
-이 runner는 `return_period/`, `event_response/`, `flood_generation/` 하위 폴더를 만들고, 각 단계의 표와 메타데이터를 `output/basin/all/analysis/` 아래에 나누어 저장한다. 기본 worker 수는 `WORKERS=4`이고, 모델 학습과 동시에 돌릴 때만 서버 자원 상황에 맞춰 줄이면 된다.
+이 runner는 `return_period/`, `event_response/`, `flood_generation/` 하위 폴더를 만들고, 각 단계의 표와 메타데이터를 all-basin 분석 폴더[^src-analysis] 아래에 나누어 저장한다. 기본 worker 수는 `WORKERS=4`이고, 모델 학습과 동시에 돌릴 때만 서버 자원 상황에 맞춰 줄이면 된다.
 
 ## Python 알고리즘 전체 흐름
 
@@ -243,7 +243,7 @@ flowchart TD
 
 각 event에 대해 Python은 다음 값을 계산한다.
 
-| 계산값 | 쉬운 의미 | 비고: 왜 필요한가 |
+| 계산값 | 의미 | 비고: 왜 필요한가 |
 | --- | --- | --- |
 | `peak_discharge` | event에서 가장 큰 유량 | 이 연구의 핵심 관심인 홍수 첨두 자체다. 모델이 홍수 첨두를 얼마나 과소추정하는지 비교할 때 기준값으로 쓴다. |
 | `unit_area_peak` | 첨두 유량을 유역 면적으로 나눈 값 | 유역 크기가 다르면 큰 유역일수록 유량이 커 보일 수 있다. 면적으로 나누면 작은 유역과 큰 유역의 홍수 반응을 더 공정하게 비교할 수 있다. |
@@ -319,3 +319,12 @@ flowchart TD
 예를 들어 어떤 유역이 `recent_precipitation` 우세이고, Model 2가 그 유역의 첨두 과소추정을 Model 1보다 크게 줄였다면, 우리는 "확률적 출력층이 짧고 강한 강수로 생기는 빠른 첨두에서 특히 도움이 될 수 있다"고 해석할 수 있다. 반대로 `snowmelt_or_rain_on_snow` event에서 개선이 작다면, 단순 출력층보다 눈 저장이나 timing을 더 직접적으로 다루는 후속 모델이 필요하다는 근거가 될 수 있다.
 
 이렇게 Python 알고리즘은 유역을 고르는 도구이면서, 나중에 모델 결과를 설명하는 해석 도구이기도 하다. 중요한 것은 단일 숫자 하나로 유역을 판단하지 않고, 공간 규칙, 품질 필터, 관측 유량 반응, 재현기간 근사값, 발생 유형 분류를 층층이 쌓아서 해석한다는 점이다.
+
+[^src-boundqa]: `basins/CAMELSH_data/attributes/attributes_gageii_Bound_QA.csv`
+[^src-drbcshp]: `basins/drbc_boundary/drb_bnd_polygon.shp`
+[^src-mapscript]: `scripts/basin/drbc/build_drbc_camelsh_tables.py`
+[^src-mappingcsv]: `output/basin/drbc/basin_define/camelsh_drbc_mapping.csv`
+[^src-poolscript]: `scripts/basin/all/build_camelsh_non_drbc_training_pool.py`
+[^src-poolcsv]: `output/basin/all/screening/training_non_drbc/camelsh_non_drbc_training_selected.csv`
+[^src-refcomp]: `output/basin/all/reference_comparison/`
+[^src-analysis]: `output/basin/all/analysis/`

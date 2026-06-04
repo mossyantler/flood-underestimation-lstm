@@ -77,7 +77,7 @@ hydrologic summary 쪽에서는 `baseflow_index_pct`, `RUNAVE7100` 같은 요약
 
 여기서 `BASIN_BOUNDARY_CONFIDENCE`를 쓰는 이유는 basin polygon이 있다고 해서 항상 그 경계가 실제 drainage area를 잘 대표하는 것은 아니기 때문이다. 우리는 “경계가 있는 basin”이 아니라 “경계 품질이 충분한 basin”만 남기려는 것이다.
 
-현재 이 gate를 통과한 basin은 154개 중 38개다.
+현재 공식 test split은 expanded observed 기준 154개 후보 중 85개다. 이 85개는 metadata quality gate와 2014-2016 선택 target coverage 기준을 함께 통과한 유역이다.
 
 ## 4. Provisional Screening Table
 

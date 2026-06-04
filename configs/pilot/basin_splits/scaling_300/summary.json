@@ -2,7 +2,7 @@
   "subset_size": 300,
   "train_count": 269,
   "validation_count": 31,
-  "test_count": 38,
+  "test_count": 85,
   "subset_dir": "configs/pilot/basin_splits/scaling_300",
   "manifest_path": "configs/pilot/basin_splits/scaling_300/manifest.csv",
   "stratify_col": "camelsh_huc02",
@@ -67,5 +67,7 @@
       "17": 13,
       "18": 8
     }
-  }
+  },
+  "test_split_source": "configs/basin_splits/drbc_expanded_observed_test/test.txt",
+  "test_split_policy": "expanded observed DRBC test: metadata quality gates plus 2014-2016 selected target coverage >= 80%"
 }

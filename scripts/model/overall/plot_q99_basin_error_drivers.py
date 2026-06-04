@@ -28,8 +28,8 @@ import numpy as np
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-TABLE_DIR = REPO_ROOT / "output/model_analysis/q99_analysis/tables"
-FIG_DIR = REPO_ROOT / "output/model_analysis/q99_analysis/figures"
+TABLE_DIR = REPO_ROOT / "output/model_analysis/q99_analysis/causes/tables"
+FIG_DIR = REPO_ROOT / "output/model_analysis/q99_analysis/causes/figures"
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 
 TARGET_BIAS = "q99_med_rel_bias"

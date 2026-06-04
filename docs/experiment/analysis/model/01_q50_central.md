@@ -44,6 +44,23 @@ Model 2 probabilistic quantile LSTM의 conditional median output `q50`이 Model 
 
 → 전체적으로 q50은 central 성능을 유지(NSE/RMSE 개선)하는 한편 high-flow 시각에서는 under-bias가 더 크다. 이는 RQ-2 (upper quantile alleviation) 동기를 정당화한다.
 
+## per-basin 이질성 — 중앙값 뒤에 가린 분포
+
+cross-basin median은 한 면만 보여 준다. 85개 basin 각각에서 M2 q50가 M1보다 나은지(부호) 비율을 보면 더 분명하다.
+
+| 지표 | M2 q50가 나은 basin | 비율 |
+| --- | --- | --- |
+| NSE | 56 / 85 | 66% |
+| RMSE | 56 / 85 | 66% |
+| MAE | 56 / 85 | 66% |
+| KGE | 53 / 85 | 62% |
+| \|Bias\| | 50 / 85 | 59% |
+| \|FHV\| | 51 / 85 | 60% |
+
+- **모든 지표에서 다수 basin(59~66%)이 M2 q50로 개선**된다. q50의 중앙 예측 우위는 평균값뿐 아니라 basin 수준에서도 성립.
+- 그런데 Bias·FHV의 **cross-basin median은 M2가 더 나쁘다**(bias −0.46→−0.95, FHV −12.3→−36.1). 다수 basin이 개선되는데 median이 악화되는 이유는 **소수 파국 basin이 분포를 끌어내리기 때문**이다 — FHV delta IQR 하단 −58.5가 그 무거운 왼쪽 꼬리를 보여 준다.
+- 즉 q50는 전형적 basin의 고유량 표현을 개선하지만, 일부 basin에서 고유량을 크게 과소추정한다. 이 잔존 고유량 과소추정이 **RQ-2(upper quantile 보완)의 직접 동기**다.
+
 ## 해석 framework 적용 (RQ-0)
 
 [`docs/experiment/method/model/quantile_output_interpretation.md`](../../method/model/quantile_output_interpretation.md)의 L3 (운영 decision output) layer + Pairwise reading (q50 vs M1). `q50`만 사용하고 `q90/q95/q99`를 끌고 들어오지 않는다.
@@ -51,11 +68,11 @@ Model 2 probabilistic quantile LSTM의 conditional median output `q50`이 Model 
 ## 산출물
 
 ```text
-output/model_analysis/expanded_drbc_test/tables/
+output/model_analysis/primary/metrics/tables/
   rq1_central_metrics_per_basin_seed.csv     (510 rows)
   rq1_central_metrics_seed_median.csv        (510 rows)
   rq1_central_metrics_pooled_summary.csv
-output/model_analysis/expanded_drbc_test/figures/
+output/model_analysis/primary/metrics/figures/
   rq1_central_metric_boxplots.png
   rq1_paired_delta_scatter.png
 ```

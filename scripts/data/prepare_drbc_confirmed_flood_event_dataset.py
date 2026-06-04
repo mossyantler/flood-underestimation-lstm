@@ -44,7 +44,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--catalog-csv",
         type=Path,
-        default=Path("output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv"),
+        default=Path("output/model_analysis/confirmed_flood/data/catalog/drbc_confirmed_flood_event_catalog.csv"),
         help="Confirmed flood catalog from build_drbc_confirmed_flood_event_catalog.py.",
     )
     parser.add_argument("--timeseries-archive", type=Path, default=Path("basins/CAMELSH_download/timeseries.7z"))

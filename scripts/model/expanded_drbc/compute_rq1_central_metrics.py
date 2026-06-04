@@ -10,8 +10,8 @@
 
 Inputs
 ------
-- output/model_analysis/expanded_drbc_test/required_series/seed{111,222,444}/primary_required_series.csv
-- output/model_analysis/expanded_drbc_test/raw_metrics/model{1,2}_seed{111,222,444}_epoch*_metrics.csv
+- output/model_analysis/primary/metrics/data/required_series/seed{111,222,444}/required_series.csv
+- output/model_analysis/primary/metrics/data/raw_metrics/model{1,2}_seed{111,222,444}_epoch*_metrics.csv
   (NSE/KGE cross-check only; bias/MAE/RMSE/FHV are computed fresh here)
 
 Outputs
@@ -60,9 +60,9 @@ from expanded_drbc import (  # noqa: E402  (sys.path setup must precede import)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_INPUT_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test/required_series"
-DEFAULT_RAW_METRICS_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test/raw_metrics"
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test"
+DEFAULT_INPUT_DIR = REPO_ROOT / "output/model_analysis/primary/metrics/data/required_series"
+DEFAULT_RAW_METRICS_DIR = REPO_ROOT / "output/model_analysis/primary/metrics/data/raw_metrics"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/primary/metrics"
 
 REQUIRED_COLS = ("seed", "basin", "obs", "model1", "q50")
 METRIC_ORDER = ("nse", "kge", "bias", "mae", "rmse", "fhv")
@@ -158,7 +158,7 @@ def main() -> None:
 
     per_seed_frames: list[pd.DataFrame] = []
     for seed in args.seeds:
-        seed_csv = args.input_dir / f"seed{seed}" / "primary_required_series.csv"
+        seed_csv = args.input_dir / f"seed{seed}" / "required_series.csv"
         if not seed_csv.exists():
             raise FileNotFoundError(seed_csv)
         print(f"[A1] loading {seed_csv}", flush=True)

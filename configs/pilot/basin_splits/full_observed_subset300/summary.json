@@ -5,7 +5,7 @@
   "stratify_col": "camelsh_huc02",
   "train_count": 269,
   "validation_count": 31,
-  "test_count": 89,
+  "test_count": 85,
   "non_drbc_total_train_validation_count": 300,
   "min_period_coverage": 0.8,
   "periods": {
@@ -47,7 +47,8 @@
     "non_drbc_train_period_eligible_count": 2738,
     "non_drbc_validation_period_eligible_count": 3238,
     "drbc_full_candidate_count": 154,
-    "drbc_test_period_eligible_count": 89
+    "drbc_test_period_eligible_count": 89,
+    "drbc_test_selected_expanded_observed_count": 85
   },
   "huc02_counts": {
     "train": {
@@ -101,6 +102,9 @@
     "validation": "configs/pilot/basin_splits/full_observed_subset300/validation.txt",
     "test": "configs/pilot/basin_splits/full_observed_subset300/test.txt",
     "manifest": "configs/pilot/basin_splits/full_observed_subset300/manifest.csv",
-    "eligible_pool_manifest": "configs/pilot/basin_splits/full_observed_subset300/eligible_pool_manifest.csv"
-  }
+    "eligible_pool_manifest": "configs/pilot/basin_splits/full_observed_subset300/eligible_pool_manifest.csv",
+    "expanded_observed_test_source": "configs/basin_splits/drbc_expanded_observed_test/test.txt"
+  },
+  "test_split_source": "configs/basin_splits/drbc_expanded_observed_test/test.txt",
+  "test_split_policy": "expanded observed DRBC test: metadata quality gates plus 2014-2016 selected target coverage >= 80%"
 }

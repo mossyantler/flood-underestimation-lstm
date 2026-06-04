@@ -9,7 +9,7 @@
 
 Inputs
 ------
-- output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv
+- output/model_analysis/confirmed_flood/data/catalog/drbc_confirmed_flood_event_catalog.csv
 - data/CAMELSH_generic/drbc_expanded_observed_test/time_series/<basin>.nc
   (canonical 85-basin id list from directory listing)
 
@@ -50,9 +50,9 @@ from expanded_drbc import (  # noqa: E402
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_CATALOG = REPO_ROOT / "output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv"
+DEFAULT_CATALOG = REPO_ROOT / "output/model_analysis/confirmed_flood/data/catalog/drbc_confirmed_flood_event_catalog.csv"
 DEFAULT_BASIN_DIR = REPO_ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test/time_series"
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/primary/metrics"
 
 UNMATCHED_THRESHOLD = 0.05  # acceptance gate
 

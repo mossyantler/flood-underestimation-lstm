@@ -44,8 +44,8 @@ if str(LIB_ROOT) not in sys.path:
 from expanded_drbc import normalize_basin_id, filter_valid_rows  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test"
-DEFAULT_INPUT_DIR = DEFAULT_OUTPUT_DIR / "required_series"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/band_signal/band_shape"
+DEFAULT_INPUT_DIR = REPO_ROOT / "output/model_analysis/primary/metrics/data/required_series"
 
 WINDOW_HOURS = 48
 
@@ -152,7 +152,7 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=111)
     args = parser.parse_args()
 
-    seed_csv = args.input_dir / f"seed{args.seed}" / "primary_required_series.csv"
+    seed_csv = args.input_dir / f"seed{args.seed}" / "required_series.csv"
     figures_dir = args.output_dir / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
 

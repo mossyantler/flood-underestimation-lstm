@@ -13,7 +13,7 @@ Inputs
 ------
 - data/CAMELSH_generic/drbc_expanded_observed_test/time_series/<basin>.nc
   (per-basin NetCDF; uses `Streamflow` variable over TRAIN_PERIOD for Q99)
-- output/model_analysis/expanded_drbc_test/required_series/seed111/primary_required_series.csv
+- output/model_analysis/primary/metrics/data/required_series/seed111/required_series.csv
   (test-period obs; obs is identical across seeds — seed111 used as canonical source)
 
 Outputs
@@ -60,9 +60,9 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_TS_DIR = REPO_ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test/time_series"
 DEFAULT_TEST_OBS_CSV = (
     REPO_ROOT
-    / "output/model_analysis/expanded_drbc_test/required_series/seed111/primary_required_series.csv"
+    / "output/model_analysis/primary/metrics/data/required_series/seed111/required_series.csv"
 )
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/primary/metrics"
 
 # Soft warning thresholds (acceptance does not fail; warnings emitted)
 WARN_TOO_FEW_EVENTS = 3

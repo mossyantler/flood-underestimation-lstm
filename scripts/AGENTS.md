@@ -38,5 +38,6 @@ scripts/
 - 데이터 준비는 `scripts/data/`, 운영 helper는 `scripts/ops/`, import 전용 helper는 `scripts/_lib/`에 둔다.
 - one-off 분석도 가능한 한 반복 가능한 script로 남긴다. 입력/출력 경로는 argparse 기본값으로 드러나게 한다.
 - 산출물은 `output/`, 학습 run은 `runs/`, scratch는 `tmp/`를 사용한다. scripts가 공식 output layout을 바꾸면 docs도 함께 갱신한다.
+- GAGES-II basin geometry를 렌더링하는 script는 `EPSG:5070`(NAD83 / Conus Albers)을 기준 CRS로 사용한다. USGS `gagesii-basins` API/cache처럼 CRS provenance가 있는 geometry를 우선 사용하고, `.prj` 없는 로컬 GAGES-II boundary도 `EPSG:5070` 기준으로 처리한다. 지도 렌더링, DRBC clipping, overlap/거리/면적 계산은 `EPSG:5070`으로 통일하며, output manifest에는 `geometry_source`, `target_crs=EPSG:5070`, cache 경로를 기록한다.
 - macOS 로컬에서 실행 안내를 쓸 때는 Homebrew PATH 규칙 `export PATH="/opt/homebrew/bin:$PATH"`를 고려한다.
 - 스크립트별 역할, 입출력 경로, 실행 순서의 상세 목록은 `scripts/README.md`를 참조한다.

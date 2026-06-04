@@ -20,6 +20,8 @@ runs/*
 !runs/AGENTS.md
 output/*
 !output/AGENTS.md
+output_backup/
+docs/report/
 tmp/*
 !tmp/AGENTS.md
 logs/*

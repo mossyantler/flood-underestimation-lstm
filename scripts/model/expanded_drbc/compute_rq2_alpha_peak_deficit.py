@@ -16,7 +16,7 @@ Inputs
 ------
 - tables/rq2_q99_events_85basin.csv (B1)
 - tables/rq2_noaa_events_expanded_overlap.csv (B2; filtered to in_expanded_85)
-- required_series/seed{111,222,444}/primary_required_series.csv
+- required_series/seed{111,222,444}/required_series.csv
 
 Outputs
 -------
@@ -28,7 +28,10 @@ Acceptance
 ----------
 - All deficits in [0, 1].
 - Cross-basin median non-increasing in τ (M1 → q50 → q90 → q95 → q99).
-- Per-basin τ-monotonicity violation rate reported and < 20%.
+- Per-basin τ-monotonicity violation rate is a sanity check: the Monotonic Quantile
+  head guarantees q50<=q90<=q95<=q99 by construction, so (obs_peak - q_tau)_+ and its
+  per-basin median are monotone non-increasing in tau by construction. The expected
+  rate is 0; the < 0.20 assert only guards against an inverse-transform / pipeline bug.
 """
 from __future__ import annotations
 
@@ -55,7 +58,7 @@ from expanded_drbc import (  # noqa: E402
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/primary/metrics"
 DEFAULT_INPUT_DIR = DEFAULT_OUTPUT_DIR / "required_series"
 
 
@@ -147,7 +150,11 @@ violation rate is computed only over the q50→q99 quantile sequence within Mode
 
 def violation_rate_per_basin(by_basin: pd.DataFrame) -> float:
     """Fraction of basins where per-basin event median is NOT monotonically non-increasing
-    across the Model-2 quantile sequence q50 → q90 → q95 → q99."""
+    across the Model-2 quantile sequence q50 → q90 → q95 → q99.
+
+    Expected to be 0: the Monotonic Quantile head guarantees q_tau ordering by
+    construction, so this is a sanity check on the inverse-transform pipeline, not a
+    measurement of a learned property."""
     violating = 0
     total = 0
     for _, sub in by_basin.groupby("basin_id"):
@@ -221,15 +228,16 @@ def main() -> None:
     # falls outside the required_series coverage (e.g. NOAA event recorded daily
     # but model output is hourly). We rely on the left-merge dropping unmatched.
 
-    seed_csvs = {seed: args.input_dir / f"seed{seed}" / "primary_required_series.csv" for seed in args.seeds}
+    seed_csvs = {seed: args.input_dir / f"seed{seed}" / "required_series.csv" for seed in args.seeds}
 
     _, q99_summary, q99_violation = run_scope("q99", q99_events, seed_csvs, args.output_dir)
     _, noaa_summary, noaa_violation = run_scope("noaa", noaa_events, seed_csvs, args.output_dir)
 
-    # Acceptance — monotonicity asserted across Model-2 quantile sequence only
-    # (M1 deterministic ≠ M2-q50 by construction; RQ-1 handles the M1 vs q50 axis).
-    assert q99_violation < 0.20, f"Q99 violation rate {q99_violation:.2%} >= 20%"
-    assert noaa_violation < 0.20, f"NOAA violation rate {noaa_violation:.2%} >= 20%"
+    # Sanity — the Monotonic Quantile head guarantees q50<=q90<=q95<=q99 by construction,
+    # so violation rate is expected to be 0. The < 0.20 assert only catches an
+    # inverse-transform / pipeline bug. (M1 deterministic != M2-q50; RQ-1 handles that axis.)
+    assert q99_violation < 0.20, f"Q99 violation rate {q99_violation:.2%} >= 20% (pipeline bug?)"
+    assert noaa_violation < 0.20, f"NOAA violation rate {noaa_violation:.2%} >= 20% (pipeline bug?)"
     for scope, summ in (("q99", q99_summary), ("noaa", noaa_summary)):
         ordered = summ.set_index("tau").reindex(QUANTILE_TAU_ORDER)["basin_median_of_event_median"].values
         for i in range(len(ordered) - 1):
@@ -237,7 +245,7 @@ def main() -> None:
                 f"{scope} cross-basin median NOT non-increasing across q50→q99: "
                 f"{dict(zip(QUANTILE_TAU_ORDER, ordered))}"
             )
-    print("[B3] acceptance: q50→q99 cross-basin monotonicity + per-basin violation < 20% PASS", flush=True)
+    print("[B3] sanity: q50→q99 cross-basin monotonicity (head-guaranteed) + per-basin violation≈0 PASS", flush=True)
 
     # Figure
     fig, ax = plt.subplots(figsize=(7, 4))

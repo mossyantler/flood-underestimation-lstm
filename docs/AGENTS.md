@@ -18,7 +18,6 @@ docs/
 │   └── analysis/               # 결과 해석 문서
 │       ├── basin/              # subset 대표성, basin diagnostics
 │       └── model/              # Model 1/2 결과 분석 축별 문서
-├── paper/                      # 논문 proposal, defense, writing draft
 ├── references/                 # 외부 문헌·개념 메모
 ├── explain/                    # 입문자용 설명
 ├── templates/                  # 문서 템플릿·작성 규칙
@@ -37,7 +36,7 @@ docs/
 | `experiment/method/data/` | 원자료 → 분석 산출물 end-to-end 처리 흐름 | **canonical** |
 | `experiment/analysis/model/` | Model 1/2 결과 해석 문서. 완료 문서와 예정 문서를 상태로 구분 | **canonical** |
 | `experiment/analysis/basin/` | subset 대표성, basin diagnostics | canonical |
-| `paper/` | 논문 proposal, defense playbook | 논문 전용 |
+| `draft/` (루트) | 논문 초안, HTML, docx | 논문 전용 |
 | `references/` | 외부 문헌 메모, glossary, 학습 노트 | 참조용 (공식 기준 아님) |
 | `explain/` | 학부생/입문자용 설명 | 비공식 |
 | `templates/` | 문서 작성 규칙 | 비공식 |

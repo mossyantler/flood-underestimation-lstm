@@ -18,10 +18,10 @@ For each Q99 event (obs >= basin 99th percentile, 2014-2016 test period):
 
 Outputs
 -------
-output/model_analysis/q99_analysis/tables/q99_event_forcing_drivers.csv   event-level table
-output/model_analysis/q99_analysis/tables/q99_event_forcing_correlation.csv
-output/model_analysis/q99_analysis/figures/q99_event_forcing_scatter.png
-output/model_analysis/q99_analysis/figures/q99_event_forcing_correlation_bar.png
+output/model_analysis/q99_analysis/causes/tables/q99_event_forcing_drivers.csv   event-level table
+output/model_analysis/q99_analysis/causes/tables/q99_event_forcing_correlation.csv
+output/model_analysis/q99_analysis/causes/figures/q99_event_forcing_scatter.png
+output/model_analysis/q99_analysis/causes/figures/q99_event_forcing_correlation_bar.png
 """
 from __future__ import annotations
 
@@ -37,10 +37,10 @@ from scipy import stats
 import xarray as xr
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-REQUIRED_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test/required_series"
+REQUIRED_DIR = REPO_ROOT / "output/model_analysis/primary/metrics/data/required_series"
 NC_DIR = REPO_ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test/time_series"
-OUT_TABLES = REPO_ROOT / "output/model_analysis/q99_analysis/tables"
-OUT_FIGS = REPO_ROOT / "output/model_analysis/q99_analysis/figures"
+OUT_TABLES = REPO_ROOT / "output/model_analysis/q99_analysis/causes/tables"
+OUT_FIGS = REPO_ROOT / "output/model_analysis/q99_analysis/causes/figures"
 OUT_TABLES.mkdir(parents=True, exist_ok=True)
 OUT_FIGS.mkdir(parents=True, exist_ok=True)
 
@@ -170,7 +170,7 @@ def build_event_table() -> pd.DataFrame:
     for seed in OFFICIAL_SEEDS:
         print(f"[seed {seed}] loading …", flush=True)
         series = pd.read_csv(
-            REQUIRED_DIR / f"seed{seed}" / "primary_required_series.csv"
+            REQUIRED_DIR / f"seed{seed}" / "required_series.csv"
         )
         series["basin"] = series["basin"].astype(str)
 

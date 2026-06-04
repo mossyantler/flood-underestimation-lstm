@@ -99,12 +99,20 @@ q90 / q95 / q50 모두 baseline 대비 양의 skill. **q99**은 baseline 보다 
 
 primary Q99-exceedance stratum에서 median spread = **20.836**, 관측값 대비 **74.581%**. q99이 high-flow 시각에서 q50 위로 obs의 75% 폭만큼 보수성 추가.
 
-### Upper-tail pinball proxy (one-sided 4-quantile mean)
+### CRPS 4-분위 상위 근사 (secondary, caveat 포함)
 
-- all-hour: 3.335
-- observed peak hour stratum: **84.782** (high-flow에서 급격히 증가)
+CRPS_approx = 2 × mean_pinball across {q50, q90, q95, q99}. lower tail 부재이므로 **full two-sided CRPS 아님** — upper-only 근사치.
 
-> proxy는 upper quantile 4개의 평균이며 lower tail이 없으므로 **CRPS 아님**. one-sided spread 진단용.
+| stratum | CRPS_approx (상위 4-quantile 근사) |
+| --- | --- |
+| All hours | 6.671 |
+| Observed peak hour | **169.564** |
+
+> `upper_tail_pinball_proxy` = CRPS_approx / 2. high-flow stratum에서 급격히 증가. 참조 산출물: `crps_4quantile_upper_approx.csv`.
+
+### 154 유역 vs expanded 85 유역 비교 (AC11 — deferred)
+
+`output/model_analysis/legacy/` 미존재로 비교 불가. `154_vs_expanded_comparison.csv`에 blocking 사유와 재생성 방법 기록. legacy quantile_analysis 입력이 복원되면 `analyze_subset300_probabilistic_diagnostics.py` 재실행으로 활성화 가능.
 
 ### Quantile crossing
 
@@ -120,6 +128,22 @@ primary Q99-exceedance stratum에서 median spread = **20.836**, 관측값 대�
 | ≥ 3 IQR | 0.990 |
 
 tier는 error 분포에서 파생된 grouping이므로 **부분 순환적**. 독립적 calibration 검증으로 읽지 말고, basin heterogeneity 진단 보조로만 사용. Paper에서는 supplement로 격등.
+
+### Stratum별 coverage 열화 (all-hour → 극단)
+
+전체 시각에서 극단 stratum으로 갈수록 q99 포함률이 더 떨어진다 — 명목에서 멀어진다.
+
+| stratum | q99 empirical coverage |
+| --- | --- |
+| all-hour | 0.787 |
+| observed peak hour | 0.522 |
+| Basin Q99.9-exceedance | 0.572 |
+
+극단 첨두에서 q99조차 obs를 절반 정도만 덮는다(0.52). RQ-2의 `above_q99` 47% 결과와 정합 — calibration 열화가 곧 첨두 과소추정이다.
+
+### Seed 이질성
+
+seed 111/222/444 간 all-hour 포함률 편차가 작지 않다 (q50 0.273~0.351, q99 0.745~0.808). 본문은 seed-median 또는 3-seed 평균을 쓰되, point estimate를 단정적으로 읽지 않고 seed 범위를 함께 보고한다.
 
 ## 통합 해석
 

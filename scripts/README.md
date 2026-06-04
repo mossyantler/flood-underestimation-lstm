@@ -159,7 +159,7 @@ Primary checkpoint box plot에서 `NSE`, `KGE`, `FHV` 값이 각 model/seed medi
 uv run python scripts/model/overall/analyze_subset300_primary_metric_median_deviation_regimes.py
 ```
 
-DRBC 38개 basin을 개별 station 단위로 진단할 때는 아래 script를 사용한다. 기존 attribute-metric Spearman 상관, median-distance regime, event-response summary, extreme-rain stress error, USGS station note, basin_dissect report를 join해서 basin별 상세 Markdown report와 38개 summary table을 `output/model_analysis/legacy/overall_analysis/main_comparison/individual_basin_diagnostics/` 아래에 쓴다.
+expanded observed DRBC test **85개** basin을 개별 station 단위로 진단할 때는 expanded DRBC 분석 pipeline을 우선 사용한다. 아래 script는 pre-expanded legacy 산출물의 attribute-metric Spearman 상관, median-distance regime, event-response summary, extreme-rain stress error, USGS station note, basin_dissect report를 join해 basin별 상세 Markdown report와 summary table을 `output/model_analysis/legacy/overall_analysis/main_comparison/individual_basin_diagnostics/` 아래에 쓰는 보존용 도구다.
 
 ```bash
 uv run python scripts/model/overall/build_drbc_individual_basin_diagnostics.py
@@ -171,7 +171,7 @@ Primary checkpoint에서 paired seed 비교를 볼 때는 아래 chart script를
 uv run python scripts/model/overall/plot_subset300_primary_paired_seed_comparison.py
 ```
 
-Broad DRBC test 38개를 Natural 8개와 broad non-natural 30개로 다시 나누어 robustness check를 만들 때는 아래 script를 사용한다. 기존 primary overall metric, hydrograph required-series, event-regime error table, extreme-rain stress table을 읽어 cohort별 aggregate와 figure를 `output/model_analysis/legacy/natural_broad_comparison/` 아래에 쓴다.
+expanded observed DRBC test의 공식 기준은 **85개** basin이다. 아래 broad/natural robustness script는 pre-expanded legacy primary overall metric, hydrograph required-series, event-regime error table, extreme-rain stress table을 읽어 cohort별 aggregate와 figure를 `output/model_analysis/legacy/natural_broad_comparison/` 아래에 쓰는 보존용 도구다.
 
 ```bash
 uv run scripts/model/overall/analyze_natural_broad_comparison.py
@@ -202,10 +202,14 @@ uv run python scripts/model/overall/build_analysis_inventory_site.py \
 uv run scripts/basin/split_diagnostics/plot_subset300_timeseries_coverage.py
 ```
 
-고정 300-basin split의 공간 분포를 CONUS state boundary와 DRBC boundary 위에서 확인할 때는 아래 map script를 사용한다. 산출물은 `output/basin/all/screening/subset300_spatial_split/` 아래에 `figures/subset300_conus_split_map.{png,svg}`, basin label table, manifest로 저장된다.
+고정 300-basin split의 공간 분포를 CONUS state boundary와 DRBC boundary 위에서 확인할 때는 아래 map script를 사용한다. 산출물은 `output/basin/all/screening/subset300_spatial_split/` 아래에 `figures/subset300_conus_split_map.{png,svg}`, basin label table, manifest로 저장된다. 논문용 재생성처럼 DRBC inset의 test basin 경계를 DRBC boundary에 더 잘 맞추려면 `--test-basin-geometry-source gagesii-api`를 붙여 USGS GAGES-II geometry를 cache 후 EPSG:5070으로 투영한다.
 
 ```bash
 uv run scripts/basin/split_diagnostics/plot_subset300_split_map.py
+# 논문용 DRBC inset 정합성 우선
+uv run scripts/basin/split_diagnostics/plot_subset300_split_map.py \
+  --test-basin-geometry-source gagesii-api \
+  --formats png svg pdf
 ```
 
 같은 외형으로 target coverage가 아니라 모델에 dynamic input window로 실제 들어간 시간의 union만 보려면 `--chart-kind input`을 사용한다. 이 경우 기존 target chart를 덮어쓰지 않고 `output/basin/timeseries/input_coverage/` 아래의 `figures/`, `tables/spans.csv`, `metadata/manifest.json`으로 별도로 쓴다. Input chart는 전체 관측 가능 기간이 아니라 실제 input으로 사용된 기간에 x축을 맞춰 확대해서 그린다.
@@ -267,6 +271,24 @@ uv run scripts/model/event_regime/analyze_subset300_event_surrogate_shap.py
 ```
 
 출력은 `output/model_analysis/legacy/quantile_analysis/event_surrogate_shap/` 아래의 `tables/`, `figures/`, `metadata/`, `report/`에 생성된다.
+
+Model 2 LSTM의 `q50/q90/q95/q99` 예측값 자체에 직접 SHAP을 적용할 때는 아래 script를 사용한다. 이 분석은 대리 모델을 만들지 않고 `shap.GradientExplainer`로 336시간 동적 입력과 정적 유역 속성이 각 quantile 출력에 미치는 민감도를 계산한다. 관측 유량은 SHAP 입력으로 넣지 않고 event 선택과 사후 검증에만 사용한다. 로컬 점검은 `--smoke`로 작은 합성 데이터에서 실행하고, GPU 서버에서는 먼저 seed 하나와 작은 event 수로 확인한 뒤 확장한다.
+
+```bash
+uv run scripts/model/overall/compute_q99_lstm_direct_shap.py --smoke --output-dir tmp/q99_lstm_direct_shap_smoke --max-events 2 --background-events 2 --shap-samples 4
+
+uv run scripts/model/overall/compute_q99_lstm_direct_shap.py \
+  --seed 111 \
+  --device cuda \
+  --analysis-start-date "2014-01-01" \
+  --analysis-end-date "2016-12-31 23:59:59" \
+  --quantiles q50 q90 q95 q99 \
+  --max-events 120 \
+  --background-events 32 \
+  --shap-samples 64
+```
+
+직접 SHAP 기본 출력은 `output/model_analysis/shap_analysis/test_split_analysis/` 아래의 `tables/`, `figures/`, `metadata/`, `report/`에 생성된다. 이 폴더는 공식 test split 전체(`2014-01-01`부터 `2016-12-31 23:59:59`)에서 저유량/중유량/고유량/극유량 조건을 비교하는 분석 영역이다. 기존 Q99 사건 조건부 직접 SHAP 결과는 `output/model_analysis/shap_analysis/q99_analysis/`에 보존한다. 핵심 HTML은 `report/quantile_lstm_direct_shap_method.html`이다.
 
 극한호우가 train/validation에 실제로 있었는지, 그리고 DRBC holdout basin의 historical extreme-rain response에서 Model 1/2가 peak를 따라가는지는 별도 stress test로 본다. 이 분석은 hourly `.nc`의 `Rainf` rolling sum에서 rain-event catalog를 직접 만들고, 기존 checkpoint를 재학습 없이 다시 forward pass한다. 기본값은 validation 기준 primary checkpoint이고, `--epoch-mode validation --validation-epochs 5 10 15 20 25 30`을 주면 모든 validation checkpoint grid를 같은 epoch 번호의 Model 1/2 쌍으로 평가한다.
 
@@ -336,7 +358,27 @@ uv run scripts/model/extreme_rain/build_observed_q99_hydrograph_gallery_index.py
 DEVICE=cuda:0 bash scripts/runs/official/run_subset300_extreme_rain_stress_test.sh
 ```
 
-Primary 출력은 `output/model_analysis/legacy/extreme_rain/primary/` 아래에 생성된다. 모든 validation epoch sweep 출력은 `output/model_analysis/legacy/extreme_rain/all/` 아래에 둔다. 주요 산출물은 `exposure/extreme_rain_event_catalog.csv`, `exposure/inference_blocks.csv`, `inference/inference_manifest.csv`, `inference/required_series/`, `analysis/extreme_rain_stress_error_table_long.csv`, `analysis/paired_delta_aggregate.csv`, `analysis/paired_delta_epoch_aggregate.csv`, `analysis/extreme_rain_stress_test_report.md`다. Event별 강우-관측유량 확인 plot은 `plot_subset300_extreme_rain_events.py`로 만들며 `event_plots/event_plot_index.html`와 `event_plot_manifest.csv`를 생성한다. 전체 236개 event에서 Model 1과 Model 2 `q50/q95/q99`를 seed별 flow panel로 겹쳐 보는 plot은 `plot_subset300_extreme_rain_simq_events.py`가 `event_simq_plots/` 아래에 생성하며, stress analysis table에 peak bracket 컬럼이 있으면 각 seed panel에 bracket annotation을 표시한다. `build_extreme_rain_median_map_index.py`는 `event_simq_plot_manifest.csv`가 있으면 이 sim-Q plot을 우선 사용하고, 없으면 observed-only event manifest로 fallback하여 `event_plot_median_map_index.html`을 만든다. DRBC basin별 historical observed Q99+ event hydrograph 전체를 볼 때는 `plot_observed_q99_hydrograph_gallery.py --all-gauges --skip-existing`가 `analysis/{gauge_id}_hydrograph/` 아래에 PNG, manifest, `index.html`을 만들고, `build_observed_q99_hydrograph_gallery_index.py`가 `observed_q99_hydrograph_gallery_index.html` map index를 만든다. 이 HTML map은 `subset300_conus_split_map`과 같은 EPSG:5070 투영으로 CAMELSH basin과 DRBC boundary를 겹쳐 그린다. 대표 event 3개를 본문/부록용으로 따로 고르는 figure는 `plot_subset300_extreme_rain_flow_graph_examples.py`로 만들며 `flow_graph_diagnostic/` 아래에 `figures/`, `tables/`, `metadata/`를 생성한다. 이 stress test는 primary `2014-2016` DRBC test를 대체하지 않고, historical extreme-rain event에 대한 보조 진단으로 해석한다.
+Primary 출력은 `output/model_analysis/legacy/extreme_rain/primary/` 아래에 생성된다. 모든 validation epoch sweep 출력은 `output/model_analysis/legacy/extreme_rain/all/` 아래에 둔다. 주요 산출물은 `exposure/extreme_rain_event_catalog.csv`, `exposure/inference_blocks.csv`, `inference/inference_manifest.csv`, `inference/required_series/`, `analysis/extreme_rain_stress_error_table_long.csv`, `analysis/paired_delta_aggregate.csv`, `analysis/paired_delta_epoch_aggregate.csv`, `analysis/extreme_rain_stress_test_report.md`다. Event별 강우-관측유량 확인 plot은 `plot_subset300_extreme_rain_events.py`로 만들며 `event_plots/event_plot_index.html`와 `event_plot_manifest.csv`를 생성한다. 전체 236개 event에서 Model 1과 Model 2 `q50/q95/q99`를 seed별 flow panel로 겹쳐 보는 plot은 `plot_subset300_extreme_rain_simq_events.py`가 `event_simq_plots/` 아래에 생성하며, stress analysis table에 peak bracket 컬럼이 있으면 각 seed panel에 bracket annotation을 표시한다. `build_extreme_rain_median_map_index.py`는 `event_simq_plot_manifest.csv`가 있으면 이 sim-Q plot을 우선 사용하고, 없으면 observed-only event manifest로 fallback하여 `event_plot_median_map_index.html`을 만든다. DRBC basin별 historical observed Q99+ event hydrograph 전체를 볼 때는 `plot_observed_q99_hydrograph_gallery.py --all-gauges --skip-existing`가 `analysis/{gauge_id}_hydrograph/` 아래에 PNG, manifest, `index.html`을 만들고, `build_observed_q99_hydrograph_gallery_index.py`가 `observed_q99_hydrograph_gallery_index.html` map index를 만든다. 이 HTML map은 `subset300_conus_split_map`과 같은 EPSG:5070 투영을 쓰며, 기본값은 CAMELSH bundle의 GAGES-II 기반 shapefile과 DRBC boundary를 겹친다. 그림용 DRBC 정합성이 더 중요할 때는 `--basin-geometry-source gagesii-api`를 붙여 USGS `gagesii-basins` API에서 좌표계가 명시된 GAGES-II geometry를 받아 `<output-html-parent>/map_geometry/gagesii_basins/`에 cache하고 EPSG:5070으로 변환·clipping한다. 대표 event 3개를 본문/부록용으로 따로 고르는 figure는 `plot_subset300_extreme_rain_flow_graph_examples.py`로 만들며 `flow_graph_diagnostic/` 아래에 `figures/`, `tables/`, `metadata/`를 생성한다. 이 stress test는 primary `2014-2016` DRBC test를 대체하지 않고, historical extreme-rain event에 대한 보조 진단으로 해석한다.
+
+`build_observed_q99_hydrograph_gallery_index.py`를 expanded observed DRBC test 산출물에 다시 맞출 때는 디스크 실물(`output/model_analysis/q99_analysis/expanded_drbc/analysis/`)을 `--hydrograph-root`로, expanded event_response 테이블(`output/basin/expanded_drbc/analysis/event_response/tables/event_response_table.csv`)을 `--event-response-table`로, `output/model_analysis/expanded_drbc_test/tables/expanded_drbc_tier_profile.csv`를 `--tier-profile`로 넘기고 `--allow-missing`을 붙여 재생성한다. 그림용 지도는 DRBC boundary와 더 잘 맞는 USGS GAGES-II geometry가 필요하면 `--basin-geometry-source gagesii-api`도 함께 붙인다. 입력 basin set과 디스크 manifest가 어긋나면 index의 이미지/유역 버튼 링크가 깨지므로, 재생성 후 BASINS의 `galleryPath`/`plotPath` 실존과 map shape 수를 확인한다.
+
+### M3 rise_h window 리뷰 갤러리
+
+M3 (Savitzky-Golay) onset 기반 rising limb의 onset/peak/rise_h가 타당한지 window별로 직접 검수할 때 사용한다.
+
+```bash
+# 1) rising_limb_m3_spearman.csv의 unique (basin,peak) window마다 강수+유량 hydrograph PNG 생성
+uv run scripts/model/expanded_drbc/plot_rising_limb_m3_windows.py
+# 2) 로컬 리뷰 서버 (basin 버튼 탐색, lightbox, '불만족' flag → 고정 CSV append)
+uv run scripts/model/expanded_drbc/serve_rising_limb_review.py --port 8771
+#    → http://127.0.0.1:8771
+```
+
+onset 산정 방법은 두 가지다. **M3**(`compute_rising_limb_m3_spearman.py`)는 Savitzky-Golay dQ/dt 부호변환으로 onset을 잡고, **M4**(`compute_rising_limb_m4.py`)는 연구 표준(Blume·Zehe·Bronstert 2007; Mei&Anagnostou 2015; Koskelo 2012; Nagy 2022; Molina-Sanchis 2016)을 따라 ① 사건 유발 강수 burst 직전 유량 극솟값을 onset으로 잡고 ② MIT(minimum inter-event time)로 burst를 분리하며 ③ 유역별 T_cap=clip(3×median lag,24,168) h로 단일 event 최대 길이를 제한하고 ④ onset→peak 데이터 완전성을 요구한다. onset은 정의상 강수 시작 이후의 유량 trough(`[rain_start − 2h, min(peak, rain_start+120h)]`의 최솟값)로 잡는다 — 시각은 강수 뒤(상승은 강수보다 lag 늦음), 값은 강수 직후 미반응 구간이라 강수 전 baseflow에 해당한다. M4는 HARD flag(`no_rain_trigger`(peak 유발 강수 없음=눈녹음/baseflow, rise 미정의)·`too_long`·`data_gap`)로 통계에서 제외하고, SOFT flag(`elevated_baseline`(onset_q>3×유역Q10)·`peak_below_q99`)는 '주의'로만 표시한다. (flag 감사 결과 구 `antecedent_elevated`는 83% 발화에 above_q99 구분력이 사실상 0이어서, baseflow(Q10) 기준 `elevated_baseline`으로 재정의했다.) `data_gap`은 streamflow가 `[onset−24h, peak]`에서 결측>20% 또는 내부공백>6h일 때 (이 데이터셋 Streamflow는 NaN 38%로 결측이 많고, Rainf는 NaN 0% gap-fill이라 강수 결측 게이트는 불필요). rise 지표는 두 가지: `rise_slope_m4`(onset→peak 평균 상승속도)와 `rise_slope_max_m4`(rising limb 내 최대 6h 상승속도 — 다단계 사건에서 평균이 급상승부를 희석하는 문제 점검용). M4 clean subset(803/926)에서 `rise_slope` r≈+0.45 ≈ `rise_slope_max` r≈+0.45(둘 다 견고히 ≥0.3, 6h-max가 평균보다 더 낫지는 않음) ≫ `rise_rel` r≈−0.09(미달)으로, "절대 상승속도가 Q99 초과를 예측, rise_rel은 onset 정의 artifact" 결론이 M1·M3에 이어 독립 재현된다. 출력은 `rising_limb_m4.csv`와 `rising_limb_m4_compare.html`(M1/M3/M4 Spearman 비교).
+
+`plot_rising_limb_m4_windows.py`는 `rising_limb_m4.csv`를 읽어 강수(`data/CAMELSH_generic/drbc_expanded_observed_test/time_series/{basin}.nc`의 Rainf)+유량 hydrograph를 그린다: M4 onset(녹)·rain_start(파랑)·peak(빨강)·onset→peak rising limb 음영·Q50/Q99 임계선·rise_slope 기울기·hard/soft flag 제목·박스. 데이터 공백 구간은 시간축 reindex로 선을 끊어 직선 연결을 막는다. 출력은 `output/model_analysis/rising_limb_comparison/rise_h_windows/{basin}/`의 PNG와 `rise_h_window_manifest.csv`(926건, flag·clean 포함). obs_class는 seed별 집합으로 표기한다. (구버전 `plot_rising_limb_m3_windows.py`는 M3 onset·Q50/Q99만 그리며 flag/공백처리가 없다.)
+
+`serve_rising_limb_review.py`는 이 manifest를 읽어 로컬 갤러리를 띄운다(basin 버튼, clean/auto-flag 필터, lightbox). M4 auto-flag는 색/배지로 표시하고, 사용자가 직접 누르는 '불만족' 수동 flag는 별도로 `output/model_analysis/rising_limb_comparison/rise_h_flagged_windows.csv`에 누적 저장한다(사유 없으면 '사유 없음', 재클릭 해제, 서버 재시작 시 복원). 이 갤러리는 primary 모델 비교축이 아니라 rise_h onset 품질 검수용 보조 도구다.
 
 Confirmed flood inference도 primary hydrograph와 같은 lean time-series 계약을 따른다. 아래 명령은 NWS flood-stage catalog를 읽어 `output/model_analysis/expanded/confirmed_flood/inference/raw_model_exports/`에 모델별 raw prediction CSV를, `inference/required_series/seed*/primary_required_series.csv`에 `obs / model1 / q50 / q90 / q95 / q99`를 inner-join한 event-window 시계열을 쓴다. `required_series`에는 LSTM warmup을 포함한 전체 inference window가 저장되고, metric 계산은 `in_eval_window == True`인 `[peak_time - 24h, peak_time + 168h]` 구간만 사용해 `output/model_analysis/expanded/confirmed_flood/performance/drbc_confirmed_flood_performance.csv`를 다시 만든다.
 

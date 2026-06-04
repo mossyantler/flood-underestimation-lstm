@@ -19,8 +19,8 @@ event response    : RBI, rising_time, event_duration, etc.
 
 Outputs
 -------
-output/model_analysis/q99_analysis/tables/basin_q99_error_profile.csv   (85×3=255 rows, per seed)
-output/model_analysis/q99_analysis/tables/basin_q99_error_summary.csv   (85 rows, seed median)
+output/model_analysis/q99_analysis/causes/tables/basin_q99_error_profile.csv   (85×3=255 rows, per seed)
+output/model_analysis/q99_analysis/causes/tables/basin_q99_error_summary.csv   (85 rows, seed median)
 """
 from __future__ import annotations
 
@@ -32,9 +32,9 @@ import xarray as xr
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
-Q99_DIR = REPO_ROOT / "output/model_analysis/q99_analysis/expanded_drbc"
+Q99_DIR = REPO_ROOT / "output/model_analysis/q99_analysis/performance"
 # Use expanded_drbc_test required_series (all timesteps, all basins)
-REQUIRED_DIR = REPO_ROOT / "output/model_analysis/expanded_drbc_test/required_series"
+REQUIRED_DIR = REPO_ROOT / "output/model_analysis/primary/metrics/data/required_series"
 NC_DIR = REPO_ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test/time_series"
 
 STATIC_PATH = (
@@ -48,7 +48,7 @@ EVENT_RESPONSE_PATH = (
     / "event_response_basin_summary.csv"
 )
 
-OUT_DIR = REPO_ROOT / "output/model_analysis/q99_analysis/tables"
+OUT_DIR = REPO_ROOT / "output/model_analysis/q99_analysis/causes/tables"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 OFFICIAL_SEEDS = [111, 222, 444]
@@ -204,7 +204,7 @@ def main() -> None:
     all_frames = []
     for seed in OFFICIAL_SEEDS:
         print(f"[seed {seed}] loading required_series …", flush=True)
-        series_path = REQUIRED_DIR / f"seed{seed}" / "primary_required_series.csv"
+        series_path = REQUIRED_DIR / f"seed{seed}" / "required_series.csv"
         series = pd.read_csv(series_path)
         series["basin"] = series["basin"].astype(str)
 

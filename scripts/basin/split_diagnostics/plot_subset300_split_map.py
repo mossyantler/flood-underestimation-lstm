@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import urllib.parse
+import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +25,7 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import pandas as pd
 from shapely.geometry import box
+from shapely.geometry import shape as shapely_shape
 
 
 DEFAULT_SPLIT_DIR = Path("configs/pilot/basin_splits/scaling_300")
@@ -30,6 +33,8 @@ DEFAULT_BASIN_SHAPEFILE = Path("basins/CAMELSH_data/shapefiles/CAMELSH_shapefile
 DEFAULT_STATE_SHAPEFILE = Path("basins/us_boundaries/tl_2024_us_state/tl_2024_us_state.shp")
 DEFAULT_DRBC_SHAPEFILE = Path("basins/drbc_boundary/drb_bnd_polygon.shp")
 DEFAULT_OUTPUT_DIR = Path("output/basin/all/screening/subset300_spatial_split")
+DEFAULT_GAGESII_CACHE_DIR = Path("output/model_analysis/q99_analysis/performance/map_geometry/gagesii_basins")
+DEFAULT_GAGESII_API_URL = "https://api.water.usgs.gov/fabric/pygeoapi/collections/gagesii-basins/items"
 CONUS_EXCLUDED_STATES = {"AK", "HI", "PR", "GU", "VI", "MP", "AS"}
 TARGET_CRS = "EPSG:5070"
 
@@ -66,6 +71,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--basin-shapefile", type=Path, default=DEFAULT_BASIN_SHAPEFILE)
     parser.add_argument("--state-shapefile", type=Path, default=DEFAULT_STATE_SHAPEFILE)
     parser.add_argument("--drbc-shapefile", type=Path, default=DEFAULT_DRBC_SHAPEFILE)
+    parser.add_argument(
+        "--test-basin-geometry-source",
+        choices=("camelsh", "gagesii-api"),
+        default="camelsh",
+        help=(
+            "Geometry source for DRBC test basins in the inset. Train/validation basins stay on "
+            "the CAMELSH shapefile; 'gagesii-api' replaces test basin polygons with CRS-tagged "
+            "USGS GAGES-II geometry projected to EPSG:5070."
+        ),
+    )
+    parser.add_argument("--gagesii-cache-dir", type=Path, default=DEFAULT_GAGESII_CACHE_DIR)
+    parser.add_argument("--gagesii-api-url", default=DEFAULT_GAGESII_API_URL)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--dpi", type=int, default=300)
     parser.add_argument(
@@ -147,6 +164,45 @@ def read_basins(path: Path, split_table: pd.DataFrame) -> gpd.GeoDataFrame:
 
 def read_drbc(path: Path) -> gpd.GeoDataFrame:
     return gpd.read_file(path).to_crs(TARGET_CRS)
+
+
+def fetch_gagesii_feature(gauge_id: str, cache_dir: Path, api_url: str) -> dict[str, Any]:
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_path = cache_dir / f"{gauge_id}.geojson"
+    if cache_path.exists():
+        return json.loads(cache_path.read_text(encoding="utf-8"))
+    url = f"{api_url}?{urllib.parse.urlencode({'gage_id': gauge_id, 'f': 'json', 'limit': 1})}"
+    with urllib.request.urlopen(url, timeout=45) as response:
+        payload = json.load(response)
+    if not payload.get("features"):
+        raise RuntimeError(f"No USGS GAGES-II basin geometry for {gauge_id}")
+    cache_path.write_text(json.dumps(payload), encoding="utf-8")
+    return payload
+
+
+def read_gagesii_test_basins(gauge_ids: list[str], cache_dir: Path, api_url: str) -> gpd.GeoDataFrame:
+    rows: list[dict[str, Any]] = []
+    for gauge_id in gauge_ids:
+        payload = fetch_gagesii_feature(gauge_id, cache_dir, api_url)
+        feature = payload["features"][0]
+        rows.append({"gauge_id": gauge_id, "geometry": shapely_shape(feature["geometry"])})
+    return gpd.GeoDataFrame(rows, geometry="geometry", crs="EPSG:4326").to_crs(TARGET_CRS)
+
+
+def replace_test_geometries_with_gagesii(
+    basins: gpd.GeoDataFrame,
+    *,
+    cache_dir: Path,
+    api_url: str,
+) -> gpd.GeoDataFrame:
+    test_ids = basins.loc[basins["split"] == "test", "gauge_id"].tolist()
+    if not test_ids:
+        return basins
+    test_geometries = read_gagesii_test_basins(test_ids, cache_dir, api_url).set_index("gauge_id")
+    out = basins.copy()
+    for gauge_id, row in test_geometries.iterrows():
+        out.loc[out["gauge_id"] == gauge_id, "geometry"] = row.geometry
+    return gpd.GeoDataFrame(out, geometry="geometry", crs=TARGET_CRS)
 
 
 def simplify_for_display(gdf: gpd.GeoDataFrame, tolerance: float) -> gpd.GeoDataFrame:
@@ -304,6 +360,9 @@ def write_outputs(
         "basin_shapefile": str(args.basin_shapefile),
         "state_shapefile": str(args.state_shapefile),
         "drbc_shapefile": str(args.drbc_shapefile),
+        "test_basin_geometry_source": str(args.test_basin_geometry_source),
+        "gagesii_cache_dir": str(args.gagesii_cache_dir),
+        "gagesii_api_url": str(args.gagesii_api_url),
         "target_crs": TARGET_CRS,
         "display_simplification_m": {
             "state": args.state_simplify_m,
@@ -334,6 +393,12 @@ def main() -> None:
     split_table = read_split_table(args.split_dir)
     states = simplify_for_display(read_states(args.state_shapefile), args.state_simplify_m)
     basins = simplify_for_display(read_basins(args.basin_shapefile, split_table), args.basin_simplify_m)
+    if args.test_basin_geometry_source == "gagesii-api":
+        basins = replace_test_geometries_with_gagesii(
+            basins,
+            cache_dir=args.gagesii_cache_dir,
+            api_url=args.gagesii_api_url,
+        )
     drbc = simplify_for_display(read_drbc(args.drbc_shapefile), args.drbc_simplify_m)
 
     output_base = args.output_dir / "figures" / "subset300_conus_split_map"
