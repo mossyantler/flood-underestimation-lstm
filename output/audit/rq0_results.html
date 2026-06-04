@@ -385,7 +385,7 @@
       <tr class="row-conditional"><td><b>유역 반응성</b></td><td>baseflow_index</td><td><span class="badge b-s">S</span></td><td class="num pos">+0.20</td><td class="num pos">+0.44</td><td class="num pos">+0.20</td><td><b>조건부 생존.</b> 세 범위 모두 양수지만 NOAA 홍수에서 특히 강하다. 유역 저장·완만한 반응 특성이 실제 홍수 과소추정과 연결될 수 있다.</td></tr>
       <tr class="row-conditional"><td><b>유역 토양/지질</b></td><td>permeability</td><td><span class="badge b-s">S</span></td><td class="num pos">+0.32</td><td class="num">+0.04</td><td class="num pos">+0.26</td><td><b>보조 신호.</b> Q99와 전체 강우에서는 양수이나 NOAA 표본에서는 거의 0이다. headline 신호보다는 보조 유역 특성으로 둔다.</td></tr>
       <tr class="row-conditional"><td><b>대류성 성격</b></td><td>CRainf_frac / CAPE</td><td><span class="badge b-f">F</span></td><td class="num">+0.05 / +0.03</td><td class="num pos">+0.39 / +0.22</td><td class="num pos">+0.13 / +0.12</td><td><b>조건부 핵심 신호.</b> Q99 전체에서는 약하지만 NOAA 확인 홍수와 전체 강우에서 양수다. “비의 양”보다 <b>대류성 여부</b>가 더 중요한 공통 단서다.</td></tr>
-      <tr class="row-caution"><td><b>강우 총량</b></td><td>rain_sum</td><td><span class="badge b-f">F</span></td><td class="num neg">−0.24</td><td class="num">+0.08</td><td class="num">−0.03</td><td><b>선택 편향.</b> 극단 범위에서는 음수지만 전체 강우에서는 거의 0이다. 비가 많이 오면 모델도 밴드를 올리는 간접 결합으로 해석한다.</td></tr>
+      <tr class="row-caution"><td><b>강우 총량</b></td><td>rain_sum</td><td><span class="badge b-f">F</span></td><td class="num neg">−0.24</td><td class="num">+0.08</td><td class="num">−0.03</td><td><b>선택 편향.</b> Q99에서는 음수지만 NOAA/NWS와 전체 강우에서는 방향이 안정적이지 않다. 비가 많이 오면 모델도 밴드를 올리는 간접 결합으로 해석한다.</td></tr>
       <tr class="row-caution"><td><b>강우 강도/등급</b></td><td>rain_max_1h / NWS class</td><td><span class="badge b-f">F</span></td><td class="num neg">−0.20 / −0.20</td><td class="num">+0.08 / +0.05</td><td class="num">+0.02 / +0.01</td><td><b>전 범위 붕괴.</b> 극단 사건 안에서만 보이는 음의 상관이다. 독립 예측 신호로 쓰지 않는다.</td></tr>
       <tr class="row-caution"><td><b>밴드 폭</b></td><td>rel_width / q99_q50_ratio</td><td><span class="badge b-c">C</span></td><td class="num neg">−0.14</td><td class="num neg">−0.16</td><td class="num">+0.01</td><td><b>정의상 결합.</b> 밴드가 넓으면 관측이 밴드 안에 들어갈 확률이 커져 관측 위치 구간이 낮아진다. 예측력으로 말하지 않는다.</td></tr>
       <tr class="row-null"><td><b>모델 불확실성</b></td><td>seed_spread_rel / M1−M2 gap</td><td><span class="badge b-m">M</span></td><td class="num">−0.05 / −0.08</td><td class="num">−0.09 / −0.07</td><td class="num">−0.02 / —</td><td><b>기각.</b> 모델 간 차이와 seed 분산은 과소추정 위험을 안정적으로 예고하지 못한다.</td></tr>
@@ -395,7 +395,7 @@
   </div>
 
   <div class="callout pass"><b>공통 결론:</b> 과소추정 위험을 누수 없이 가장 명확하게 말해 주는 축은 <b>유역 규모(area)</b>다. 여기에 <b>대류성 강수 성격(CRainf_frac, CAPE)</b>이 NOAA 확인 홍수에서 강하게 붙는다. 따라서 “강우량이 많아서”가 아니라 <b>큰 유역 + 대류성 폭우 성격</b>이 관측 첨두가 q99 위로 넘어가는 조건으로 정리된다.</div>
-  <div class="callout warn"><b>해석 금지:</b> 밴드 폭, 강우 총량, 강우 강도는 극단 범위에서만 그럴듯해 보이고 전체 강우에서는 0 근처로 무너진다. 모델 불확실성(seed spread, M1−M2 gap)도 안정 신호가 아니다. 이들은 예측 신호가 아니라 선택 편향·정의상 결합·null로 분류한다.</div>
+  <div class="callout warn"><b>해석 금지:</b> 밴드 폭, 강우 총량, 강우 강도는 범위가 바뀌면 방향이 흔들리거나 전체 강우에서 0 근처로 무너진다. 모델 불확실성(seed spread, M1−M2 gap)도 안정 신호가 아니다. 이들은 예측 신호가 아니라 선택 편향·정의상 결합·null로 분류한다.</div>
 </section>
 
 <!-- ===== 결과 C ===== -->
