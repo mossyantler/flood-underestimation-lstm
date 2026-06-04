@@ -1,0 +1,85 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e6]:
+      - link "콘텐츠로 건너뛰기" [ref=e8] [cursor=pointer]:
+        - /url: "#main"
+        - generic [ref=e9]:
+          - text: 콘텐츠로 건너뛰기
+          - img [ref=e10]
+      - navigation "사이드바":
+        - generic [ref=e12]:
+          - generic [ref=e131]:
+            - generic [ref=e132]:
+              - button "민 민엽 장의 Notion 사이드바 닫기" [ref=e137] [cursor=pointer]:
+                - generic [ref=e138]
+                - button "사이드바 닫기" [ref=e151]
+              - generic [ref=e156]:
+                - tablist "Sidebar navigation" [ref=e157]
+                - button "검색" [ref=e188] [cursor=pointer]
+            - tabpanel "홈" [ref=e192]:
+              - generic [ref=e196]:
+                - generic [ref=e197]
+                - generic [ref=e558]
+            - button "신규..." [ref=e606] [cursor=pointer]:
+              - generic [ref=e607]:
+                - img [ref=e608]
+                - generic [ref=e611]: 신규
+          - separator "왼쪽 및 오른쪽 방향키로 크기 조정" [ref=e85]
+      - generic [ref=e86]:
+        - banner [ref=e87]:
+          - generic [ref=e90]:
+            - generic [ref=e612]:
+              - link "🌊 Flood LSTM 연구 워크스페이스" [ref=e613] [cursor=pointer]:
+                - /url: /p/Flood-LSTM-05836522acee49fabe5e009def64c28e?pvs=18
+                - generic [ref=e614]
+              - img [ref=e620]
+              - button "..." [ref=e623] [cursor=pointer]
+              - img [ref=e625]
+              - link "📚 Imported GitHub Pages drafts - full text migration" [ref=e627] [cursor=pointer]:
+                - /url: /p/Imported-GitHub-Pages-drafts-full-text-migration-3716d0284c1681df8099e5375253169e?pvs=18
+                - generic [ref=e628]
+              - img [ref=e634]
+              - button "📝 LATEST - paper_draft.html migrated editable draft" [ref=e637] [cursor=pointer]:
+                - generic [ref=e640]: 📝
+                - generic [ref=e641]: LATEST - paper_draft.html migrated editable draft
+            - generic [ref=e642]:
+              - generic [ref=e643]:
+                - button "패널 닫기"
+              - generic [ref=e644]:
+                - button "한국어" [ref=e646] [cursor=pointer]
+                - button "공유" [ref=e655] [cursor=pointer]
+                - button "링크 복사하기" [ref=e661] [cursor=pointer]
+                - button "즐겨찾기" [ref=e667] [cursor=pointer]
+                - button "작업" [ref=e672] [cursor=pointer]
+        - main [ref=e91]:
+          - group [ref=e94]:
+            - generic [ref=e96]:
+              - generic [ref=e99]:
+                - generic
+                - textbox [ref=e108]:
+                  - /placeholder: 새 페이지
+              - generic [ref=e110]:
+                - note [ref=e112]
+                - figure [ref=e710]
+        - region [ref=e126]
+      - button "AI" [ref=e679] [cursor=pointer]:
+        - img "Notion AI face" [ref=e685]
+    - dialog [ref=e688]:
+      - generic [ref=e689]:
+        - generic [ref=e690]: Notion 데스크톱 앱에서 여시겠습니까?
+        - button "해제" [ref=e691] [cursor=pointer]:
+          - img [ref=e692]
+      - button "앱이 없으신가요? 지금 다운로드하세요." [ref=e695] [cursor=pointer]:
+        - img [ref=e696]
+        - generic [ref=e699]: 앱이 없으신가요? 지금 다운로드하세요.
+      - generic [ref=e700]:
+        - generic [ref=e701]:
+          - generic [ref=e702]:
+            - img [ref=e704]
+            - checkbox [checked] [ref=e706] [cursor=pointer]
+          - generic [ref=e707]: 항상 앱에서 열기
+        - button "앱에서 열기" [ref=e708] [cursor=pointer]
+    - status [ref=e127]: 파일 가져오기를 해보세요 이 파일을 가져와 Notion 데이터베이스에서 직접 콘텐츠를 편집할 수 있습니다.
+    - alert [ref=e128]
+  - iframe [ref=e129]:
+    

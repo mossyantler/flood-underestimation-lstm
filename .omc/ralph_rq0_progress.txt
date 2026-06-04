@@ -1,0 +1,23 @@
+RALPH — RQ-0 논문급 재작성
+
+US-1 obs 위치 구간(obs_class) 정의 + 분포 결과 반영 — Q99 47% / NOAA 100% above_q99
+US-2 신호 탐색(상관) 반영 — 3분류(C/I/L), 독립신호 순위, 밴드결합 붕괴, 3-scope, 불확실성 null
+US-3 상승 기울기 신호 — 관측 0.498 vs 예측 0.182
+US-4 종합 결론 — 대류성 돌발홍수 + 큰 유역, RQ-2 연결
+US-5 doc(00b) + HTML 갱신, 한국어 위주·학부생, 수치 교차검증
+
+근거 출처:
+- band_signal/signal_sweep/report/summary.md (신호 3분류·3-scope·불확실성)
+- band_signal/slope_signal/report/summary.md (rise slope)
+- band_signal/band_shape/tables/location_class_*_summary.csv (obs_class 분포)
+- band_signal/band_shape/tables/gap_trajectory_q99_summary.csv
+- signal_sweep/tables/branchA_spearman.csv (area+0.425, obs_peak+0.450, rel_width−0.253...)
+
+핵심 수치 (교차확인됨):
+- obs_class Q99: above_q99 median 0.469 / NOAA above_q99 1.0
+- gap q99: rel_under_gap 0.657(q50)→0.018(q99), rel_over_gap 0→0.122
+- area +0.43, obs_peak(누수) +0.45, permeability +0.27, baseflow +0.11/+0.41noaa, CAPE +0.05/+0.29noaa, crainf_frac +0.07/+0.38noaa
+- band-coupled rel_width −0.25q99/−0.30noaa/+0.01allrain (붕괴)
+- rain_sum −0.29/−0.27/−0.03 (붕괴)
+- uncertainty: seed_spread_rel −0.02, model gap −0.04ns, fanning −0.182 (전부 null)
+- slope: 관측 0.498, 예측 최대 0.182

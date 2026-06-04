@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1779805175883,
+  "lastScanned": 1780550694640,
   "projectRoot": "/Users/jang-minyeop/Project/CAMELS",
   "techStack": {
     "languages": [],
@@ -40,7 +40,7 @@
       "path": "basins",
       "purpose": null,
       "fileCount": 3,
-      "lastAccessed": 1779805175855,
+      "lastAccessed": 1780550694632,
       "keyFiles": [
         "AGENTS.md",
         "CLAUDE.md"
@@ -50,7 +50,7 @@
       "path": "configs",
       "purpose": null,
       "fileCount": 6,
-      "lastAccessed": 1779805175867,
+      "lastAccessed": 1780550694632,
       "keyFiles": [
         "AGENTS.md",
         "CLAUDE.md",
@@ -63,7 +63,7 @@
       "path": "dashboard",
       "purpose": null,
       "fileCount": 10,
-      "lastAccessed": 1779805175867,
+      "lastAccessed": 1780550694633,
       "keyFiles": [
         "AGENTS.md",
         "CLAUDE.md",
@@ -76,7 +76,7 @@
       "path": "data",
       "purpose": "Data files",
       "fileCount": 3,
-      "lastAccessed": 1779805175872,
+      "lastAccessed": 1780550694633,
       "keyFiles": [
         "AGENTS.md",
         "CLAUDE.md"
@@ -86,7 +86,7 @@
       "path": "database",
       "purpose": null,
       "fileCount": 3,
-      "lastAccessed": 1779805175874,
+      "lastAccessed": 1780550694633,
       "keyFiles": [
         "AGENTS.md",
         "CLAUDE.md",
@@ -97,18 +97,30 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 4,
-      "lastAccessed": 1779805175875,
+      "lastAccessed": 1780550694633,
       "keyFiles": [
         "AGENTS.md",
         "CLAUDE.md",
         "README.md"
       ]
     },
+    "draft": {
+      "path": "draft",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1780550694634,
+      "keyFiles": [
+        "README.md",
+        "defense_playbook.md",
+        "results_expanded_drbc_draft.md",
+        "results_final.md"
+      ]
+    },
     "logs": {
       "path": "logs",
       "purpose": null,
       "fileCount": 11,
-      "lastAccessed": 1779805175875,
+      "lastAccessed": 1780550694634,
       "keyFiles": [
         "AGENTS.md",
         "CLAUDE.md",
@@ -121,28 +133,25 @@
       "path": "output",
       "purpose": null,
       "fileCount": 4,
-      "lastAccessed": 1779805175875,
+      "lastAccessed": 1780550694634,
       "keyFiles": [
         "AGENTS.md",
         "CLAUDE.md",
         "cleanup_manifest_2026-05-18.md"
       ]
     },
-    "report": {
-      "path": "report",
+    "output_backup": {
+      "path": "output_backup",
       "purpose": null,
-      "fileCount": 2,
-      "lastAccessed": 1779805175875,
-      "keyFiles": [
-        "논문 초본.docx",
-        "논문 초본_cited.docx"
-      ]
+      "fileCount": 0,
+      "lastAccessed": 1780550694635,
+      "keyFiles": []
     },
     "runs": {
       "path": "runs",
       "purpose": null,
       "fileCount": 3,
-      "lastAccessed": 1779805175876,
+      "lastAccessed": 1780550694635,
       "keyFiles": [
         "AGENTS.md",
         "CLAUDE.md"
@@ -152,50 +161,40 @@
       "path": "scripts",
       "purpose": "Build/utility scripts",
       "fileCount": 3,
-      "lastAccessed": 1779805175876,
+      "lastAccessed": 1780550694635,
       "keyFiles": [
         "AGENTS.md",
         "CLAUDE.md",
         "README.md"
       ]
     },
-    "skills": {
-      "path": "skills",
-      "purpose": null,
-      "fileCount": 0,
-      "lastAccessed": 1779805175876,
-      "keyFiles": []
-    },
     "tests": {
       "path": "tests",
       "purpose": "Test files",
-      "fileCount": 4,
-      "lastAccessed": 1779805175876,
+      "fileCount": 7,
+      "lastAccessed": 1780550694636,
       "keyFiles": [
         "test_confirmed_flood_inference_exports.py",
         "test_confirmed_flood_stratified_underestimation.py",
         "test_dashboard_evidence_catalog.py",
-        "test_stratified_underestimation.py"
+        "test_expanded_drbc_run_all.py",
+        "test_gagesii_basin_geometry.py"
       ]
     },
     "tmp": {
       "path": "tmp",
       "purpose": null,
-      "fileCount": 60,
-      "lastAccessed": 1779805175876,
+      "fileCount": 1,
+      "lastAccessed": 1780550694636,
       "keyFiles": [
-        "AGENTS.md",
-        "CLAUDE.md",
-        "add_docx_citations.py",
-        "camels_backup_20260519.dump",
-        "confirmed_flood_inference_smoke_catalog.csv"
+        "AGENTS.md"
       ]
     },
     "vendor": {
       "path": "vendor",
       "purpose": "Third-party code",
       "fileCount": 2,
-      "lastAccessed": 1779805175876,
+      "lastAccessed": 1780550694636,
       "keyFiles": [
         "AGENTS.md",
         "CLAUDE.md"
@@ -205,7 +204,7 @@
       "path": "dashboard/app",
       "purpose": "Application code",
       "fileCount": 3,
-      "lastAccessed": 1779805175880,
+      "lastAccessed": 1780550694638,
       "keyFiles": [
         "globals.css",
         "layout.tsx",
@@ -216,7 +215,7 @@
       "path": "dashboard/components",
       "purpose": "UI components",
       "fileCount": 21,
-      "lastAccessed": 1779805175880,
+      "lastAccessed": 1780550694639,
       "keyFiles": [
         "analysis-module-index.tsx",
         "chart-card.tsx",
@@ -227,7 +226,7 @@
       "path": "dashboard/data",
       "purpose": "Data files",
       "fileCount": 4,
-      "lastAccessed": 1779805175880,
+      "lastAccessed": 1780550694639,
       "keyFiles": [
         "evidence_candidates.csv",
         "evidence_catalog_items.csv",
@@ -238,7 +237,7 @@
       "path": "scripts/data",
       "purpose": "Data files",
       "fileCount": 6,
-      "lastAccessed": 1779805175882,
+      "lastAccessed": 1780550694640,
       "keyFiles": [
         "download_camelsh_core.py",
         "download_camelsh_hourly_selected.py",
@@ -248,87 +247,303 @@
   },
   "hotPaths": [
     {
-      "path": "docs/experiment/analysis/model/01_q50_central.md",
-      "accessCount": 2,
-      "lastAccessed": 1779805826136,
+      "path": "docs/explain/08_rq_analysis_map.md",
+      "accessCount": 84,
+      "lastAccessed": 1780244739693,
       "type": "file"
     },
     {
-      "path": "docs/experiment/analysis/model/02_upper_quantile_peak_under.md",
-      "accessCount": 2,
-      "lastAccessed": 1779805870942,
+      "path": "docs/explain/05_basin_analysis_method.md",
+      "accessCount": 32,
+      "lastAccessed": 1780244833169,
       "type": "file"
     },
     {
-      "path": "docs/experiment/analysis/model/05_calibration_sharpness.md",
-      "accessCount": 2,
-      "lastAccessed": 1779805936251,
+      "path": "docs/explain/06_research_process.md",
+      "accessCount": 21,
+      "lastAccessed": 1780244872081,
+      "type": "file"
+    },
+    {
+      "path": "docs/explain/README.md",
+      "accessCount": 15,
+      "lastAccessed": 1780242577636,
+      "type": "file"
+    },
+    {
+      "path": "docs/ub_analysis_review_for_students.html",
+      "accessCount": 13,
+      "lastAccessed": 1780146676682,
       "type": "file"
     },
     {
       "path": "docs/experiment/analysis/model/00_research_question_analysis_map.md",
-      "accessCount": 2,
-      "lastAccessed": 1779806014266,
+      "accessCount": 13,
+      "lastAccessed": 1780562062447,
       "type": "file"
     },
     {
-      "path": "docs/experiment/method/model/quantile_output_interpretation.md",
-      "accessCount": 2,
-      "lastAccessed": 1779806063776,
+      "path": "docs/paper/paper_draft.html",
+      "accessCount": 10,
+      "lastAccessed": 1780151859894,
       "type": "file"
     },
     {
       "path": "docs/experiment/analysis/model/README.md",
+      "accessCount": 10,
+      "lastAccessed": 1780561592890,
+      "type": "file"
+    },
+    {
+      "path": "AGENTS.md",
+      "accessCount": 8,
+      "lastAccessed": 1780242080970,
+      "type": "file"
+    },
+    {
+      "path": "CLAUDE.md",
+      "accessCount": 7,
+      "lastAccessed": 1780242066994,
+      "type": "file"
+    },
+    {
+      "path": "docs/plans/2026-05-31-output-model-analysis-reorg.md",
+      "accessCount": 6,
+      "lastAccessed": 1780157591622,
+      "type": "file"
+    },
+    {
+      "path": "docs/AGENTS.md",
+      "accessCount": 6,
+      "lastAccessed": 1780160128718,
+      "type": "file"
+    },
+    {
+      "path": "scripts/model/expanded_drbc/analyze_ub_band_shape_absolute.py",
+      "accessCount": 5,
+      "lastAccessed": 1780141793571,
+      "type": "file"
+    },
+    {
+      "path": "docs/README.md",
+      "accessCount": 5,
+      "lastAccessed": 1780160271124,
+      "type": "file"
+    },
+    {
+      "path": "scripts/model/expanded_drbc/compute_quantile_rise_slope_signal.py",
+      "accessCount": 4,
+      "lastAccessed": 1780203955594,
+      "type": "file"
+    },
+    {
+      "path": "scripts/model/expanded_drbc/recompute_quantile_rise_slope_m4method.py",
+      "accessCount": 3,
+      "lastAccessed": 1780143501673,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/rising_limb_comparison/signal_sweep/summary.md",
+      "accessCount": 3,
+      "lastAccessed": 1780152568748,
+      "type": "file"
+    },
+    {
+      "path": "output/AGENTS.md",
       "accessCount": 2,
-      "lastAccessed": 1779806103101,
+      "lastAccessed": 1780158949639,
       "type": "file"
     },
     {
-      "path": "scripts/model/expanded_drbc/compute_rq4a_nse_tier_stratify.py",
-      "accessCount": 1,
-      "lastAccessed": 1779805196650,
+      "path": "output/model_analysis/README.md",
+      "accessCount": 2,
+      "lastAccessed": 1780158968703,
       "type": "file"
     },
     {
-      "path": "scripts/model/expanded_drbc/compute_rq4b_event_type_stratify.py",
-      "accessCount": 1,
-      "lastAccessed": 1779805247733,
+      "path": "docs/experiment/README.md",
+      "accessCount": 2,
+      "lastAccessed": 1780160282015,
       "type": "file"
     },
     {
-      "path": "scripts/model/expanded_drbc/compute_cross_tab_q99_noaa_sanity.py",
-      "accessCount": 1,
-      "lastAccessed": 1779805293937,
+      "path": "scripts/model/expanded_drbc/signal_sweep_branchA_csv.py",
+      "accessCount": 2,
+      "lastAccessed": 1780202791613,
       "type": "file"
     },
     {
-      "path": "dashboard/package.json",
+      "path": "scripts/model/expanded_drbc/signal_sweep_branchB2_allrain.py",
+      "accessCount": 2,
+      "lastAccessed": 1780202808631,
+      "type": "file"
+    },
+    {
+      "path": "scripts/model/expanded_drbc/compute_ub_band_shape.py",
+      "accessCount": 2,
+      "lastAccessed": 1780203963473,
+      "type": "file"
+    },
+    {
+      "path": "configs/camelsh_hourly_model2_drbc_holdout_broad.yml",
+      "accessCount": 2,
+      "lastAccessed": 1780204279405,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/expanded_drbc_test/report/quantile_ladder_signal_explainer.html",
       "accessCount": 1,
-      "lastAccessed": 1779805327102,
+      "lastAccessed": 1780124686981,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/rising_limb_comparison/signal_sweep/tables/branchA_spearman.csv",
+      "accessCount": 1,
+      "lastAccessed": 1780150154655,
+      "type": "file"
+    },
+    {
+      "path": "scripts/model/expanded_drbc/plot_signal_sweep_branchA.py",
+      "accessCount": 1,
+      "lastAccessed": 1780150835813,
+      "type": "file"
+    },
+    {
+      "path": "docs/experiment/method/model/architecture.md",
+      "accessCount": 1,
+      "lastAccessed": 1780151230692,
       "type": "file"
     },
     {
       "path": "configs/camelsh_hourly_model1_drbc_holdout_broad.yml",
       "accessCount": 1,
-      "lastAccessed": 1779805335066,
+      "lastAccessed": 1780151231504,
       "type": "file"
     },
     {
-      "path": "docs/experiment/analysis/model/03_cost.md",
+      "path": "database/README.md",
       "accessCount": 1,
-      "lastAccessed": 1779805393615,
+      "lastAccessed": 1780151532033,
       "type": "file"
     },
     {
-      "path": "docs/experiment/analysis/model/04a_basin_cohort.md",
+      "path": "scripts/data/prepare_drbc_confirmed_flood_event_dataset.py",
       "accessCount": 1,
-      "lastAccessed": 1779805420514,
+      "lastAccessed": 1780151562341,
       "type": "file"
     },
     {
-      "path": "docs/experiment/analysis/model/04b_event_type.md",
+      "path": "scripts/model/expanded_drbc/signal_sweep_branchB_forcing.py",
       "accessCount": 1,
-      "lastAccessed": 1779805451370,
+      "lastAccessed": 1780151636525,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/rising_limb_comparison/signal_sweep/tables/branchB_spearman.csv",
+      "accessCount": 1,
+      "lastAccessed": 1780151693350,
+      "type": "file"
+    },
+    {
+      "path": "scripts/model/expanded_drbc/plot_signal_sweep_combined.py",
+      "accessCount": 1,
+      "lastAccessed": 1780151730330,
+      "type": "file"
+    },
+    {
+      "path": "scripts/model/expanded_drbc/plot_signal_sweep_3scope.py",
+      "accessCount": 1,
+      "lastAccessed": 1780152421689,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/primary/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1780159124891,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/primary/metrics/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1780159127846,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/primary/calibration/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1780159136284,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/confirmed_flood/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1780159140770,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/q99_analysis/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1780159147284,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/q99_analysis/performance/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1780159150427,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/q99_analysis/causes/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1780159158264,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/band_signal/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1780159160772,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/band_signal/band_shape/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1780159167209,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/band_signal/slope_signal/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1780159169955,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/band_signal/signal_sweep/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1780159177508,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/band_signal/method_compare/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1780159179953,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/shap/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1780159186066,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/shap/q99/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1780159189086,
+      "type": "file"
+    },
+    {
+      "path": "output/model_analysis/shap/test_split/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1780159195156,
       "type": "file"
     }
   ],

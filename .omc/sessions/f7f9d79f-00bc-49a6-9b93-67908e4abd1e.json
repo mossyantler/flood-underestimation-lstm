@@ -1,0 +1,10 @@
+{
+  "session_id": "f7f9d79f-00bc-49a6-9b93-67908e4abd1e",
+  "ended_at": "2026-05-27T00:31:06.501Z",
+  "reason": "resume",
+  "agents_spawned": 0,
+  "agents_completed": 0,
+  "modes_used": [
+    "ralplan"
+  ]
+}

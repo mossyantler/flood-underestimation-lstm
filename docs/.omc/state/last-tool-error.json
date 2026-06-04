@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd docs && echo \\\"=== report/band_shape ===\\\" && ls report/band_shape 2>/dev/null && echo \\\"=== report/primary_metrics ===\\\" && ls report/primary_metrics 2>/dev/null && echo \\\"=== report f...",
+  "error": "Exit code 1\n(eval):cd:1: no such file or directory: docs",
+  "timestamp": "2026-05-30T16:55:30.603Z",
+  "retry_count": 1
+}

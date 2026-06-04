@@ -1,0 +1,37 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e6]:
+      - link "콘텐츠로 건너뛰기" [ref=e8] [cursor=pointer]:
+        - /url: "#main"
+        - generic [ref=e9]:
+          - text: 콘텐츠로 건너뛰기
+          - img [ref=e10]
+      - navigation "사이드바":
+        - generic [ref=e12]:
+          - generic [ref=e131]
+          - separator "왼쪽 및 오른쪽 방향키로 크기 조정" [ref=e85]
+      - generic [ref=e86]:
+        - banner [ref=e87]:
+          - generic [ref=e90]
+        - main [ref=e91]:
+          - group [ref=e94]
+        - region [ref=e126]
+      - button "AI" [ref=e679] [cursor=pointer]:
+        - img "Notion AI face" [ref=e685]
+    - dialog [ref=e688]:
+      - generic [ref=e689]:
+        - generic [ref=e690]: Notion 데스크톱 앱에서 여시겠습니까?
+        - button "해제" [ref=e691] [cursor=pointer]:
+          - img [ref=e692]
+      - button "앱이 없으신가요? 지금 다운로드하세요." [ref=e695] [cursor=pointer]:
+        - img [ref=e696]
+        - generic [ref=e699]: 앱이 없으신가요? 지금 다운로드하세요.
+      - generic [ref=e700]:
+        - generic [ref=e701]:
+          - generic [ref=e702]
+          - generic [ref=e707]: 항상 앱에서 열기
+        - button "앱에서 열기" [ref=e708] [cursor=pointer]
+    - status [ref=e127]: 파일 가져오기를 해보세요 이 파일을 가져와 Notion 데이터베이스에서 직접 콘텐츠를 편집할 수 있습니다.
+    - alert [ref=e128]
+  - iframe [ref=e129]:
+    

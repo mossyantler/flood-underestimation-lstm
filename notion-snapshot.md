@@ -1,0 +1,24 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e5]:
+    - generic [ref=e7]:
+      - link "콘텐츠로 건너뛰기" [ref=e9] [cursor=pointer]:
+        - /url: "#main"
+        - generic [ref=e10]:
+          - text: 콘텐츠로 건너뛰기
+          - img [ref=e11]
+      - navigation "사이드바":
+        - generic [ref=e95]:
+          - generic [ref=e98]
+          - separator "왼쪽 및 오른쪽 방향키로 크기 조정" [ref=e582]
+      - generic [ref=e583]:
+        - banner [ref=e584]:
+          - generic [ref=e587]
+        - main [ref=e634]:
+          - group [ref=e637]
+        - region [ref=e1060]
+      - button "AI" [ref=e1065] [cursor=pointer]:
+        - img "Notion AI face" [ref=e1071]
+    - status [ref=e92]
+    - alert [ref=e93]
+  - iframe [ref=e94]:
+    

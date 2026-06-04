@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"echo \\\"=== expanded_drbc 스크립트 실재? ===\\\" && ls scripts/model/expanded_drbc/ 2>/dev/null | head -30 || echo \\\"DIR MISSING\\\" && echo \\\"=== compute_alpha 정의 위치 검색 ===\\\" && grep -rn 'def comput...",
+  "error": "Exit code 2\n=== expanded_drbc 스크립트 실재? ===\n=== compute_alpha 정의 위치 검색 ===",
+  "timestamp": "2026-05-31T05:58:29.655Z",
+  "retry_count": 1
+}
