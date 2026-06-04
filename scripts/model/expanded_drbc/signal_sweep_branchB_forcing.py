@@ -22,6 +22,7 @@ from pathlib import Path
 
 BASE = Path(__file__).resolve().parents[3]
 T = BASE / "output/model_analysis/primary/metrics/tables"
+LOC = BASE / "output/model_analysis/band_signal/band_shape/tables"
 NCDIR = BASE / "data/CAMELSH_generic/drbc_expanded_observed_test/time_series"
 OUT = BASE / "output/model_analysis/band_signal/signal_sweep/tables"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -80,20 +81,41 @@ def forcing_features(basin, peak_t):
 
 
 def build(scope, fn):
-    tgt = pd.read_csv(T / fn, comment="#")
+    tgt = pd.read_csv(fn, comment="#")
     tgt["basin_id"] = tgt["basin_id"].astype(str).str.zfill(8)
     tgt["peak_time"] = pd.to_datetime(tgt["peak_time"]).astype(str)
     tgt["oc"] = tgt["obs_class"].map(OC)
     tgt = tgt.dropna(subset=["oc"])
-    # peak당 obs_class 평균(seed 묶음)
-    agg = tgt.groupby(["basin_id", "peak_time"])["oc"].mean().reset_index()
+    agg = (
+        tgt.groupby(["basin_id", "peak_time"])
+        .agg(
+            oc=("oc", "median"),
+            oc_seed_mean=("oc", "mean"),
+            oc_seed_min=("oc", "min"),
+            oc_seed_max=("oc", "max"),
+            oc_seed_std=("oc", lambda s: s.std(ddof=0) if len(s) > 1 else 0.0),
+            oc_seed_n=("oc", "count"),
+        )
+        .reset_index()
+    )
 
     rows = []
     for _, r in agg.iterrows():
         f = forcing_features(r["basin_id"], r["peak_time"])
         if f is None:
             continue
-        f.update({"basin_id": r["basin_id"], "peak_time": r["peak_time"], "oc": r["oc"]})
+        f.update(
+            {
+                "basin_id": r["basin_id"],
+                "peak_time": r["peak_time"],
+                "oc": r["oc"],
+                "oc_seed_mean": r["oc_seed_mean"],
+                "oc_seed_min": r["oc_seed_min"],
+                "oc_seed_max": r["oc_seed_max"],
+                "oc_seed_std": r["oc_seed_std"],
+                "oc_seed_n": r["oc_seed_n"],
+            }
+        )
         rows.append(f)
     df = pd.DataFrame(rows)
     df.to_csv(OUT / f"branchB_features_{scope}.csv", index=False)
@@ -113,8 +135,8 @@ def build(scope, fn):
 
 print("Branch B 시작...")
 allr = []
-for scope, fn in [("q99", "ub_location_class_q99.csv"), ("noaa", "ub_location_class_noaa.csv")]:
-    allr.append(build(scope, fn))
+for scope, fn in [("q99", "location_class_q99.csv"), ("noaa", "location_class_noaa.csv")]:
+    allr.append(build(scope, LOC / fn))
 out = pd.concat(allr, ignore_index=True)
 out.to_csv(OUT / "branchB_spearman.csv", index=False)
 print("저장:", OUT / "branchB_spearman.csv")

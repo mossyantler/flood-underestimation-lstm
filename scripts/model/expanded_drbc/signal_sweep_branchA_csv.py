@@ -18,6 +18,7 @@ from pathlib import Path
 
 BASE = Path(__file__).resolve().parents[3]
 T = BASE / "output/model_analysis/primary/metrics/tables"
+LOC = BASE / "output/model_analysis/band_signal/band_shape/tables"
 OUT = BASE / "output/model_analysis/band_signal/signal_sweep/tables"
 OUT.mkdir(parents=True, exist_ok=True)
 SEEDS = [111, 222, 444]
@@ -83,7 +84,16 @@ def build(target_csv, scope):
         if not feats_per_seed:
             continue
         # seed 평균 + spread
-        rec = {"basin_id": b, "peak_time": pt, "oc": grp["oc"].iloc[0]}
+        rec = {
+            "basin_id": b,
+            "peak_time": pt,
+            "oc": float(grp["oc"].median()),
+            "oc_seed_mean": float(grp["oc"].mean()),
+            "oc_seed_min": float(grp["oc"].min()),
+            "oc_seed_max": float(grp["oc"].max()),
+            "oc_seed_std": float(grp["oc"].std(ddof=0)) if len(grp) > 1 else 0.0,
+            "oc_seed_n": int(grp["oc"].count()),
+        }
         keys = [k for k in feats_per_seed[0] if k not in ("q50_for_spread", "q99_for_spread")]
         for k in keys:
             rec[k] = np.nanmean([f[k] for f in feats_per_seed])
@@ -116,9 +126,9 @@ def build(target_csv, scope):
 
 print("Branch A 시작...")
 all_res = []
-for scope, fn in [("q99", "ub_location_class_q99.csv"), ("noaa", "ub_location_class_noaa.csv")]:
+for scope, fn in [("q99", "location_class_q99.csv"), ("noaa", "location_class_noaa.csv")]:
     print(f"  scope={scope}")
-    all_res.append(build(T / fn, scope))
+    all_res.append(build(LOC / fn, scope))
 out = pd.concat(all_res, ignore_index=True)
 out.to_csv(OUT / "branchA_spearman.csv", index=False)
 print("저장:", OUT / "branchA_spearman.csv")
