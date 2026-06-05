@@ -44,7 +44,7 @@ Tier 사이즈: bottom 29 / mid 28 / top 28 = 85 basins
 | | q95 | 0.387 | 0.680 | 0.212 | 0.0025 | 5.206 |
 | | q99 | 0.215 | 0.917 | 0.394 | 0.0077 | 7.828 |
 
-**Tier별 M1 NSE seed-median 경계** (`rq4a_nse_tier_assignments.csv`): bottom −171.8 ~ −0.11 (극단 음수 NSE basin 포함: 01443900 −171.8, 01483200 −136.5, 01480400 −107.7), mid −0.04 ~ 0.03, top 0.08 ~ 0.60.
+**Tier별 M1 NSE seed-median 경계** (`rq4a_nse_tier_assignments.csv`): bottom −171.8 ~ −0.42 (극단 음수 NSE basin 포함: 01443900 −171.8, 01483200 −136.5, 01480400 −107.7), mid −0.39 ~ 0.24, top 0.25 ~ 0.61.
 
 ## 핵심 패턴
 
