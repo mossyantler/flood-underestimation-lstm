@@ -50,15 +50,20 @@ uv run scripts/model/expanded_drbc/<script>.py
 ## 산출물
 
 ```text
-output/model_analysis/expanded_drbc_test/
-├── tables/     # rq1_*, rq2_*, rq3_*, rq4a_*, rq4b_*, cross_tab_*,
-│              # ub_location_class_*, ub_gap_trajectory_*, ub_band_shape_* CSV
-└── figures/    # rq1_*, rq2_*, rq3_*, rq4a_*, rq4b_*,
-               # ub_location_class_bar, ub_gap_trajectory, ub_band_shape_scatter,
-               # ub_hydrograph_fan PNG
+output/model_analysis/primary/metrics/
+├── data/required_series/seed{111,222,444}/required_series.csv
+├── data/raw_metrics/
+├── tables/     # rq1_*, rq2_*, rq3_*, rq4a_*, rq4b_*, cross_tab_* CSV
+└── figures/    # rq1_*, rq2_*, rq3_*, rq4a_*, rq4b_* PNG
+
+output/model_analysis/band_signal/
+├── band_shape/    # band_shape_*, location_class_*, hydrograph fan
+├── slope_signal/
+├── signal_sweep/
+└── method_compare/
 ```
 
-RQ-5 calibration·sharpness 산출물은 `scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py` 재활용 → `output/model_analysis/expanded_drbc_test/probabilistic_diagnostics/`.
+RQ-5 calibration·sharpness 산출물은 `scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py` 재활용 → `output/model_analysis/primary/calibration/`.
 
 ## 분석 문서
 

@@ -43,7 +43,7 @@ Model 2 `q50`이 Model 1 deterministic 대비 central performance를 큰 손해 
 | --- | --- |
 | 분석 문서 | [`01_q50_central.md`](01_q50_central.md) |
 | 주요 스크립트 | `scripts/model/expanded_drbc/compute_rq1_central_metrics.py` |
-| 산출물 | `output/model_analysis/expanded_drbc_test/tables/rq1_central_*` + `figures/rq1_*` |
+| 산출물 | `output/model_analysis/primary/metrics/tables/rq1_central_*` + `primary/metrics/figures/rq1_*` |
 | 해석 layer | L3 (운영 decision output) + Pairwise reading (q50 vs M1) |
 | 결과 요약 | NSE +0.149 / RMSE −0.273 / MAE −0.197 (basin-median delta, M2 q50 − M1) |
 
@@ -90,7 +90,7 @@ RQ-2 / RQ-3 효과가 basin이나 event-type에 따라 어떻게 다른가.
 | --- | --- |
 | 분석 문서 | [`05_calibration_sharpness.md`](05_calibration_sharpness.md) |
 | 주요 스크립트 | `scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py` (reuse) |
-| 산출물 | `output/model_analysis/expanded_drbc_test/probabilistic_diagnostics/` |
+| 산출물 | `output/model_analysis/primary/calibration/` |
 | 해석 layer | L1 + L2 + 일부 L3 |
 | 결과 요약 | q99 empirical coverage = 0.787 (nominal 0.99, undercoverage) / q99 mean pinball = 1.638 (가장 낮음) / Q99-exceedance tail hit-rate q99 = 0.563 |
 
@@ -143,25 +143,22 @@ RQ-0 (framework, methodology)
 ## 산출물 위치 요약
 
 ```text
-output/model_analysis/expanded_drbc_test/
-├── tables/
-│   ├── rq1_central_metrics_*.csv
-│   ├── rq2_q99_per_basin_thresholds.csv, rq2_q99_events_85basin.csv, rq2_q99_basin_warnings.csv
-│   ├── rq2_id_normalization_report.csv, rq2_noaa_basin_overlap_summary.csv, rq2_noaa_events_expanded_overlap.csv
-│   ├── rq2_alpha_event_peak_deficit_{q99,noaa}.csv + _summary.csv
-│   ├── rq2_beta_window_capture_{q99,noaa}.csv + _summary.csv
-│   ├── rq2_delta_threshold_recall_*.csv
-│   ├── rq3_far_*.csv, rq3_over_prediction_magnitude_*.csv
-│   ├── rq4a_nse_tier_*.csv
-│   ├── rq4b_event_type_metrics.csv, rq4b_event_type_mapping.csv, rq4b_noaa_annotation_unmatched.csv
-│   └── cross_tab_q99_noaa_sanity_*.csv
-├── figures/
-│   ├── rq1_central_metric_boxplots.png, rq1_paired_delta_scatter.png
-│   ├── rq2_alpha_by_tau.png, rq2_beta_by_tau.png, rq2_delta_recall_by_tau.png
-│   ├── rq3_cost_recall_tradeoff.png
-│   ├── rq4a_tier_metric_heatmap.png
-│   └── rq4b_event_type_bar.png
-└── probabilistic_diagnostics/      (RQ-5 — reuse)
+output/model_analysis/primary/
+├── metrics/
+│   ├── data/required_series/seed{111,222,444}/required_series.csv
+│   ├── data/raw_metrics/
+│   ├── tables/rq1_*, rq2_*, rq3_*, rq4a_*, rq4b_*, cross_tab_*.csv
+│   └── figures/rq1_*, rq2_*, rq3_*, rq4a_*, rq4b_*.png
+└── calibration/
+    ├── tables/quantile_*, upper_tail_*, tier_*, comparability_manifest.json
+    ├── figures/
+    └── report/report.md
+
+output/model_analysis/band_signal/
+├── band_shape/
+├── signal_sweep/
+├── slope_signal/
+└── method_compare/
 ```
 
 ## 해석 framework 연결

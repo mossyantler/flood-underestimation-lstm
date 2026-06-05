@@ -17,7 +17,7 @@ Outputs
 -------
 - tables/rq2_id_normalization_report.csv
 - tables/rq2_noaa_basin_overlap_summary.csv
-- tables/rq2_noaa_events_expanded_overlap.csv
+- tables/rq2_noaa_events_overlap.csv
 - tables/rq4b_event_type_mapping.csv
 - tables/rq4b_noaa_annotation_unmatched.csv
 
@@ -158,7 +158,7 @@ def main() -> None:
         "flood_tier", "noaa_corroborated", "period",
     ]
     events_overlap = catalog[keep_cols].rename(columns={"peak_discharge_cms": "peak_obs"})
-    events_overlap_path = tables_dir / "rq2_noaa_events_expanded_overlap.csv"
+    events_overlap_path = tables_dir / "rq2_noaa_events_overlap.csv"
     events_overlap.to_csv(events_overlap_path, index=False)
     print(f"[B2] wrote {events_overlap_path} ({len(events_overlap)} rows)", flush=True)
 

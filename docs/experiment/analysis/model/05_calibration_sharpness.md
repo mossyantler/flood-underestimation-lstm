@@ -17,7 +17,7 @@ Model 2의 `q50 / q90 / q95 / q99`가 quantile forecast로서 얼마나 잘 cali
 산출물:
 
 ```text
-output/model_analysis/expanded_drbc_test/probabilistic_diagnostics/
+output/model_analysis/primary/calibration/
   quantile_pinball_summary.csv
   quantile_pinball_by_stratum.csv
   quantile_calibration_summary.csv
@@ -31,7 +31,7 @@ output/model_analysis/expanded_drbc_test/probabilistic_diagnostics/
   upper_tail_pinball_proxy.csv  + _agg.csv
   comparability_manifest.json
   report/report.md
-  figures/{primary_all_quantile_calibration, primary_pinball_by_stratum, primary_q99_q50_spread_by_stratum, tier_calibration_by_iqr_distance}.png
+  figures/{all_quantile_calibration,pinball_by_stratum,q99_q50_spread_by_stratum,tier_calibration_by_iqr_distance}.png
 ```
 
 ## 해석 기준 (RQ-0 framework)

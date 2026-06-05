@@ -62,7 +62,7 @@ export const figureAssets = {
     caption:
       "q99가 peak bias 완화에는 유효하지만 calibrated 99% interval로 해석하면 안 되는 근거를 보여준다.",
     source:
-      "output/model_analysis/probabilistic_diagnostics/figures/primary_all_quantile_calibration.png",
+      "output/model_analysis/primary/calibration/figures/all_quantile_calibration.png",
   },
 } satisfies Record<string, FigureAsset>;
 

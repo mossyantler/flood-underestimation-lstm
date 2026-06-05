@@ -384,7 +384,7 @@ assert ordered[i] >= ordered[i + 1] - 1e-9, (
 
 #### NOAA 확인 홍수 사건 점검
 
-위의 결과는 "Q99 기준선을 넘은 사건" 전체를 대상으로 했다. 더 엄격한 점검으로, NOAA(National Oceanic and Atmospheric Administration, 미국 해양대기청)가 실제 홍수로 공식 확인한 사건만 모은 별도 집합(평가 기간에 겹치는 21개 유역, 65개 사건)으로도 같은 분석을 했다. 이 사건 목록은 `tables/rq2_noaa_events_expanded_overlap.csv`에서 읽어 오는데, α·β 스크립트가 이 표를 불러올 때 85개 평가 유역에 드는 사건(`in_expanded_85`)이면서 평가 기간(2014~2016년)에 일어난 사건만 남기도록 코드에서 추려 낸다.
+위의 결과는 "Q99 기준선을 넘은 사건" 전체를 대상으로 했다. 더 엄격한 점검으로, NOAA(National Oceanic and Atmospheric Administration, 미국 해양대기청)가 실제 홍수로 공식 확인한 사건만 모은 별도 집합(평가 기간에 겹치는 21개 유역, 65개 사건)으로도 같은 분석을 했다. 이 사건 목록은 `output/model_analysis/primary/metrics/tables/rq2_noaa_events_overlap.csv`에서 읽어 오는데, α·β 스크립트가 이 표를 불러올 때 85개 평가 유역에 드는 사건(`in_expanded_85`)이면서 평가 기간(2014~2016년)에 일어난 사건만 남기도록 코드에서 추려 낸다.
 
 | 예측선 | α (NOAA 사건) | β (NOAA 사건) |
 | --- | ---: | ---: |

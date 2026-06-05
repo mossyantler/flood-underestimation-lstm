@@ -12,7 +12,7 @@ Groups with < 5 events are merged into "Other". Per group: α (B3-NOAA) median, 
 FAR and over-pred basin-subset medians use the basin set that contributed events of that type.
 
 Inputs:
-- tables/rq2_noaa_events_expanded_overlap.csv (B2; in_expanded_85 True only)
+- tables/rq2_noaa_events_overlap.csv (B2; in_expanded_85 True only)
 - tables/rq2_alpha_event_peak_deficit_noaa.csv (B3 NOAA scope)
 - tables/rq2_beta_window_capture_noaa.csv (B4 NOAA scope)
 - tables/rq3_far_per_basin_seed.csv, rq3_over_prediction_magnitude_per_basin_seed.csv
@@ -53,7 +53,7 @@ def main() -> None:
     figures_dir = args.output_dir / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
 
-    events = pd.read_csv(tables_dir / "rq2_noaa_events_expanded_overlap.csv", dtype={"basin_id": str}, parse_dates=["peak_time"])
+    events = pd.read_csv(tables_dir / "rq2_noaa_events_overlap.csv", dtype={"basin_id": str}, parse_dates=["peak_time"])
     events["basin_id"] = events["basin_id"].map(normalize_basin_id)
     test_start = pd.Timestamp("2014-01-01")
     test_end = pd.Timestamp("2016-12-31 23:00:00")

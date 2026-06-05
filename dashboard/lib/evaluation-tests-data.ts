@@ -2,16 +2,16 @@
 // Do not edit values by hand. Regenerate after expanded first/extreme reruns.
 
 export const evaluationTestsSnapshot = {
-  "generatedAt": "2026-05-21T05:57:25Z",
+  "generatedAt": "2026-06-04T15:53:07Z",
   "sources": {
     "expandedManifest": "configs/basin_splits/drbc_expanded_observed_test/manifest.csv",
-    "expandedFirstSummary": "output/model_analysis/expanded_drbc_test/tables/primary_summary_by_seed.csv",
+    "expandedFirstSummary": "output/model_analysis/primary/metrics/tables/summary_by_seed.csv",
     "expandedFirstRunner": "scripts/runs/official/run_expanded_drbc_test_evaluation.sh",
-    "extremeRainPrimaryLong": "output/model_analysis/extreme_rain/primary/analysis/extreme_rain_stress_error_table_long.csv",
+    "extremeRainPrimaryLong": "output/model_analysis/q99_analysis/performance/tables/extreme_rain_stress_error_table_long.csv",
     "extremeRainRunner": "scripts/runs/official/run_subset300_extreme_rain_stress_test.sh",
-    "confirmedFloodPerformance": "output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv",
-    "confirmedFloodCatalog": "output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv",
-    "confirmedFloodHydrographs": "output/model_analysis/confirmed_flood/hydrographs/confirmed_flood_hydrograph_manifest.csv"
+    "confirmedFloodPerformance": "output/model_analysis/confirmed_flood/tables/drbc_confirmed_flood_performance.csv",
+    "confirmedFloodCatalog": "output/model_analysis/confirmed_flood/data/catalog/drbc_confirmed_flood_event_catalog.csv",
+    "confirmedFloodHydrographs": "output/model_analysis/confirmed_flood/gallery/confirmed_flood_hydrograph_manifest.csv"
   },
   "tests": [
     {
@@ -21,7 +21,7 @@ export const evaluationTestsSnapshot = {
       "status": "ready",
       "basis": "expanded DRBC observed test",
       "coverage": "85/85 basins",
-      "primarySource": "output/model_analysis/expanded_drbc_test/tables/primary_summary_by_seed.csv",
+      "primarySource": "output/model_analysis/primary/metrics/tables/summary_by_seed.csv",
       "runner": "scripts/runs/official/run_expanded_drbc_test_evaluation.sh",
       "summary": {
         "expandedBasins": 85,
@@ -105,15 +105,15 @@ export const evaluationTestsSnapshot = {
       "id": "extreme",
       "label": "Extreme test",
       "route": "/analysis/stress",
-      "status": "needs-expanded-rerun",
+      "status": "ready",
       "basis": "expanded DRBC extreme-rain stress",
-      "coverage": "38/85 basins",
-      "primarySource": "output/model_analysis/extreme_rain/primary/analysis/extreme_rain_stress_error_table_long.csv",
+      "coverage": "85/85 basins",
+      "primarySource": "output/model_analysis/q99_analysis/performance/tables/extreme_rain_stress_error_table_long.csv",
       "runner": "scripts/runs/official/run_subset300_extreme_rain_stress_test.sh",
       "summary": {
         "expandedBasins": 85,
-        "currentBasins": 38,
-        "events": 236,
+        "currentBasins": 85,
+        "events": 534,
         "seeds": [
           111,
           222,
@@ -122,7 +122,7 @@ export const evaluationTestsSnapshot = {
         "predictorCount": 5
       },
       "rows": [],
-      "interpretation": "현재 stress table은 기존 primary/all 계열이다. Expanded basin universe로 stress catalog와 inference를 다시 만든 뒤 dashboard 공식값으로 승격한다."
+      "interpretation": "Expanded basin universe 기준 extreme-rain stress result가 준비됐다."
     },
     {
       "id": "confirmed",
@@ -131,13 +131,13 @@ export const evaluationTestsSnapshot = {
       "status": "ready",
       "basis": "NWS flood-stage confirmed events",
       "coverage": "623 events / 48 basins",
-      "primarySource": "output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv",
+      "primarySource": "output/model_analysis/confirmed_flood/tables/drbc_confirmed_flood_performance.csv",
       "runner": "scripts/model/confirmed_flood/export_confirmed_flood_dashboard_snapshot.py",
       "summary": {
         "events": 623,
         "basins": 48,
         "catalogEvents": 664,
-        "hydrographs": 623,
+        "hydrographs": 0,
         "seeds": [
           111,
           222,

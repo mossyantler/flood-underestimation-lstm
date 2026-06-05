@@ -14,9 +14,9 @@
 
 세 분석을 담당하는 스크립트와 산출물 폴더는 다음과 같다.
 
-- 유역별 차이(RQ-4a): `scripts/model/expanded_drbc/compute_rq4a_nse_tier_stratify.py` → `output/model_analysis/expanded_drbc_test/tables/`
-- 홍수 유형별 차이(RQ-4b): `scripts/model/expanded_drbc/compute_rq4b_event_type_stratify.py` → `output/model_analysis/expanded_drbc_test/tables/`
-- 예측선 품질 점검(RQ-5): `scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py` → `output/model_analysis/expanded_drbc_test/probabilistic_diagnostics/`
+- 유역별 차이(RQ-4a): `scripts/model/expanded_drbc/compute_rq4a_nse_tier_stratify.py` → `output/model_analysis/primary/metrics/tables/`
+- 홍수 유형별 차이(RQ-4b): `scripts/model/expanded_drbc/compute_rq4b_event_type_stratify.py` → `output/model_analysis/primary/metrics/tables/`
+- 예측선 품질 점검(RQ-5): `scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py` → `output/model_analysis/primary/calibration/`
 
 ---
 

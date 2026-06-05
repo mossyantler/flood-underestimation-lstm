@@ -7,7 +7,7 @@ Model 2 probabilistic quantile LSTM의 conditional median output `q50`이 Model 
 ## 데이터
 
 - expanded DRBC observed test (85 basin, seed 111/222/444, test 2014-2016)
-- 모델 출력: `output/model_analysis/expanded_drbc_test/required_series/seed{111,222,444}/primary_required_series.csv`
+- 모델 출력: `output/model_analysis/primary/metrics/data/required_series/seed{111,222,444}/required_series.csv`
 - 비교 대상: Model 1 deterministic prediction (`model1`), Model 2 conditional median (`q50`)
 
 ## 방법

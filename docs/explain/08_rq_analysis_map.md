@@ -132,7 +132,9 @@ flowchart TD
 - `docs/experiment/analysis/model/` — RQ별 분석 문서 (표의 "분석 문서" 열).
 - `docs/experiment/method/model/` — `quantile_output_interpretation.md` (RQ-0 해석 framework) 한 개만 여기.
 - `scripts/model/expanded_drbc/` — RQ별 계산 스크립트 (표의 "계산 스크립트" 열, 파일명만 표기). RQ-5용 한 개만 예외로 `scripts/model/hydrograph/`.
-- `output/model_analysis/expanded_drbc_test/` — 산출물. `tables/`(수치 표), `figures/`(그림).
+- `output/model_analysis/primary/metrics/` — RQ-1~4 산출물. `tables/`(수치 표), `figures/`(그림), `data/required_series/`(seed별 모델 출력).
+- `output/model_analysis/primary/calibration/` — RQ-5 calibration·sharpness 산출물.
+- `output/model_analysis/band_signal/` — 관측 위치 구간과 신호 분석 산출물.
 
 ---
 
@@ -544,7 +546,7 @@ RQ-2와 RQ-3이 "운영상 도움이 되는가"(실용적 관점)를 봤다면, 
 
 #### 분석 목적
 
-분석 문서 `05_calibration_sharpness.md`가 담당한다. RQ-5는 전용 스크립트를 새로 만들지 않고, 이미 있던 확률 예측 진단 스크립트 `analyze_expanded_drbc_probabilistic_diagnostics.py`[^src-prob-diag]를 재사용한다. 이 스크립트도 다른 RQ와 같은 용어 자물쇠(`expanded_drbc.py`[^src-lib])에서 분위 순서·기간 같은 상수를 불러와 일관성을 맞춘다. 결과는 `output/model_analysis/expanded_drbc_test/probabilistic_diagnostics/` 아래에 떨어진다.
+분석 문서 `05_calibration_sharpness.md`가 담당한다. RQ-5는 전용 스크립트를 새로 만들지 않고, 이미 있던 확률 예측 진단 스크립트 `analyze_expanded_drbc_probabilistic_diagnostics.py`[^src-prob-diag]를 재사용한다. 이 스크립트도 다른 RQ와 같은 용어 자물쇠(`expanded_drbc.py`[^src-lib])에서 분위 순서·기간 같은 상수를 불러와 일관성을 맞춘다. 결과는 `output/model_analysis/primary/calibration/` 아래에 떨어진다.
 
 | 평가지표       | 범위                         | 최적화 방향                  |
 | -------------- | ---------------------------- | ---------------------------- |

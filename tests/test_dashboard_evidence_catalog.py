@@ -82,7 +82,7 @@ class DashboardEvidenceCatalogTests(unittest.TestCase):
     def test_scanner_excludes_raw_timeseries_by_default(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            raw = root / "output/model_analysis/expanded_drbc_test/raw_timeseries/model1_seed111_epoch025.csv"
+            raw = root / "output/model_analysis/primary/metrics/data/raw_timeseries/model1_seed111_epoch025.csv"
             raw.parent.mkdir(parents=True)
             raw.write_text("a,b\n1,2\n", encoding="utf-8")
             candidates = scanner.scan_paths(root)
@@ -92,8 +92,8 @@ class DashboardEvidenceCatalogTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             doc = root / "docs/experiment/analysis/model/02_primary_high_flow_peak_performance.md"
-            fig = root / "output/model_analysis/probabilistic_diagnostics/figures/primary_all_quantile_calibration.png"
-            summary = root / "output/model_analysis/expanded_drbc_test/analysis_summary.json"
+            fig = root / "output/model_analysis/primary/calibration/figures/all_quantile_calibration.png"
+            summary = root / "output/model_analysis/primary/metrics/report/analysis_summary.json"
             for path in [doc, fig, summary]:
                 path.parent.mkdir(parents=True, exist_ok=True)
                 if path.suffix == ".md":
@@ -104,10 +104,10 @@ class DashboardEvidenceCatalogTests(unittest.TestCase):
             rels = {row.source_path for row in candidates}
             self.assertIn("docs/experiment/analysis/model/02_primary_high_flow_peak_performance.md", rels)
             self.assertIn(
-                "output/model_analysis/probabilistic_diagnostics/figures/primary_all_quantile_calibration.png",
+                "output/model_analysis/primary/calibration/figures/all_quantile_calibration.png",
                 rels,
             )
-            self.assertIn("output/model_analysis/expanded_drbc_test/analysis_summary.json", rels)
+            self.assertIn("output/model_analysis/primary/metrics/report/analysis_summary.json", rels)
 
     def test_scanner_script_runs_as_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

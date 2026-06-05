@@ -26,25 +26,37 @@ Model 2의 `q50`은 conditional median (M1 deterministic 대응). `q90/q95/q99`�
 ## 산출물 위치
 
 ```text
-output/model_analysis/expanded_drbc_test/
-├── tables/
-│   ├── rq1_central_metrics_*.csv
-│   ├── rq2_q99_per_basin_thresholds.csv, rq2_q99_events_85basin.csv, rq2_q99_basin_warnings.csv
-│   ├── rq2_id_normalization_report.csv, rq2_noaa_basin_overlap_summary.csv, rq2_noaa_events_expanded_overlap.csv
-│   ├── rq2_alpha_event_peak_deficit_{q99,noaa}.csv + _summary.csv
-│   ├── rq2_beta_window_capture_{q99,noaa}.csv + _summary.csv
-│   ├── rq2_delta_threshold_recall_*.csv
-│   ├── rq3_far_*.csv, rq3_over_prediction_magnitude_*.csv
-│   ├── rq4a_nse_tier_*.csv
-│   ├── rq4b_event_type_metrics.csv, rq4b_event_type_mapping.csv, rq4b_noaa_annotation_unmatched.csv
-│   └── cross_tab_q99_noaa_sanity_*.csv
-├── figures/
-│   ├── rq1_central_metric_boxplots.png, rq1_paired_delta_scatter.png
-│   ├── rq2_alpha_by_tau.png, rq2_beta_by_tau.png, rq2_delta_recall_by_tau.png
-│   ├── rq3_cost_recall_tradeoff.png
-│   ├── rq4a_tier_metric_heatmap.png
-│   └── rq4b_event_type_bar.png
-└── probabilistic_diagnostics/      (RQ-5; analyze_expanded_drbc_probabilistic_diagnostics.py reuse)
+output/model_analysis/primary/
+├── metrics/
+│   ├── data/required_series/seed{111,222,444}/required_series.csv
+│   ├── data/raw_metrics/
+│   ├── tables/
+│   │   ├── rq1_central_metrics_*.csv
+│   │   ├── rq2_q99_per_basin_thresholds.csv, rq2_q99_events_85basin.csv, rq2_q99_basin_warnings.csv
+│   │   ├── rq2_id_normalization_report.csv, rq2_noaa_basin_overlap_summary.csv, rq2_noaa_events_overlap.csv
+│   │   ├── rq2_alpha_event_peak_deficit_{q99,noaa}.csv + _summary.csv
+│   │   ├── rq2_beta_window_capture_{q99,noaa}.csv + _summary.csv
+│   │   ├── rq2_delta_threshold_recall_*.csv
+│   │   ├── rq3_far_*.csv, rq3_over_prediction_magnitude_*.csv
+│   │   ├── rq4a_nse_tier_*.csv
+│   │   ├── rq4b_event_type_metrics.csv, rq4b_event_type_mapping.csv, rq4b_noaa_annotation_unmatched.csv
+│   │   └── cross_tab_q99_noaa_sanity_*.csv
+│   └── figures/
+│       ├── rq1_central_metric_boxplots.png, rq1_paired_delta_scatter.png
+│       ├── rq2_alpha_by_tau.png, rq2_beta_by_tau.png, rq2_delta_recall_by_tau.png
+│       ├── rq3_cost_recall_tradeoff.png
+│       ├── rq4a_tier_metric_heatmap.png
+│       └── rq4b_event_type_bar.png
+└── calibration/
+    ├── tables/
+    ├── figures/
+    └── report/report.md
+
+output/model_analysis/band_signal/
+├── band_shape/
+├── signal_sweep/
+├── slope_signal/
+└── method_compare/
 ```
 
 ## 분석 스크립트

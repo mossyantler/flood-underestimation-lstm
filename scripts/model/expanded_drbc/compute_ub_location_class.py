@@ -30,7 +30,7 @@ Aggregation: per-event class → per-basin-seed class fraction →
 Inputs
 ------
 - tables/rq2_q99_events_85basin.csv (B1)
-- tables/rq2_noaa_events_expanded_overlap.csv (B2)
+- tables/rq2_noaa_events_overlap.csv (B2)
 - required_series/seed{111,222,444}/required_series.csv
 
 Outputs
@@ -303,7 +303,7 @@ def main() -> None:
     q99_events["basin_id"] = q99_events["basin_id"].map(normalize_basin_id)
 
     noaa_events = pd.read_csv(
-        tables_dir / "rq2_noaa_events_expanded_overlap.csv",
+        tables_dir / "rq2_noaa_events_overlap.csv",
         dtype={"basin_id": str},
         parse_dates=["peak_time"],
     )

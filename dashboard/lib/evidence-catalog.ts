@@ -1,6 +1,6 @@
 import type { AnalysisModuleCopy, EvidenceItem } from "./evidence-types";
 
-export const evidenceCatalogInputHash = "f5ddeb94b97f067738ca3545cafbd84940114ed39323d93adb96369e502a7416";
+export const evidenceCatalogInputHash = "20628c2d7fd6d558ab4e56e33868e598468b757f4fb6defeefeb3d2342ed97a9";
 
 export const evidenceModules = [
   {
@@ -112,8 +112,8 @@ export const evidenceItems = [
     "role": "canonical",
     "priority": 1,
     "showInDashboard": true,
-    "sourcePath": "output/model_analysis/probabilistic_diagnostics/report/probabilistic_diagnostics_report.md",
-    "docPath": "output/model_analysis/probabilistic_diagnostics/report/probabilistic_diagnostics_report.md",
+    "sourcePath": "output/model_analysis/primary/calibration/report/report.md",
+    "docPath": "output/model_analysis/primary/calibration/report/report.md",
     "analysisPurpose": "q99 calibration caveat",
     "shortDescription": "Quantile coverage and pinball interpretation",
     "tags": [
@@ -132,9 +132,9 @@ export const evidenceItems = [
     "role": "canonical",
     "priority": 1,
     "showInDashboard": true,
-    "sourcePath": "output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv",
+    "sourcePath": "output/model_analysis/confirmed_flood/tables/drbc_confirmed_flood_performance.csv",
     "generatorPath": "scripts/model/confirmed_flood/export_confirmed_flood_dashboard_snapshot.py",
-    "tablePath": "output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv",
+    "tablePath": "output/model_analysis/confirmed_flood/tables/drbc_confirmed_flood_performance.csv",
     "analysisPurpose": "NWS flood-stage event audit",
     "shortDescription": "Confirmed flood model performance rows",
     "tags": [
@@ -146,17 +146,17 @@ export const evidenceItems = [
   {
     "id": "hydrograph-candidates",
     "moduleId": "analysis/hydrograph",
-    "title": "Representative hydrograph candidates",
+    "title": "Q99 event table",
     "section": "analysis",
     "module": "hydrograph",
     "kind": "table",
     "role": "canonical",
     "priority": 1,
     "showInDashboard": true,
-    "sourcePath": "output/model_analysis/paper_result_assets/tables/representative_hydrograph_candidates.csv",
-    "tablePath": "output/model_analysis/paper_result_assets/tables/representative_hydrograph_candidates.csv",
+    "sourcePath": "output/model_analysis/primary/metrics/tables/rq2_q99_events_85basin.csv",
+    "tablePath": "output/model_analysis/primary/metrics/tables/rq2_q99_events_85basin.csv",
     "analysisPurpose": "Hydrograph representative evidence",
-    "shortDescription": "Selected basin/event hydrograph candidates",
+    "shortDescription": "Q99 exceedance event windows",
     "tags": [
       "analysis",
       "hydrograph"
@@ -173,9 +173,9 @@ export const evidenceItems = [
     "role": "canonical",
     "priority": 1,
     "showInDashboard": true,
-    "sourcePath": "output/model_analysis/overall_analysis/main_comparison/figures/overall_conclusion/overall_conclusion_high_flow_quantiles.png",
-    "docPath": "docs/experiment/analysis/model/02_primary_high_flow_peak_performance.md",
-    "chartPath": "output/model_analysis/overall_analysis/main_comparison/figures/overall_conclusion/overall_conclusion_high_flow_quantiles.png",
+    "sourcePath": "output/model_analysis/primary/metrics/figures/rq2_delta_recall_by_tau.png",
+    "docPath": "docs/experiment/analysis/model/02_upper_quantile_peak_under.md",
+    "chartPath": "output/model_analysis/primary/metrics/figures/rq2_delta_recall_by_tau.png",
     "analysisPurpose": "Q99 exceedance quantile comparison",
     "shortDescription": "Primary chart for peak underestimation claim",
     "tags": [
@@ -195,8 +195,8 @@ export const evidenceItems = [
     "role": "canonical",
     "priority": 1,
     "showInDashboard": true,
-    "sourcePath": "docs/experiment/analysis/model/02_primary_high_flow_peak_performance.md",
-    "docPath": "docs/experiment/analysis/model/02_primary_high_flow_peak_performance.md",
+    "sourcePath": "docs/experiment/analysis/model/02_upper_quantile_peak_under.md",
+    "docPath": "docs/experiment/analysis/model/02_upper_quantile_peak_under.md",
     "analysisPurpose": "Model 2 q99 peak underestimation claim",
     "shortDescription": "Main claim interpretation doc",
     "tags": [
@@ -272,20 +272,20 @@ export const evidenceItems = [
   {
     "id": "paper-assets-report",
     "moduleId": "overview/status",
-    "title": "Paper result assets report",
+    "title": "Primary metrics README",
     "section": "overview",
     "module": "status",
     "kind": "report",
     "role": "canonical",
     "priority": 1,
     "showInDashboard": true,
-    "sourcePath": "output/model_analysis/paper_result_assets/report/paper_result_assets_report.md",
-    "docPath": "output/model_analysis/paper_result_assets/report/paper_result_assets_report.md",
+    "sourcePath": "output/model_analysis/primary/metrics/README.md",
+    "docPath": "output/model_analysis/primary/metrics/README.md",
     "analysisPurpose": "Homepage result evidence",
-    "shortDescription": "Paper-ready result asset summary",
+    "shortDescription": "Primary metrics output summary",
     "tags": [
       "overview",
-      "paper-assets"
+      "primary-metrics"
     ],
     "status": "ready"
   },

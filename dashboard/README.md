@@ -44,12 +44,13 @@ NODE_OPTIONS=--no-experimental-webstorage npm run dev -- -p 3001
 - `output/model_analysis/overall_analysis/main_comparison/tables/overall_performance_high_flow_quantile_summary.csv`
 - `output/model_analysis/overall_analysis/main_comparison/tables/primary_epoch_summary.csv`
 - `output/model_analysis/overall_analysis/main_comparison/tables/overall_performance_seed_delta_summary_long.csv`
-- `output/model_analysis/probabilistic_diagnostics/quantile_calibration_summary.csv`
-- `output/model_analysis/extreme_rain/primary/analysis/analysis_summary.json`
-- `output/model_analysis/confirmed_flood/performance/drbc_confirmed_flood_performance.csv`
-- `output/model_analysis/confirmed_flood/inference/confirmed_flood_event_windows_used.csv`
-- `output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv`
-- `output/model_analysis/confirmed_flood/coverage/nws_flood_stage_coverage.csv`
+- `output/model_analysis/primary/metrics/tables/summary_by_seed.csv`
+- `output/model_analysis/primary/calibration/tables/quantile_calibration_summary.csv`
+- `output/model_analysis/q99_analysis/performance/tables/extreme_rain_stress_error_table_long.csv`
+- `output/model_analysis/confirmed_flood/tables/drbc_confirmed_flood_performance.csv`
+- `output/model_analysis/confirmed_flood/data/inference/event_windows_used.csv`
+- `output/model_analysis/confirmed_flood/data/catalog/drbc_confirmed_flood_event_catalog.csv`
+- `output/model_analysis/confirmed_flood/data/nws_flood_stage_coverage.csv`
 - `basins/drbc_boundary/drb_bnd_polygon.shp`
 - `basins/CAMELSH_data/shapefiles/CAMELSH_shapefile.shp`
 - `docs/experiment/analysis/basin/subset300_representativeness_report.md`
@@ -79,7 +80,7 @@ uv run --script scripts/model/confirmed_flood/export_confirmed_flood_dashboard_s
 - `/figures/stress-tradeoff.png` ← `output/model_analysis/overall_analysis/main_comparison/figures/overall_conclusion/overall_conclusion_stress_tradeoff.png`
 - `/figures/checkpoint-sensitivity.png` ← `output/model_analysis/paper_result_assets/figures/checkpoint_sensitivity_compact.png`
 - `/figures/event-regime-delta.png` ← `output/model_analysis/paper_result_assets/figures/event_regime_paired_delta_compact.png`
-- `/figures/quantile-calibration.png` ← `output/model_analysis/probabilistic_diagnostics/figures/primary_all_quantile_calibration.png`
+- `/figures/quantile-calibration.png` ← `output/model_analysis/primary/calibration/figures/all_quantile_calibration.png`
 - `/figures/input-coverage-overview.png` ← `output/basin/timeseries/input_coverage/figures/overview.png`
 
 ## Dataset Evidence Explorer

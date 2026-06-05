@@ -507,7 +507,7 @@ const DETAIL_CONTENT: Record<string, DetailContent> = {
   "analysis/calibration": {
     title: "Calibration",
     lede: "Calibration detail은 q99가 peak bias 완화에는 유용해도 calibrated 99% interval이라는 뜻은 아님을 분리한다.",
-    sourcePath: "output/model_analysis/probabilistic_diagnostics/",
+    sourcePath: "output/model_analysis/primary/calibration/",
     panels: (
       <Panel kicker="Quantile diagnostics" title="Coverage / pinball">
         <div className="data-block">

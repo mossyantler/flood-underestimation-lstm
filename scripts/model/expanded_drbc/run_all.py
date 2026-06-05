@@ -19,8 +19,8 @@ from typing import Sequence
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/primary/metrics"
-DEFAULT_INPUT_DIR = DEFAULT_OUTPUT_DIR / "required_series"
-DEFAULT_RAW_METRICS_DIR = DEFAULT_OUTPUT_DIR / "raw_metrics"
+DEFAULT_INPUT_DIR = DEFAULT_OUTPUT_DIR / "data/required_series"
+DEFAULT_RAW_METRICS_DIR = DEFAULT_OUTPUT_DIR / "data/raw_metrics"
 DEFAULT_TS_DIR = (
     REPO_ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test/time_series"
 )

@@ -87,7 +87,7 @@ NOAA 사건 범위는 이름 때문에 혼동하기 쉽다. 실제 입력은 `ou
 | --- | --- |
 | `output/model_analysis/primary/metrics/tables/rq2_id_normalization_report.csv` | NOAA `usgs_id`와 expanded basin id 정규화·매칭 확인 |
 | `output/model_analysis/primary/metrics/tables/rq2_noaa_basin_overlap_summary.csv` | NOAA catalog 유역과 DRBC 85개 유역의 교집합 요약 |
-| `output/model_analysis/primary/metrics/tables/rq2_noaa_events_expanded_overlap.csv` | catalog row에 `in_expanded_85`, 사건 창, 대표 event type을 붙인 표 |
+| `output/model_analysis/primary/metrics/tables/rq2_noaa_events_overlap.csv` | catalog row에 `in_expanded_85`, 사건 창, 대표 event type을 붙인 표 |
 | `output/model_analysis/primary/metrics/tables/rq4b_event_type_mapping.csv` | 대표 event type별 사건 수·유역 수 |
 | `output/model_analysis/primary/metrics/tables/rq4b_noaa_annotation_unmatched.csv` | NOAA 문구가 있으나 정규식 유형에 걸리지 않은 문구 목록 |
 

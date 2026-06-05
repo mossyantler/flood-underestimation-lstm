@@ -12,7 +12,7 @@ no 12h secondary buffer.
 
 Inputs:
 - tables/rq2_q99_events_85basin.csv (B1)
-- tables/rq2_noaa_events_expanded_overlap.csv (B2; in_expanded_85 True, test period)
+- tables/rq2_noaa_events_overlap.csv (B2; in_expanded_85 True, test period)
 
 Outputs:
 - tables/cross_tab_q99_noaa_sanity_per_basin.csv
@@ -52,7 +52,7 @@ def main() -> None:
     q99["basin_id"] = q99["basin_id"].map(normalize_basin_id)
 
     noaa = pd.read_csv(
-        tables_dir / "rq2_noaa_events_expanded_overlap.csv",
+        tables_dir / "rq2_noaa_events_overlap.csv",
         dtype={"basin_id": str},
         parse_dates=["peak_time", "window_start", "window_end"],
     )

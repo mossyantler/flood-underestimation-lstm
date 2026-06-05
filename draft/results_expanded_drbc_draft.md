@@ -112,6 +112,6 @@ q50~q99 밴드의 정적 형태와 상승 사면 가파름을 관측 없이 계�
 
 - 주요 분석 지도: `docs/experiment/analysis/model/00_research_question_analysis_map.md`
 - RQ별 문서: `docs/experiment/analysis/model/01_q50_central.md` ~ `05_calibration_sharpness.md`
-- 재생성된 표: `output/model_analysis/expanded_drbc_test/tables/`
-- 확률론적 진단: `output/model_analysis/expanded_drbc_test/probabilistic_diagnostics/`
+- 재생성된 표: `output/model_analysis/primary/metrics/tables/`
+- 확률론적 진단: `output/model_analysis/primary/calibration/`
 - RQ-1~4 재생성 명령: `uv run scripts/model/expanded_drbc/run_all.py`

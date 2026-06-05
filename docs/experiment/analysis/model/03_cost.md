@@ -11,7 +11,7 @@ upper quantile output(q90/q95/q99)이 peak underestimation을 줄이는 이득(R
 
 - expanded DRBC observed test (85 basin, seed 111/222/444, test 2014-2016)
 - per-basin Q99 threshold: train period 2000-2010 obs 분위 (`tables/rq2_q99_per_basin_thresholds.csv`)
-- 모델 출력: `output/model_analysis/expanded_drbc_test/required_series/seed{111,222,444}/`
+- 모델 출력: `output/model_analysis/primary/metrics/data/required_series/seed{111,222,444}/required_series.csv`
 
 ## 방법
 

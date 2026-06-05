@@ -167,7 +167,7 @@ def main() -> None:
     q99_events["basin_id"] = q99_events["basin_id"].map(normalize_basin_id)
 
     noaa_events = pd.read_csv(
-        tables_dir / "rq2_noaa_events_expanded_overlap.csv",
+        tables_dir / "rq2_noaa_events_overlap.csv",
         dtype={"basin_id": str},
         parse_dates=["peak_time", "window_start", "window_end"],
     )

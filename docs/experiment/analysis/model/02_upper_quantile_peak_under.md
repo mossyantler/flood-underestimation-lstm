@@ -14,8 +14,8 @@ Q99 (85 basin) + NOAA (overlap = 21 basin in test period) dual scope.
 
 - `tables/rq2_q99_per_basin_thresholds.csv` (B1; per-basin train-period Q99)
 - `tables/rq2_q99_events_85basin.csv` (B1; 926 events / 82 active basin)
-- `tables/rq2_noaa_events_expanded_overlap.csv` (B2; NOAA confirmed flood + dominant event-type)
-- 모델 출력: `required_series/seed{111,222,444}/primary_required_series.csv`
+- `output/model_analysis/primary/metrics/tables/rq2_noaa_events_overlap.csv` (B2; NOAA confirmed flood + dominant event-type)
+- 모델 출력: `output/model_analysis/primary/metrics/data/required_series/seed{111,222,444}/required_series.csv`
 
 ## 방법
 

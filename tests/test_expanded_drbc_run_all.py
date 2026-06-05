@@ -22,6 +22,9 @@ def test_expanded_drbc_run_all_locks_canonical_step_order() -> None:
         "B7 RQ-4a NSE tier stratify",
         "B8 RQ-4b event type stratify",
         "B9 Q99 NOAA cross-tab sanity",
+        "B10 UB obs location class",
+        "B11 UB gap trajectory",
+        "B12 UB band-shape prospective",
     ]
 
 
@@ -80,13 +83,44 @@ def test_expanded_drbc_run_all_builds_uv_commands_with_shared_and_step_inputs() 
         "--basin-dir",
         "tmp/basins",
     ]
-    assert commands[-1] == [
+    assert commands[9] == [
         "uv-test",
         "run",
         str(Path("scripts/model/expanded_drbc/compute_cross_tab_q99_noaa_sanity.py")),
         "--output-dir",
         "tmp/out",
     ]
+    assert commands[-1] == [
+        "uv-test",
+        "run",
+        str(Path("scripts/model/expanded_drbc/compute_ub_band_shape.py")),
+        "--output-dir",
+        "tmp/out",
+        "--input-dir",
+        "tmp/required",
+    ]
+
+
+def test_expanded_drbc_run_all_defaults_use_primary_metrics_data_dirs() -> None:
+    args = run_all.parse_args([])
+
+    assert args.output_dir == run_all.REPO_ROOT / "output/model_analysis/primary/metrics"
+    assert args.input_dir == args.output_dir / "data/required_series"
+    assert args.raw_metrics_dir == args.output_dir / "data/raw_metrics"
+    assert args.test_obs_csv == args.input_dir / "seed111/required_series.csv"
+
+
+def test_expanded_drbc_scripts_use_current_noaa_overlap_filename() -> None:
+    script_dir = run_all.REPO_ROOT / "scripts/model/expanded_drbc"
+    texts = {path: path.read_text() for path in script_dir.rglob("*.py")}
+
+    assert all(
+        "rq2_noaa_events_expanded_overlap.csv" not in text
+        for text in texts.values()
+    )
+    assert "rq2_noaa_events_overlap.csv" in (
+        script_dir / "build_noaa_mapping.py"
+    ).read_text()
 
 
 def test_expanded_drbc_run_all_returns_first_failed_step(monkeypatch) -> None:

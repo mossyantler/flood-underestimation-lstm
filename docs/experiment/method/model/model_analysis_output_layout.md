@@ -1,23 +1,68 @@
 # Model Analysis Output Layout
 
-이 문서는 `output/model_analysis/` 아래 산출물 폴더의 역할을 설명한다. 폴더명에는 더 이상 `subset300_` prefix를 붙이지 않는다. 현재 실험이 고정 300-basin main comparison이라는 사실은 config와 runner 이름에서 확인하고, 산출물 경로는 분석 목적 중심으로 읽는다.
+이 문서는 `output/model_analysis/` 아래 산출물 폴더의 현재 역할을 설명한다. 세부 배치 규칙은 `output/AGENTS.md`를 우선한다. 파일명에는 폴더명이 이미 주는 `confirmed_flood_`, `q99_`, `primary_`, `subset300_`, `expanded_drbc_` 같은 중복 접두어를 붙이지 않는다.
 
-| Folder | Purpose |
+## 현재 공식 구조
+
+| 폴더 | 형태 | 역할 |
+| --- | --- | --- |
+| `primary/` | 그룹형 | expanded DRBC observed test 85개 유역의 공식 Model 1/2 primary 결과. `metrics/`와 `calibration/`으로 분리한다. |
+| `confirmed_flood/` | 평탄형 | NWS flood-stage 기준 확인 홍수 event catalog와 관련 요약. Q99 사건을 대체하지 않는 보조 홍수 범위다. |
+| `q99_analysis/` | 그룹형 | 관측 Q99 초과 사건 중심 성능·원인 분석. `performance/`, `causes/`로 나눈다. |
+| `band_signal/` | 그룹형 | 관측 첨두가 `q50/q90/q95/q99` 예측 사다리 어디에 놓이는지와 그 신호를 분석한다. |
+| `shap/` | 그룹형 | 직접 SHAP 분석. `q99/`는 Q99 사건 조건부, `test_split/`은 전체 test split 조건부 분석이다. |
+| `natural_broad_comparison/` | 평탄형 또는 legacy | pre-expanded broad/natural robustness 보조 산출물. 현재 paper canonical primary 근거로 쓰지 않는다. |
+
+## `primary/` 하위 구조
+
+```text
+output/model_analysis/primary/
+├── metrics/
+│   ├── data/required_series/seed{111,222,444}/required_series.csv
+│   ├── data/raw_metrics/
+│   ├── tables/rq1_*, rq2_*, rq3_*, rq4a_*, rq4b_*, cross_tab_*.csv
+│   └── figures/rq1_*, rq2_*, rq3_*, rq4a_*, rq4b_*.png
+└── calibration/
+    ├── tables/quantile_*, upper_tail_*, tier_*, comparability_manifest.json
+    ├── figures/
+    └── report/report.md
+```
+
+`primary/metrics/`는 RQ-1~4와 Q99/NOAA cross-tab 산출물의 기준 위치다. 재생성 진입점은 `scripts/model/expanded_drbc/run_all.py`다.
+
+`primary/calibration/`은 RQ-5 calibration·sharpness 산출물의 기준 위치다. `coverage`는 "관측값이 예측 quantile 아래에 들어오는 비율"이며, lower quantile이 없으므로 `q99`를 calibrated 99% prediction interval이나 return-period estimate로 해석하지 않는다.
+
+## `band_signal/` 하위 구조
+
+```text
+output/model_analysis/band_signal/
+├── band_shape/
+├── slope_signal/
+├── signal_sweep/
+└── method_compare/
+```
+
+`band_signal/`은 관측 위치 구간(관측 첨두가 `q50`~`q99` 예측 사다리 어디에 놓이는지)과 그 위치를 예고하는 신호를 묶은 주제다.
+
+| 하위 폴더 | 역할 |
 | --- | --- |
-| `overall_analysis/` | Model 1/2의 전체 성능 분석 산출물이다. 공식 결과는 `main_comparison/`, epoch robustness는 `epoch_sensitivity/`, 이상치/방법 점검은 `result_checks/`, 실행 기록은 `run_records/`에 둔다. |
-| `quantile_analysis/` | 모든 validation checkpoint의 required-series와 q50/q90/q95/q99 hydrograph 분석 결과를 둔다. high-flow strata, peak-hour, quantile coverage, event-regime 분석과 event-level surrogate SHAP의 기준 입력이다. |
-| `extreme_rain/primary/` | validation 기준 primary checkpoint를 사용하고 rain event 시간축은 wet-footprint 기준으로 정렬한 extreme-rain exposure/stress-test 산출물이다. event catalog, inference required-series, paired delta aggregate, observed/sim-Q event plot, local peak quantile bracket, 대표 event의 prediction-overlaid flow graph diagnostic을 포함한다. |
-| `extreme_rain/all/` | primary 선택과 분리된 checkpoint sensitivity 진단용 extreme-rain sweep 산출물이다. validation epoch grid `005 / 010 / 015 / 020 / 025 / 030` 전체를 비교한다. |
-| `natural_broad_comparison/` | Pre-expanded legacy broad/natural robustness 산출물이다. 현재 공식 primary test는 expanded observed DRBC 85개 기준이므로 paper canonical 인용에는 사용하지 않는다. |
-| `../basin/timeseries/` | fixed split의 target/input coverage, basin time-series overview, 단일 sequence 구조 진단 산출물. 시간축 coverage는 basin/data support 성격이므로 `model_analysis/`가 아니라 `output/basin/timeseries/`에 둔다. |
+| `band_shape/` | 밴드 폭, 꼬리 모양, 위치 구간, gap trajectory, hydrograph fan. |
+| `slope_signal/` | 상승 기울기 기반 신호 분석. |
+| `signal_sweep/` | 강우·대류·유역·seed spread 후보 신호 탐색. |
+| `method_compare/` | 상승부 onset 검출법 비교. |
 
-`overall_analysis/` 안에서는 파일 역할을 폴더명으로 바로 알 수 있게 아래 구조를 사용한다.
+## `shap/` 하위 구조
 
-| Folder | Purpose |
-| --- | --- |
-| `overall_analysis/main_comparison/` | validation 기준 primary checkpoint에서 Model 1과 Model 2 `q50`을 비교한 공식 전체 성능 결과다. |
-| `overall_analysis/epoch_sensitivity/` | epoch `005 / 010 / 015 / 020 / 025 / 030` 전체를 훑어 primary 결과가 특정 checkpoint 하나에만 의존하는지 확인하는 보조 분석이다. Figure는 `figures/`, 집계표는 `tables/`, 학습/검증 로그는 `logs/`, chart manifest와 metadata는 `metadata/`에 둔다. |
-| `overall_analysis/result_checks/` | outlier basin, seed ensemble method 비교처럼 결과 해석을 점검하기 위한 diagnostic 산출물이다. |
-| `overall_analysis/run_records/` | metric file manifest, 분석 metadata처럼 재현성과 입력 출처 추적에 쓰는 실행 기록이다. |
+```text
+output/model_analysis/shap/
+├── q99/
+└── test_split/
+```
 
-현재 로컬에 없는 `probabilistic_diagnostics/` 같은 폴더는 해당 분석을 새로 실행할 때만 생성된다. 생성되면 이 문서와 `scripts/README.md`의 경로 설명을 함께 갱신한다.
+`shap/q99/`는 Q99 사건 조건부 직접 SHAP 결과를 보존한다. `shap/test_split/`은 test split 전체에서 저유량·중유량·고유량·극유량 조건을 비교하는 직접 SHAP 분석이다.
+
+## 이름 규칙
+
+- output 파일명에서 `expanded`는 쓰지 않는다. expanded observed DRBC test 85개 유역이라는 조건은 config, data split, 문서 설명에서 확인한다.
+- 산출물 폴더 root에 표·그림 파일을 직접 두지 않는다. 표는 `tables/`, 그림은 `figures/` 또는 대량 basin별 그림용 `gallery/`에 둔다.
+- 분석 폴더 안에 같은 분석 이름을 다시 중첩하지 않는다. 한 분석 안의 갈래는 하위 폴더 추가보다 파일명 prefix로 구분한다.

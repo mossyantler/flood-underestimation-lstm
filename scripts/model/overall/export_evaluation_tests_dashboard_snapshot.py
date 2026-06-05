@@ -25,7 +25,7 @@ DUCKDB_PATH = ROOT / "database/local/duckdb/camels.duckdb"
 
 SOURCES = {
     "expandedManifest": "configs/basin_splits/drbc_expanded_observed_test/manifest.csv",
-    "expandedFirstSummary": "output/model_analysis/primary/metrics/tables/primary_summary_by_seed.csv",
+    "expandedFirstSummary": "output/model_analysis/primary/metrics/tables/summary_by_seed.csv",
     "expandedFirstRunner": "scripts/runs/official/run_expanded_drbc_test_evaluation.sh",
     "extremeRainPrimaryLong": "output/model_analysis/q99_analysis/performance/tables/extreme_rain_stress_error_table_long.csv",
     "extremeRainRunner": "scripts/runs/official/run_subset300_extreme_rain_stress_test.sh",
