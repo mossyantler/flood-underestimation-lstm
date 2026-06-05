@@ -110,9 +110,9 @@ CRPS_approx = 2 × mean_pinball across {q50, q90, q95, q99}. lower tail 부재�
 
 > `upper_tail_pinball_proxy` = CRPS_approx / 2. high-flow stratum에서 급격히 증가. 참조 산출물: `crps_4quantile_upper_approx.csv`.
 
-### 154 유역 vs expanded 85 유역 비교 (AC11 — deferred)
+### 154 유역 vs 85 유역 비교 (AC11 — deferred)
 
-`output/model_analysis/legacy/` 미존재로 비교 불가. `154_vs_expanded_comparison.csv`에 blocking 사유와 재생성 방법 기록. legacy quantile_analysis 입력이 복원되면 `analyze_subset300_probabilistic_diagnostics.py` 재실행으로 활성화 가능.
+이 비교는 현재 paper canonical 분석에서 제외한다. 과거 pre-expanded 산출물은 `docs/archive/analysis_legacy/`의 재현성 참고 자료로만 보존하며, 현재 RQ-5 판단은 DRBC 관측 시험 85개 유역의 `output/model_analysis/primary/calibration/` 산출물에 한정한다. 비교를 되살릴 경우 legacy 입력을 그대로 인용하지 말고 현재 `scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py` 출력 형식에 맞춰 새 산출물로 재생성한다.
 
 ### Quantile crossing
 
@@ -139,11 +139,11 @@ tier는 error 분포에서 파생된 grouping이므로 **부분 순환적**. 독
 | observed peak hour | 0.522 |
 | Basin Q99.9-exceedance | 0.572 |
 
-극단 첨두에서 q99조차 obs를 절반 정도만 덮는다(0.52). RQ-2의 `above_q99` 47% 결과와 정합 — calibration 열화가 곧 첨두 과소추정이다.
+극단 첨두에서 q99 coverage는 약 절반 수준이다. `observed peak hour` 기준 q99 coverage 0.522는 RQ-0/RQ-2의 Q99 사건 `above_q99` 약 47%와 정합적이다. 다만 이는 “q99가 절반 이상은 덮었다”와 “못 덮은 절반 가까이에서는 과소 결손이 크다”를 동시에 뜻하므로, calibration 열화와 첨두 과소추정을 같은 문장으로 단정하지 말고 coverage와 under/over gap 규모를 함께 보고한다.
 
 ### Seed 이질성
 
-seed 111/222/444 간 all-hour 포함률 편차가 작지 않다 (q50 0.273~0.351, q99 0.745~0.808). 본문은 seed-median 또는 3-seed 평균을 쓰되, point estimate를 단정적으로 읽지 않고 seed 범위를 함께 보고한다.
+seed 111/222/444 간 all-hour 포함률 편차가 작지 않다 (q50 0.273~0.351, q99 0.745~0.808). 본문은 지표 성격에 따라 seed 중앙값 또는 3-seed 평균을 쓰되, 사건 위치 구간처럼 실제 class 이름이 필요한 판단은 중앙값을 primary로 두고 seed 범위·표준편차를 함께 보고한다.
 
 ## 통합 해석
 

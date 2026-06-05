@@ -132,7 +132,7 @@ flowchart TD
 - `docs/experiment/analysis/model/` — RQ별 분석 문서 (표의 "분석 문서" 열).
 - `docs/experiment/method/model/` — `quantile_output_interpretation.md` (RQ-0 해석 framework) 한 개만 여기.
 - `scripts/model/expanded_drbc/` — RQ별 계산 스크립트 (표의 "계산 스크립트" 열, 파일명만 표기). RQ-5용 한 개만 예외로 `scripts/model/hydrograph/`.
-- `output/model_analysis/primary/metrics/` — RQ-1~4 산출물. `tables/`(수치 표), `figures/`(그림), `data/required_series/`(seed별 모델 출력).
+- `output/model_analysis/primary/metrics/` — RQ-1~4 산출물. `tables/`(수치 표), `figures/`(그림), `output/model_analysis/primary/metrics/data/required_series/`(seed별 모델 출력).
 - `output/model_analysis/primary/calibration/` — RQ-5 calibration·sharpness 산출물.
 - `output/model_analysis/band_signal/` — 관측 위치 구간과 신호 분석 산출물.
 

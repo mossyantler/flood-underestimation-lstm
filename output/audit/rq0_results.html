@@ -159,7 +159,7 @@
   </div>
   <ul class="clean">
     <li>세 범위(3-scope)를 함께 본다: 극단 집합(Q99·NOAA)은 범위 제한(선택 편향) 위험이 있어, <b>전체 강우 사건</b>에서 신호가 살아남는지로 견고성을 검증한다.</li>
-    <li>신호 vs 관측 위치 구간을 Spearman 순위상관으로 측정. Q99/NOAA는 seed별 <code>(basin_id, seed, peak_time)</code>에서 위치를 계산한 뒤 사건 단위 primary 판정은 seed 중앙값으로 묶고, 전체강우는 seed 평균 <code>(basin_id, peak_time)</code> 기준으로 둔다.</li>
+    <li>신호 vs 관측 위치 구간을 Spearman 순위상관으로 측정 — seed 집계 방식은 §3 하단 규칙 참조.</li>
     <li>출처: <code>output/model_analysis/band_signal/</code> (band_shape · signal_sweep · slope_signal · method_compare).</li>
   </ul>
 </section>
@@ -177,14 +177,13 @@
       <tr><td>시험 기간</td><td>2014-01-01 00:00 ~ 2016-12-31 23:00</td><td><code>TEST_PERIOD</code></td></tr>
       <tr><td>Q99 임계 산정 기간</td><td>2000-01-01 ~ 2010-12-31</td><td><code>TRAIN_PERIOD</code></td></tr>
       <tr><td>seed</td><td><code>111 / 222 / 444</code></td><td><code>SEEDS</code></td></tr>
-      <tr><td>seed 단일화</td><td>Q99/NOAA 단일 사건 판정은 seed별 관측 위치 번호의 중앙값</td><td><code>oc</code> primary, <code>oc_seed_mean/min/max/std</code> 보조</td></tr>
+      <tr><td>seed 단일화</td><td>§3 하단 "seed 단일화 규칙" 참조</td><td><code>oc</code> primary, <code>oc_seed_mean/min/max/std</code> 보조</td></tr>
       <tr><td>예측선 순서</td><td><code>model1 → q50 → q90 → q95 → q99</code></td><td><code>TAU_ORDER</code></td></tr>
       <tr><td>사건 창</td><td>관측 첨두 기준 ±6시간</td><td><code>EVENT_WINDOW_HOURS = 6</code></td></tr>
       <tr><td>Q99 초과 병합</td><td>초과 시각 사이 간격 12시간 이하이면 같은 사건</td><td><code>EVENT_MERGE_GAP_HOURS = 12</code></td></tr>
     </tbody>
   </table>
   <p><code>basin_id</code>는 모든 단계에서 8자리 문자열로 정규화한다. 이 규칙이 있어야 CAMELSH NetCDF 파일명, <code>required_series.csv</code>의 <code>basin</code>, NOAA catalog의 <code>usgs_id</code>가 같은 유역으로 붙는다.</p>
-  <p><b>seed 처리:</b> Q99/NOAA에서는 seed마다 <code>q50/q90/q95/q99</code>가 달라 같은 사건의 <code>obs_class</code>가 달라질 수 있다. 따라서 원자료는 <code>(event, seed)</code> 행으로 보존하고, 상관관계처럼 사건당 한 판단이 필요한 표에서는 0~4 순서형 위치 번호의 <b>중앙값</b>을 primary로 쓴다. 평균은 실제 구간명이 아니므로 최종 class 이름으로 쓰지 않고, <code>oc_seed_mean</code>과 seed 범위는 민감도 확인용으로 남긴다. 실제로 Q99 사건은 926건 중 613건(66.2%), NOAA/NWS 사건은 65건 중 44건(67.7%)에서 세 seed의 위치 구간이 완전히 같지 않아, 이 seed 단일화 규칙을 명시해야 한다.</p>
 
   <div class="grid3">
     <div class="stat red"><div class="v">926</div><div class="l">Q99 사건: 학습기간 관측 Q99 임계를 넘은 시험기간 고유량 사건, 82개 유역</div></div>
@@ -244,6 +243,46 @@
       <tr><td>전체강우</td><td>강우 탐지부터 seed 평균 <code>obs_class</code>까지 한 스크립트에서 생성</td><td><code>signal_sweep_branchB2_allrain.py</code>, <code>signal_sweep_seed_spread_allrain.py</code></td><td><code>branchB2_features_allrain.csv</code>, <code>branchB2_spearman.csv</code></td></tr>
     </tbody>
   </table>
+
+  <h3>seed 단일화 규칙 — 같은 사건, 다른 seed 판정</h3>
+  <p>
+    Model 2는 seed가 3개(111/222/444)이고, 각 seed가 q50·q90·q95·q99를 조금씩 다르게 출력한다.
+    따라서 <strong>같은 홍수 사건이라도 "관측 첨두가 어느 구간에 드는가(관측 위치 구간)"가 seed마다 달라질 수 있다.</strong>
+  </p>
+  <div class="example-box" style="background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:16px 20px;font-size:13.5px;margin:12px 0 16px">
+    <b>예시 — 같은 관측값(100), seed별 q99 차이:</b>
+    <ul style="margin:8px 0 0;padding-left:18px;line-height:1.9">
+      <li>seed 111: q99 = 95 → obs > q99 → <code>above_q99</code> (구간 4)</li>
+      <li>seed 222: q99 = 103 → obs &lt; q99 → <code>q95~q99</code> (구간 3)</li>
+      <li>seed 444: q99 = 97 → obs > q99 → <code>above_q99</code> (구간 4)</li>
+    </ul>
+  </div>
+  <p>
+    이 불일치는 예외가 아니라 대부분의 사건에서 발생한다:
+    <strong>Q99 사건 926건 중 613건(66.2%)</strong>, <strong>NOAA/NWS 사건 65건 중 44건(67.7%)</strong>에서
+    세 seed의 관측 위치 구간이 일치하지 않는다.
+  </p>
+  <table>
+    <thead><tr><th>처리 원칙</th><th>내용</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>원자료 보존</b></td>
+        <td>(사건, seed) 행을 전부 남긴다. seed 111/222/444 각각의 관측 위치 구간을 버리지 않는다.</td>
+      </tr>
+      <tr>
+        <td><b>사건 단위 집계 — primary</b></td>
+        <td>상관관계처럼 "사건 하나에 값 하나"가 필요한 표에서는 3개 seed 관측 위치 구간(0~4)의 <b>중앙값</b>을 primary로 쓴다. 위 예시: 중앙값(4, 3, 4) = 4.</td>
+      </tr>
+      <tr>
+        <td><b>평균 사용 금지</b></td>
+        <td>0~4는 순서형 번호다. 평균(예: 3.67)은 실제 구간 이름이 아니므로 최종 판정값으로 쓰지 않는다.</td>
+      </tr>
+      <tr>
+        <td><b>민감도 보조</b></td>
+        <td><code>oc_seed_mean</code>과 seed별 범위는 민감도 확인용으로 산출물에 남긴다.</td>
+      </tr>
+    </tbody>
+  </table>
 </section>
 
 <!-- ===== 결과 A ===== -->
@@ -276,12 +315,12 @@
 
   <h3>덮었을 때와 못 덮었을 때의 크기</h3>
   <table>
-    <thead><tr><th>범위</th><th>q99 판정</th><th class="num">상대 크기</th><th>해석</th></tr></thead>
+    <thead><tr><th>범위</th><th>q99 판정</th><th class="num">중앙값</th><th class="num">IQR [하/상]</th><th>해석</th></tr></thead>
     <tbody>
-      <tr class="row-caution"><td>Q99 사건</td><td>못 덮음</td><td class="num">부족 0.378 [0.294/0.474]</td><td><code>above_q99</code> 사건에서 q99가 관측 첨두보다 전형적으로 38% 낮다.</td></tr>
-      <tr class="row-strong"><td>Q99 사건</td><td>덮음</td><td class="num">초과 0.544 [0.342/1.170]</td><td>덮은 사건에서는 관측 첨두 대비 54% 수준의 보수 여유가 있다.</td></tr>
-      <tr class="row-caution"><td>NOAA/NWS</td><td>못 덮음</td><td class="num">부족 0.344 [0.208/0.445]</td><td>사회적으로 확인된 홍수에서 못 덮을 때도 부족 폭이 크다.</td></tr>
-      <tr class="row-strong"><td>NOAA/NWS</td><td>덮음</td><td class="num">초과 0.810 [0.550/1.036]</td><td>덮은 경우는 매우 보수적인 upper envelope가 된다.</td></tr>
+      <tr class="row-caution"><td>Q99 사건</td><td>못 덮음</td><td class="num">부족 0.378</td><td class="num">[0.294 / 0.474]</td><td><code>above_q99</code> 사건에서 q99가 관측 첨두보다 전형적으로 38% 낮다.</td></tr>
+      <tr class="row-strong"><td>Q99 사건</td><td>덮음</td><td class="num">초과 0.544</td><td class="num">[0.342 / 1.170]</td><td>덮은 사건에서는 관측 첨두 대비 54% 수준의 보수 여유가 있다.</td></tr>
+      <tr class="row-caution"><td>NOAA/NWS</td><td>못 덮음</td><td class="num">부족 0.344</td><td class="num">[0.208 / 0.445]</td><td>사회적으로 확인된 홍수에서 못 덮을 때도 부족 폭이 크다.</td></tr>
+      <tr class="row-strong"><td>NOAA/NWS</td><td>덮음</td><td class="num">초과 0.810</td><td class="num">[0.550 / 1.036]</td><td>덮은 경우는 매우 보수적인 upper envelope가 된다.</td></tr>
     </tbody>
   </table>
 

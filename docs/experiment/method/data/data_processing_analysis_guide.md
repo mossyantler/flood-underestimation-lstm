@@ -333,7 +333,7 @@ Observed high-flow event table은 streamflow에서 출발한다. 즉 유량이 �
 
 과정은 아래 순서다.
 
-첫째, `scripts/model/extreme_rain/build_subset300_extreme_rain_event_catalog.py`가 hourly `.nc`의 `Rainf`에서 rain-event candidate를 직접 만든다. `event_response_table.csv`처럼 streamflow peak에서 시작하지 않는다. `1h / 6h / 24h / 72h` rolling precipitation sum을 만들고, basin별 CAMELSH annual-maxima proxy인 `prec_ari25/50/100_{duration}h`와 비교한다. 이 중 하나라도 ARI25 이상이거나, ARI25는 넘지 못해도 ARI100의 `80%` 이상이면 near-ARI100 후보로 남긴다.
+첫째, 강수 기반 보조 분석은 hourly `.nc`의 `Rainf`에서 rain-event candidate를 직접 만든다. `event_response_table.csv`처럼 streamflow peak에서 시작하지 않는다. `1h / 6h / 24h / 72h` rolling precipitation sum을 만들고, basin별 CAMELSH annual-maxima proxy인 `prec_ari25/50/100_{duration}h`와 비교한다. 이 중 하나라도 ARI25 이상이거나, ARI25는 넘지 못해도 ARI100의 `80%` 이상이면 near-ARI100 후보로 남긴다. 현재 paper canonical 표는 `output/model_analysis/q99_analysis/performance/`에 보존된 stress-test 산출물을 기준으로 읽고, 구식 `subset300_extreme_rain` 개별 스크립트명은 재현 진입점으로 쓰지 않는다.
 
 둘째, active rain hour를 storm 단위로 병합한다. 같은 basin에서 threshold를 넘는 active rain hour 사이 gap이 `72h` 이하면 하나의 storm으로 묶는다. 그 뒤 wet-footprint 기준으로 실제 비가 집중된 구간을 다시 잡아 `rain_start`, `rain_peak`, `rain_end`를 정한다. 그래서 plot에서 보이는 rain event 본 구간은 단순 rolling-window envelope가 아니라 wet footprint에 더 가깝다.
 
@@ -425,17 +425,19 @@ uv run scripts/basin/reference/fetch_usgs_streamstats_peak_flow_references.py --
 # Main Model 1 / Model 2 subset300 comparison
 bash scripts/runs/official/run_subset300_multiseed.sh
 
-# Model result analysis
-uv run scripts/model/overall/analyze_subset300_epoch_results.py
-uv run scripts/model/hydrograph/plot_subset300_hydrographs.py --epochs all --output-dir output/model_analysis/legacy/quantile_analysis
-uv run scripts/model/hydrograph/analyze_subset300_hydrograph_outputs.py
-uv run scripts/model/event_regime/analyze_subset300_event_regime_errors.py
+# Current Model 1 / Model 2 RQ-0~4 result analysis
+uv run scripts/model/expanded_drbc/run_all.py
 
-# Extreme-rain exposure and stress test
-uv run scripts/model/extreme_rain/build_subset300_extreme_rain_event_catalog.py
-uv run scripts/model/extreme_rain/infer_subset300_extreme_rain_windows.py --device cuda:0
-uv run scripts/model/extreme_rain/analyze_subset300_extreme_rain_stress_test.py
-uv run scripts/model/extreme_rain/plot_subset300_extreme_rain_events.py
+# RQ-5 calibration / sharpness
+uv run scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py
+
+# RQ-0 band-signal follow-up plots and signal sweep
+uv run scripts/model/expanded_drbc/compute_ub_location_class.py
+uv run scripts/model/expanded_drbc/compute_ub_gap_trajectory.py
+uv run scripts/model/expanded_drbc/compute_ub_band_shape.py
+uv run scripts/model/expanded_drbc/signal_sweep_branchA_csv.py
+uv run scripts/model/expanded_drbc/signal_sweep_branchB_forcing.py
+uv run scripts/model/expanded_drbc/signal_sweep_branchB2_allrain.py
 ```
 
 원격 Ubuntu GPU 서버에서는 Homebrew PATH를 추가하지 않는다. 로컬 macOS에서 `uv`, `python`, `brew`를 쓸 때만 `export PATH="/opt/homebrew/bin:$PATH"`를 먼저 적용한다.

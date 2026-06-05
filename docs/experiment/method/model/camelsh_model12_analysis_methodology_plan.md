@@ -1,5 +1,7 @@
 # CAMELSH Model 1/2 실험 분석 Methodology Plan
 
+> **현재 상태:** 이 문서는 subset300 시기 분석 순서를 보존하는 historical plan이다. 현재 paper canonical RQ 산출물은 `scripts/model/expanded_drbc/run_all.py`, `scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py`, `output/model_analysis/primary/`, `output/model_analysis/band_signal/`, `output/model_analysis/q99_analysis/performance/` 기준으로 해석한다. 아래에 남아 있는 `legacy/`, `subset300_`, `event_regime` 경로는 현재 재현 진입점이 아니라 과거 분석 맥락이다.
+
 ## 목적
 
 이 문서는 `subset300` 기반 CAMELSH Model 1 / Model 2 비교 결과를 어떤 순서로 분석하고, 어떤 표현으로 논문에 반영할지 고정한다. 핵심 질문은 flood typology를 새로 만드는 것이 아니라, 같은 multi-basin LSTM backbone에서 deterministic output과 probabilistic quantile output이 extreme flood peak underestimation을 어떻게 다르게 만드는지 확인하는 것이다.
@@ -41,82 +43,23 @@ flowchart TD
 
 결과 해석의 층위는 `primary independent test`, `stratified event analysis`, `historical extreme-rain stress`로 분리한다. Primary independent test는 DRBC holdout `2014-2016` 결과이고 본문 headline에 둔다. Stratified event analysis는 같은 primary test 안에서 event-regime과 severity별 이질성을 보는 분석이다. Historical extreme-rain stress는 같은 DRBC basin을 쓰더라도 `1980-2024` 기간을 포함하므로 temporal independence claim 없이 robustness/stress 결과로만 보고한다.
 
-## 공식 실행 순서
+## 현재 재생성 진입점
 
-1. Epoch sweep은 아래 스크립트로 집계한다. 이 단계는 validation/test metric, FHV, Peak-MAPE, Peak-Timing을 basin 단위로 확인하는 역할이다.
-
-```bash
-uv run scripts/model/overall/analyze_subset300_epoch_results.py
-```
-
-2. Hourly high-flow stratum 분석은 아래 스크립트로 수행한다. 이 단계는 basin top 1%, top 0.1%, observed peak hour에서 Model 1과 Model 2 quantile output을 비교한다.
+현재 RQ-0~4의 공식 재생성 진입점은 아래 하나로 둔다.
 
 ```bash
-uv run scripts/model/hydrograph/analyze_subset300_hydrograph_outputs.py
+uv run scripts/model/expanded_drbc/run_all.py
 ```
 
-3. Event-regime model-error 분석은 아래 스크립트로 수행한다. 이 단계는 event window 안에서 observed peak, predictor peak, event RMSE, threshold exceedance recall을 계산한 뒤 ML event-regime을 주 stratification으로 사용한다.
+이 명령은 `scripts/model/expanded_drbc/README.md`의 Phase A/B 순서를 따른다. 핵심 산출물은 `output/model_analysis/primary/metrics/`와 `output/model_analysis/band_signal/`에 둔다.
+
+RQ-5 calibration·sharpness는 별도 재활용 스크립트로 만든다.
 
 ```bash
-uv run scripts/model/event_regime/analyze_subset300_event_regime_errors.py
+uv run scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py
 ```
 
-기본 출력 위치는 아래다.
-
-```text
-output/model_analysis/legacy/quantile_analysis/event_regime_analysis/
-```
-
-4. 극한호우 exposure와 historical stress test는 아래 순서로 수행한다. Catalog 단계는 train/validation에 ARI25/50/100급 rain forcing이 있었는지 답하고, inference/analyze 단계는 DRBC holdout basin의 historical extreme-rain response에서 기존 Model 1/2 checkpoint가 peak를 따라가는지 평가한다. 기본 실행은 validation 기준 primary checkpoint를 사용하고, 별도 sensitivity 실행에서는 validation checkpoint grid `005 / 010 / 015 / 020 / 025 / 030` 전체를 같은 epoch 번호의 Model 1/2 쌍으로 평가한다.
-
-```bash
-uv run scripts/model/extreme_rain/build_subset300_extreme_rain_event_catalog.py
-uv run scripts/model/extreme_rain/infer_subset300_extreme_rain_windows.py --device cuda:0
-uv run scripts/model/extreme_rain/analyze_subset300_extreme_rain_stress_test.py
-```
-
-원격 A100 서버에서는 `tmux` 안에서 아래 wrapper를 실행한다. 이 wrapper는 catalog, inference, analysis 로그를 각각 `logs/extreme_rain_catalog.log`, `logs/extreme_rain_inference.log`, `logs/extreme_rain_analysis.log`에 남긴다.
-
-```bash
-DEVICE=cuda:0 bash scripts/runs/official/run_subset300_extreme_rain_stress_test.sh
-```
-
-Primary checkpoint stress test의 기본 출력 위치는 아래다.
-
-```text
-output/model_analysis/legacy/extreme_rain/primary/
-```
-
-5. Broad vs Natural robustness 분석은 pre-expanded legacy 산출물을 cohort로 다시 나누어 계산한 보존용 분석이다. 현재 공식 primary test는 expanded observed DRBC 85개 기준이며, legacy cohort label은 paper canonical 기준으로 사용하지 않는다.
-
-```bash
-uv run scripts/model/overall/analyze_natural_broad_comparison.py
-```
-
-출력 위치는 아래다.
-
-```text
-output/model_analysis/legacy/natural_broad_comparison/
-```
-
-모든 validation checkpoint를 대상으로 한 sensitivity run은 catalog를 재사용하고 output root를 분리한다.
-
-```bash
-OUTPUT_ROOT=output/model_analysis/legacy/extreme_rain/all \
-RUN_CATALOG=0 \
-EPOCH_MODE=validation \
-VALIDATION_EPOCHS="5 10 15 20 25 30" \
-BLOCKS_CSV=output/model_analysis/legacy/extreme_rain/primary/exposure/inference_blocks.csv \
-COHORT_CSV=output/model_analysis/legacy/extreme_rain/primary/exposure/drbc_historical_stress_cohort.csv \
-DEVICE=cuda:0 \
-bash scripts/runs/official/run_subset300_extreme_rain_stress_test.sh
-```
-
-이 sensitivity 출력 위치는 아래다.
-
-```text
-output/model_analysis/legacy/extreme_rain/all/
-```
+강수에서 출발한 historical stress test는 현재 paper canonical primary test를 대체하지 않는 보조 진단이다. 현재 문서에서는 `output/model_analysis/q99_analysis/performance/`의 보존 산출물과 `docs/explain/14_extreme_rain_stress_test.md`를 해석 기준으로 두며, 과거 `subset300_extreme_rain` 개별 스크립트명은 실행 지시로 쓰지 않는다.
 
 ## Event-Regime 분석 기준
 
@@ -178,7 +121,7 @@ Response class는 `flood_response_ge25`, `flood_response_ge2_to_lt25`, `high_flo
 
 Inference는 재학습 없이 paired seed `111 / 222 / 444`의 checkpoint를 사용한다. Primary epoch mapping은 `Model 1 seed111 epoch25 / seed222 epoch10 / seed444 epoch15`, `Model 2 seed111 epoch5 / seed222 epoch10 / seed444 epoch10`으로 고정하고, 본문 기준 결과는 이 primary mapping을 우선 읽는다. 별도 sensitivity run은 validation이 저장된 epoch `005 / 010 / 015 / 020 / 025 / 030` 전체를 `Model 1 epoch N`과 `Model 2 epoch N`의 same-epoch pair로 돌린다. 이 결과는 checkpoint 선택을 다시 하기 위한 것이 아니라, extreme-rain stress conclusion이 primary checkpoint 하나에만 의존하는지 확인하는 diagnostic이다. Model 1은 deterministic prediction, Model 2는 `q50/q90/q95/q99`를 산출하며, positive-response group은 peak tracking과 under-deficit을, negative-control group은 upper quantile이 불필요하게 flood threshold를 넘는지 본다.
 
-`infer_subset300_extreme_rain_windows.py`는 `--epoch-mode primary`와 `--epoch-mode validation`을 지원한다. `analyze_subset300_extreme_rain_stress_test.py`는 `inference_manifest.csv`를 읽어 seed/epoch pair별 required-series를 모두 집계하고, epoch 축이 있는 `paired_delta_epoch_aggregate.csv`를 추가로 만든다. Aggregate를 읽을 때는 primary 결과와 all-validation-epoch 결과를 섞지 않고 output root로 구분한다.
+과거 stress-test inference/analysis 스크립트는 primary와 validation epoch mode를 나누어 지원했지만, 현재 repo에서는 이 개별 스크립트명을 canonical 실행 지시로 쓰지 않는다. 보존 산출물을 읽을 때도 primary 결과와 all-validation-epoch 결과를 섞지 않고 output root와 파일명 metadata로 구분한다.
 
 이 분석은 primary `2014-2016` DRBC test를 대체하지 않는다. DRBC basin이 train에 없으므로 basin-holdout 조건은 유지되지만, historical stress period에는 train/validation 연도와 겹치는 event가 포함될 수 있으므로 temporal independence claim은 하지 않는다.
 

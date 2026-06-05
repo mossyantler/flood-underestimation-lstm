@@ -33,9 +33,9 @@ flowchart TD
 | --- | --- |
 | [`method/model/experiment_protocol.md`](method/model/experiment_protocol.md) | split, loss, metric, checkpoint, artifact 규칙 |
 | [`method/model/result_analysis_protocol.md`](method/model/result_analysis_protocol.md) | 결과 비교 순서와 paired-delta 해석 규칙 |
-| [`method/model/camelsh_model12_analysis_methodology_plan.md`](method/model/camelsh_model12_analysis_methodology_plan.md) | subset300 Model 1/2 분석 실행 순서 |
+| [`method/model/model_analysis_output_layout.md`](method/model/model_analysis_output_layout.md) | 현재 `output/model_analysis/` 산출물 배치 규칙 |
 | [`method/basin/basin_cohort_definition.md`](method/basin/basin_cohort_definition.md) | DRBC holdout과 non-DRBC training pool 기준 |
 | [`method/basin/event_response_spec.md`](method/basin/event_response_spec.md) | observed high-flow event candidate 생성 규칙 |
 | [`method/data/data_processing_analysis_guide.md`](method/data/data_processing_analysis_guide.md) | 원자료부터 분석 산출물까지의 end-to-end 흐름 |
 | [`analysis/basin/subset300_representativeness_report.md`](analysis/basin/subset300_representativeness_report.md) | fixed `scaling_300` subset 대표성 해석 |
-| [`analysis/model/subset300_hydrograph_interpretation_report.md`](analysis/model/subset300_hydrograph_interpretation_report.md) | hydrograph/quantile 결과 해석 |
+| [`analysis/model/00_research_question_analysis_map.md`](analysis/model/00_research_question_analysis_map.md) | RQ-0~5 결과 문서와 산출물 매핑 |

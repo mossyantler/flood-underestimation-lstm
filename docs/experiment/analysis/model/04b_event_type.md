@@ -8,14 +8,14 @@ upper quantile output의 peak alleviation 효과·cost가 NOAA Storm Events에�
 
 ## 데이터
 
-- NOAA event catalog: `output/model_analysis/confirmed_flood/catalog/drbc_confirmed_flood_event_catalog.csv` (664 events; 49 USGS basin)
+- NOAA/NWS 확인 홍수 catalog: `output/model_analysis/confirmed_flood/data/catalog/drbc_confirmed_flood_event_catalog.csv` (664 events; 49 USGS basin)
 - expanded DRBC 85 basin과 매핑: B2 산출물 `tables/rq2_noaa_basin_overlap_summary.csv` (overlap = 46)
 - per-event α / β: B3 / B4 NOAA scope 산출물
 - per-basin FAR / over-pred: B6 (Q99 baseline)
 
 ### Event-type 분류
 
-`noaa_annotation` 정규식 파싱 (`scripts/_lib/expanded_drbc.NOAA_REGEX`):
+`noaa_annotation` 정규식 파싱 (`scripts/_lib/expanded_drbc.py`의 `NOAA_REGEX`):
 - `Flash Flood`: `\bFlash Flood\b(?!\s+(?:Watch|Advisory))`
 - `Flood`: `(?<!Flash )(?<!Coastal )\bFlood\b(?!\s+(?:Watch|Advisory))`
 - `Coastal Flood`: `\bCoastal Flood\b`

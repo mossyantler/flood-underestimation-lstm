@@ -7,7 +7,7 @@
 | 순서 | 문서 | 역할 |
 | ---: | --- | --- |
 | 0 | [`00_research_question_analysis_map.md`](00_research_question_analysis_map.md) | 핵심 주제 → RQ-0/1/2/3/4a/4b/5 분해와 산출물 매핑 |
-| 0b | [`00b_rq0_framework_validation.md`](00b_rq0_framework_validation.md) | RQ-0 — 분위 출력 해석과 관측 위치(obs_class) 추측: 위치 분포(q99 47%/NOAA 100% above_q99)·신호 상관(유역 면적·대류 성격)·상승 기울기 분석 |
+| 0b | [`00b_rq0_framework_validation.md`](00b_rq0_framework_validation.md) | RQ-0 — 분위 출력 해석과 관측 위치 구간 추측: Q99 사건은 q99가 절반 이상을 덮지만 약 47%는 `above_q99`, NOAA/NWS 확인 홍수는 모두 `above_q99`; under/over gap 규모·신호 상관(유역 면적·대류 성격)·상승 기울기 분석 |
 | 1 | [`01_q50_central.md`](01_q50_central.md) | RQ-1 — Model 2 `q50`가 Model 1 deterministic 대비 central 성능을 유지하는가 |
 | 2 | [`02_upper_quantile_peak_under.md`](02_upper_quantile_peak_under.md) | RQ-2 — upper quantile (`q90/q95/q99`)이 peak underestimation을 줄이는가 (α + β + δ triplet, Q99 + NOAA dual scope) |
 | 3 | [`03_cost.md`](03_cost.md) | RQ-3 — peak under 감소의 cost (FAR + over-prediction magnitude) |

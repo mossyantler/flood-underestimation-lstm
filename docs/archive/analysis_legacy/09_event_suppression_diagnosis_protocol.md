@@ -31,7 +31,7 @@
 | external station context cache | `output/basin/all/cache/usgs_streamstats/{gauge_id}.json` | `isRegulated`, `name`, `location`, `statistics`, `characteristics` |
 | required external station notes | USGS monitoring location page, available USGS annual water-data report PDF, local station-note artifact | regulation/diversion remarks, station relocation/datum notes, rating/estimated-flow caveats, period-of-record context, saved source summary |
 
-USGS monitoring location page는 case-level 진단을 시작할 때 반드시 먼저 읽는다. Annual water-data report PDF는 모든 station에 항상 쉽게 연결되는 것은 아니므로, 찾을 수 있으면 읽고 찾지 못하면 `not found`로 기록한다. 확인한 source summary는 [`docs/references/basin/usgs_station_notes/`](../../../references/basin/usgs_station_notes/) 아래에 `gauge_id`별 markdown artifact로 따로 저장한다. 이 외부 note는 local metadata보다 최신이거나 더 직접적인 regulation/diversion 설명을 줄 수 있으므로, hydromod/managed-flow 해석에서는 선택 사항이 아니라 초기 확인 항목이다.
+USGS monitoring location page는 case-level 진단을 시작할 때 반드시 먼저 읽는다. Annual water-data report PDF는 모든 station에 항상 쉽게 연결되는 것은 아니므로, 찾을 수 있으면 읽고 찾지 못하면 `not found`로 기록한다. 확인한 source summary는 [`docs/references/basin/usgs_station_notes/`](../../references/basin/usgs_station_notes/) 아래에 `gauge_id`별 markdown artifact로 따로 저장한다. 이 외부 note는 local metadata보다 최신이거나 더 직접적인 regulation/diversion 설명을 줄 수 있으므로, hydromod/managed-flow 해석에서는 선택 사항이 아니라 초기 확인 항목이다.
 
 ## 진단 절차
 
@@ -246,7 +246,7 @@ Upstream/downstream comparison도 regulation 쪽이다. 같은 2020-08-04 16:00 
 
 ## 01471510 worked example
 
-대상 event는 `01471510_rain_drbc_historical_stress_0005`이고, 유역은 `Schuylkill River at Reading, PA`다. 이 예시는 작은 유역의 단일 dam attenuation 사례가 아니라, 큰 mainstem regulated basin에서 ARI100급 24h rain이 Q99+ high flow를 만들었지만 flood proxy까지는 넘지 않은 mixed attenuation case로 보는 것이 안전하다. USGS source summary는 [`01471510_schuylkill_river_at_reading_pa.md`](../../../references/basin/usgs_station_notes/01471510_schuylkill_river_at_reading_pa.md)에 따로 저장했다.
+대상 event는 `01471510_rain_drbc_historical_stress_0005`이고, 유역은 `Schuylkill River at Reading, PA`다. 이 예시는 작은 유역의 단일 dam attenuation 사례가 아니라, 큰 mainstem regulated basin에서 ARI100급 24h rain이 Q99+ high flow를 만들었지만 flood proxy까지는 넘지 않은 mixed attenuation case로 보는 것이 안전하다. USGS source summary는 [`01471510_schuylkill_river_at_reading_pa.md`](../../references/basin/usgs_station_notes/01471510_schuylkill_river_at_reading_pa.md)에 따로 저장했다.
 
 Station note는 regulation 해석을 먼저 열어 둬야 함을 보여준다. USGS page와 historic water-data report PDF는 이 station의 flow가 Still Creek Reservoir, Blue Marsh Lake, Lake Ontelaunee의 영향을 받는다고 설명한다. 다만 이 source는 station-level context이지, 2010-09-30 event의 실제 reservoir operation record는 아니다. 따라서 confidence는 `medium`으로 두고, primary cause를 `regulated/storage context`로 쓰되 specific operation claim은 하지 않는다.
 

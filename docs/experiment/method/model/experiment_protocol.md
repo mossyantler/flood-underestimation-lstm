@@ -121,7 +121,7 @@ Model 1의 training loss는 `nse`이고 Model 2의 training loss는 `pinball`이
 
 별도로 validation이 저장된 epoch `005 / 010 / 015 / 020 / 025 / 030` 전체에 DRBC test를 돌리는 sweep을 둔다. 이 sweep은 checkpoint 민감도, epoch30 fixed-budget robustness, epoch15/20 부근의 중간 checkpoint sensitivity를 보기 위한 것이고, test 결과를 보고 primary epoch를 다시 고르는 용도로 쓰지 않는다.
 
-같은 validation checkpoint grid는 극한호우 historical stress test에도 별도 sensitivity run으로 적용할 수 있다. 이때는 `output/model_analysis/legacy/extreme_rain/all/`에 primary stress test와 분리해 저장하고, Model 1/2 same-epoch pair별 `q50/q90/q95/q99` peak tracking과 false-positive tradeoff가 checkpoint 선택에 민감한지만 본다.
+같은 validation checkpoint grid는 극한호우 historical stress test에도 별도 sensitivity run으로 적용할 수 있다. 다만 현재 공식 산출물 배치는 `output/model_analysis/q99_analysis/performance/`이며, sensitivity 결과를 재생성할 때도 primary stress 결과와 같은 폴더에 섞지 말고 `data/`, `tables/`, `report/` 아래에서 epoch-grid 여부가 드러나는 파일명이나 별도 분석 폴더로 구분한다. 이 분석은 Model 1/2 same-epoch pair별 `q50/q90/q95/q99` peak tracking과 false-positive tradeoff가 checkpoint 선택에 민감한지만 본다.
 
 Model 2 seed `444`는 epoch 15 validation 이후 epoch 16 학습 중 NaN loss로 한 번 중단되었고, `allow_subsequent_nan_losses=3` resume으로 epoch 30까지 이어 돌린 run이다. final aggregate에 넣으려면 checkpoint, validation, test prediction이 finite인지 확인하고 NaN skip 횟수와 resume 사용 사실을 run log에 남긴다. 이 seed의 primary epoch `010`은 NaN 중단 이전 checkpoint지만, epoch30 robustness 결과를 쓰려면 resume 이후 epoch `016-030` checkpoint와 `validation/model_epoch020`, `025`, `030` 산출물이 top-level run directory에 복구되어 있어야 한다.
 

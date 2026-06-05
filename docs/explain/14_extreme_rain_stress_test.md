@@ -2,6 +2,8 @@
 
 이 문서는 공식 300개 train subset으로 학습한 Model 1 / Model 2 결과에 새로 붙인 극한호우 stress test를 비전공 대학생 기준으로 설명한다. 앞 장의 hydrograph 분석이 "큰 유량 시간대에서 모델이 얼마나 낮게 예측하는가"를 본다면, 이 장의 stress test는 "큰 비가 왔을 때 모델이 유량을 충분히 올리는가"를 본다.
 
+> **현재 재현 상태:** 이 문서는 강수에서 출발한 historical stress test의 해석을 보존한다. 현재 repo에서 paper canonical 요약은 `output/model_analysis/q99_analysis/performance/`의 표·보고서이며, 과거 `subset300_extreme_rain` 개별 스크립트명은 일부 정리되어 직접 실행 진입점으로 보장하지 않는다.
+
 미리 못 박아 둘 점이 하나 있다. 이 stress test는 공식 결론을 내는 primary DRBC test(2014-2016년, 관측 기준 85개 basin)를 **대체하지 않는다**. 그 자리를 메우는 보조 진단이다. 왜 보조 진단으로만 읽어야 하는지는 마지막 절에서 정리한다.
 
 - **이 문서의 역할**: 강수에서 출발하는 보조 진단의 설계와 읽는 법을 비전공 독자에게 풀어 쓴다.
@@ -35,11 +37,11 @@
 
 | 단계 | 셸 변수 | 호출 스크립트 | 하는 일 |
 | --- | --- | --- | --- |
-| catalog | `RUN_CATALOG` | `build_subset300_extreme_rain_event_catalog.py` | 강수 event 목록 생성 |
-| inference | `RUN_INFERENCE` | `infer_subset300_extreme_rain_windows.py` | 기존 checkpoint 재추론 |
-| analysis | `RUN_ANALYSIS` | `analyze_subset300_extreme_rain_stress_test.py` | 결과를 표로 정리 |
+| catalog | `RUN_CATALOG` | wrapper 내부 catalog 단계 | 강수 event 목록 생성 |
+| inference | `RUN_INFERENCE` | wrapper 내부 inference 단계 | 기존 checkpoint 재추론 |
+| analysis | `RUN_ANALYSIS` | wrapper 내부 analysis 단계 | 결과를 표로 정리 |
 
-세 분석 스크립트는 모두 `scripts/model/extreme_rain/` 아래에 있다. 산출물은 셸 변수 `OUTPUT_ROOT`(기본 경로 `output/model_analysis/q99_analysis/performance`) 아래에 단계별로 떨어진다.
+산출물은 셸 변수 `OUTPUT_ROOT`(기본 경로 `output/model_analysis/q99_analysis/performance`) 아래에 단계별로 떨어진다. 실행 스크립트를 실제로 재가동하기 전에는 wrapper가 호출하는 하위 스크립트가 현재 repo에 남아 있는지 먼저 확인한다.
 
 - catalog: `output/model_analysis/q99_analysis/performance/data/exposure/`
 - inference: `output/model_analysis/q99_analysis/performance/data/inference/`
@@ -93,7 +95,7 @@ ARI는 Average Recurrence Interval(평균 재현 간격)의 약자다. ARI100은
 그래서 비의 세기는 한 시점의 강수량 하나로 재지 않고 `Rainf`를 여러 길이로 더한 rolling sum(이동 누적 합)으로 잰다. catalog 단계의 함수 `rolling_ratio_frame`이 1시간, 6시간, 24시간, 72시간 누적을 각각 계산해, 같은 길이의 ARI 기준값으로 나눈 ratio(기준 대비 비율)를 만든다.
 
 ```python
-# scripts/model/extreme_rain/build_subset300_extreme_rain_event_catalog.py: rolling_ratio_frame()
+# historical catalog step: rolling_ratio_frame()
 threshold = safe_float(ref.get(f"prec_ari{period}_{duration}h"))
 ...
 out[f"max_prec_ari{period}_ratio"] = ratios.max(axis=1, skipna=True)
@@ -239,7 +241,7 @@ primary checkpoint 결과(wet-footprint)와 all-validation 결과는 같은 분�
 
 ## 표를 읽는 데 필요한 지표
 
-analysis 단계(`analyze_subset300_extreme_rain_stress_test.py`)가 만드는 표에는 여러 지표가 나온다. 아래는 그 지표들을 한눈에 보는 참조 카드다. 각 지표가 무엇을 재는지는 카드 뒤에서 풀어 설명한다.
+analysis 단계가 만드는 표에는 여러 지표가 나온다. 아래는 그 지표들을 한눈에 보는 참조 카드다. 각 지표가 무엇을 재는지는 카드 뒤에서 풀어 설명한다.
 
 | 지표 | 변수명 | 범위 | 최적화 방향 |
 | --- | --- | --- | --- |

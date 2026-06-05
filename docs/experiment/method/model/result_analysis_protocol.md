@@ -11,7 +11,7 @@
 
 이 문서는 [`experiment_protocol.md`](experiment_protocol.md), [`architecture.md`](architecture.md), [`../basin/event_response_spec.md`](../basin/event_response_spec.md)를 바탕으로, “실험이 끝난 뒤 결과를 어떻게 읽을지”를 설명해요.
 
-현재 subset300 all-validation-epoch hydrograph 산출물의 구체적 해석은 [`../../analysis/model/subset300_hydrograph_interpretation_report.md`](../../analysis/model/subset300_hydrograph_interpretation_report.md)에 따로 정리한다. 해당 보고서는 이 프로토콜을 실제 `Model 1 / Model 2 q50/q90/q95/q99` 결과에 적용한 현재 결과 해석 문서다.
+현재 85개 DRBC 관측 시험 split의 결과 해석은 [`../../analysis/model/README.md`](../../analysis/model/README.md)에서 RQ-0~5 문서로 나누어 관리한다. 구식 `subset300` hydrograph 해석 보고서는 [`../../../archive/analysis_legacy/subset300_hydrograph_interpretation_report.md`](../../../archive/analysis_legacy/subset300_hydrograph_interpretation_report.md)에 보존되어 있으며, 현재 paper canonical 결과로 인용하지 않는다.
 
 ## 가장 먼저 기억할 원칙
 
@@ -235,13 +235,13 @@ Event 분석은 event가 basin 안에 nested되어 있다는 점을 조심해야
 
 이 단계의 핵심 질문은 `Model 2`의 장점이 정말 큰 홍수에서 더 강하게 나타나는가예요.
 
-현재 subset300 산출물에서는 아래 스크립트가 이 단계를 담당해요.
+현재 85개 DRBC 관측 시험 split에서는 `scripts/model/expanded_drbc/`의 RQ별 스크립트가 이 단계를 나누어 담당한다. 전체 재생성 진입점은 아래다.
 
 ```bash
-uv run scripts/model/event_regime/analyze_subset300_event_regime_errors.py
+uv run scripts/model/expanded_drbc/run_all.py
 ```
 
-이 스크립트는 observed high-flow event candidate window 안에서 observed peak, predictor peak, event-level RMSE, threshold exceedance recall을 계산하고, 본문 주 분석은 ML-based `hydromet_only_7 + KMeans(k=3)` event-regime으로 나눕니다. 같은 결과에서 `degree_day_v2` rule label sensitivity도 함께 만들지만, rule label은 causal mechanism 확정이 아니라 QA/baseline으로만 읽어야 해요.
+이 실행은 `build_q99_events.py`, `build_noaa_mapping.py`, `compute_rq2_*`, `compute_rq3_cost.py`, `compute_rq4a_nse_tier_stratify.py`, `compute_rq4b_event_type_stratify.py`를 순서대로 호출해 Q99 사건, NOAA/NWS 확인 홍수, 유역·사건 이질성 표를 만든다. 구식 `event_regime` 스크립트는 legacy 분석 문맥으로만 남기고 현재 재현 체크리스트의 기준으로 쓰지 않는다.
 
 ### 6단계. 극한 유량을 실제로 잡았는지 보기
 
@@ -602,7 +602,7 @@ calibration error(q99) = empirical coverage(q99) - 0.99
 - [ ] 전체 성능과 홍수 성능을 따로 봤는가
 - [ ] basin별 비교를 했는가
 - [ ] event별 비교를 했는가
-- [ ] event별 비교를 `scripts/model/event_regime/analyze_subset300_event_regime_errors.py`로 재현할 수 있는가
+- [ ] event별 비교를 `scripts/model/expanded_drbc/run_all.py --dry-run`으로 확인되는 RQ별 스크립트 체인으로 재현할 수 있는가
 - [ ] event table을 official flood inventory가 아니라 observed high-flow candidate table로 해석했는가
 - [ ] `selected_threshold_quantile`, `flood_relevance_tier`, `return_period_confidence_flag`를 결과표에 같이 남겼는가. 원본에 없는 flag는 `not_available`로 명시했는가
 - [ ] `Q99-only` candidate와 fallback 포함 candidate에서 핵심 결론이 유지되는가
@@ -625,5 +625,5 @@ type별 결과를 볼 때도 조심해야 해요. 본문 stratification은 ML-ba
 - [`experiment_protocol.md`](experiment_protocol.md): 실험 규칙 정리
 - [`architecture.md`](architecture.md): Model 1 / Model 2 구조 설명
 - [`probabilistic_head_guide.md`](probabilistic_head_guide.md): quantile head 쉬운 설명
-- [`camelsh_model12_analysis_methodology_plan.md`](camelsh_model12_analysis_methodology_plan.md): subset300 Model 1/2 분석 실행 순서와 event-regime 해석 규칙
+- [`camelsh_model12_analysis_methodology_plan.md`](camelsh_model12_analysis_methodology_plan.md): subset300 시기 historical plan과 현재 RQ 재생성 진입점 주의사항
 - [`../basin/event_response_spec.md`](../basin/event_response_spec.md): event 정의 규칙

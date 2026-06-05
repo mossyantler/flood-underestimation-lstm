@@ -86,7 +86,7 @@ inputs
 
 즉 LSTM의 본래 출력은 hidden state `h_t`이고, 우리가 보는 값은 각 head가 `h_t`를 해석한 결과다.
 
-발표용 구조도는 [`../../../../scripts/model/overall/plot_model12_architecture_diagram.py`](../../../../scripts/model/overall/plot_model12_architecture_diagram.py)로 생성한다. 기본 산출물은 [`../../../../output/model_analysis/legacy/overall_analysis/main_comparison/figures/model_architecture/model12_architecture_comparison.png`](../../../../output/model_analysis/legacy/overall_analysis/main_comparison/figures/model_architecture/model12_architecture_comparison.png)이며, 같은 위치에 SVG/PDF도 함께 둔다.
+발표용 구조도는 현재 canonical 산출물로 고정하지 않는다. 과거 `overall_analysis` 구조도 생성 스크립트와 그림은 legacy 산출물 정리 과정에서 현재 재현 경로에서 제외되었으므로, 새 구조도가 필요하면 `scripts/model/expanded_drbc/`의 현재 Model 1/2 용어와 `output/model_analysis/` 표준 배치 규칙에 맞춰 새로 생성한다.
 
 ## 문서 정리
 

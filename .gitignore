@@ -37,3 +37,26 @@ data/CAMELS_US/
 database/local/
 *.pem
 *.pdf
+
+# AI agent / plugin runtime state
+.omc/
+.omx/
+**/.omc/
+**/.omx/
+.agents/
+.codex/
+.claude/
+**/.claude/
+.superpowers/
+.antigravitycli/
+.playwright-cli/
+.playwright-mcp/
+
+# Serena local cache
+.serena/cache/
+.serena/project.local.yml
+
+# Local AI-humanization workspace / submodule artifacts
+draft/im-not-ai/
+**/im-not-ai/
+**/im-not-ai/.claude/
