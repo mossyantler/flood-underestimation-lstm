@@ -38,7 +38,7 @@ warnings.filterwarnings("ignore")
 
 ROOT = Path(__file__).resolve().parents[3]
 TABLE_DIR = ROOT / "output/model_analysis/primary/metrics/tables"
-OBS_CLASS_CSV = TABLE_DIR / "ub_location_class_q99.csv"
+OBS_CLASS_CSV = TABLE_DIR / "location_class_q99.csv"
 TS_DIR = ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test/time_series"
 OUT_DIR = ROOT / "output/model_analysis/band_signal/method_compare"
 OUT_CSV = OUT_DIR / "rising_limb_m4.csv"

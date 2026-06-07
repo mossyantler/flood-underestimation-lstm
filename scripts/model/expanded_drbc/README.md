@@ -22,9 +22,9 @@ Phase B  (B1·B2 먼저, 이후 병렬 가능)
   compute_rq4b_event_type_stratify.py   # B8 — RQ-4b NOAA event-type cohort (depends B2·B3)
   compute_cross_tab_q99_noaa_sanity.py  # B9 — Q99 ∩ NOAA geometry sanity (depends B1·B2)
 
-  compute_ub_location_class.py          # B10 — UB obs location class (below_q50 ~ above_q99)
-  compute_ub_gap_trajectory.py          # B11 — UB gap trajectory (under/over-gap by τ)
-  compute_ub_band_shape.py              # B12 — UB band-shape prospective (rel_width, g3_ratio, Spearman r)
+  compute_location_class.py          # B10 — obs location class (below_q50 ~ above_q99)
+  compute_gap_trajectory.py          # B11 — gap trajectory (under/over-gap by τ)
+  compute_band_shape.py              # B12 — band-shape prospective (rel_width, g3_ratio, Spearman r)
 ```
 
 ## 실행 방법

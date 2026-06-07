@@ -11,7 +11,7 @@ import matplotlib.patches as mpatches
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parents[3]
-TBL = BASE / "output/model_analysis/band_signal/signal_sweep/tables/branchA_spearman.csv"
+TBL = BASE / "output/model_analysis/band_signal/signal_sweep/tables/static_spearman.csv"
 OUTDIR = BASE / "output/model_analysis/band_signal/signal_sweep/figures"
 OUTDIR.mkdir(parents=True, exist_ok=True)
 
@@ -65,7 +65,7 @@ fig.legend(handles=handles, loc="lower center", ncol=4, fontsize=9,
 fig.suptitle("Branch A  -  Feature vs obs-band-position correlation  (band shape + model gap + seed spread + basin attributes)",
              fontsize=12.5, fontweight="bold", y=1.0)
 plt.tight_layout(rect=[0, 0.03, 1, 0.99])
-out = OUTDIR / "branchA_signal_sweep.png"
+out = OUTDIR / "static_signal_sweep.png"
 plt.savefig(out, dpi=145, bbox_inches="tight", facecolor="#f8fafc")
 plt.close()
 print("saved:", out)

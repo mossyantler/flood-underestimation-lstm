@@ -35,9 +35,9 @@ Inputs
 
 Outputs
 -------
-- tables/ub_location_class_q99.csv + _summary.csv
-- tables/ub_location_class_noaa.csv + _summary.csv
-- figures/ub_location_class_bar.png
+- tables/location_class_q99.csv + _summary.csv
+- tables/location_class_noaa.csv + _summary.csv
+- figures/location_class_bar.png
 
 Acceptance
 ----------
@@ -247,14 +247,14 @@ def run_scope(
     all_loc = pd.concat(parts, ignore_index=True)
     tables_dir = output_dir / "tables"
 
-    out_path = tables_dir / f"ub_location_class_{scope_name}.csv"
+    out_path = tables_dir / f"location_class_{scope_name}.csv"
     with out_path.open("w") as f:
         f.write(f"# Uncertainty Band obs location class (scope={scope_name})\n")
         all_loc.to_csv(f, index=False)
     print(f"[UB-LOC] wrote {out_path} ({len(all_loc)} rows)", flush=True)
 
     summary, by_basin = summarize_location(all_loc)
-    summary_path = tables_dir / f"ub_location_class_{scope_name}_summary.csv"
+    summary_path = tables_dir / f"location_class_{scope_name}_summary.csv"
     with summary_path.open("w") as f:
         f.write(
             f"# UB location class — cross-basin median fraction per class (scope={scope_name})\n"
@@ -264,7 +264,7 @@ def run_scope(
     print(f"[UB-LOC] {scope_name} summary:\n{summary.to_string(index=False)}", flush=True)
 
     pooled = summarize_location_pooled(all_loc)
-    pooled_path = tables_dir / f"ub_location_class_{scope_name}_pooled.csv"
+    pooled_path = tables_dir / f"location_class_{scope_name}_pooled.csv"
     with pooled_path.open("w") as f:
         f.write(
             f"# UB location class — event-pooled fraction per class (scope={scope_name})\n"
@@ -322,7 +322,7 @@ def main() -> None:
     q99_summary = run_scope("q99", q99_events, seed_csvs, args.output_dir)
     noaa_summary = run_scope("noaa", noaa_events, seed_csvs, args.output_dir)
 
-    fig_path = figures_dir / "ub_location_class_bar.png"
+    fig_path = figures_dir / "location_class_bar.png"
     plot_location_bar(q99_summary, noaa_summary, fig_path)
     print(f"[UB-LOC] wrote {fig_path}", flush=True)
 

@@ -3,7 +3,7 @@
 # ///
 """
 ALL-RAIN(전 범위) scope에 seed_spread(앙상블 분산) 신호 추가.
-기존 branchB2_features_allrain.csv 의 (basin_id, peak_time, oc) 를 재사용하고,
+기존 features_allrain.csv 의 (basin_id, peak_time, oc) 를 재사용하고,
 seed 111/222/444 의 q50/q99 를 그 시점에서 뽑아 표준편차(seed_spread) 산출 → obs_class 와 Spearman.
 
 목적: Branch A(Q99/NOAA)에서만 본 seed_spread 를 전 범위 scope 에서도 측정해 3-scope 완성.
@@ -18,7 +18,7 @@ SEEDS = [111, 222, 444]
 EPS = 1e-6
 
 # 사건 첨두 시점 (B2 산출물). (basin, peak_time) 당 seed 행이 중복 → 첫 행만.
-b2 = pd.read_csv(TBL / "branchB2_features_allrain.csv",
+b2 = pd.read_csv(TBL / "features_allrain.csv",
                  usecols=["basin_id", "peak_time", "oc"])
 b2["basin_id"] = b2["basin_id"].astype(str).str.zfill(8)
 b2["peak_time"] = pd.to_datetime(b2["peak_time"])
@@ -63,12 +63,12 @@ for metric in ["seed_spread_q50", "seed_spread_q99", "seed_spread_q50_rel"]:
     print(f"  {metric:22s} r={r:+.4f}  p={p:.2e}  n={len(sub)}")
 
 rd = pd.DataFrame(res)
-out = TBL / "branchB2_seed_spread_spearman.csv"
+out = TBL / "allrain_seed_spread_spearman.csv"
 rd.to_csv(out, index=False)
 print("저장:", out)
 
-# 3-scope 통합표 (q99/noaa from branchA + allrain)
-a = pd.read_csv(TBL / "branchA_spearman.csv")
+# 3-scope 통합표 (q99/noaa from static + allrain)
+a = pd.read_csv(TBL / "static_spearman.csv")
 ss = a[a["metric"].str.startswith("seed_spread")][["scope", "metric", "spearman_r", "n"]]
 combo = pd.concat([ss, rd[["scope", "metric", "spearman_r", "n"]]], ignore_index=True)
 piv = combo.pivot_table(index="metric", columns="scope", values="spearman_r")

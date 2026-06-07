@@ -31,9 +31,9 @@ Inputs
 
 Outputs
 -------
-- tables/ub_gap_trajectory_q99.csv + _summary.csv
-- tables/ub_gap_trajectory_noaa.csv + _summary.csv
-- figures/ub_gap_trajectory.png
+- tables/gap_trajectory_q99.csv + _summary.csv
+- tables/gap_trajectory_noaa.csv + _summary.csv
+- figures/gap_trajectory.png
 
 Acceptance
 ----------
@@ -249,14 +249,14 @@ def run_scope(
     all_gaps = pd.concat(parts, ignore_index=True)
     tables_dir = output_dir / "tables"
 
-    out_path = tables_dir / f"ub_gap_trajectory_{scope_name}.csv"
+    out_path = tables_dir / f"gap_trajectory_{scope_name}.csv"
     with out_path.open("w") as f:
         f.write(f"# Uncertainty Band gap trajectory per event per τ (scope={scope_name})\n")
         all_gaps.to_csv(f, index=False)
     print(f"[UB-GAP] wrote {out_path} ({len(all_gaps)} rows)", flush=True)
 
     summary, _ = summarize_gaps(all_gaps)
-    summary_path = tables_dir / f"ub_gap_trajectory_{scope_name}_summary.csv"
+    summary_path = tables_dir / f"gap_trajectory_{scope_name}_summary.csv"
     with summary_path.open("w") as f:
         f.write(
             f"# UB gap trajectory summary — cross-basin median per τ (scope={scope_name})\n"
@@ -307,7 +307,7 @@ def main() -> None:
     q99_summary = run_scope("q99", q99_events, seed_csvs, args.output_dir)
     noaa_summary = run_scope("noaa", noaa_events, seed_csvs, args.output_dir)
 
-    fig_path = figures_dir / "ub_gap_trajectory.png"
+    fig_path = figures_dir / "gap_trajectory.png"
     plot_gap_trajectory(q99_summary, noaa_summary, fig_path)
     print(f"[UB-GAP] wrote {fig_path}", flush=True)
 

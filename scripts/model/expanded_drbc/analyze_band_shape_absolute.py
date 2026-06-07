@@ -199,7 +199,7 @@ def compare_table(abs_sp: pd.DataFrame, rel_sp: pd.DataFrame) -> None:
 
 def main() -> None:
     print("[abs-B12] 기존 metrics 로드...", flush=True)
-    metrics = pd.read_csv(TABLES / "ub_band_shape_metrics_q99.csv", comment="#",
+    metrics = pd.read_csv(TABLES / "band_shape_metrics_q99.csv", comment="#",
                           dtype={"basin_id": str}, parse_dates=["peak_time"])
     print(f"  metrics: {len(metrics)} rows, seeds={sorted(metrics['seed'].unique())}")
 
@@ -218,25 +218,25 @@ def main() -> None:
     print(abs_sp.to_string(index=False))
 
     # 기존 상대 지표 Spearman 파일 로드
-    rel_sp_path = TABLES / "ub_band_shape_spearman.csv"
+    rel_sp_path = TABLES / "band_shape_spearman.csv"
     if rel_sp_path.exists():
         rel_sp = pd.read_csv(rel_sp_path, comment="#")
         compare_table(abs_sp, rel_sp)
 
     # 그림 저장
-    scatter_path = FIGURES / "ub_band_shape_scatter_absolute.png"
-    lookup_path  = FIGURES / "ub_band_shape_lookup_absolute.png"
+    scatter_path = FIGURES / "band_shape_scatter_absolute.png"
+    lookup_path  = FIGURES / "band_shape_lookup_absolute.png"
     print("\n[abs-B12] 그림 생성...", flush=True)
     plot_scatter_abs(df, scatter_path)
     plot_lookup_abs(df, lookup_path)
 
     # CSV 저장
-    out_csv = TABLES / "ub_band_shape_metrics_q99_absolute.csv"
+    out_csv = TABLES / "band_shape_metrics_q99_absolute.csv"
     df[["basin_id", "seed", "peak_time", "abs_width", "abs_tail", "abs_mid",
         "obs_class", "obs_class_ordinal"]].to_csv(out_csv, index=False)
     print(f"[abs-B12] saved {out_csv}")
 
-    abs_sp_csv = TABLES / "ub_band_shape_spearman_absolute.csv"
+    abs_sp_csv = TABLES / "band_shape_spearman_absolute.csv"
     abs_sp.to_csv(abs_sp_csv, index=False)
     print(f"[abs-B12] saved {abs_sp_csv}")
 

@@ -34,7 +34,7 @@ warnings.filterwarnings("ignore")
 
 ROOT = Path(__file__).resolve().parents[3]
 M4_CSV = ROOT / "output/model_analysis/band_signal/method_compare/rising_limb_m4.csv"
-OBS_CLASS_CSV = ROOT / "output/model_analysis/primary/metrics/tables/ub_location_class_q99.csv"
+OBS_CLASS_CSV = ROOT / "output/model_analysis/primary/metrics/tables/location_class_q99.csv"
 TS_DIR = ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test/time_series"
 OUT_DIR = ROOT / "output/model_analysis/band_signal/method_compare/data/rise_h_windows"
 

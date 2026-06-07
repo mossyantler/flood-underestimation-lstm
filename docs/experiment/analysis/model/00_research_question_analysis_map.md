@@ -39,61 +39,64 @@ Model 2 probabilistic quantile LSTM의 conditional median output `q50`이 Model 
 
 ---
 
-### RQ-2. Model 2 상세 분석
+### RQ-2. Model 2 출력 심층 분석
 
-Model 2의 내부 구조, 고유량·극한 홍수 성능, 불확실성 비용, 통계 품질, 이질성을 어떻게 이해할 것인가? `q50→q90→q95→q99` τ-진행이 첨두 과소추정을 체계적으로 줄이는지 확인하고, 이 결과를 SHAP·band signal·calibration·이질성 분석으로 입체적으로 뒷받침한다.
+Model 2의 4-quantile 출력(q50/q90/q95/q99)은 어떻게 생겼는가? 입력 특성과 출력 간 상관 구조는? 유량 체제·강우 유형·실제 홍수 상황에서 출력 패턴이 어떻게 달라지는가?
 
 | 하위 분석 | 내용 | 분석 문서 | 산출물 |
 | --- | --- | --- | --- |
-| **2a. Q99/NOAA peak underestimation** | τ-진행에 따른 첨두 과소추정 완화 (α/β/δ triplet) | [`02_rq2_model2_detailed.md §2a`](02_rq2_model2_detailed.md) | `primary/metrics/tables/rq2_*` |
-| **2b. SHAP 분석** | 모델 입력 기여도 — 어떤 특성이 예측에 영향을 미치는가 | [`02_rq2_model2_detailed.md §2b`](02_rq2_model2_detailed.md) | `output/model_analysis/shap/` |
-| **2c. Spearman r / band signal** | 예측 밴드와 관측 위치의 상관관계, 밴드 형태 분석 | [`02_rq2_model2_detailed.md §2c`](02_rq2_model2_detailed.md) | `output/model_analysis/band_signal/` |
-| **2d. confirmed flood 성능** | NWS flood-stage 확인 홍수에서의 성능 | [`02_rq2_model2_detailed.md §2d`](02_rq2_model2_detailed.md) | `output/model_analysis/confirmed_flood/` |
-| **2e. cost: FAR·over-prediction** | 상위 분위 사용 시 false alarm + 과대추정 비용 | [`02_rq2_model2_detailed.md §2e`](02_rq2_model2_detailed.md) | `primary/metrics/tables/rq3_*` |
-| **2f. calibration/sharpness** | 분위 출력의 통계 품질 진단 | [`02_rq2_model2_detailed.md §2f`](02_rq2_model2_detailed.md) | `output/model_analysis/primary/calibration/` |
-| **2g. 이질성** | basin cohort(M1 NSE tier) + event-type(Flash Flood·Flood) 별 효과 차이 | [`02_rq2_model2_detailed.md §2g`](02_rq2_model2_detailed.md) | `primary/metrics/tables/rq4a_*, rq4b_*` |
+| **2a. 각 quantile 출력 특성** | τ별 α/β/δ — q50/q90/q95/q99 각각의 출력 형태 기술 (단일 τ 점 추정 진단) | [`02_rq2_model2_detailed.md §2a`](02_rq2_model2_detailed.md) | `primary/metrics/tables/rq2_*` |
+| **2b. 입력-출력 상관 (SHAP)** | 정적 vs 동적 기여도, area×soil_depth 게이트, slope 극한 반전, 강우 유형 신호 (CRainf_frac, CAPE) | [`02_rq2_model2_detailed.md §2b`](02_rq2_model2_detailed.md) | `output/model_analysis/shap/` |
+| **2c. 밴드 형태 및 gap 구조** | q50~q99 밴드 폭·꼬리·위치, gap trajectory | [`02_rq2_model2_detailed.md §2c`](02_rq2_model2_detailed.md) | `output/model_analysis/band_signal/` |
+| **2d. 보정 및 예리도** | 전 τ 경험적 포함률 vs 공칭값, Pinball 손실, climatology 대비 skill score | [`02_rq2_model2_detailed.md §2d`](02_rq2_model2_detailed.md) | `output/model_analysis/primary/calibration/` |
+| **2e. 실제 홍수 사건 출력** | NOAA 확인 홍수 65건 21유역 출력 관찰, 홍수 유형별 패턴 (Flash Flood vs Flood) | [`02_rq2_model2_detailed.md §2e`](02_rq2_model2_detailed.md) | `output/model_analysis/confirmed_flood/` |
+| **2f. 강우 유형별 출력 패턴** | SHAP의 CRainf_frac·CAPE 강우 유형 구분법 차용, 대류성 vs 전선성 사건에서 τ 출력 분포·α 패턴 신규 분석 | [`02_rq2_model2_detailed.md §2f`](02_rq2_model2_detailed.md) | `primary/metrics/tables/rq2f_*` |
 
 ---
 
-### RQ-3. Model 2 해석 방법
+### RQ-3. obs_class 해석 방법론 + 모델 평가
 
-Model 2의 4-quantile 출력(`q50/q90/q95/q99`)을 어떻게 해석해야 하는가? 관측 첨두가 예측 밴드 어디에 드는지(관측 위치 구간, obs_class)와 그 위치를 예고하는 신호는 무엇인가? 이 해석 기법 자체가 본 연구의 독립 기여물이다.
+Model 2의 4-quantile 출력을 해석하는 obs_class 틀은 무엇이고, 그 틀로 Model 2가 Model 1 대비 과소추정을 실제로 줄이는가? 이 해석 기법 자체가 본 연구의 독립 기여물이다.
 
-| 항목 | 위치 |
-| --- | --- |
-| 분석 문서 | [`03_rq3_obs_class_interpretation.md`](03_rq3_obs_class_interpretation.md) |
-| 핵심 도구 | obs_class(관측 위치 구간 0~4) + 신호 3분류(독립/밴드결합/누수) + 3-scope Spearman |
-| 산출물 | `output/model_analysis/band_signal/signal_sweep/` + `output/model_analysis/band_signal/band_shape/` |
-| 결과 요약 | 유역 면적 r=+0.50, 대류성 강수비(CRainf_frac) r=+0.39 (NOAA scope) |
-| 주의 | obs_class 상관관계는 test set 기술(describe) 수준. 운영 사전 선택 주장은 이 연구 범위 밖 |
+| 하위 분석 | 내용 | 분석 문서 | 산출물 |
+| --- | --- | --- | --- |
+| **3a. obs_class 틀 정의** | 관측 위치 구간 0–4 서수 정의, Q99/NOAA 사건 실제 분포 확인 | [`03_rq3_obs_class_interpretation.md §3a`](03_rq3_obs_class_interpretation.md) | `band_signal/band_shape/tables/` |
+| **3b. 독립 신호 분류** | 신호 3분류 (I/C/L), 3-scope Spearman r (Q99/NOAA/전체강우) | [`03_rq3_obs_class_interpretation.md §3b`](03_rq3_obs_class_interpretation.md) | `band_signal/signal_sweep/tables/` |
+| **3c. area 사분위 층화 분포** | area Q1~Q4별 above_q99 비율 단조 증가 (Q1 20% → Q4 65%) | [`03_rq3_obs_class_interpretation.md §3c`](03_rq3_obs_class_interpretation.md) | `signal_sweep/figures/rq0_stratified_obsclass.png` |
+| **3d. RF obs_class 분류기 훈련** | S1 features → predicted obs_class, Basin GroupKFold + Event upper bound, S1 vs S1+S2 ablation | [`03_rq3_obs_class_interpretation.md §3d`](03_rq3_obs_class_interpretation.md) | `signal_sweep/tables/obsclass_cv_metrics.csv` 외 |
+| **3e. 모델 평가 — predicted vs actual** | DIRECT(관측 band-position oc==4 비율 = M2 q99 과소추정, M1 NSE tier별) / surrogate(RF 혼동행렬 = forcing-surrogate predictability, M2 평가 아님) 분리 | [`03_rq3_obs_class_interpretation.md §3e`](03_rq3_obs_class_interpretation.md) | `primary/metrics/tables/rq3e_obsclass_eval_{direct,surrogate}_*.csv`, `rq4a_*` |
+| **3f. NOAA overlay 검증** | AllRain으로 훈련 → NOAA 완전 held-out 유역 평가 (basin intersection = 0) | [`03_rq3_obs_class_interpretation.md §3f`](03_rq3_obs_class_interpretation.md) | `signal_sweep/tables/obsclass_overlay_metrics.csv` |
 
 ---
 
 ## RQ 사이의 논리 흐름
 
 ```text
-RQ-1 (base 성능 비교 — M1 q vs M2 q50)
+RQ-1 (전제 — M1 vs M2 q50 base 성능 비교)
     │
-    └─→ RQ-2 (Model 2 상세 분석)
+    └─→ RQ-2 (Model 2 출력 심층 분석)
             │
-            ├─→ 2a. Q99/NOAA peak underestimation
-            ├─→ 2b. SHAP 분석
-            ├─→ 2c. Spearman r / band signal
-            ├─→ 2d. confirmed flood 성능
-            ├─→ 2e. cost (FAR · over-prediction)
-            ├─→ 2f. calibration / sharpness
-            └─→ 2g. 이질성 (basin cohort · event-type)
+            ├─→ 2a. 각 quantile 출력 특성 (α/β/δ)
+            ├─→ 2b. 입력-출력 상관 (SHAP)
+            ├─→ 2c. 밴드 형태 및 gap 구조
+            ├─→ 2d. 보정 및 예리도
+            ├─→ 2e. 실제 홍수 사건 출력 (NOAA + 홍수 유형)
+            └─→ 2f. 강우 유형별 출력 패턴
 
-RQ-3 (해석 방법 — obs_class · signal sweep · 범위값 한계)
-    ↑
-    RQ-2의 이해를 심화하는 독립 기여
+RQ-3 (obs_class 해석 방법론 + 모델 평가)
+    ├─→ 3a. obs_class 틀 정의
+    ├─→ 3b. 독립 신호 분류 (3-scope Spearman)
+    ├─→ 3c. area 사분위 층화 분포
+    ├─→ 3d. RF obs_class 분류기 훈련
+    ├─→ 3e. 모델 평가 — predicted vs actual obs_class
+    └─→ 3f. static/NOAA overlay 검증
 ```
 
 | 역할 | RQ |
 | --- | --- |
 | base 성능 비교 (전제) | RQ-1 |
-| 상세 분석 (중심) | RQ-2 |
-| 해석 방법론 (기여) | RQ-3 |
+| Model 2 출력 특성 (중심) | RQ-2 |
+| obs_class 해석 + 모델 평가 (기여 + 결론) | RQ-3 |
 
 ---
 

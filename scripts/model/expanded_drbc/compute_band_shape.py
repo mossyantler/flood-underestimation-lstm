@@ -36,10 +36,10 @@ Inputs
 
 Outputs
 -------
-- tables/ub_band_shape_metrics_q99.csv    (event-level, q99 scope)
-- tables/ub_band_shape_metrics_noaa.csv   (event-level, noaa scope)
-- tables/ub_band_shape_spearman.csv       (r / p_value / n per metric×scope)
-- figures/ub_band_shape_scatter.png       (rel_width vs above_q99, 2 panels)
+- tables/band_shape_metrics_q99.csv    (event-level, q99 scope)
+- tables/band_shape_metrics_noaa.csv   (event-level, noaa scope)
+- tables/band_shape_spearman.csv       (r / p_value / n per metric×scope)
+- figures/band_shape_scatter.png       (rel_width vs above_q99, 2 panels)
 
 Acceptance
 ----------
@@ -241,8 +241,8 @@ BIN_LABELS_G3 = ["low tail", "high tail"]
 def compute_lookup_table(df: pd.DataFrame, scope: str) -> pd.DataFrame:
     """Conditional obs_class distribution per (rel_width_bin, g3_ratio_bin)."""
     work = df.copy()
-    work["rw_bin"] = pd.qcut(work["rel_width"], q=4, labels=BIN_LABELS, duplicates="drop")
-    work["g3_bin"] = pd.qcut(work["g3_ratio"], q=4, labels=BIN_LABELS_G3, duplicates="drop")
+    work["rw_bin"] = pd.qcut(work["rel_width"], q=2, labels=BIN_LABELS, duplicates="drop")
+    work["g3_bin"] = pd.qcut(work["g3_ratio"], q=2, labels=BIN_LABELS_G3, duplicates="drop")
 
     rows = []
     for dim, bin_col in [("rel_width", "rw_bin"), ("g3_ratio", "g3_bin")]:
@@ -272,8 +272,8 @@ def plot_lookup(
 
     for row_idx, (scope_title, df) in enumerate(scope_data):
         work = df.copy()
-        work["rw_bin"] = pd.qcut(work["rel_width"], q=4, labels=BIN_LABELS, duplicates="drop")
-        work["g3_bin"] = pd.qcut(work["g3_ratio"], q=4, labels=BIN_LABELS_G3, duplicates="drop")
+        work["rw_bin"] = pd.qcut(work["rel_width"], q=2, labels=BIN_LABELS, duplicates="drop")
+        work["g3_bin"] = pd.qcut(work["g3_ratio"], q=2, labels=BIN_LABELS_G3, duplicates="drop")
 
         for col_idx, (dim, bin_col, labels, xlabel) in enumerate(dim_info):
             ax = axes[row_idx][col_idx]
@@ -356,7 +356,7 @@ def run_scope(
     all_df = pd.concat(parts, ignore_index=True)
     tables_dir = output_dir / "tables"
 
-    out_path = tables_dir / f"ub_band_shape_metrics_{scope_name}.csv"
+    out_path = tables_dir / f"band_shape_metrics_{scope_name}.csv"
     with out_path.open("w") as f:
         f.write(f"# UB band-shape prospective metrics (scope={scope_name})\n")
         all_df.to_csv(f, index=False)
@@ -415,7 +415,7 @@ def main() -> None:
     # Spearman r table
     spearman_rows = compute_spearman(q99_df, "q99") + compute_spearman(noaa_df, "noaa")
     spearman_df = pd.DataFrame(spearman_rows)
-    sp_path = tables_dir / "ub_band_shape_spearman.csv"
+    sp_path = tables_dir / "band_shape_spearman.csv"
     with sp_path.open("w") as f:
         f.write("# UB band-shape Spearman r: metric vs obs_class_ordinal (per-event pooled)\n")
         spearman_df.to_csv(f, index=False)
@@ -426,19 +426,19 @@ def main() -> None:
     lookup_q99 = compute_lookup_table(q99_df, "q99")
     lookup_noaa = compute_lookup_table(noaa_df, "noaa")
     lookup_all = pd.concat([lookup_q99, lookup_noaa], ignore_index=True)
-    lk_path = tables_dir / "ub_band_shape_lookup.csv"
+    lk_path = tables_dir / "band_shape_lookup.csv"
     with lk_path.open("w") as f:
         f.write("# UB band-shape conditional obs_class distribution per bin (prospective lookup)\n")
         lookup_all.to_csv(f, index=False)
     print(f"[UB-SHAPE] wrote {lk_path} ({len(lookup_all)} rows)", flush=True)
 
     # Lookup stacked-bar figure
-    lk_fig_path = figures_dir / "ub_band_shape_lookup.png"
+    lk_fig_path = figures_dir / "band_shape_lookup.png"
     plot_lookup(q99_df, noaa_df, lk_fig_path)
     print(f"[UB-SHAPE] wrote {lk_fig_path}", flush=True)
 
     # Scatter figure
-    fig_path = figures_dir / "ub_band_shape_scatter.png"
+    fig_path = figures_dir / "band_shape_scatter.png"
     plot_scatter(q99_df, noaa_df, fig_path)
     print(f"[UB-SHAPE] wrote {fig_path}", flush=True)
 

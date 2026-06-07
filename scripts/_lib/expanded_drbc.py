@@ -157,6 +157,40 @@ def paired_delta_per_seed(
 
 
 # ---------------------------------------------------------------------------
+# Rainfall-type split (convective vs frontal) — single source of truth
+# ---------------------------------------------------------------------------
+
+CRAINF_SPLIT_LABELS: tuple[str, str] = (
+    "Low CRainf (bot. 50%)",
+    "High CRainf (top 50%)",
+)
+"""Median-split labels for the convective-vs-frontal rainfall bisection.
+
+Bottom 50% CRainf fraction → frontal-leaning ("Low CRainf"); top 50% →
+convective-leaning ("High CRainf"). Label order matches ``pd.qcut`` bin order
+(lowest bin first)."""
+
+
+def crainf_median_split(
+    series: pd.Series,
+    *,
+    labels: Sequence[str] = CRAINF_SPLIT_LABELS,
+) -> pd.Categorical:
+    """Bisect a CRainf-fraction series at its median into low/high groups.
+
+    Single source of truth for the convective-vs-frontal rainfall split shared
+    by RQ-0 (stratified obs_class distribution, ``compute_rq0_area_stratified_obsclass``)
+    and RQ-2f (rain-type τ-output / α analysis, ``compute_rq2f_rain_type_output``).
+    Do NOT redefine the threshold elsewhere — import this function so both
+    analyses bisect on exactly the same definition.
+
+    Callers must drop NaN in ``series`` beforehand (``pd.qcut`` would otherwise
+    leave NaN-binned rows). Returns a categorical with two ordered labels.
+    """
+    return pd.qcut(series, q=2, labels=list(labels))
+
+
+# ---------------------------------------------------------------------------
 # NOAA annotation parsing (B2 helpers)
 # ---------------------------------------------------------------------------
 
@@ -221,6 +255,8 @@ __all__: Iterable[str] = (
     "NOAA_LABELS",
     "NOAA_REGEX",
     "NOAA_TIE_BREAK",
+    "CRAINF_SPLIT_LABELS",
+    "crainf_median_split",
     "normalize_basin_id",
     "filter_valid_rows",
     "per_basin_seed_then_median",

@@ -32,7 +32,7 @@ import matplotlib
 import numpy as np
 import pandas as pd
 
-import analyze_subset300_probabilistic_diagnostics as base
+import probabilistic_diagnostics_helpers as base
 
 matplotlib.use("Agg")  # redundant safety; base import already set this
 import matplotlib.pyplot as plt  # noqa: E402
@@ -58,7 +58,7 @@ DEFAULT_INPUT_DIR = REPO_ROOT / "output/model_analysis/primary/metrics"
 DEFAULT_OUTPUT_DIR = (
     REPO_ROOT / "output/model_analysis/primary/calibration"
 )
-TIER_PROFILE_REL = "tables/expanded_drbc_tier_profile.csv"
+TIER_PROFILE_REL = "tables/tier_profile.csv"
 PRIMARY_SEEDS = [111, 222, 444]
 
 # AC8 climatology baseline source: observed Streamflow from the expanded dataset
@@ -80,7 +80,7 @@ TRAIN_PERIOD_START = "2000-01-01"
 TRAIN_PERIOD_END = "2010-12-31T23:59:59"
 
 # AC10: IQR-distance error tier (dominant_distance_label). NOT minor/moderate/major.
-# Exact label strings from tables/expanded_drbc_tier_profile.csv.
+# Exact label strings from tables/tier_profile.csv.
 TIER_ORDER = ["<0.5 IQR", "0.5-1.5 IQR", "1.5-3 IQR", ">=3 IQR"]
 
 
@@ -118,7 +118,7 @@ def _relative(path: Path) -> str:
 
 
 def _expanded_series_path(input_dir: Path, seed: int) -> Path:
-    return input_dir / "required_series" / f"seed{seed}" / "required_series.csv"
+    return input_dir / "data" / "required_series" / f"seed{seed}" / "required_series.csv"
 
 
 def _preflight(input_dir: Path, seeds: list[int], timeseries_dir: Path) -> tuple[list[Path], Path]:
@@ -541,7 +541,7 @@ def _write_expanded_report(
         "",
         "## Calibration by IQR-distance Error Tier (AC10)",
         "",
-        "Tier = `dominant_distance_label` from `tables/expanded_drbc_tier_profile.csv` "
+        "Tier = `dominant_distance_label` from `tables/tier_profile.csv` "
         "(basin-level, joined row-wise). **Caveat:** the tier is error-derived, so "
         "coverage-by-tier is partly circular and should not be read as an independent "
         "calibration test.",

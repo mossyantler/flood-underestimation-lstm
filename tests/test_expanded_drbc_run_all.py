@@ -22,9 +22,9 @@ def test_expanded_drbc_run_all_locks_canonical_step_order() -> None:
         "B7 RQ-4a NSE tier stratify",
         "B8 RQ-4b event type stratify",
         "B9 Q99 NOAA cross-tab sanity",
-        "B10 UB obs location class",
-        "B11 UB gap trajectory",
-        "B12 UB band-shape prospective",
+        "B10 obs location class",
+        "B11 gap trajectory",
+        "B12 band-shape prospective",
     ]
 
 
@@ -93,7 +93,7 @@ def test_expanded_drbc_run_all_builds_uv_commands_with_shared_and_step_inputs() 
     assert commands[-1] == [
         "uv-test",
         "run",
-        str(Path("scripts/model/expanded_drbc/compute_ub_band_shape.py")),
+        str(Path("scripts/model/expanded_drbc/compute_band_shape.py")),
         "--output-dir",
         "tmp/out",
         "--input-dir",

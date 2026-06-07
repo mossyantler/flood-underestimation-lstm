@@ -87,18 +87,18 @@ STEPS: tuple[Step, ...] = (
         Path("scripts/model/expanded_drbc/compute_cross_tab_q99_noaa_sanity.py"),
     ),
     Step(
-        "B10 UB obs location class",
-        Path("scripts/model/expanded_drbc/compute_ub_location_class.py"),
+        "B10 obs location class",
+        Path("scripts/model/expanded_drbc/compute_location_class.py"),
         (("--input-dir", "input_dir"),),
     ),
     Step(
-        "B11 UB gap trajectory",
-        Path("scripts/model/expanded_drbc/compute_ub_gap_trajectory.py"),
+        "B11 gap trajectory",
+        Path("scripts/model/expanded_drbc/compute_gap_trajectory.py"),
         (("--input-dir", "input_dir"),),
     ),
     Step(
-        "B12 UB band-shape prospective",
-        Path("scripts/model/expanded_drbc/compute_ub_band_shape.py"),
+        "B12 band-shape prospective",
+        Path("scripts/model/expanded_drbc/compute_band_shape.py"),
         (("--input-dir", "input_dir"),),
     ),
 )

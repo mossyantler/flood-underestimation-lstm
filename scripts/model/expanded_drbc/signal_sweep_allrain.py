@@ -141,7 +141,7 @@ for i, f in enumerate(ncfiles):
         print(f"  {i+1}/{len(ncfiles)}  누적사건 {len(rows)}")
 
 df = pd.DataFrame(rows).merge(attrs, left_on="basin_id", right_index=True, how="left")
-df.to_csv(OUT / "branchB2_features_allrain.csv", index=False)
+df.to_csv(OUT / "features_allrain.csv", index=False)
 print(f"\n전체 강우사건 {len(df)}개")
 print("obs_class 분포:")
 print(df["oc"].value_counts().sort_index().to_string())
@@ -160,5 +160,5 @@ for m, c in cat.items():
     r, p = spearmanr(sub[m], sub["oc"])
     res.append({"scope": "allrain", "metric": m, "category": c, "spearman_r": r, "p_value": p, "n": len(sub)})
 rd = pd.DataFrame(res)
-rd.to_csv(OUT / "branchB2_spearman.csv", index=False)
-print("\n저장:", OUT / "branchB2_spearman.csv")
+rd.to_csv(OUT / "allrain_spearman.csv", index=False)
+print("\n저장:", OUT / "allrain_spearman.csv")

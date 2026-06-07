@@ -22,7 +22,7 @@ Each panel shows:
 
 Output
 ------
-- figures/ub_hydrograph_fan.png
+- figures/hydrograph_fan.png
 """
 from __future__ import annotations
 
@@ -192,7 +192,7 @@ def main() -> None:
     )
     fig.tight_layout()
 
-    out_path = figures_dir / "ub_hydrograph_fan.png"
+    out_path = figures_dir / "hydrograph_fan.png"
     fig.savefig(out_path, dpi=160, bbox_inches="tight")
     plt.close(fig)
     print(f"[UB-FAN] wrote {out_path}", flush=True)

@@ -4,8 +4,8 @@
 # ///
 """
 M3 SG onset 기반 rising limb figure 2종 생성.
-  1. ub_rising_limb_scatter.png  — rise_slope vs obs_class scatter + boxplot
-  2. ub_rising_limb_example.png  — 대조 수문곡선 (long vs short rising limb)
+  1. rising_limb_scatter.png  — rise_slope vs obs_class scatter + boxplot
+  2. rising_limb_example.png  — 대조 수문곡선 (long vs short rising limb)
 출력: output/model_analysis/primary/metrics/figures/
 """
 from pathlib import Path
@@ -107,7 +107,7 @@ def make_scatter_png(df: pd.DataFrame):
     ax2.grid(True, alpha=0.25, axis="y")
 
     plt.tight_layout()
-    out = OUT / "ub_rising_limb_scatter.png"
+    out = OUT / "rising_limb_scatter.png"
     fig.savefig(out, dpi=140, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved: {out}")
@@ -187,7 +187,7 @@ def make_example_png(df: pd.DataFrame, q: pd.Series):
     axes[1].set_title("Short rising limb\n" + axes[1].get_title(), fontsize=10)
 
     plt.tight_layout()
-    out = OUT / "ub_rising_limb_example.png"
+    out = OUT / "rising_limb_example.png"
     fig.savefig(out, dpi=140, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved: {out}")

@@ -104,7 +104,7 @@ def build(target_csv, scope):
         rows.append(rec)
 
     df = pd.DataFrame(rows).merge(attrs, on="basin_id", how="left")
-    df.to_csv(OUT / f"branchA_features_{scope}.csv", index=False)
+    df.to_csv(OUT / f"static_features_{scope}.csv", index=False)
 
     # 분류 지정
     band_coupled = ["q50_level", "q90_level", "q95_level", "q99_level", "w_q90_q50", "w_q95_q90",
@@ -131,6 +131,6 @@ for scope, fn in [("q99", "location_class_q99.csv"), ("noaa", "location_class_no
     print(f"  scope={scope}")
     all_res.append(build(LOC / fn, scope))
 out = pd.concat(all_res, ignore_index=True)
-out.to_csv(OUT / "branchA_spearman.csv", index=False)
-print("저장:", OUT / "branchA_spearman.csv")
+out.to_csv(OUT / "static_spearman.csv", index=False)
+print("저장:", OUT / "static_spearman.csv")
 print(f"행수: {len(out)}")

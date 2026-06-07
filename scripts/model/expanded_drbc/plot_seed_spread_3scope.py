@@ -12,8 +12,8 @@ BASE = Path(__file__).resolve().parents[3]
 TD = BASE / "output/model_analysis/band_signal/signal_sweep/tables"
 OUTDIR = BASE / "output/model_analysis/band_signal/signal_sweep/figures"
 
-a = pd.read_csv(TD / "branchA_spearman.csv")            # q99, noaa
-b2 = pd.read_csv(TD / "branchB2_seed_spread_spearman.csv")  # allrain
+a = pd.read_csv(TD / "static_spearman.csv")            # q99, noaa
+b2 = pd.read_csv(TD / "allrain_seed_spread_spearman.csv")  # allrain
 df = pd.concat([a[a["metric"].str.startswith("seed_spread")], b2], ignore_index=True)
 
 METRICS = [

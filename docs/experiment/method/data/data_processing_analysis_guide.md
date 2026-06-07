@@ -432,12 +432,12 @@ uv run scripts/model/expanded_drbc/run_all.py
 uv run scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py
 
 # RQ-0 band-signal follow-up plots and signal sweep
-uv run scripts/model/expanded_drbc/compute_ub_location_class.py
-uv run scripts/model/expanded_drbc/compute_ub_gap_trajectory.py
-uv run scripts/model/expanded_drbc/compute_ub_band_shape.py
-uv run scripts/model/expanded_drbc/signal_sweep_branchA_csv.py
-uv run scripts/model/expanded_drbc/signal_sweep_branchB_forcing.py
-uv run scripts/model/expanded_drbc/signal_sweep_branchB2_allrain.py
+uv run scripts/model/expanded_drbc/compute_location_class.py
+uv run scripts/model/expanded_drbc/compute_gap_trajectory.py
+uv run scripts/model/expanded_drbc/compute_band_shape.py
+uv run scripts/model/expanded_drbc/signal_sweep_static_csv.py
+uv run scripts/model/expanded_drbc/signal_sweep_forcing.py
+uv run scripts/model/expanded_drbc/signal_sweep_allrain.py
 ```
 
 원격 Ubuntu GPU 서버에서는 Homebrew PATH를 추가하지 않는다. 로컬 macOS에서 `uv`, `python`, `brew`를 쓸 때만 `export PATH="/opt/homebrew/bin:$PATH"`를 먼저 적용한다.

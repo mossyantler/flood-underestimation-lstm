@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LSTM 홍수 첨두 과소추정 분석 개요 — RQ-0/1/2/3</title>
+  <style>
+    :root {
+      --blue:   #2563eb;
+      --indigo: #4f46e5;
+      --green:  #16a34a;
+      --amber:  #d97706;
+      --red:    #dc2626;
+      --slate:  #475569;
+      --bg:     #f8fafc;
+      --card:   #ffffff;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+      background: var(--bg);
+      color: #1e293b;
+      line-height: 1.78;
+      font-size: 15px;
+    }
+    .page { max-width: 920px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #0f2744 0%, #1e3a8a 55%, #4338ca 100%);
+      color: #fff;
+      border-radius: 16px;
+      padding: 2.5rem 2rem 2.2rem;
+      margin-bottom: 2.8rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 999px;
+      padding: 0.2rem 0.85rem;
+      font-size: 0.74rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.85rem;
+    }
+    .hero h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.55rem; line-height: 1.3; }
+    .hero p  { opacity: 0.85; font-size: 0.93rem; max-width: 640px; }
+    .hero-meta {
+      margin-top: 1.2rem;
+      display: flex; gap: 1.5rem; flex-wrap: wrap;
+      font-size: 0.8rem; opacity: 0.75;
+    }
+    .hero-meta span::before { content: '· '; }
+
+    /* ── Section ── */
+    section { margin-bottom: 2.8rem; }
+    .section-title {
+      font-size: 1.18rem; font-weight: 700;
+      color: var(--indigo);
+      border-left: 4px solid var(--indigo);
+      padding-left: 0.8rem;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .card-title {
+      font-size: 0.98rem; font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+
+    /* ── Model grid ── */
+    .model-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 600px) { .model-grid { grid-template-columns: 1fr; } }
+    .model-card {
+      border-radius: 12px;
+      padding: 1.3rem;
+      border: 2px solid transparent;
+    }
+    .model1 { background: #eff6ff; border-color: #93c5fd; }
+    .model2 { background: #f0fdf4; border-color: #86efac; }
+    .model-tag {
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+    .m1-tag { color: var(--blue); }
+    .m2-tag { color: var(--green); }
+    .model-name { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .model-desc { font-size: 0.87rem; color: var(--slate); }
+
+    /* ── Pill ── */
+    .pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 0.15rem 0.65rem;
+      font-size: 0.74rem;
+      font-weight: 600;
+    }
+    .pill-blue   { background: #dbeafe; color: var(--blue); }
+    .pill-green  { background: #dcfce7; color: var(--green); }
+    .pill-amber  { background: #fef3c7; color: var(--amber); }
+    .pill-red    { background: #fee2e2; color: var(--red); }
+    .pill-indigo { background: #e0e7ff; color: var(--indigo); }
+    .pill-slate  { background: #f1f5f9; color: var(--slate); }
+
+    /* ── RQ flow ── */
+    .rq-flow { display: flex; flex-direction: column; }
+    .rq-item { display: flex; gap: 0; }
+    .rq-spine {
+      display: flex; flex-direction: column; align-items: center;
+      width: 38px; flex-shrink: 0;
+    }
+    .rq-dot {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 700; color: #fff;
+      flex-shrink: 0; z-index: 1;
+    }
+    .rq-line { width: 2px; flex: 1; min-height: 1rem; background: var(--border); }
+    .rq-body { padding: 0 0 1.5rem 0.9rem; flex: 1; }
+    .rq-label {
+      font-size: 0.73rem; font-weight: 700; letter-spacing: 0.05em;
+      margin-bottom: 0.15rem;
+    }
+    .rq-q { font-size: 0.98rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .rq-desc { font-size: 0.87rem; color: #334155; }
+
+    /* ── obs_class ladder ── */
+    .obs-ladder {
+      display: flex; flex-direction: column; gap: 0.45rem;
+      margin: 0.8rem 0;
+    }
+    .obs-row {
+      display: flex; align-items: center; gap: 0.75rem;
+      font-size: 0.88rem;
+    }
+    .obs-num {
+      width: 26px; height: 26px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.85rem; flex-shrink: 0;
+    }
+    .obs-bar-wrap { flex: 1; }
+    .obs-bar-bg { height: 10px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+    .obs-bar-fill { height: 100%; border-radius: 4px; }
+    .obs-label { font-size: 0.82rem; color: var(--slate); flex: 0 0 auto; }
+
+    /* ── Signal table ── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+    th {
+      background: #f1f5f9; text-align: left;
+      padding: 0.55rem 0.8rem;
+      border-bottom: 2px solid var(--border);
+      font-weight: 600; color: var(--slate);
+    }
+    td {
+      padding: 0.5rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .highlight { font-weight: 700; color: var(--indigo); }
+    .hl-green  { font-weight: 700; color: var(--green); }
+    .hl-amber  { font-weight: 700; color: var(--amber); }
+    .hl-blue   { font-weight: 700; color: var(--blue); }
+
+    /* ── Metric summary cards ── */
+    .metric-row {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem;
+      margin: 0.9rem 0;
+    }
+    @media (max-width: 580px) { .metric-row { grid-template-columns: 1fr; } }
+    .metric-card {
+      background: #f8fafc; border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem;
+      text-align: center;
+    }
+    .metric-sym  { font-size: 1.9rem; font-weight: 700; color: var(--indigo); }
+    .metric-name { font-size: 0.8rem; font-weight: 600; color: var(--slate); margin: 0.2rem 0; }
+    .metric-def  { font-size: 0.78rem; color: #64748b; }
+
+    /* ── τ 진행 시각화 ── */
+    .tau-flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
+      margin: 0.9rem 0;
+    }
+    @media (max-width: 580px) { .tau-flow { grid-template-columns: repeat(2, 1fr); } }
+    .tau-card {
+      border-radius: 10px;
+      padding: 0.9rem 0.75rem;
+      text-align: center;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      position: relative;
+    }
+    .tau-card.active {
+      border-color: #818cf8;
+      background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    }
+    .tau-label {
+      font-size: 0.78rem; font-weight: 700; color: var(--slate);
+      margin-bottom: 0.35rem; letter-spacing: 0.03em;
+    }
+    .tau-alpha { font-size: 1.35rem; font-weight: 700; color: var(--indigo); }
+    .tau-alpha-note { font-size: 0.72rem; color: #64748b; margin-top: 0.1rem; }
+    .tau-miss { font-size: 0.8rem; font-weight: 600; color: var(--amber); margin-top: 0.3rem; }
+    .tau-arrow {
+      display: none;
+    }
+
+    /* ── Alert ── */
+    .alert {
+      border-radius: 10px; padding: 1rem 1.2rem;
+      font-size: 0.88rem; margin-bottom: 0.8rem;
+      display: flex; gap: 0.75rem; align-items: flex-start;
+    }
+    .alert-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
+    .alert-blue   { background: #eff6ff; border: 1px solid #93c5fd; }
+    .alert-amber  { background: #fffbeb; border: 1px solid #fcd34d; }
+    .alert-green  { background: #f0fdf4; border: 1px solid #86efac; }
+    .alert-indigo { background: #eef2ff; border: 1px solid #a5b4fc; }
+
+    /* ── Big number callout ── */
+    .callout-row {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem;
+      margin: 1rem 0;
+    }
+    @media (max-width: 580px) { .callout-row { grid-template-columns: 1fr 1fr; } }
+    .callout-card {
+      border-radius: 12px;
+      padding: 1.1rem 0.9rem;
+      text-align: center;
+    }
+    .callout-bg-blue   { background: #eff6ff; border: 1.5px solid #bfdbfe; }
+    .callout-bg-green  { background: #f0fdf4; border: 1.5px solid #bbf7d0; }
+    .callout-bg-indigo { background: #eef2ff; border: 1.5px solid #c7d2fe; }
+    .callout-big { font-size: 2rem; font-weight: 700; line-height: 1.1; }
+    .callout-blue-txt   { color: var(--blue); }
+    .callout-green-txt  { color: var(--green); }
+    .callout-indigo-txt { color: var(--indigo); }
+    .callout-sub { font-size: 0.8rem; color: var(--slate); margin-top: 0.3rem; }
+
+    /* ── Signal class grid ── */
+    .sig-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;
+      margin: 0.8rem 0;
+    }
+    @media (max-width: 600px) { .sig-grid { grid-template-columns: 1fr; } }
+    .sig-card {
+      border-radius: 10px; padding: 1rem;
+      font-size: 0.86rem;
+    }
+    .sig-I  { background: #f0fdf4; border: 1.5px solid #86efac; }
+    .sig-C  { background: #fff1f2; border: 1.5px solid #fca5a5; }
+    .sig-L  { background: #fffbeb; border: 1.5px solid #fcd34d; }
+    .sig-head { font-weight: 700; margin-bottom: 0.4rem; font-size: 0.92rem; }
+    .sig-I .sig-head { color: var(--green); }
+    .sig-C .sig-head { color: var(--red); }
+    .sig-L .sig-head { color: var(--amber); }
+    .sig-body { color: #374151; }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center; font-size: 0.8rem; color: #94a3b8;
+      margin-top: 3rem; padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    p { margin-bottom: 0.65rem; }
+    strong { color: #1e293b; }
+    code {
+      font-family: 'Menlo', 'Monaco', monospace;
+      font-size: 0.83em;
+      background: #f1f5f9;
+      border-radius: 4px;
+      padding: 0.1em 0.35em;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── Hero ── -->
+  <div class="hero">
+    <div class="hero-badge">수문학 전공 학부생 대상 설명 자료</div>
+    <h1>LSTM 기반 극한 홍수 첨두 과소추정<br>진단 분석 — RQ-0 / RQ-1 / RQ-2 / RQ-3</h1>
+    <p>
+      Multi-basin LSTM 홍수 예측 모델이 극한 첨두유량을 얼마나 놓치는지,
+      어떤 유역에서 더 많이 놓치는지, 그리고 확률 예측(quantile 출력)이
+      이 문제를 얼마나 개선하는지를 단계별로 분석한다.
+    </p>
+    <div class="hero-meta">
+      <span>평가 유역: DRBC 관측 시험 85개</span>
+      <span>시험기간: 2014–2016</span>
+      <span>seed: 111 / 222 / 444</span>
+      <span>Q99 초과 사건: 926건 / 82개 유역</span>
+    </div>
+  </div>
+
+  <!-- ── Section 1: 왜 이 연구인가 ── -->
+  <section>
+    <div class="section-title">왜 이 연구인가</div>
+    <div class="card">
+      <p>
+        LSTM(Long Short-Term Memory)은 시계열 입력에서 강우-유출 관계를 학습하는
+        딥러닝 모델이다. 유역별 복잡한 비선형 특성을 잘 잡아 최근 수문 예측에 널리 쓰인다.
+        그러나 <strong>극한 홍수 첨두</strong>에서는 체계적으로 과소추정하는 경향이 있다.
+      </p>
+      <p>
+        이유는 단순하다. 홍수 첨두는 드문 사건이라 학습 데이터 안에서 비중이 작고,
+        NSE(Nash-Sutcliffe Efficiency) 같은 손실 함수는 평균 오차를 최소화하는 방향으로
+        모델을 훈련시키기 때문이다.
+      </p>
+      <div class="alert alert-amber">
+        <span class="alert-icon">⚠</span>
+        <div>
+          <strong>핵심 문제</strong>: 홍수 경보·방재 관점에서 첨두를 낮게 예측하면
+          대피 기준을 충족 못 하거나, 제방·댐 운영에 잘못된 여유를 줄 수 있다.
+          "평균적으로 잘 맞는" 모델이 홍수 현장에서는 위험할 수 있다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 2: 두 모델 ── -->
+  <section>
+    <div class="section-title">비교 대상: 두 모델</div>
+    <div class="model-grid">
+      <div class="model-card model1">
+        <div class="model-tag m1-tag">Model 1</div>
+        <div class="model-name">Deterministic LSTM</div>
+        <div class="model-desc">
+          NSE 손실로 학습. 시점마다 <strong>단일 예측값</strong> 하나를 출력한다.
+          전통적인 방식으로 "가장 그럴 법한 유량"을 예측.
+        </div>
+      </div>
+      <div class="model-card model2">
+        <div class="model-tag m2-tag">Model 2</div>
+        <div class="model-name">Probabilistic Quantile LSTM</div>
+        <div class="model-desc">
+          Pinball loss로 학습. 시점마다
+          <code>q50 / q90 / q95 / q99</code> <strong>네 개 예측선</strong>을 동시에 출력한다.
+          관측값이 각 선 아래에 들어올 확률 수준을 직접 훈련.
+        </div>
+      </div>
+    </div>
+    <div class="alert alert-blue">
+      <span class="alert-icon">ℹ</span>
+      <div>
+        <strong>band vs point 비대칭</strong>: Model 2의 q99는 "넓게 잡은 상한선"이고
+        Model 1은 "점 예측"이다. 직접 비교는 구조가 달라 공평하지 않다.
+        이 분석에서는 Model 2 내부의 τ 진행(q50→q90→q95→q99)을 주비교 축으로 삼고,
+        Model 1은 q50 기준선을 통해 간접 연결한다.
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 3: 분석 체계 ── -->
+  <section>
+    <div class="section-title">분석 체계 — RQ 사다리</div>
+    <div class="card">
+      <p style="margin-bottom:1rem; font-size:0.88rem; color:var(--slate);">
+        세 연구 질문이 전제–결과 관계로 연결된다. RQ-0이 틀(frame)을 만들어야
+        RQ-1·RQ-2 결과 해석이 가능하다.
+      </p>
+      <div class="rq-flow">
+
+        <div class="rq-item">
+          <div class="rq-spine">
+            <div class="rq-dot" style="background:#7c3aed;">0</div>
+            <div class="rq-line"></div>
+          </div>
+          <div class="rq-body">
+            <div class="rq-label" style="color:#7c3aed;">RQ-0 — 진단 틀</div>
+            <div class="rq-q">관측 위치 구간(obs_class)과 유역 특성의 관계</div>
+            <div class="rq-desc">
+              Model 2 예측 밴드(q50~q99) 안에서 관측 첨두가 어느 구간에 드는지를
+              다섯 단계로 정의하고, 유역 면적·대류성 강수 비율 같은 외부 특성이
+              그 위치를 예측하는 신호가 되는지 확인한다.
+            </div>
+          </div>
+        </div>
+
+        <div class="rq-item">
+          <div class="rq-spine">
+            <div class="rq-dot" style="background:#2563eb;">1</div>
+            <div class="rq-line"></div>
+          </div>
+          <div class="rq-body">
+            <div class="rq-label" style="color:#2563eb;">RQ-1 — 기준선</div>
+            <div class="rq-q">Model 2의 q50은 Model 1과 동등한가?</div>
+            <div class="rq-desc">
+              Pinball loss로 훈련한 Model 2의 중앙 예측선(q50)이
+              NSE 손실로 훈련한 Model 1과 중앙 성능에서 동등한지 확인한다.
+              q50 ≈ Model 1이 성립해야 q50→q99 개선이 "기준 대비 개선"으로 읽힌다.
+              실제 결과: NSE <strong>+0.149</strong> (Model 2 q50이 더 나음).
+            </div>
+          </div>
+        </div>
+
+        <div class="rq-item">
+          <div class="rq-spine">
+            <div class="rq-dot" style="background:#16a34a;">2</div>
+            <div class="rq-line"></div>
+          </div>
+          <div class="rq-body">
+            <div class="rq-label" style="color:#16a34a;">RQ-2 — 핵심 주장</div>
+            <div class="rq-q">τ 수준이 높아질수록 peak underestimation이 체계적으로 줄어드는가?</div>
+            <div class="rq-desc">
+              q50 → q90 → q95 → q99로 갈수록 과소추정이 단조 감소함을
+              세 지표(α, β, δ)로 정량화한다. 이것이 본 연구의 중심 주장이다.
+            </div>
+          </div>
+        </div>
+
+        <div class="rq-item">
+          <div class="rq-spine">
+            <div class="rq-dot" style="background:#d97706;">3</div>
+          </div>
+          <div class="rq-body">
+            <div class="rq-label" style="color:#d97706;">RQ-3 — 비용</div>
+            <div class="rq-q">recall 개선의 대가로 어느 정도의 FAR·과대추정 비용이 따라오는가?</div>
+            <div class="rq-desc">
+              upper quantile을 쓸수록 놓치는 사건이 줄지만 오경보(false alarm)도 증가한다.
+              FAR과 과대추정 크기를 τ별로 정량화하고,
+              운영 목적에 따른 <strong>τ 선택 기준</strong>을 제시한다.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 4: RQ-0 ── -->
+  <section>
+    <div class="section-title">RQ-0 — 관측 위치 구간(obs_class)과 신호 분석</div>
+
+    <div class="card">
+      <div class="card-title">관측 위치 구간(obs_class)이란?</div>
+      <p style="font-size:0.88rem; color:var(--slate); margin-bottom:0.9rem;">
+        Model 2가 <code>q50 / q90 / q95 / q99</code> 네 개 예측선을 출력하면,
+        실제 관측 첨두가 그 "사다리" 어디에 놓이는지를 다섯 구간으로 나눈 서수 변수다.
+        값이 클수록 모델이 관측을 더 심하게 낮게 예측한 것이다.
+      </p>
+      <div class="obs-ladder">
+        <div class="obs-row">
+          <div class="obs-num" style="background:#dbeafe; color:#1d4ed8;">0</div>
+          <div class="obs-bar-wrap">
+            <div class="obs-bar-bg"><div class="obs-bar-fill" style="width:30%; background:#93c5fd;"></div></div>
+          </div>
+          <div class="obs-label">관측 ≤ q50 &nbsp;→ 과대추정 쪽</div>
+        </div>
+        <div class="obs-row">
+          <div class="obs-num" style="background:#dcfce7; color:#15803d;">1</div>
+          <div class="obs-bar-wrap">
+            <div class="obs-bar-bg"><div class="obs-bar-fill" style="width:45%; background:#86efac;"></div></div>
+          </div>
+          <div class="obs-label">q50 < 관측 ≤ q90 &nbsp;→ 밴드 하부</div>
+        </div>
+        <div class="obs-row">
+          <div class="obs-num" style="background:#fef9c3; color:#a16207;">2</div>
+          <div class="obs-bar-wrap">
+            <div class="obs-bar-bg"><div class="obs-bar-fill" style="width:60%; background:#fde047;"></div></div>
+          </div>
+          <div class="obs-label">q90 < 관측 ≤ q95 &nbsp;→ 밴드 중상부</div>
+        </div>
+        <div class="obs-row">
+          <div class="obs-num" style="background:#ffedd5; color:#c2410c;">3</div>
+          <div class="obs-bar-wrap">
+            <div class="obs-bar-bg"><div class="obs-bar-fill" style="width:75%; background:#fdba74;"></div></div>
+          </div>
+          <div class="obs-label">q95 < 관측 ≤ q99 &nbsp;→ 밴드 최상부 근접</div>
+        </div>
+        <div class="obs-row">
+          <div class="obs-num" style="background:#fee2e2; color:#b91c1c; font-weight:800;">4</div>
+          <div class="obs-bar-wrap">
+            <div class="obs-bar-bg"><div class="obs-bar-fill" style="width:92%; background:#f87171;"></div></div>
+          </div>
+          <div class="obs-label"><strong>관측 > q99 → 과소추정 (연구 핵심)</strong></div>
+        </div>
+      </div>
+      <div class="alert alert-indigo" style="margin-top:0.8rem; margin-bottom:0;">
+        <span class="alert-icon">★</span>
+        <div>
+          <code>obs_class = 4</code> (above_q99)는 q99 예측마저 관측 첨두를 못 잡은 경우다.
+          이것이 과소추정의 가장 심각한 형태이며, RQ-0은 이 사건이 어떤 유역에서 집중적으로 나타나는지를 찾는다.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">신호 3분류 — 어떤 변수를 신뢰할 수 있는가?</div>
+      <p style="font-size:0.88rem; color:var(--slate); margin-bottom:0.9rem;">
+        obs_class와 상관관계가 높더라도 <em>왜</em> 높은지가 중요하다.
+        세 분류 중 <strong>독립 신호</strong>만 실제 예측력을 갖는다.
+      </p>
+      <div class="sig-grid">
+        <div class="sig-card sig-I">
+          <div class="sig-head">I. 독립 신호 ✓</div>
+          <div class="sig-body">
+            obs_class 정의와 무관한 외부 정보.<br>
+            유역 면적, 투수성, 기저유출, 대류성 강수 비율 등.<br>
+            <strong>실제 예측·진단에 쓸 수 있음.</strong>
+          </div>
+        </div>
+        <div class="sig-card sig-C">
+          <div class="sig-head">C. 밴드 결합 ✗</div>
+          <div class="sig-body">
+            예측 밴드 자체에서 파생된 값.<br>
+            밴드가 넓으면 obs가 넘기 어려우므로 <em>정의상</em> 음의 상관.<br>
+            예측력이 아님. 제거해야 할 허위 신호.
+          </div>
+        </div>
+        <div class="sig-card sig-L">
+          <div class="sig-head">L. 관측값 누수 △</div>
+          <div class="sig-body">
+            관측 첨두 자체 또는 직접 파생값.<br>
+            상관이 강하지만 사전에 알 수 없으므로<br>
+            사후 진단 외 사용 불가.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">독립 신호 순위 — Spearman 상관계수 (vs obs_class)</div>
+      <p style="font-size:0.87rem; color:var(--slate); margin-bottom:0.8rem;">
+        Q99 사건(926건, 극한 고유량)과 NOAA 확인 홍수(65건, 공식 홍수 기록)에서
+        각 신호와 obs_class의 Spearman 순위 상관을 측정했다.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>신호</th>
+            <th>분류</th>
+            <th class="num">Q99 사건 r</th>
+            <th class="num">NOAA 확인 홍수 r</th>
+            <th>해석</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>유역 면적 (area)</strong></td>
+            <td><span class="pill pill-green">독립</span></td>
+            <td class="num highlight">+0.50</td>
+            <td class="num highlight">+0.50</td>
+            <td>가장 강한 독립 신호. 큰 유역일수록 obs가 밴드 위쪽.</td>
+          </tr>
+          <tr>
+            <td>기저유출 지수 (baseflow_index)</td>
+            <td><span class="pill pill-green">독립</span></td>
+            <td class="num">+0.11</td>
+            <td class="num hl-green">+0.41</td>
+            <td>NOAA 홍수에서 강함. 유역 반응성.</td>
+          </tr>
+          <tr>
+            <td><strong>대류성 강수비 (CRainf_frac)</strong></td>
+            <td><span class="pill pill-green">독립</span></td>
+            <td class="num">+0.07</td>
+            <td class="num hl-green">+0.38</td>
+            <td>NOAA 돌발홍수에서 강력. 대류성 폭우 시 모델 실패.</td>
+          </tr>
+          <tr>
+            <td>투수성 (permeability)</td>
+            <td><span class="pill pill-green">독립</span></td>
+            <td class="num">+0.27</td>
+            <td class="num">+0.03</td>
+            <td>Q99 사건에서만 유의미.</td>
+          </tr>
+          <tr>
+            <td>CAPE (대류 잠재력)</td>
+            <td><span class="pill pill-green">독립</span></td>
+            <td class="num">+0.05</td>
+            <td class="num">+0.29</td>
+            <td>대류 강도 지표. NOAA에서 중간.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--red);">밴드 폭 (rel_width)</td>
+            <td><span class="pill pill-red">밴드 결합</span></td>
+            <td class="num" style="color:var(--red);">−0.25</td>
+            <td class="num" style="color:var(--red);">−0.30</td>
+            <td>정의상 음수. 전체 강우 범위에서 0으로 붕괴. 허위 신호.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--red);">강우 총량 (rain_sum)</td>
+            <td><span class="pill pill-red">밴드 결합</span></td>
+            <td class="num" style="color:var(--red);">−0.29</td>
+            <td class="num" style="color:var(--red);">−0.27</td>
+            <td>비 많음 → 밴드 올라감 → obs 넘기 어려움. 간접 결합.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="alert alert-green" style="margin-top:1rem; margin-bottom:0;">
+        <span class="alert-icon">★</span>
+        <div>
+          <strong>핵심 통찰</strong>: 같은 "강우"라도 성격이 다르다.
+          강우 <em>총량</em>은 모델이 반응해 밴드를 올리는 입력이라 obs_class와 음의 관계다.
+          반면 강우 <em>종류</em>(대류성 비율, CAPE)는 모델이 구조적으로 못 잡는 부분이라 양의 신호다.
+          → 과소추정은 <strong>대류성 돌발홍수 + 큰 유역</strong>에서 두드러진다.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">gap selection — 유역 특성으로 어느 구간에 떨어질지 예측할 수 있는가?</div>
+      <p style="font-size:0.88rem; color:var(--slate); margin-bottom:0.9rem;">
+        Spearman 상관은 "평균적 연관성"을 보여 줄 뿐이다.
+        실제 gap selection 진단은 유역 특성 그룹별로
+        <strong>obs_class 0~4가 어떤 비율로 분포하는지</strong>를 직접 보는 것이다.
+        큰 유역(Q4)일수록 class 4(above_q99) 비율이 높다면,
+        "이 유역은 홍수 첨두가 q99마저 초과할 가능성이 높다"고 사전 진단할 수 있다.
+      </p>
+
+      <p style="font-size:0.87rem; font-weight:600; margin-bottom:0.5rem;">유역 면적 사분위 그룹별 obs_class 분포 (Q99 scope)</p>
+      <table>
+        <thead>
+          <tr>
+            <th>면적 그룹</th>
+            <th class="num">below_q50 (0)</th>
+            <th class="num">q50~q90 (1)</th>
+            <th class="num">q90~q95 (2)</th>
+            <th class="num">q95~q99 (3)</th>
+            <th class="num" style="color:var(--red);">above_q99 (4)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-blue">Q1 (소형, n=400)</span></td>
+            <td class="num">16.5%</td>
+            <td class="num">19.5%</td>
+            <td class="num">19.8%</td>
+            <td class="num">24.3%</td>
+            <td class="num" style="color:var(--red); font-weight:700;">20.0%</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-blue">Q2 (n=285)</span></td>
+            <td class="num">2.8%</td>
+            <td class="num">9.8%</td>
+            <td class="num">14.0%</td>
+            <td class="num">33.0%</td>
+            <td class="num" style="color:var(--red); font-weight:700;">40.4%</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-blue">Q3 (n=148)</span></td>
+            <td class="num">0.7%</td>
+            <td class="num">3.4%</td>
+            <td class="num">13.5%</td>
+            <td class="num">24.3%</td>
+            <td class="num" style="color:var(--red); font-weight:700;">58.1%</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-indigo">Q4 (대형, n=93)</span></td>
+            <td class="num">2.2%</td>
+            <td class="num">8.6%</td>
+            <td class="num">12.9%</td>
+            <td class="num">11.8%</td>
+            <td class="num highlight" style="color:var(--red);">64.5%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="alert alert-indigo" style="margin-top:0.9rem;">
+        <span class="alert-icon">★</span>
+        <div>
+          <strong>gap selection 해석</strong>:
+          소형 유역(Q1)에서 above_q99 비율은 <strong>20.0%</strong>지만,
+          대형 유역(Q4)에서는 <strong>64.5%</strong>다(Q2 40%, Q3 58% 순차 증가).
+          면적만 알아도 "이 유역의 홍수 첨두가 q99를 초과할 사전 확률"을
+          세 배 이상 다르게 추정할 수 있다.
+          이것이 gap selection의 핵심 — 사건이 발생하기 전(또는 직후)에
+          obs_class 분포를 유역 특성으로 조건화하는 진단 틀이다.
+        </div>
+      </div>
+
+      <p style="font-size:0.87rem; font-weight:600; margin:0.9rem 0 0.5rem;">대류성 강수비 그룹별 obs_class 분포 (NOAA scope)</p>
+      <table>
+        <thead>
+          <tr>
+            <th>대류성 강수비 그룹</th>
+            <th class="num" style="color:var(--red);">above_q99 (4) 비율</th>
+            <th>해석</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-slate">하위 50% (낮은 대류성 비)</span></td>
+            <td class="num">낮음</td>
+            <td style="font-size:0.83rem;">대규모 지속 강우 — 모델이 상대적으로 잘 따라감</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-amber">상위 50% (높은 대류성 비)</span></td>
+            <td class="num hl-amber">높음 (NOAA r = +0.38)</td>
+            <td style="font-size:0.83rem;">단시간 대류성 폭우 — 모델 구조적 실패 집중</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.84rem; color:var(--slate); margin-top:0.6rem; margin-bottom:0;">
+        두 특성(면적 + 대류성 강수 비율)을 조합하면 "대형 유역 + 대류성 폭우" 조합이
+        above_q99 위험 구간으로 분류될 가능성이 가장 높다는 복합 진단이 가능하다.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">선택 편향 점검 — 전체 강우 사건(n = 16,639)과의 3-scope 비교</div>
+      <p style="font-size:0.87rem; color:var(--slate); margin-bottom:0.8rem;">
+        Q99·NOAA는 이미 큰 홍수만 고른 범위라 <em>선택 편향</em>이 있을 수 있다.
+        2014–2016 전체 강우 사건을 새로 탐지해 동일 신호를 검증했다.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>신호</th>
+            <th class="num">Q99 (극단)</th>
+            <th class="num">NOAA (극단)</th>
+            <th class="num">전체 강우</th>
+            <th>판정</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>유역 면적</strong></td>
+            <td class="num">+0.50</td>
+            <td class="num">+0.50</td>
+            <td class="num">+0.27</td>
+            <td><span class="pill pill-green">견고 유지</span></td>
+          </tr>
+          <tr>
+            <td>대류성 강수비</td>
+            <td class="num">+0.07</td>
+            <td class="num">+0.38</td>
+            <td class="num">+0.13</td>
+            <td><span class="pill pill-green">모든 범위 양수</span></td>
+          </tr>
+          <tr>
+            <td>CAPE</td>
+            <td class="num">+0.05</td>
+            <td class="num">+0.29</td>
+            <td class="num">+0.13</td>
+            <td><span class="pill pill-green">모든 범위 양수</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--red);">밴드 폭 (rel_width)</td>
+            <td class="num" style="color:var(--red);">−0.25</td>
+            <td class="num" style="color:var(--red);">−0.30</td>
+            <td class="num" style="color:var(--slate);">+0.01</td>
+            <td><span class="pill pill-red">전 범위 붕괴 → 허위</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--red);">강우 총량</td>
+            <td class="num" style="color:var(--red);">−0.29</td>
+            <td class="num" style="color:var(--red);">−0.27</td>
+            <td class="num" style="color:var(--slate);">−0.03</td>
+            <td><span class="pill pill-red">전 범위 ≈ 0 → 간접 결합</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.84rem; color:var(--slate); margin-top:0.7rem; margin-bottom:0;">
+        밴드 결합 신호의 음수 상관은 극단 집합의 선택 편향 산물임이 확인됐다.
+        유역 정적 특성(면적·투수성·기저유출)과 대류 성격이 전 범위에서 살아남는
+        견고한 독립 신호다.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── Section 5: RQ-1 ── -->
+  <section>
+    <div class="section-title">RQ-1 — Model 2의 q50은 Model 1과 동등한가?</div>
+    <div class="card">
+      <p>
+        Pinball loss로 훈련한 Model 2는 q50(중앙 예측선)에서도 NSE를 직접 최적화하지 않는다.
+        그런데 q50이 Model 1 수준의 중앙 예측 성능을 유지하지 못한다면,
+        q99의 "개선"은 단순히 보수성을 높인 것일 뿐 진짜 학습 효과가 아닐 수 있다.
+      </p>
+      <div class="callout-row">
+        <div class="callout-card callout-bg-blue">
+          <div class="callout-big callout-blue-txt">+0.149</div>
+          <div class="callout-sub">NSE 차이 (Model 2 q50 − Model 1)<br>cross-basin 중앙값</div>
+        </div>
+        <div class="callout-card callout-bg-green">
+          <div class="callout-big callout-green-txt">≈ M1</div>
+          <div class="callout-sub">q50은 Model 1과 중앙 성능 동등<br>(오히려 소폭 우세)</div>
+        </div>
+        <div class="callout-card callout-bg-indigo">
+          <div class="callout-big callout-indigo-txt">간접</div>
+          <div class="callout-sub">q50 ≈ M1이 성립하므로<br>q50→q99 개선 = M1 대비 개선</div>
+        </div>
+      </div>
+      <div class="alert alert-blue" style="margin-bottom:0;">
+        <span class="alert-icon">ℹ</span>
+        <div>
+          RQ-1 결과가 RQ-2의 해석 기반이 된다.
+          q50 ≈ Model 1이 확립됐기 때문에, RQ-2에서 보이는 q50→q99 과소추정 감소는
+          "Model 1-equivalent 기준에서 q99까지의 개선"을 간접적으로 의미한다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 6: RQ-2 ── -->
+  <section>
+    <div class="section-title">RQ-2 — τ 진행에 따른 과소추정 단조 감소</div>
+
+    <div class="card">
+      <div class="card-title">세 가지 측정 지표</div>
+      <div class="metric-row">
+        <div class="metric-card">
+          <div class="metric-sym">α</div>
+          <div class="metric-name">peak under-deficit</div>
+          <div class="metric-def">
+            사건별<br>
+            <code>(obs − q_τ)₊ / obs</code><br>
+            과소추정 크기. 작을수록 좋음.
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-sym">β</div>
+          <div class="metric-name">window peak capture</div>
+          <div class="metric-def">
+            ±6h 창 안에서<br>
+            <code>max(q_τ) / max(obs)</code><br>
+            창 전체로 보수성. 1 이상이면 충분히 보수적.
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-sym">δ</div>
+          <div class="metric-name">Q99 threshold recall</div>
+          <div class="metric-def">
+            pooled<br>
+            <code>P(q_τ ≥ obs | Q99 사건)</code><br>
+            몇 %의 고유량 시각을 커버하는가.
+          </div>
+        </div>
+      </div>
+      <p style="font-size:0.84rem; color:var(--slate); margin-bottom:0;">
+        Q99 사건(82개 유역 / 926건)과 NOAA 확인 홍수(21개 유역 / 65건) 두 범위에서 평가한다.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Q99 scope — α (과소추정 크기) 진행</div>
+      <p style="font-size:0.87rem; color:var(--slate); margin-bottom:0.9rem;">
+        τ 수준이 올라갈수록 사건 첨두에서의 과소추정 크기(cross-basin 중앙값)가 단조 감소한다.
+      </p>
+      <div class="tau-flow">
+        <div class="tau-card">
+          <div class="tau-label">q50</div>
+          <div class="tau-alpha">0.657</div>
+          <div class="tau-alpha-note">α 중앙값</div>
+          <div class="tau-miss">miss 93.1%</div>
+        </div>
+        <div class="tau-card">
+          <div class="tau-label">q90</div>
+          <div class="tau-alpha">0.376</div>
+          <div class="tau-alpha-note">α 중앙값</div>
+          <div class="tau-miss">miss 72.0%</div>
+        </div>
+        <div class="tau-card">
+          <div class="tau-label">q95</div>
+          <div class="tau-alpha">0.272</div>
+          <div class="tau-alpha-note">α 중앙값</div>
+          <div class="tau-miss">miss 62.1%</div>
+        </div>
+        <div class="tau-card active">
+          <div class="tau-label">q99</div>
+          <div class="tau-alpha" style="color:#4338ca;">0.018</div>
+          <div class="tau-alpha-note">α 중앙값</div>
+          <div class="tau-miss" style="color:#15803d; font-weight:700;">miss 41.7%</div>
+        </div>
+      </div>
+      <div class="alert alert-green" style="margin-top:0.5rem;">
+        <span class="alert-icon">★</span>
+        <div>
+          q50 → q99: α 중앙값 0.657 → 0.018 (<strong>36× 개선</strong>).
+          miss rate(놓친 사건 비율) 93.1% → 41.7% (−51.4%p).
+          q99 첨두에서 cross-basin 중앙 과소추정이 거의 0에 수렴한다.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Q99 scope — 세 지표 전체 결과</div>
+      <table>
+        <thead>
+          <tr>
+            <th>τ 수준</th>
+            <th class="num">α (중앙값)</th>
+            <th class="num">β (중앙값)</th>
+            <th class="num">δ recall (중앙값)</th>
+            <th class="num">miss rate (%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-slate">Model 1 (참고)</span></td>
+            <td class="num">0.588</td>
+            <td class="num">0.519</td>
+            <td class="num">0.143</td>
+            <td class="num">85.7</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-blue">q50</span></td>
+            <td class="num">0.657</td>
+            <td class="num">0.444</td>
+            <td class="num">0.069</td>
+            <td class="num">93.1</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-blue">q90</span></td>
+            <td class="num">0.376</td>
+            <td class="num">0.733</td>
+            <td class="num">0.280</td>
+            <td class="num">72.0</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-blue">q95</span></td>
+            <td class="num">0.272</td>
+            <td class="num">0.920</td>
+            <td class="num">0.379</td>
+            <td class="num">62.1</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-indigo">q99</span></td>
+            <td class="num highlight">0.018</td>
+            <td class="num highlight">1.306</td>
+            <td class="num highlight">0.583</td>
+            <td class="num hl-green">41.7</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.84rem; color:var(--slate); margin-top:0.7rem; margin-bottom:0;">
+        β &gt; 1은 q99이 ±6h 창 안 어느 시각에서는 관측 첨두를 초과한다는 뜻이다.
+        "보수적 upper envelope"로서 기능한다고 볼 수 있다.
+        δ recall 0.583: Q99 초과 시각의 58%를 q99 예측이 커버. q50(7%)보다 8.5× 개선.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">NOAA 확인 홍수 scope (21 유역 / 65 사건)</div>
+      <p style="font-size:0.87rem; color:var(--slate); margin-bottom:0.8rem;">
+        공식 NWS flood-stage 기준으로 확인된 사회적 홍수 사건만 골랐다.
+        Q99보다 더 어려운 subset이다.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>τ 수준</th>
+            <th class="num">α 중앙값 [IQR]</th>
+            <th class="num">β 중앙값 [IQR]</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-slate">Model 1 (참고)</span></td>
+            <td class="num">0.676 [0.516 / 0.828]</td>
+            <td class="num">0.400 [0.194 / 0.647]</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-blue">q50</span></td>
+            <td class="num">0.788 [0.739 / 0.817]</td>
+            <td class="num">0.282 [0.223 / 0.368]</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-blue">q90</span></td>
+            <td class="num">0.482 [0.428 / 0.630]</td>
+            <td class="num">0.566 [0.465 / 0.703]</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-blue">q95</span></td>
+            <td class="num">0.404 [0.273 / 0.544]</td>
+            <td class="num">0.677 [0.552 / 0.818]</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-indigo">q99</span></td>
+            <td class="num highlight">0.172 [0.000 / 0.367]</td>
+            <td class="num highlight">0.977 [0.814 / 1.402]</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="alert alert-amber" style="margin-top:0.9rem; margin-bottom:0;">
+        <span class="alert-icon">△</span>
+        <div>
+          NOAA scope q99 α(0.172)는 Q99 scope(0.018)보다 약 9.5배 크다.
+          공식 확인 홍수가 모델에게 더 어려운 subset임을 보여 준다.
+          그러나 방향(단조 감소)은 동일 — 결론의 견고성을 뒷받침한다.
+          주의: 표본이 21개 유역으로 작아 절대값 비교에는 caveat.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">tradeoff — 놓치는 사건이 줄어드는 대가</div>
+      <p style="font-size:0.87rem; color:var(--slate); margin-bottom:0.9rem;">
+        q99으로 갈수록 recall이 늘지만 FAR(오경보율)도 함께 증가한다.
+        이것이 RQ-3에서 분석하는 cost 문제다.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>지표</th>
+            <th class="num">q50 → q99 변화</th>
+            <th>의미</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>δ recall (개선)</td>
+            <td class="num hl-green">0.069 → 0.583 (+8.5×)</td>
+            <td>Q99 초과 시각을 더 잘 커버</td>
+          </tr>
+          <tr>
+            <td>miss rate (개선)</td>
+            <td class="num hl-green">93.1% → 41.7% (−51%p)</td>
+            <td>놓친 사건 절반 이상 회수</td>
+          </tr>
+          <tr>
+            <td>FAR (증가)</td>
+            <td class="num hl-amber">+24× 증가 (RQ-3 결과)</td>
+            <td>과경보 시각도 함께 늘어남</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="alert alert-amber" style="margin-top:0.9rem; margin-bottom:0;">
+        <span class="alert-icon">⚠</span>
+        <div>
+          recall 8×, FAR 24× — 비대칭 tradeoff다.
+          q99을 "단일 예측"이 아닌 "upper envelope"로 읽어야 하며,
+          운영 목적(미감지 비용 vs 오경보 비용)에 따라 적합한 τ 수준을 선택해야 한다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 7: RQ-3 ── -->
+  <section>
+    <div class="section-title">RQ-3 — FAR과 과대추정: 어떤 비용이 따라오는가</div>
+
+    <div class="card">
+      <div class="card-title">FAR(오경보율)이란?</div>
+      <p style="font-size:0.88rem; color:var(--slate); margin-bottom:0.8rem;">
+        <code>FAR = P(q_τ &gt; Q99_임계 | 실제 관측 &lt; Q99_임계)</code> — 실제로는 Q99 초과가 아닌 시각에
+        모델 예측이 Q99를 넘어버리는 비율이다. τ가 높을수록 예측선이 위로 올라가므로
+        이 오경보 시각 수도 늘어난다.
+      </p>
+      <div class="alert alert-amber">
+        <span class="alert-icon">⚠</span>
+        <div>
+          FAR 분모는 시험기간 전체의 <strong>99% 시각</strong>(Q99 비초과 시간)이다.
+          홍수가 드문 사건임을 반영해 절대값이 작아 보이지만,
+          배수 증가율은 recall보다 훨씬 가파르다.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">recall × FAR 대비표 — τ 선택의 핵심</div>
+      <table>
+        <thead>
+          <tr>
+            <th>τ 수준</th>
+            <th class="num">δ recall (중앙값)</th>
+            <th class="num">FAR (중앙값)</th>
+            <th class="num">과대추정 크기 (중앙값)</th>
+            <th>특징</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-slate">Model 1 (참고)</span></td>
+            <td class="num">0.143</td>
+            <td class="num">0.0018</td>
+            <td class="num">1.80</td>
+            <td style="font-size:0.82rem; color:var(--slate);">점 예측 기준선</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-blue">q50</span></td>
+            <td class="num">0.069</td>
+            <td class="num">0.00068</td>
+            <td class="num">1.47</td>
+            <td style="font-size:0.82rem; color:var(--slate);">최소 오경보, 최소 커버</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-blue">q90</span></td>
+            <td class="num">0.280</td>
+            <td class="num">0.0042</td>
+            <td class="num">2.19</td>
+            <td style="font-size:0.82rem; color:var(--slate);">FAR 6× 증가, recall 4× 증가</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-indigo">q95</span></td>
+            <td class="num">0.379</td>
+            <td class="num">0.0063</td>
+            <td class="num">2.29</td>
+            <td style="font-size:0.82rem;"><strong style="color:#d97706;">균형점 후보</strong> — recall 0.38, FAR 0.63%</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-indigo">q99</span></td>
+            <td class="num highlight">0.583</td>
+            <td class="num hl-amber">0.0164</td>
+            <td class="num hl-amber">3.44</td>
+            <td style="font-size:0.82rem; color:var(--red);">FAR q50 대비 <strong>×24</strong>, recall ×8.5</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:1.1rem;">
+        <p style="font-size:0.87rem; margin-bottom:0.5rem;">
+          <strong>배수 기준</strong>: FAR ×24 폭증 vs recall ×8.5 — FAR이 더 가파르게 오른다.
+        </p>
+        <p style="font-size:0.87rem; margin-bottom:0.5rem;">
+          <strong>절대값 기준</strong>: FAR 변화폭 +0.016 vs recall 변화폭 +0.51 —
+          recall 이득이 절대 크기로는 훨씬 크다. Q99 홍수가 드문 사건이라
+          오경보 절대 시간 수가 적은 것이다.
+        </p>
+        <p style="font-size:0.87rem; margin-bottom:0;">
+          <strong>과대추정 크기</strong>: q99에서 중앙 3.44 mm/hr 초과 — 유역 규모에 종속적이라
+          basin 간 절대 비교는 주의가 필요하다 (IQR 2.4~10.5로 넓다).
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">τ 선택 기준 — 운영 목적에 따라 다르다</div>
+      <p style="font-size:0.87rem; color:var(--slate); margin-bottom:0.9rem;">
+        τ 선택에는 정답이 없다. 아래 두 질문의 답에 따라 달라진다.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>운영 목적</th>
+            <th>권장 τ</th>
+            <th>근거</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>홍수 미감지를 최대한 줄이고 싶다</strong><br><span style="font-size:0.8rem; color:var(--slate);">(생명·재산 보호 최우선)</span></td>
+            <td><span class="pill pill-indigo">q99</span></td>
+            <td style="font-size:0.83rem;">miss rate 41.7%, recall 58%. 오경보 증가를 감수하고 놓치는 사건 최소화.</td>
+          </tr>
+          <tr>
+            <td><strong>recall과 FAR 균형이 필요하다</strong><br><span style="font-size:0.8rem; color:var(--slate);">(대응 자원이 한정적)</span></td>
+            <td><span class="pill pill-indigo">q95</span></td>
+            <td style="font-size:0.83rem;">recall 0.38 / FAR 0.63% — 두 지표 사이 균형점. q99보다 과대추정 크기도 작다.</td>
+          </tr>
+          <tr>
+            <td><strong>오경보 비용을 최소화해야 한다</strong><br><span style="font-size:0.8rem; color:var(--slate);">(경보 신뢰도 유지 필요)</span></td>
+            <td><span class="pill pill-blue">q90</span></td>
+            <td style="font-size:0.83rem;">FAR 0.42%로 작으면서 recall q50 대비 4× 개선.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="alert alert-indigo" style="margin-top:0.9rem; margin-bottom:0;">
+        <span class="alert-icon">★</span>
+        <div>
+          <strong>q99를 "단일 정답"이 아닌 upper envelope로</strong>: q50~q99 밴드 전체를 보면
+          관측 첨두가 밴드 안에 드는지(α ≈ 0)와 그 대가로 밴드가 얼마나 넓어지는지(FAR 증가)를
+          함께 읽는 것이 올바른 해석이다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 8: 통합 해석 ── -->
+  <section>
+    <div class="section-title">통합 해석 — 네 연구 질문이 연결하는 이야기</div>
+    <div class="card">
+      <p>
+        <strong>RQ-0</strong>이 보여 준 것: 유역 면적이 크고 대류성 폭우가 집중되는 유역에서
+        관측 첨두가 q99마저 초과하는 비율이 높다(면적 Q1 소형 20% → Q4 대형 65%).
+        모델 한계는 무작위가 아니라 유역 구조·강우 성격에 따라 예측 가능하다.
+      </p>
+      <p>
+        <strong>RQ-1</strong>이 보여 준 것: Pinball loss 훈련이 중앙 예측 성능을 희생하지 않는다.
+        q50 NSE +0.149로 Model 1보다 오히려 낫다. RQ-2의 q99 개선이
+        "단순히 보수적으로 높인 것"이 아니라 실제 학습 효과임을 뒷받침한다.
+      </p>
+      <p>
+        <strong>RQ-2</strong>가 보여 준 것: q50→q90→q95→q99 τ 진행에 따라 과소추정이 단조 감소한다.
+        Q99 scope 기준 α 36× 개선, miss rate −51%p, δ recall 8.5× 증가.
+        방향은 NOAA 공식 확인 홍수에서도 동일하게 재현된다.
+      </p>
+      <p>
+        <strong>RQ-3</strong>이 보여 준 것: recall ×8.5의 대가로 FAR ×24 증가. 절대 변화폭은
+        recall(+0.51)이 FAR(+0.016)보다 훨씬 크다. q95가 recall 0.38 / FAR 0.63%로
+        균형점 후보이며, 운영 목적(미감지 비용 vs 오경보 비용)에 따라 τ를 선택한다.
+      </p>
+      <div class="alert alert-indigo" style="margin-top:0.5rem; margin-bottom:0;">
+        <span class="alert-icon">★</span>
+        <div>
+          <strong>결론</strong>: Quantile LSTM의 upper quantile 출력은 극한 홍수 첨두 과소추정을
+          대폭 줄인다. 어떤 τ를 쓸지는 운영 환경의 비용 구조에 달려 있으며,
+          대류성·대유역 조건에서 한계가 집중됨을 함께 인식해야 한다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    CAMELS-KR Multi-basin LSTM 극한 홍수 과소추정 연구 &mdash; 학부생 설명 자료
+  </div>
+
+</div>
+</body>
+</html>

@@ -40,8 +40,8 @@ TABLE_DIR = ROOT / "output/model_analysis/primary/metrics/tables"
 OUT_DIR = ROOT / "output/model_analysis/band_signal/method_compare"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-OBS_CLASS_CSV    = TABLE_DIR / "ub_location_class_q99.csv"
-BAND_SHAPE_CSV   = TABLE_DIR / "ub_band_shape_metrics_q99.csv"
+OBS_CLASS_CSV    = TABLE_DIR / "location_class_q99.csv"
+BAND_SHAPE_CSV   = TABLE_DIR / "band_shape_metrics_q99.csv"
 
 SEEDS = [111, 222, 444]
 MAX_LOOKBACK_HOURS = 240

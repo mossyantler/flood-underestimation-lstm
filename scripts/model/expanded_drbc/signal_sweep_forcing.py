@@ -118,7 +118,7 @@ def build(scope, fn):
         )
         rows.append(f)
     df = pd.DataFrame(rows)
-    df.to_csv(OUT / f"branchB_features_{scope}.csv", index=False)
+    df.to_csv(OUT / f"forcing_features_{scope}.csv", index=False)
 
     metrics = ["rain_sum_24h", "rain_sum_72h", "antecedent_rain_7d", "rain_max_1h_72h",
                "nws_class", "cape_max_24h", "crainf_frac_mean_24h"]
@@ -138,6 +138,6 @@ allr = []
 for scope, fn in [("q99", "location_class_q99.csv"), ("noaa", "location_class_noaa.csv")]:
     allr.append(build(scope, LOC / fn))
 out = pd.concat(allr, ignore_index=True)
-out.to_csv(OUT / "branchB_spearman.csv", index=False)
-print("저장:", OUT / "branchB_spearman.csv")
+out.to_csv(OUT / "forcing_spearman.csv", index=False)
+print("저장:", OUT / "forcing_spearman.csv")
 print(f"행수: {len(out)}")

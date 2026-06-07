@@ -12,9 +12,9 @@ BASE = Path(__file__).resolve().parents[3]
 TD = BASE / "output/model_analysis/band_signal/signal_sweep/tables"
 OUTDIR = BASE / "output/model_analysis/band_signal/signal_sweep/figures"
 
-a = pd.read_csv(TD / "branchA_spearman.csv")
-b = pd.read_csv(TD / "branchB_spearman.csv")
-b2 = pd.read_csv(TD / "branchB2_spearman.csv")
+a = pd.read_csv(TD / "static_spearman.csv")
+b = pd.read_csv(TD / "forcing_spearman.csv")
+b2 = pd.read_csv(TD / "allrain_spearman.csv")
 df = pd.concat([a, b, b2], ignore_index=True)
 
 # 공통 신호 라벨 매핑 (scope별 metric명 차이 흡수)

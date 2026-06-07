@@ -14,8 +14,8 @@ TD = BASE / "output/model_analysis/band_signal/signal_sweep/tables"
 OUTDIR = BASE / "output/model_analysis/band_signal/signal_sweep/figures"
 OUTDIR.mkdir(parents=True, exist_ok=True)
 
-a = pd.read_csv(TD / "branchA_spearman.csv")
-b = pd.read_csv(TD / "branchB_spearman.csv")
+a = pd.read_csv(TD / "static_spearman.csv")
+b = pd.read_csv(TD / "forcing_spearman.csv")
 df = pd.concat([a, b], ignore_index=True)
 
 # category: forcing(I from B) gets its own color "F"
