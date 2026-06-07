@@ -11,8 +11,8 @@
 본 연구는 multi-basin LSTM hourly streamflow 예측에서 **극한 홍수 첨두 과소추정(extreme flood peak underestimation) 완화**를 다룬다.
 
 핵심 주장은 **이중 deliverable**이다:
-1. **(방법) 병렬 quantile output `q50/q90/q95/q99` 동시 해석 framework** — RQ-0에서 정의한다.
-2. **(실증) 그 framework 위에서 Model 2 probabilistic quantile LSTM이 Model 1 deterministic LSTM 대비 expanded DRBC peak underestimation을 줄이는가** — RQ-1 ~ RQ-5에서 검증한다.
+1. **(방법·분기) 4-quantile 출력 구조에서 관측 첨두(obs)가 예측 밴드 어디에 위치하는지(obs_class), 그 위치와 유역·기상 특성의 상관관계가 존재하는가** — RQ-0에서 읽기 규칙 + 해석 가능성(gate)을 함께 확인한다. 해석 가능성이 확인되면 RQ-1~5로 진행하고, 확인되지 않으면 출력 구조 분석과 한계 서술로 논문을 닫는다.
+2. **(실증) RQ-0 해석 틀 위에서 Model 2 probabilistic quantile LSTM(pinball loss)이 Model 1 deterministic LSTM(NSE loss) 대비 expanded DRBC peak underestimation을 줄이는가** — RQ-1 ~ RQ-5에서 검증한다.
 
 ## 실험 고정 조건
 
@@ -23,9 +23,15 @@
 
 ## RQ 정의와 분석 매핑
 
-### RQ-0. 병렬 quantile output을 어떻게 동시 해석하는가 (방법론)
+### RQ-0. 4-quantile 출력 구조에서 obs 위치를 해석할 수 있는가 (방법론 + 분기)
 
-해석 framework는 본 연구의 별도 deliverable이다. `q50`은 conditional median (M1 deterministic 대응), `q90/q95/q99`은 conservatism level. PI / return-period / 양방향 calibration 해석 금지.
+해석 framework는 본 연구의 별도 deliverable이다. 두 갈래 질문을 동시에 답한다.
+
+**Q-0a 읽기 규칙**: `q50`은 conditional median (M1 deterministic 대응), `q90/q95/q99`은 conservatism level. PI / return-period / 양방향 calibration 해석 금지.
+
+**Q-0b 해석 가능성 gate**: obs가 예측 밴드(`q50`~`q99`) 어디에 드는지(obs_class 0~4)와 그 위치를 예고하는 신호(유역 정적 특성·대류 성격)의 상관관계가 존재하는가. 상관관계가 존재하면 → RQ-1~5 진행. 존재하지 않으면 → 출력 구조 분석과 한계 서술로 논문을 닫는다.
+
+주장 수위: obs_class 상관관계는 test set 기술(describe) 수준이다. "이 상관관계를 이용해 새 사건의 분위를 사전 선택한다"는 운영 주장은 동일 test 데이터 검증이 불가하므로 이 연구 범위 밖이다.
 
 | 항목 | 위치 |
 | --- | --- |
@@ -47,9 +53,11 @@ Model 2 `q50`이 Model 1 deterministic 대비 central performance를 큰 손해 
 | 해석 layer | L3 (운영 decision output) + Pairwise reading (q50 vs M1) |
 | 결과 요약 | NSE +0.149 / RMSE −0.273 / MAE −0.197 (basin-median delta, M2 q50 − M1) |
 
-### RQ-2. upper quantile이 peak underestimation을 줄이는가 (중심 주장)
+### RQ-2. RQ-0 해석 틀 위에서 Model 2 q99가 Model 1 대비 peak underestimation을 줄이는가 (중심 주장)
 
-obs Q99 exceedance event + NOAA confirmed flood event에서 `q90/q95/q99`가 peak underestimation을 줄이는지 본다.
+RQ-0에서 obs_class 해석 가능성이 확인됐을 때, obs Q99 exceedance event + NOAA confirmed flood event에서 Model 2 `q90/q95/q99`(pinball loss 훈련)이 Model 1 deterministic(NSE loss 훈련) 대비 peak underestimation을 줄이는지 본다.
+
+비자명성 근거: "q99 출력값이 q50보다 높다"는 자명하지만, "pinball loss로 훈련한 Model 2가 NSE로 훈련한 Model 1보다 극한 유량을 통계적으로 더 잘 표현한다"는 실증이 필요하다. RQ-1(q50도 함께 개선)이 이 non-trivial 학습 효과를 뒷받침한다.
 
 | 항목 | 위치 |
 | --- | --- |

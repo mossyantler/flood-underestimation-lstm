@@ -13,6 +13,8 @@
 - 전문 용어, 자체 규정 단어, 새로 만든 지표명은 첫 등장 시 반드시 한국어 풀이를 붙인다. 예: `coverage`는 "관측값이 예측 quantile 아래에 들어오는 비율".
 - `obs class`, `signal feature`, `risk tier`, `leakage`, `anchor`처럼 분석 과정에서 만든 내부 용어를 그대로 던지지 않는다. 각각 "관측 위치 구간", "신호 지표", "위험 단계", "관측값 누수", "계산 기준 시점"처럼 한국어 이름을 먼저 쓰고, 필요할 때만 괄호 안에 영어/코드명을 병기한다.
 - HTML, dashboard, 발표자료, 설명 문서처럼 독자 이해가 목적인 산출물은 특히 영어 약어·내부 용어를 남발하지 않는다. 표와 그림에는 "무엇을 뜻하는 값인지"를 한 문장으로 풀어 쓴다.
+- 논문·발표·연구 검토용 figure image(`figures/`, `gallery/`의 PNG/PDF/SVG) 안의 title, axis label, legend, colorbar, tick label은 영어로 작성한다. 특히 SHAP 분석 figure는 모든 chart에 간결한 영어 title을 둔다. 이 규칙은 본문 한국어 기본 규칙보다 우선한다.
+- 연구용 figure에서는 plotting area 안에 설명 문장, seed/basin/prediction 같은 metadata 주석을 직접 넣지 않는다. 필요한 해석은 caption, report, manifest, 본문 문장처럼 figure 밖에 둔다. 단, SHAP bar의 bar-end value label과 SHAP force/waterfall처럼 공식 diagnostic plot API가 plot 구조상 표시하는 contribution value label은 예외로 두되, 표시 feature 수를 줄여 겹침과 과밀을 피한다.
 - `docs/` 또는 `report/` 작성 시 대학생 수준 가독성. 순서: "무엇을 보는 분석인지" → "왜 필요한지" → "결과를 어떻게 해석해야 하는지".
 - `docs/explain/` 설명 자료는 **수문학 전공 대학생** 기준으로 쓴다. 유역·하천 유량·홍수 첨두·재현기간·NSE/KGE 같은 수문학 기본 개념은 전제하고 다시 풀지 않는다. 반면 기계학습 배경(LSTM, quantile, calibration 등)은 전제하지 않고 첫 등장 시 한 번만 짚는다. 간결하게 쓰고 일상 비유·장황한 단계 풀이는 지양한다. 한국어 위주로 쓰며, 불가피한 고정 전문 용어만 영어로 둔다.
 - 수식·지표·모델 구조 설명 시 정의와 직관적 의미 함께. 논문용 문장에서는 과장·미확인 인과 단정 금지.
@@ -190,7 +192,7 @@ DB cache 구조 변경 (schema, importer, migration, DuckDB view 수정) 시 `da
 | `confirmed_flood/` | 평탄 | NWS flood stage 기준 실제 홍수 event |
 | `q99_analysis/` | 그룹 | `performance/` · `causes/` |
 | `band_signal/` | 그룹 | `band_shape/` · `slope_signal/` · `signal_sweep/` · `method_compare/` |
-| `shap/` | 그룹 | `q99/` · `test_split/` |
+| `shap/` | 그룹 | `q99/` · `test_split/` · `direction/` |
 
 `band_signal/` = 관측 첨두가 예측 밴드(q50~q99) 어디에 드는지(관측 위치 구간)와 그 위치를 예측하는 신호를 묶은 주제. 하위: `band_shape`(밴드 폭·꼬리·위치·gap), `slope_signal`(상승 기울기 신호), `signal_sweep`(위치 구간 신호 탐색), `method_compare`(상승부 onset 검출법 비교).
 
@@ -222,7 +224,7 @@ Subagents 남용 금지. 단순 한 파일 수정, 즉시 확인 가능한 명�
 
 - 현재 Elice GPU 인스턴스 접속 기준:
 - 사용자 이름: `elicer`
-- 접속 주소: `central-02.tcp.tunnel.elice.io:15699`
+- 접속 주소: `central-02.tcp.tunnel.elice.io:23818`
 - SSH 비밀키: `/Users/jang-minyeop/.ssh/elice.pem`
 - 원격 서버 OS: `Ubuntu 22.04.5 LTS`
 - 재접속 예시: `ssh -i /Users/jang-minyeop/.ssh/elice.pem elicer@central-01.tcp.tunnel.elice.io -p 27612`

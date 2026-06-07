@@ -175,7 +175,7 @@ Model 2의 가치 주장은 τ에 따라 다르게 표현된다.
 
 | RQ | 사용하는 묶음 방식 | 주된 layer | 표기·금지 사항 |
 | --- | --- | --- | --- |
-| RQ-0 (framework 자체) | 전부 | L1 + L2 + L3 + L4 | 본 문서가 RQ-0 산출물. paper 본문 method section에 핵심 4수준만 압축 인용 |
+| RQ-0 (framework + gate) | 전부 | L1 + L2 + L3 + L4 | 본 문서가 RQ-0 읽기 규칙 산출물. obs_class 해석 가능성 + 신호 상관관계 gate는 `00b_rq0_framework_validation.md`. gate 결과가 해석 가능이면 → RQ-1~5 진행, 아니면 → 한계 서술로 닫음. obs_class 상관관계는 test set 기술 수준이며 운영 주장(새 사건 분위 사전 선택)은 이 연구 범위 밖 |
 | RQ-1 (q50 central) | Pairwise | L3 | `q50`만 사용. `q90 / q95 / q99`를 끌고 들어오지 않는다 |
 | RQ-2 (upper quantile peak under) | Sequence + Uncertainty Band | L3 + L4 | recall (δ) + precision side (RQ-3 FAR / over-pred) 같은 figure에서 보고. q99를 upper envelope로 해석; obs location class 및 gap trajectory를 보완 framing으로 사용 |
 | RQ-3 (cost: FAR + over-pred) | Sequence + Uncertainty Band | L3 | RQ-2 recall과 동일 axis에서 보고. economic / operational cost 단위 사용 금지. over-gap trajectory가 FAR 증가와 연결됨을 명시 |

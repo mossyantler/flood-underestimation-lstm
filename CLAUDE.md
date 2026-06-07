@@ -8,6 +8,8 @@ Guidance for Claude Code (claude.ai/code) working in this repo.
 
 - 응답, 설명 문서, HTML/report 산출물은 한국어 기본으로 작성한다.
 - 영어는 API, LSTM, quantile, calibration, coverage, SHAP, RandomForest처럼 고정된 전문 용어와 코드 식별자에만 제한한다. 일반 설명어·제목·표 머리글은 가능한 한 한국어로 쓴다.
+- 논문·발표·연구 검토용 figure image(`figures/`, `gallery/`의 PNG/PDF/SVG) 안의 title, axis label, legend, colorbar, tick label은 영어로 작성한다. 특히 SHAP 분석 figure는 모든 chart에 간결한 영어 title을 둔다. 이 규칙은 본문 한국어 기본 규칙보다 우선한다.
+- 연구용 figure에서는 plotting area 안에 설명 문장, seed/basin/prediction 같은 metadata 주석을 직접 넣지 않는다. 필요한 해석은 caption, report, manifest, 본문 문장처럼 figure 밖에 둔다. 단, SHAP bar의 bar-end value label과 SHAP force/waterfall처럼 공식 diagnostic plot API가 plot 구조상 표시하는 contribution value label은 예외로 두되, 표시 feature 수를 줄여 겹침과 과밀을 피한다.
 - 전문 용어, 자체 규정 단어, 새 지표명은 첫 등장 시 반드시 한국어 풀이를 붙인다. 예: `coverage`는 "관측값이 예측 quantile 아래에 들어오는 비율".
 - `obs class`, `signal feature`, `risk tier`, `leakage`, `anchor` 같은 내부 용어를 그대로 쓰지 않는다. 한국어 이름을 먼저 쓴 뒤 필요하면 괄호에 코드명/영어를 병기한다.
   - `obs class` → 관측 위치 구간
@@ -65,7 +67,7 @@ npm run build         # route/layout/dependency/asset 변경 시 실행
 ### 원격 GPU 서버 (Elice)
 
 ```bash
-ssh -i ~/.ssh/elice.pem elicer@central-01.tcp.tunnel.elice.io -p 27612
+ssh -i ~/.ssh/elice.pem elicer@central-02.tcp.tunnel.elice.io -p 23818
 ```
 
 - Ubuntu 22.04, Homebrew PATH 추가 안 함.
@@ -204,7 +206,7 @@ DEVICE=cuda:0 bash scripts/runs/official/run_subset300_extreme_rain_stress_test.
 | `confirmed_flood/` | 평탄 | (NWS flood stage 기준 실제 홍수 event) |
 | `q99_analysis/` | 그룹 | `performance/` · `causes/` |
 | `band_signal/` | 그룹 | `band_shape/` · `slope_signal/` · `signal_sweep/` · `method_compare/` |
-| `shap/` | 그룹 | `q99/` · `test_split/` |
+| `shap/` | 그룹 | `q99/` · `test_split/` · `direction/` |
 
 `band_signal/` = 관측 첨두가 예측 밴드(q50~q99) 어디에 드는지(관측 위치 구간)와 그 위치를 예측하는 신호를 묶은 주제. `band_shape`(밴드 폭·꼬리·위치·gap), `slope_signal`(상승 기울기 신호), `signal_sweep`(위치 구간 신호 탐색), `method_compare`(상승부 onset 검출법 비교).
 

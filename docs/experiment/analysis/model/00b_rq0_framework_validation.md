@@ -197,6 +197,32 @@ obs_class의 유역 중앙값 분포(관측 위치 구간별 사건 비율):
 
 유역 면적의 예측력(+0.50)이 관측값 누수 기준선(+0.46)에 맞먹거나 더 크다 — 외부 정보만으로 과소추정 위험을 관측값만큼 잘 예고할 수 있다는 뜻이다.
 
+### feature 층화 분포 분석 — gap selection 직접 근거
+
+Spearman 상관이 **방향**을 보여 준다면, 층화 분포 분석은 "어느 gap(obs_class)에 obs가 들어갈 가능성이 높은가"를 **직접** 보여 준다. area 사분위(Q1=소형 ~ Q4=대형)로 유역을 나눈 뒤 각 그룹의 obs_class 분포를 비교했다.
+
+| area 그룹 | n_events | above_q99 비율 | 의미 |
+| ---: | ---: | ---: | --- |
+| **Q1 (소형)** | 400 | **20%** | 소형 유역에서는 q99가 관측을 잘 덮음 |
+| Q2 | 285 | 40% | — |
+| Q3 | 148 | 58% | — |
+| **Q4 (대형)** | 93 | **65%** | 대형 유역에서는 65%가 q99마저 초과 |
+
+(Q99 scope, 82개 유역)
+
+NOAA scope에서는 단조가 더 뚜렷하다(Q1=23% → Q4=82%). 대류성 강수비(CRainf_frac) 이분에서도 고 CRainf 그룹의 above_q99 비율(68%)이 저 CRainf(24%)의 약 2.8배다.
+
+→ **area가 클수록, 대류성 강수 비율이 높을수록 obs가 q99 위(gap 4)에 있을 가능성이 체계적으로 높다**. 이것이 RQ-0의 gap selection 결론이다: 해당 feature 값으로 obs가 어떤 gap에 있을지 미리 예고할 수 있다.
+
+| 산출물 | 내용 |
+| --- | --- |
+| `output/model_analysis/band_signal/signal_sweep/tables/rq0_area_stratified_obsclass_q99.csv` | area 사분위 × obs_class 분포 (Q99 scope) |
+| `output/model_analysis/band_signal/signal_sweep/tables/rq0_area_stratified_obsclass_noaa.csv` | area 사분위 × obs_class 분포 (NOAA scope) |
+| `output/model_analysis/band_signal/signal_sweep/tables/rq0_crainf_stratified_obsclass_noaa.csv` | CRainf 중앙값 이분 × obs_class 분포 (NOAA scope) |
+| `output/model_analysis/band_signal/signal_sweep/figures/rq0_stratified_obsclass.png` | 3-panel 층화 분포 bar chart |
+
+생성 스크립트: `scripts/model/expanded_drbc/compute_rq0_area_stratified_obsclass.py`
+
 ### 함정: 밴드 결합·강우 총량은 선택 편향 산물
 
 극단 집합(Q99/NOAA)에서 음의 상관처럼 보이던 신호들이 전 범위에서 0으로 붕괴한다.

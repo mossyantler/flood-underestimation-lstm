@@ -2,7 +2,13 @@
 
 ## 질문 (RQ-2)
 
-Model 2의 upper quantile output(`q90 / q95 / q99`)이 Model 1 deterministic 대비 expanded DRBC peak underestimation을 줄이는가? 본 RQ는 본 연구의 중심 주장이다. 세 metric의 triplet으로 측정한다.
+**전제(RQ-0 gate)**: RQ-0에서 obs가 예측 밴드(obs_class) 어디에 드는지와 유역·기상 특성의 상관관계가 존재한다는 해석 가능성이 확인됐다. 이 해석 틀 위에서 RQ-2 질문이 성립한다.
+
+**질문**: Model 2 upper quantile output(`q90 / q95 / q99`, pinball loss 훈련)에서, τ 수준이 높아질수록 expanded DRBC peak underestimation이 체계적으로 줄어드는가? 비교 구조: **Model 2 내부 τ 진행(q50→q90→q95→q99)**이 일차 비교이며, Model 1(deterministic, NSE loss)은 RQ-1에서 확립된 q50 기준선(NSE +0.149)을 통해 간접 연결된다. 본 RQ는 본 연구의 중심 주장이다.
+
+> **band vs point 비대칭 주의**: Model 2의 q99는 밴드(범위)이고 Model 1은 점 예측이라 직접 비교는 성격이 다르다. 직접 비교 대신 τ-진행 내부에서 과소추정이 단조 감소함을 보이고, Model 1과의 연결은 RQ-1(q50 ≈ Model 1)을 통해 간접적으로만 맺는다.
+
+**비자명성**: "q99 출력값이 q50보다 높다"는 by construction 자명하다. 비자명한 주장은 "pinball loss 훈련 목적 함수 전환이 극한 유량 표현을 개선한다"이며, RQ-1(q50도 함께 개선: NSE +0.149)이 이 non-trivial 학습 효과를 뒷받침한다. 세 metric의 triplet으로 측정한다.
 
 - **α — event peak under-deficit**: per-event `(obs_peak − q_τ_at_peak)_+ / obs_peak`
 - **β — ±6h window peak capture**: per-event `max(q_τ in window) / max(obs in window)`
@@ -71,6 +77,20 @@ q99이 window 안에서 1.3× obs까지 overshoots — peak에서 충분한 보�
 
 q99이 high-flow 시각의 58%를 cover. q50과 비교해 8.5× 개선.
 
+### miss rate (1 − δ recall) — τ 진행 요약
+
+δ recall의 보수(miss rate = `P(obs > q_τ | Q99 event)`)는 τ 증가에 따라 단조 감소해야 한다.
+
+| τ | miss rate (%) | miss IQR (low / high) |
+| --- | ---: | --- |
+| model1 (ref) | **85.7** | 67.0 / 100.0 |
+| q50 | 93.1 | 77.2 / 100.0 |
+| q90 | 72.0 | 36.6 / 88.7 |
+| q95 | 62.1 | 28.7 / 82.4 |
+| **q99** | **41.7** | 11.1 / 64.5 |
+
+q50 대비 q99에서 miss rate 51.4%p 감소. miss rate는 α(크기)와 달리 "놓친 사건 비율"이라 독립적 관점을 더한다.
+
 ## 결과 — NOAA scope (test-period overlap 21 basin / 65 events)
 
 | τ | α (basin median) [IQR] | β (basin median) [IQR] |
@@ -89,7 +109,9 @@ NOAA confirmed flood event-set 위에서도 q99이 peak deficit 17% / window cap
 
 ## 통합 해석
 
-upper quantile output (q90 / q95 / q99)이 Model 1 deterministic 및 Model 2 q50 대비 peak underestimation을 monotone하게 줄인다. q99에서 cross-basin median peak deficit ≈ 0 (Q99 scope), recall ≈ 0.58. Effect는 NOAA confirmed flood event-set에서도 재현된다 (basin scope 다름에도 동일 방향).
+Model 2 내부 τ 진행(q50→q90→q95→q99)에 따라 peak underestimation이 단조 감소한다. Q99 scope 기준: α 0.657→0.018(36×), miss rate 93%→42%(−51%p), δ recall 0.069→0.583(8.5×). 효과는 NOAA confirmed flood event-set에서도 같은 방향으로 재현된다.
+
+Model 1과의 연결: RQ-1에서 q50 ≈ Model 1(NSE +0.149, 중앙 성능 동등)이 확립됐으므로, q50→q99 τ 진행 개선은 곧 "Model 1-equivalent 기준에서 q99까지의 개선"을 간접적으로 의미한다. 직접 band vs point 비교는 구조 비대칭으로 수행하지 않는다.
 
 이 reduction은 RQ-3 (cost) 분석과 결합해서 해석되어야 한다 — recall 증가 8× vs FAR 증가 24× 비대칭 tradeoff.
 
@@ -108,11 +130,15 @@ output/model_analysis/primary/metrics/tables/
   rq2_beta_window_capture_q99.csv + _summary.csv
   rq2_beta_window_capture_noaa.csv + _summary.csv
   rq2_delta_threshold_recall_per_basin_seed.csv + _summary.csv
+  rq2_miss_rate_summary.csv            ← miss rate (1−δ) per τ, Q99 scope
 output/model_analysis/primary/metrics/figures/
-  rq2_alpha_by_tau.png
+  rq2_alpha_by_tau.png                 ← 구 프레임 (model1 포함 x축)
+  rq2_tau_progression.png             ← 신 프레임: τ-진행 + Model 1 점선 reference
   rq2_beta_by_tau.png
   rq2_delta_recall_by_tau.png
 ```
+
+신 프레임 figure 생성 스크립트: `scripts/model/expanded_drbc/plot_rq2_tau_progression.py`
 
 ## 주의점
 
