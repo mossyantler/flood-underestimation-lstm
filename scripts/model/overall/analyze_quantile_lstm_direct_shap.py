@@ -27,7 +27,7 @@ import numpy as np
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_INPUT_DIR = REPO_ROOT / "output/model_analysis/shap/test_split"
+DEFAULT_INPUT_DIR = REPO_ROOT / "output/model_analysis/shap/q99"
 QUANTILES = ["q50", "q90", "q95", "q99"]
 
 
@@ -121,20 +121,20 @@ def plot_seed_mean_top_features(global_seed_mean: pd.DataFrame, figures_dir: Pat
         top = global_seed_mean[global_seed_mean["quantile"].eq(quantile)].head(top_n).iloc[::-1]
         bar_colors = [colors.get(g, "#64748b") for g in top["feature_group"]]
         ax.barh(
-            top["feature_label_ko"],
+            top["feature"],
             top["mean_abs_shap_mean"],
             xerr=top["mean_abs_shap_std"].fillna(0),
             color=bar_colors,
             alpha=0.88,
         )
-        ax.set_title(f"{quantile}: 평균 영향 크기 상위 {top_n}개")
-        ax.set_xlabel("평균 |SHAP|")
+        ax.set_title(f"{quantile}: Top {top_n} feature effects")
+        ax.set_xlabel("Mean |SHAP|")
         ax.grid(axis="x", alpha=0.25)
-    fig.suptitle("Model 2 quantile LSTM 직접 SHAP: quantile별 중요 입력", fontsize=16, y=0.99)
+    fig.suptitle("Model 2 quantile LSTM direct SHAP: important inputs by quantile", fontsize=16, y=0.99)
     fig.text(
         0.5,
         0.015,
-        "막대는 seed 111/222/444 평균, 가는 선은 seed 사이 표준편차입니다. 파랑은 시간별 기상 입력, 초록은 유역 고정 속성입니다.",
+        "Bars show the seed 111/222/444 mean; error bars show between-seed standard deviation. Blue denotes dynamic forcing and green denotes static attributes.",
         ha="center",
         fontsize=10,
     )
@@ -149,15 +149,15 @@ def plot_seed_mean_top_features(global_seed_mean: pd.DataFrame, figures_dir: Pat
 def plot_ladder_shift(ladder_shift: pd.DataFrame, figures_dir: Path, top_n: int) -> Path:
     top = ladder_shift.head(max(top_n, 10)).iloc[::-1]
     fig, ax = plt.subplots(figsize=(11, 7))
-    ax.barh(top["feature_label_ko"], top["q99_minus_q50"], color="#dc2626", alpha=0.86)
+    ax.barh(top["feature"], top["q99_minus_q50"], color="#dc2626", alpha=0.86)
     ax.axvline(0, color="#334155", linewidth=1)
-    ax.set_title("q99로 갈수록 더 커지는 입력 영향: q99 - q50")
-    ax.set_xlabel("평균 |SHAP| 차이")
+    ax.set_title("Inputs with stronger effects toward q99: q99 - q50")
+    ax.set_xlabel("Difference in mean |SHAP|")
     ax.grid(axis="x", alpha=0.25)
     fig.text(
         0.5,
         0.02,
-        "값이 클수록 중심 예측(q50)보다 극단 상단 예측(q99)에서 해당 입력을 더 강하게 본다는 뜻입니다.",
+        "Larger values indicate stronger model sensitivity for the upper-tail prediction (q99) than for the central prediction (q50).",
         ha="center",
         fontsize=10,
     )
@@ -178,7 +178,7 @@ def plot_temporal_lag(temporal_seed_mean: pd.DataFrame, global_seed_mean: pd.Dat
         .head(4)
     )
     selected = dynamic_top["feature"].tolist()
-    labels = dict(zip(dynamic_top["feature"], dynamic_top["feature_label_ko"]))
+    labels = dict(zip(dynamic_top["feature"], dynamic_top["feature"]))
     fig, axes = plt.subplots(2, 2, figsize=(13, 8), sharex=True, sharey=False)
     axes = axes.ravel()
     palette = ["#2563eb", "#f97316", "#16a34a", "#7c3aed"]
@@ -195,17 +195,17 @@ def plot_temporal_lag(temporal_seed_mean: pd.DataFrame, global_seed_mean: pd.Dat
                 label=labels.get(feature, feature),
             )
         ax.invert_xaxis()
-        ax.set_title(f"{quantile}: 첨두 전 시간별 영향")
-        ax.set_xlabel("첨두 전 시간")
-        ax.set_ylabel("평균 |SHAP|")
+        ax.set_title(f"{quantile}: Effects by lag before peak")
+        ax.set_xlabel("Hours before peak")
+        ax.set_ylabel("Mean |SHAP|")
         ax.grid(alpha=0.25)
     handles, legend_labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, legend_labels, loc="lower center", ncol=len(selected), frameon=False)
-    fig.suptitle("시간별 기상 입력의 영향이 첨두 전 어느 시점에 커지는가", fontsize=16, y=0.99)
+    fig.suptitle("When dynamic forcing effects increase before the peak", fontsize=16, y=0.99)
     fig.text(
         0.5,
         0.055,
-        "오른쪽 0시간은 예측 기준 시점입니다. 왼쪽으로 갈수록 더 과거 입력입니다.",
+        "The rightmost 0 h is the prediction anchor; moving left indicates older inputs.",
         ha="center",
         fontsize=10,
     )
@@ -227,7 +227,7 @@ def plot_event_quantile_heatmap(event_df: pd.DataFrame, figures_dir: Path, top_n
         .head(top_n)
     )
     selected = feature_order["feature"].tolist()
-    labels = feature_order["feature_label_ko"].tolist()
+    labels = feature_order["feature"].tolist()
     heat = (
         event_df[event_df["feature"].isin(selected)]
         .groupby(["feature", "quantile"], as_index=False)["mean_abs_shap"]
@@ -239,12 +239,12 @@ def plot_event_quantile_heatmap(event_df: pd.DataFrame, figures_dir: Path, top_n
     im = ax.imshow(heat.values, aspect="auto", cmap="YlOrRd")
     ax.set_xticks(range(len(QUANTILES)), QUANTILES)
     ax.set_yticks(range(len(labels)), labels)
-    ax.set_title("사건별 상세 SHAP에서 본 quantile별 영향 강도")
+    ax.set_title("Event-level SHAP effect strength by quantile")
     for i in range(heat.shape[0]):
         for j in range(heat.shape[1]):
             ax.text(j, i, f"{heat.values[i, j]:.3f}", ha="center", va="center", fontsize=8)
     cbar = fig.colorbar(im, ax=ax)
-    cbar.set_label("평균 |SHAP|")
+    cbar.set_label("Mean |SHAP|")
     fig.tight_layout()
     out = figures_dir / "quantile_lstm_direct_shap_event_level_quantile_heatmap.png"
     fig.savefig(out, dpi=220)
@@ -272,10 +272,10 @@ def aggregate_flow_regime(event_df: pd.DataFrame) -> pd.DataFrame:
 def plot_flow_regime_q99_top_features(flow_seed_mean: pd.DataFrame, figures_dir: Path, top_n: int) -> Path:
     order = ["low", "mid", "high", "extreme_q99"]
     title = {
-        "low": "저유량",
-        "mid": "중유량",
-        "high": "고유량",
-        "extreme_q99": "극유량(Q99 이상)",
+        "low": "Low flow",
+        "mid": "Mid flow",
+        "high": "High flow",
+        "extreme_q99": "Extreme flow (at or above Q99)",
     }
     fig, axes = plt.subplots(2, 2, figsize=(13, 9), sharex=False)
     axes = axes.ravel()
@@ -286,15 +286,15 @@ def plot_flow_regime_q99_top_features(flow_seed_mean: pd.DataFrame, figures_dir:
             .head(top_n)
             .iloc[::-1]
         )
-        ax.barh(top["feature_label_ko"], top["mean_abs_shap_mean"], color="#2563eb", alpha=0.88)
-        ax.set_title(f"{title.get(stratum, stratum)}: q99 출력 중요 입력")
-        ax.set_xlabel("평균 |SHAP|")
+        ax.barh(top["feature"], top["mean_abs_shap_mean"], color="#2563eb", alpha=0.88)
+        ax.set_title(f"{title.get(stratum, stratum)}: important q99 inputs")
+        ax.set_xlabel("Mean |SHAP|")
         ax.grid(axis="x", alpha=0.25)
-    fig.suptitle("유량 구간별 직접 SHAP: q99 출력이 무엇을 보는가", fontsize=16, y=0.99)
+    fig.suptitle("Direct SHAP by flow stratum: what the q99 output uses", fontsize=16, y=0.99)
     fig.text(
         0.5,
         0.015,
-        "유량 구간은 공식 test split 관측 유량 분위수로만 나눴고, 관측 유량은 LSTM 입력으로 넣지 않았습니다.",
+        "Flow strata are defined only from observed-flow quantiles in the official test split; observed flow is not used as an LSTM input.",
         ha="center",
         fontsize=10,
     )
@@ -315,9 +315,9 @@ def plot_flow_regime_feature_heatmap(flow_seed_mean: pd.DataFrame, figures_dir: 
         .head(top_n)
     )
     selected = feature_order["feature"].tolist()
-    labels = feature_order["feature_label_ko"].tolist()
+    labels = feature_order["feature"].tolist()
     stratum_order = ["low", "mid", "high", "extreme_q99"]
-    stratum_labels = ["저유량", "중유량", "고유량", "극유량(Q99 이상)"]
+    stratum_labels = ["Low flow", "Mid flow", "High flow", "Extreme flow (at or above Q99)"]
     heat = (
         q99[q99["feature"].isin(selected)]
         .pivot_table(index="flow_stratum", columns="feature", values="mean_abs_shap_mean", aggfunc="mean")
@@ -327,12 +327,12 @@ def plot_flow_regime_feature_heatmap(flow_seed_mean: pd.DataFrame, figures_dir: 
     im = ax.imshow(heat.values, aspect="auto", cmap="YlOrRd")
     ax.set_xticks(range(len(labels)), labels, rotation=35, ha="right")
     ax.set_yticks(range(len(stratum_labels)), stratum_labels)
-    ax.set_title("유량 구간별 q99 출력 SHAP 강도")
+    ax.set_title("q99 SHAP effect strength by flow stratum")
     for i in range(heat.shape[0]):
         for j in range(heat.shape[1]):
             ax.text(j, i, f"{heat.values[i, j]:.3f}", ha="center", va="center", fontsize=8)
     cbar = fig.colorbar(im, ax=ax)
-    cbar.set_label("평균 |SHAP|")
+    cbar.set_label("Mean |SHAP|")
     fig.tight_layout()
     out = figures_dir / "flow_regime_direct_shap_q99_feature_heatmap.png"
     fig.savefig(out, dpi=220)

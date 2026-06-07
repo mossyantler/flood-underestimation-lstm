@@ -5,7 +5,6 @@
 #   "numpy>=2.0",
 #   "pandas>=2.2",
 #   "ruamel.yaml>=0.18",
-#   "shap>=0.46",
 #   "torch>=2.0",
 #   "xarray>=2024",
 #   "netCDF4>=1.7",
@@ -14,14 +13,20 @@
 """Direct SHAP analysis for Model 2 quantile LSTM predictions.
 
 This script is intentionally separate from the existing GradientInput script.
-It applies ``shap.GradientExplainer`` to the reconstructed quantile LSTM itself,
-not to an event-level RandomForest surrogate.
+It applies expected-gradient SHAP attribution to the reconstructed quantile
+LSTM itself, not to an event-level RandomForest surrogate.
 
-Typical GPU-server run
-----------------------
+Q99 event run
+-------------
 uv run scripts/model/overall/compute_q99_lstm_direct_shap.py \
-  --seed 111 --device cuda --quantiles q50 q90 q95 q99 \
+  --analysis-scope q99 --seed 111 --device cuda --quantiles q50 q90 q95 q99 \
   --max-events 120 --background-events 32 --shap-samples 64
+
+Official test-split flow-stratified run
+---------------------------------------
+uv run scripts/model/overall/compute_q99_lstm_direct_shap.py \
+  --analysis-scope test_split --seed 111 --device cuda --quantiles q50 q90 q95 q99 \
+  --max-events 0 --background-events 64 --shap-samples 64
 
 Local smoke test
 ----------------
@@ -32,9 +37,7 @@ uv run scripts/model/overall/compute_q99_lstm_direct_shap.py \
 from __future__ import annotations
 
 import argparse
-import html
 import json
-import math
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -45,6 +48,12 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib import font_manager
+import numpy as np
+import pandas as pd
+import torch
+import torch.nn as nn
+import xarray as xr
+from ruamel.yaml import YAML
 
 
 def configure_plot_fonts() -> None:
@@ -59,20 +68,20 @@ def configure_plot_fonts() -> None:
 
 
 configure_plot_fonts()
-import numpy as np
-import pandas as pd
-import torch
-import torch.nn as nn
-import xarray as xr
-from ruamel.yaml import YAML
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "vendor" / "neuralhydrology"))
 
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/shap/test_split"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/shap/q99"
+DEFAULT_Q99_OUTPUT_DIR = DEFAULT_OUTPUT_DIR
+DEFAULT_TEST_SPLIT_OUTPUT_DIR = REPO_ROOT / "output/model_analysis/shap/test_split"
 DEFAULT_EVENT_CSV = REPO_ROOT / "output/model_analysis/q99_analysis/causes/tables/q99_event_forcing_drivers.csv"
+DEFAULT_Q99_EVENT_CSV = DEFAULT_EVENT_CSV
+DEFAULT_TEST_SPLIT_EVENT_CSV = (
+    DEFAULT_TEST_SPLIT_OUTPUT_DIR / "tables/flow_stratified_shap_anchor_samples_test_split.csv"
+)
 DEFAULT_STATIC_CSV = (
-    REPO_ROOT / "output/basin/drbc/analysis/basin_attributes/tables/drbc_selected_static_attributes_full.csv"
+    REPO_ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test/attributes/static_attributes.csv"
 )
 DEFAULT_NC_DIR = REPO_ROOT / "data/CAMELSH_generic/drbc_expanded_observed_test/time_series"
 
@@ -191,8 +200,6 @@ class MinimalQ99LSTM(nn.Module):
 
 
 class ShapQ99Wrapper(nn.Module):
-    """Batch-first wrapper expected by SHAP's PyTorch GradientExplainer."""
-
     def __init__(self, model: MinimalQ99LSTM, *, quantile: str):
         super().__init__()
         self.model = model
@@ -204,17 +211,26 @@ class ShapQ99Wrapper(nn.Module):
             quantiles = self.model.forward_quantiles(x_d_batch_first.transpose(0, 1), x_s)
         else:
             quantiles = self.model.forward_quantiles(x_d_batch_first, x_s)
-        # SHAP's PyTorch GradientExplainer expects a 2-D output: [batch, output_dim].
         return quantiles[:, self.quantile_idx].unsqueeze(-1)
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Direct SHAP analysis for Model 2 q50/q90/q95/q99 LSTM predictions.")
+    parser.add_argument(
+        "--analysis-scope",
+        choices=["q99", "test_split", "custom"],
+        default="q99",
+        help=(
+            "Named input/output bundle. q99 uses q99 peak-event anchors; test_split uses the "
+            "flow-stratified official test-split anchors. Use custom only when passing both "
+            "--output-dir and --event-csv explicitly."
+        ),
+    )
     parser.add_argument("--seed", type=int, default=111, choices=[111, 222, 444])
     parser.add_argument("--smoke", action="store_true", help="Run a tiny synthetic CPU example for local validation.")
-    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
-    parser.add_argument("--event-csv", type=Path, default=DEFAULT_EVENT_CSV)
-    parser.add_argument("--static-csv", type=Path, default=DEFAULT_STATIC_CSV)
+    parser.add_argument("--output-dir", type=Path, default=None)
+    parser.add_argument("--event-csv", type=Path, default=None)
+    parser.add_argument("--static-csv", type=Path, default=None)
     parser.add_argument("--nc-dir", type=Path, default=DEFAULT_NC_DIR)
     parser.add_argument("--run-dir", type=Path, default=None, help="Override seed run directory containing checkpoint/scaler.")
     parser.add_argument("--checkpoint", type=Path, default=None)
@@ -242,6 +258,36 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--random-state", type=int, default=20260530)
     return parser.parse_args()
+
+
+def scope_default_output_dir(scope: str) -> Path:
+    match scope:
+        case "q99":
+            return DEFAULT_Q99_OUTPUT_DIR
+        case "test_split":
+            return DEFAULT_TEST_SPLIT_OUTPUT_DIR
+        case "custom":
+            return DEFAULT_OUTPUT_DIR
+        case _:
+            raise ValueError(f"Unsupported SHAP analysis scope: {scope}")
+
+
+def scope_default_event_csv(scope: str) -> Path:
+    match scope:
+        case "q99":
+            return DEFAULT_Q99_EVENT_CSV
+        case "test_split":
+            return DEFAULT_TEST_SPLIT_EVENT_CSV
+        case "custom":
+            return DEFAULT_EVENT_CSV
+        case _:
+            raise ValueError(f"Unsupported SHAP analysis scope: {scope}")
+
+
+def scope_default_max_events(scope: str, requested: int) -> int:
+    if scope == "test_split" and requested == 120:
+        return 0
+    return requested
 
 
 def resolve(path: Path) -> Path:
@@ -299,9 +345,11 @@ def read_static(path: Path) -> pd.DataFrame:
     if "basin" not in frame.columns:
         raise ValueError(f"Static attribute table must contain basin or gauge_id: {path}")
     frame["basin"] = frame["basin"].astype(str).str.replace(r"\.0$", "", regex=True).str.zfill(8)
+    missing_features = [feat for feat in STATIC_FEATURES if feat not in frame.columns]
+    if missing_features:
+        missing = ", ".join(missing_features)
+        raise ValueError(f"Static attribute table is missing required model input columns: {missing}. Source: {path}")
     for feat in STATIC_FEATURES:
-        if feat not in frame.columns:
-            frame[feat] = np.nan
         frame[feat] = pd.to_numeric(frame[feat], errors="coerce")
     return frame[["basin", *STATIC_FEATURES]].drop_duplicates("basin")
 
@@ -354,7 +402,6 @@ def extract_window(nc_dir: Path, basin: str, anchor_time: pd.Timestamp, scaler: 
     if len(dates) == 0:
         return None
     window = np.zeros((SEQ_LEN, len(DYNAMIC_FEATURES)), dtype=np.float32)
-    offset = max(SEQ_LEN - len(dates), 0)
     for idx, feat in enumerate(DYNAMIC_FEATURES):
         if feat not in sub:
             continue
@@ -462,45 +509,70 @@ def compute_shap_values(
     quantile: str,
     shap_samples: int,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    import shap
-
     wrapper = ShapQ99Wrapper(model, quantile=quantile).to(samples.dynamic.device)
     # CUDA/cuDNN의 LSTM은 기울기 기반 설명을 계산할 때 RNN backward가
     # training mode에서만 허용된다. 이 모델은 dropout이 없는 단층 LSTM이라
-    # train/eval 전환이 예측식을 바꾸지 않으며, SHAP 기울기 구간에만
-    # train mode를 사용한다. 다만 shap.GradientExplainer 내부에서 모델을
-    # eval mode로 되돌리는 버전이 있어, CUDA에서는 SHAP 계산 구간에만
-    # cuDNN RNN 경로를 끄고 일반 PyTorch backward로 계산한다.
+    # train/eval 전환이 예측식을 바꾸지 않으며, expected-gradient 구간에만
+    # train mode를 사용한다. CUDA에서는 cuDNN RNN backward 제약을 피하려고
+    # 계산 구간에만 cuDNN RNN 경로를 끄고 일반 PyTorch backward로 계산한다.
     wrapper.train()
-    explainer = shap.GradientExplainer(wrapper, [background.dynamic, background.static])
     if samples.dynamic.device.type == "cuda":
         with torch.backends.cudnn.flags(enabled=False):
-            raw_values = explainer.shap_values([samples.dynamic, samples.static], nsamples=shap_samples)
+            dyn_values, static_values = compute_expected_gradient_values(
+                wrapper,
+                background,
+                samples,
+                quantile=quantile,
+                shap_samples=shap_samples,
+            )
     else:
-        raw_values = explainer.shap_values([samples.dynamic, samples.static], nsamples=shap_samples)
-    dyn_values, static_values = split_shap_values(raw_values)
+        dyn_values, static_values = compute_expected_gradient_values(
+            wrapper,
+            background,
+            samples,
+            quantile=quantile,
+            shap_samples=shap_samples,
+        )
     wrapper.eval()
     with torch.no_grad():
         predictions = wrapper(samples.dynamic, samples.static).detach().cpu().numpy().reshape(-1)
     return dyn_values, static_values, predictions
 
 
-def split_shap_values(raw_values: Any) -> tuple[np.ndarray, np.ndarray]:
-    """Normalize SHAP's several PyTorch return shapes into dynamic/static arrays."""
-    values = raw_values
-    if isinstance(values, tuple):
-        values = list(values)
-    if isinstance(values, list) and len(values) == 1 and isinstance(values[0], (list, tuple)):
-        values = list(values[0])
-    if not (isinstance(values, list) and len(values) == 2):
-        raise TypeError(f"Expected SHAP values for two model inputs, got {type(raw_values)!r}: {raw_values!r}")
-    dyn = np.asarray(values[0], dtype=float)
-    sta = np.asarray(values[1], dtype=float)
-    if dyn.ndim == 4 and dyn.shape[-1] == 1:
-        dyn = dyn[..., 0]
-    if sta.ndim == 3 and sta.shape[-1] == 1:
-        sta = sta[..., 0]
-    return dyn, sta
+def compute_expected_gradient_values(
+    wrapper: ShapQ99Wrapper,
+    background: PreparedInputs,
+    samples: PreparedInputs,
+    *,
+    quantile: str,
+    shap_samples: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    sample_count = samples.dynamic.shape[0]
+    background_count = background.dynamic.shape[0]
+    draw_count = max(1, shap_samples)
+    rng = np.random.default_rng(20260530 + QUANTILE_INDEX[quantile])
+    dyn_values = np.zeros(tuple(samples.dynamic.shape), dtype=np.float32)
+    static_values = np.zeros(tuple(samples.static.shape), dtype=np.float32)
+
+    for sample_idx in range(sample_count):
+        bg_indices_np = rng.integers(0, background_count, size=draw_count)
+        bg_indices = torch.tensor(bg_indices_np, dtype=torch.long, device=samples.dynamic.device)
+        alpha_np = rng.random((draw_count, 1, 1), dtype=np.float32)
+        alpha_dyn = torch.tensor(alpha_np, dtype=samples.dynamic.dtype, device=samples.dynamic.device)
+        alpha_static = alpha_dyn.reshape(draw_count, 1)
+        sample_dyn = samples.dynamic[sample_idx].unsqueeze(0).expand(draw_count, -1, -1)
+        sample_static = samples.static[sample_idx].unsqueeze(0).expand(draw_count, -1)
+        bg_dyn = background.dynamic[bg_indices]
+        bg_static = background.static[bg_indices]
+        dyn_delta = sample_dyn - bg_dyn
+        static_delta = sample_static - bg_static
+        interp_dyn = (bg_dyn + alpha_dyn * dyn_delta).detach().requires_grad_(True)
+        interp_static = (bg_static + alpha_static * static_delta).detach().requires_grad_(True)
+        output = wrapper(interp_dyn, interp_static).sum()
+        grad_dyn, grad_static = torch.autograd.grad(output, (interp_dyn, interp_static))
+        dyn_values[sample_idx] = (dyn_delta * grad_dyn).mean(dim=0).detach().cpu().numpy()
+        static_values[sample_idx] = (static_delta * grad_static).mean(dim=0).detach().cpu().numpy()
+    return dyn_values, static_values
 
 
 def build_event_feature_table(
@@ -592,9 +664,9 @@ def save_global_bar(global_table: pd.DataFrame, path: Path, quantile: str, title
     sub = global_table.head(14).sort_values("mean_abs_shap")
     fig, ax = plt.subplots(figsize=(8, 5.8))
     colors = ["#2563eb" if g == "dynamic_forcing" else "#7c3aed" for g in sub["feature_group"]]
-    ax.barh(sub["feature_label_ko"], sub["mean_abs_shap"], color=colors, alpha=0.86)
-    ax.set_xlabel("평균 |SHAP 값|")
-    ax.set_title(f"{quantile} LSTM 직접 SHAP 입력 중요도{title_suffix}")
+    ax.barh(sub["feature"], sub["mean_abs_shap"], color=colors, alpha=0.86)
+    ax.set_xlabel("Mean |SHAP value|")
+    ax.set_title(f"{quantile} Direct LSTM SHAP feature importance{title_suffix}")
     ax.grid(True, axis="x", color="#e5e7eb", linewidth=0.7)
     fig.tight_layout()
     fig.savefig(path, dpi=170)
@@ -614,12 +686,12 @@ def save_temporal_plot(lag_table: pd.DataFrame, path: Path, quantile: str, title
             sub["lag_hours_before_anchor"],
             sub["mean_abs_shap"],
             marker="o",
-            label=FEATURE_LABEL_KO.get(feat, feat),
+            label=feat,
         )
     ax.invert_xaxis()
-    ax.set_xlabel("예측 기준 시점으로부터 몇 시간 전인가")
-    ax.set_ylabel("평균 |SHAP 값|")
-    ax.set_title(f"{quantile} 시간별 직접 SHAP 민감도{title_suffix}")
+    ax.set_xlabel("Hours before prediction anchor")
+    ax.set_ylabel("Mean |SHAP value|")
+    ax.set_title(f"{quantile} Direct SHAP sensitivity by lag{title_suffix}")
     ax.legend(fontsize=8)
     ax.grid(True, color="#e5e7eb", linewidth=0.7)
     fig.tight_layout()
@@ -689,7 +761,7 @@ table { width:100%; border-collapse:collapse; margin-top:10px; } th,td { border-
     <div class="step"><div class="num">1</div><div><strong>event 선택</strong><br/>DRBC test의 high-flow event를 고른다. smoke test에서는 가짜 작은 데이터를 사용한다.</div></div>
     <div class="step"><div class="num">2</div><div><strong>입력 창 만들기</strong><br/>각 event의 기준 시점까지 과거 336시간 기상 입력을 자른다. 유역 속성은 같은 event 전체에 붙인다.</div></div>
     <div class="step"><div class="num">3</div><div><strong>학습된 LSTM 불러오기</strong><br/>Model 2 checkpoint와 학습 scaler를 불러와 학습 때와 같은 단위로 입력을 맞춘다.</div></div>
-    <div class="step"><div class="num">4</div><div><strong>SHAP 계산</strong><br/><code>shap.GradientExplainer</code>로 q50, q90, q95, q99 각각의 출력값에 대한 입력별 기여도를 계산한다.</div></div>
+    <div class="step"><div class="num">4</div><div><strong>SHAP 계산</strong><br/>Expected-gradient 방식으로 q50, q90, q95, q99 각각의 출력값에 대한 입력별 기여도를 계산한다.</div></div>
     <div class="step"><div class="num">5</div><div><strong>ladder 비교</strong><br/>변수별 중요도, event별 중요도, 시간 lag별 중요도를 quantile 컬럼과 함께 저장해 단계별 차이를 비교한다.</div></div>
   </section>
 
@@ -736,10 +808,15 @@ def write_metadata(path: Path, payload: dict[str, Any]) -> None:
 
 
 def run(args: argparse.Namespace) -> dict[str, Path]:
-    output_dir = resolve(args.output_dir)
+    if args.analysis_scope == "custom" and (args.output_dir is None or args.event_csv is None) and not args.smoke:
+        raise ValueError("--analysis-scope custom requires both --output-dir and --event-csv.")
+    output_dir = resolve(args.output_dir or scope_default_output_dir(args.analysis_scope))
+    event_csv = resolve(args.event_csv or scope_default_event_csv(args.analysis_scope))
+    static_csv = resolve(args.static_csv or DEFAULT_STATIC_CSV)
+    max_events = scope_default_max_events(args.analysis_scope, args.max_events)
     tables_dir = output_dir / "tables"
     figures_dir = output_dir / "figures"
-    metadata_dir = output_dir / "metadata"
+    metadata_dir = output_dir / "data"
     report_dir = output_dir / "report"
     for path in [tables_dir, figures_dir, metadata_dir, report_dir]:
         path.mkdir(parents=True, exist_ok=True)
@@ -750,7 +827,7 @@ def run(args: argparse.Namespace) -> dict[str, Path]:
 
     if args.smoke:
         model, background, samples = prepare_smoke_inputs(
-            args.max_events,
+            max_events,
             args.background_events,
             device=device,
             seed=args.random_state,
@@ -768,11 +845,11 @@ def run(args: argparse.Namespace) -> dict[str, Path]:
         model.load_nh_checkpoint(checkpoint)
         model.eval()
         scaler = load_scaler(scaler_path)
-        static_df = read_static(resolve(args.static_csv))
+        static_df = read_static(static_csv)
         events = read_events(
-            resolve(args.event_csv),
+            event_csv,
             args.seed,
-            args.max_events,
+            max_events,
             start_date=args.analysis_start_date,
             end_date=args.analysis_end_date,
         )
@@ -790,14 +867,15 @@ def run(args: argparse.Namespace) -> dict[str, Path]:
         )
         run_context = {
             "mode": "real",
+            "analysis_scope": args.analysis_scope,
             "seed": args.seed,
             "run_dir": relative(run_dir),
             "checkpoint": relative(checkpoint),
             "scaler": relative(scaler_path),
-            "event_csv": relative(resolve(args.event_csv)),
+            "event_csv": relative(event_csv),
             "analysis_start_date": args.analysis_start_date,
             "analysis_end_date": args.analysis_end_date,
-            "static_csv": relative(resolve(args.static_csv)),
+            "static_csv": relative(static_csv),
             "nc_dir": relative(resolve(args.nc_dir)),
         }
 
@@ -848,7 +926,9 @@ def run(args: argparse.Namespace) -> dict[str, Path]:
         "leakage_boundary_ko": "관측 유량은 SHAP 입력으로 넣지 않고, event 선택과 사후 검증에만 사용한다.",
         "device": str(device),
         "quantiles": quantiles,
+        "analysis_scope": args.analysis_scope,
         "max_events_requested": int(args.max_events),
+        "max_events_effective": int(max_events),
         "analysis_start_date": None if args.smoke else args.analysis_start_date,
         "analysis_end_date": None if args.smoke else args.analysis_end_date,
         "n_sample_events": int(samples.dynamic.shape[0]),

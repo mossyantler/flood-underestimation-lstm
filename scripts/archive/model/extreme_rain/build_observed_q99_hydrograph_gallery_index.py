@@ -73,10 +73,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--basin-geometry-source",
         choices=("camelsh", "gagesii-api"),
-        default="camelsh",
+        default="gagesii-api",
         help=(
-            "Basin geometry source for the map. 'camelsh' reads --camelsh-shapefile. "
-            "'gagesii-api' fetches CRS-tagged USGS GAGES-II basin features and caches them."
+            "Basin geometry source for the map. Default is 'gagesii-api' so observed "
+            "Q99+ gallery maps use CRS-tagged USGS GAGES-II basin features. "
+            "'camelsh' is retained only as an explicit fallback to --camelsh-shapefile."
         ),
     )
     parser.add_argument(
@@ -144,18 +145,17 @@ def resolve_plot_path(manifest_path: Path, raw_plot_path: Any) -> Path:
     Older gallery manifests may contain the output directory used when the PNGs
     were first generated. When that gallery directory is moved or regenerated
     under a different analysis root, the PNG basename remains colocated with the
-    manifest while the stored path becomes stale. Prefer the stored path when it
-    still exists, but fall back to the local file next to the manifest before
-    failing loudly.
+    manifest while the stored path becomes stale. Prefer the local file next to
+    the manifest, then fall back to the stored path before failing loudly.
     """
     raw_text = str(raw_plot_path)
     stored = Path(raw_text)
-    if stored.exists():
-        return stored
-
     local = manifest_path.parent / stored.name
     if local.exists():
         return local
+
+    if stored.exists():
+        return stored
 
     raise FileNotFoundError(
         f"Hydrograph PNG not found for manifest row: stored={raw_text}; "
