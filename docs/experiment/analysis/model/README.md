@@ -1,21 +1,17 @@
 # Model 1/2 결과 분석 문서 (expanded DRBC rebuild)
 
-본 폴더는 expanded DRBC observed test (85 basin, seed 111/222/444, test 2014-2016) 기반 Model 1 deterministic LSTM과 Model 2 probabilistic quantile LSTM 결과를 7개 연구 질문(RQ)에 1:1 매핑해 정리한다. 각 문서는 단일 RQ만 다루며, 논문 Results section의 표·그림을 만들 때 직접 참조하는 것을 목표로 한다.
+본 폴더는 expanded DRBC observed test (85 basin, seed 111/222/444, test 2014-2016) 기반 Model 1 deterministic LSTM과 Model 2 probabilistic quantile LSTM 결과를 3개 연구 질문(RQ-1/2/3)에 매핑해 정리한다. 각 문서는 단일 RQ만 다루며, 논문 Results section의 표·그림을 만들 때 직접 참조하는 것을 목표로 한다.
 
-연구 질문(RQ-0 ~ RQ-5)과 분석 문서의 1:1 매핑은 [`00_research_question_analysis_map.md`](00_research_question_analysis_map.md)에서 정한다. 본 표는 분석 문서 단위 인덱스다.
+연구 질문(RQ-1 ~ RQ-3)과 분석 문서의 매핑은 [`00_research_question_analysis_map.md`](00_research_question_analysis_map.md)에서 정한다. 본 표는 분석 문서 단위 인덱스다.
 
 | 순서 | 문서 | 역할 |
 | ---: | --- | --- |
-| 0 | [`00_research_question_analysis_map.md`](00_research_question_analysis_map.md) | 핵심 주제 → RQ-0/1/2/3/4a/4b/5 분해와 산출물 매핑 |
-| 0b | [`00b_rq0_framework_validation.md`](00b_rq0_framework_validation.md) | RQ-0 — 분위 출력 해석과 관측 위치 구간 추측: Q99 사건은 q99가 절반 이상을 덮지만 약 47%는 `above_q99`, NOAA/NWS 확인 홍수는 모두 `above_q99`; under/over gap 규모·신호 상관(유역 면적·대류 성격)·상승 기울기 분석 |
-| 1 | [`01_q50_central.md`](01_q50_central.md) | RQ-1 — Model 2 `q50`가 Model 1 deterministic 대비 central 성능을 유지하는가 |
-| 2 | [`02_upper_quantile_peak_under.md`](02_upper_quantile_peak_under.md) | RQ-2 — upper quantile (`q90/q95/q99`)이 peak underestimation을 줄이는가 (α + β + δ triplet, Q99 + NOAA dual scope) |
-| 3 | [`03_cost.md`](03_cost.md) | RQ-3 — peak under 감소의 cost (FAR + over-prediction magnitude) |
-| 4a | [`04a_basin_cohort.md`](04a_basin_cohort.md) | RQ-4a — basin heterogeneity (M1 NSE 3-tier cohort) |
-| 4b | [`04b_event_type.md`](04b_event_type.md) | RQ-4b — NOAA event-type heterogeneity (Flash Flood / Flood / Coastal Flood) |
-| 5 | [`05_calibration_sharpness.md`](05_calibration_sharpness.md) | RQ-5 — quantile output calibration·sharpness forecast quality |
+| 0 | [`00_research_question_analysis_map.md`](00_research_question_analysis_map.md) | 핵심 주제 → RQ-1/RQ-2/RQ-3 분해와 산출물 매핑 |
+| 1 | [`01_rq1_q50_vs_m1.md`](01_rq1_q50_vs_m1.md) | RQ-1 — Model 1 q vs Model 2 q50 base 성능 비교 (NSE +0.149 / RMSE −0.273 / MAE −0.197) |
+| 2 | [`02_rq2_model2_detailed.md`](02_rq2_model2_detailed.md) | RQ-2 — Model 2 상세 분석: Q99/NOAA peak underestimation (α/β/δ) · SHAP · Spearman r/band signal · confirmed flood · cost FAR · calibration/sharpness · 이질성 |
+| 3 | [`03_rq3_obs_class_interpretation.md`](03_rq3_obs_class_interpretation.md) | RQ-3 — Model 2 해석 방법: 관측 위치 구간(obs_class) · signal sweep · 범위값 한계 |
 
-방법론 RQ-0 (병렬 quantile output 해석 framework) 문서는 [`docs/experiment/method/model/quantile_output_interpretation.md`](../../method/model/quantile_output_interpretation.md)에 둔다. 그 framework가 실데이터에서 타당한지, 그리고 분위 출력으로 관측 위치(obs_class)를 추측하는 신호가 무엇인지(`band_signal/` 상관관계 분석)를 정리한 결과 문서는 [`00b_rq0_framework_validation.md`](00b_rq0_framework_validation.md)다.
+RQ-3 해석 기법의 규칙과 금지 해석은 [`docs/experiment/method/model/quantile_output_interpretation.md`](../../method/model/quantile_output_interpretation.md)에 둔다. 그 규칙이 실데이터에서 타당한지와 obs_class를 예고하는 신호 상관관계 분석 결과는 [`03_rq3_obs_class_interpretation.md`](03_rq3_obs_class_interpretation.md)에 정리한다.
 
 ## 해석 원칙
 
@@ -79,4 +75,12 @@ scripts/model/hydrograph/analyze_expanded_drbc_probabilistic_diagnostics.py   # 
 
 ## Legacy 보존
 
-pre-expanded DRBC holdout 기반 구식 분석은 [`docs/archive/analysis_legacy/`](../../../archive/analysis_legacy/)로 이동. 현재 paper canonical 기준은 expanded observed DRBC test **85개**이며, legacy 결과는 reproducibility 비교로만 보존한다.
+구 RQ-0~RQ-5 기반 분석 문서 7개는 [`docs/archive/analysis_legacy/`](../../../archive/analysis_legacy/)로 이동됨. 현재 canonical 인용 범위에서 제외되며, reproducibility·비교를 위해 보존한다.
+
+- `00b_rq0_framework_validation.md` (구 RQ-0)
+- `01_q50_central.md` (구 RQ-1)
+- `02_upper_quantile_peak_under.md` (구 RQ-2)
+- `03_cost.md` (구 RQ-3)
+- `04a_basin_cohort.md` (구 RQ-4a)
+- `04b_event_type.md` (구 RQ-4b)
+- `05_calibration_sharpness.md` (구 RQ-5)

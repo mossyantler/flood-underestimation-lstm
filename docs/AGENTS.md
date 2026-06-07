@@ -34,7 +34,7 @@ docs/
 | `experiment/method/model/` | Model 1/2 구조, split, config, metric, 결과 분석 규칙 | **canonical** |
 | `experiment/method/basin/` | DRBC holdout, training pool, screening, event candidate 기준 | **canonical** |
 | `experiment/method/data/` | 원자료 → 분석 산출물 end-to-end 처리 흐름 | **canonical** |
-| `experiment/analysis/model/` | Model 1/2 결과 해석 문서. 완료 문서와 예정 문서를 상태로 구분 | **canonical** |
+| `experiment/analysis/model/` | Model 1/2 결과 해석 문서. 3-RQ 구조: RQ-1 (base 성능 비교) · RQ-2 (상세 분석) · RQ-3 (해석 방법) | **canonical** |
 | `experiment/analysis/basin/` | subset 대표성, basin diagnostics | canonical |
 | `draft/` (루트) | 논문 초안, HTML, docx | 논문 전용 |
 | `references/` | 외부 문헌 메모, glossary, 학습 노트 | 참조용 (공식 기준 아님) |

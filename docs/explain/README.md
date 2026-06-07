@@ -30,15 +30,15 @@ flowchart TD
 6. [`06_research_process.md`](06_research_process.md): 연구와 서버 분석이 어떤 순서로 진행되는지 본다.
 7. [`07_ml_flood_generation_typing.md`](07_ml_flood_generation_typing.md): flood generation type을 ML로 다룰 때 왜 clustering 중심으로 접근하는지 이해한다.
 
-**분석**
+**분석** (08~14번 문서는 구 RQ-0~5 구조 기반이며 `docs/archive/explain_legacy/`로 이동됨)
 
-8. [`08_rq_analysis_map.md`](08_rq_analysis_map.md): 분석을 7개 연구 질문(RQ-0~5)으로 어떻게 나누는지 지도처럼 본다.
-9. [`09_core_results.md`](09_core_results.md): 핵심 결과 — q50 중앙성능 유지 → 상위 quantile이 첨두 과소추정을 줄이는가(α·β·δ) → 그 대가(FAR).
-10. [`10_q99_analysis.md`](10_q99_analysis.md): 큰 물 기준선(Q99)에서의 성능과, 첨두가 낮게 나오는 원인을 깊게 본다.
-11. [`11_heterogeneity_quality.md`](11_heterogeneity_quality.md): 유역별·홍수 유형별 차이와 예측 분포의 calibration·sharpness를 본다.
-12. [`12_band_signal.md`](12_band_signal.md): 관측 첨두가 예측 밴드(q50~q99) 어디에 드는지(관측 위치 구간)와 그 위치를 알려주는 신호를 본다.
-13. [`13_results_reading.md`](13_results_reading.md): 위 결과들을 한데 모아 "그래서 무엇을 말할 수 있나"로 종합한다.
-14. [`14_extreme_rain_stress_test.md`](14_extreme_rain_stress_test.md): 100년급 강수 같은 극한호우 event를 따로 모아, 모델이 그런 상황에서 첨두를 따라가는지 보는 보조 test를 이해한다.
+8. `08_rq_analysis_map.md` **(archived)**: 분석을 7개 연구 질문(RQ-0~5)으로 어떻게 나누는지 지도처럼 본다.
+9. `09_core_results.md` **(archived)**: 핵심 결과 — q50 중앙성능 유지 → 상위 quantile이 첨두 과소추정을 줄이는가(α·β·δ) → 그 대가(FAR).
+10. `10_q99_analysis.md` **(archived)**: 큰 물 기준선(Q99)에서의 성능과, 첨두가 낮게 나오는 원인을 깊게 본다.
+11. `11_heterogeneity_quality.md` **(archived)**: 유역별·홍수 유형별 차이와 예측 분포의 calibration·sharpness를 본다.
+12. `12_band_signal.md` **(archived)**: 관측 첨두가 예측 밴드(q50~q99) 어디에 드는지(관측 위치 구간)와 그 위치를 알려주는 신호를 본다.
+13. `13_results_reading.md` **(archived)**: 위 결과들을 한데 모아 "그래서 무엇을 말할 수 있나"로 종합한다.
+14. `14_extreme_rain_stress_test.md` **(archived)**: 100년급 강수 같은 극한호우 event를 따로 모아, 모델이 그런 상황에서 첨두를 따라가는지 보는 보조 test를 이해한다.
 
 ## 보조 HTML 설명자료
 
